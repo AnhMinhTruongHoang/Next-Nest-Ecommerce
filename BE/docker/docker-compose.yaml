@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  db-mongo:
+    image: mongo:6.0.6 # Nếu dùng máy không hỗ trợ AVX => đổi thành mongo:4.4
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: 123456
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb:/data/db
+    expose:
+      - 27017
+
+  be-nest:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - PORT=8080
+      - NODE_ENV=production
+      - MONGO_URL=mongodb://root:123456@db-mongo:27017/nestJsBase?authSource=admin
+
+    ports:
+      - 8080:8080
+    expose:
+      - 8080
+    depends_on:
+      - db-mongo
+
+volumes:
+  mongodb:
+# docker compose -p base-nest up -d --build
