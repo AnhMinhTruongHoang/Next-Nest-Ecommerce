@@ -4,7 +4,7 @@ import { UpdateSubscriberDto } from './dto/update-subscriber.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Subscriber, SubscriberDocument } from './schemas/subscriber.schemas';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
-import { IUser } from 'src/users/user.interface';
+import { IUser } from 'src/types/user.interface';
 import aqp from 'api-query-params';
 import mongoose from 'mongoose';
 

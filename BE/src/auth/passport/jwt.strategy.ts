@@ -2,14 +2,14 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { RolesService } from 'src/roles/roles.service';
-import { IUser } from 'src/users/user.interface';
+import { IUser } from 'src/types/user.interface';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private configService: ConfigService,
-    private rolesService: RolesService,
+    private usersService: UsersService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -17,21 +17,29 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       secretOrKey: configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
     });
   }
+  ////////////
 
   async validate(payload: IUser) {
     const { _id, name, email, role } = payload;
-    // cần gán thêm permissions vào req.user
 
-    const userRole = role as unknown as { _id: string; name: string };
-    const temp = (await this.rolesService.findOne(userRole._id)).toObject();
+    // Vì bạn đã xoá bảng role => role giờ chỉ là string: 'ADMIN' | 'USER'
+    // Bạn không cần truy vấn role nữa, mà gán permission dựa trên role
 
-    //req.user
+    let permissions: string[] = [];
+
+    if (role === 'ADMIN') {
+      permissions = ['manage_users', 'view_reports']; // hoặc lấy từ constant
+    } else if (role === 'USER') {
+      permissions = ['view_profile'];
+    }
+
+    // Gán req.user ở đây
     return {
       _id,
       name,
       email,
       role,
-      permissions: temp?.permissions ?? [],
+      permissions,
     };
   }
 }

@@ -2,10 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsEmail,
-  IsMongoId,
   IsNotEmpty,
-  IsNotEmptyObject,
-  IsObject,
   IsOptional,
   IsString,
   ValidateNested,
@@ -45,8 +42,6 @@ export class CreateUserDto {
   @IsOptional()
   address?: string;
 
-  @IsNotEmpty({ message: "Role mustn't empty" })
-  @IsMongoId({ message: "Role mustn't mongo ID" })
   role: string;
 
   @IsOptional()
@@ -84,6 +79,7 @@ export class RegisterUserDto {
   @IsOptional()
   address?: string;
 
+  @IsOptional()
   phone?: number;
 }
 
@@ -101,22 +97,4 @@ export class UserLoginDto {
     description: 'password',
   })
   readonly password: string;
-}
-
-/////// google login
-export class LoginWithGoogleDto {
-  @IsEmail()
-  email: string;
-
-  @IsOptional()
-  @IsString()
-  name?: string;
-
-  @IsOptional()
-  @IsString()
-  avatarUrl?: string;
-
-  @IsOptional()
-  @IsString()
-  password?: string;
 }

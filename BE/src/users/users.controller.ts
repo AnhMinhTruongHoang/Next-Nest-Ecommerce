@@ -12,7 +12,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Public, ResponseMessage, Users } from 'src/decorator/customize';
-import { IUser } from './user.interface';
+import { IUser } from '../types/user.interface';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('users')
@@ -66,7 +66,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @ResponseMessage('Delete a USer')
+  @ResponseMessage('Delete a User')
   remove(@Param('id') id: string, @Users() users: IUser) {
     return this.usersService.remove(id, users);
   }

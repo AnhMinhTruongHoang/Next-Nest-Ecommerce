@@ -10,25 +10,23 @@ import {
 import { AuthService } from './auth.service';
 import { RegisterUserDto, UserLoginDto } from 'src/users/dto/create-user.dto';
 import { Request, Response } from 'express';
-import { RolesService } from 'src/roles/roles.service';
 import { Public, ResponseMessage, Users } from 'src/decorator/customize';
-import { IUser } from 'src/users/user.interface';
+import { IUser } from 'src/types/user.interface';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { LocalAuthGuard } from './guards/local.auth.guard';
-import { MESSAGES } from '@nestjs/core/constants';
-import { AuthGuard } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
+import { UsersService } from 'src/users/users.service';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(
     private authService: AuthService,
-    private rolesService: RolesService,
     private configService: ConfigService,
     private mailerService: MailerService,
+    private usersService: UsersService,
   ) {}
 
   @Public()
@@ -53,8 +51,8 @@ export class AuthController {
   @ResponseMessage('Get user information')
   @Get('/account')
   async handleGetAccount(@Users() user: IUser) {
-    const temp = (await this.rolesService.findOne(user.role._id)) as any;
-    user.permissions = temp.permissions;
+    const temp = (await this.usersService.findOne(user.role)) as any;
+
     return { user };
   }
 

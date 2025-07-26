@@ -2,16 +2,14 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto, RegisterUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { User as UserM, UserDocument, UserSchema } from './schemas/user.schema';
+import { User as UserM, UserDocument } from './schemas/user.schema';
 import mongoose, { Model } from 'mongoose';
 import { genSaltSync, hashSync, compareSync } from 'bcryptjs';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import aqp from 'api-query-params';
-import { USER_ROLE } from 'src/databases/sample';
 import { Users } from 'src/decorator/customize';
-import { IUser } from './user.interface';
+import { IUser } from '../types/user.interface';
 import { v4 as uuidv4 } from 'uuid';
-import { Role, RoleDocument } from 'src/roles/schemas/role.schemas';
 import { MailerService } from '@nestjs-modules/mailer';
 import dayjs from 'dayjs';
 
@@ -21,9 +19,6 @@ export class UsersService {
     @InjectModel(UserM.name)
     private userModel: SoftDeleteModel<UserDocument>,
     private mailerService: MailerService,
-
-    @InjectModel(Role.name)
-    private roleModel: SoftDeleteModel<RoleDocument>,
   ) {}
 
   getHashPassword = (password: string) => {
@@ -35,8 +30,16 @@ export class UsersService {
   /// create
 
   async create(createUserDto: CreateUserDto, @Users() user: IUser) {
-    const { name, email, password, age, gender, address, role, avatarUrl } =
-      createUserDto;
+    const {
+      name,
+      email,
+      password,
+      age,
+      gender,
+      address,
+      role = 'USER',
+      avatarUrl,
+    } = createUserDto;
 
     //add logic check email
     const isExist = await this.userModel.findOne({ email });
@@ -53,8 +56,9 @@ export class UsersService {
       age,
       gender,
       address,
-      role,
+      role: 'USER',
       avatarUrl,
+      isActive: false,
       createdBy: {
         _id: user._id,
         email: user.email,
@@ -77,7 +81,6 @@ export class UsersService {
     }
 
     //fetch user role
-    const userRole = await this.roleModel.findOne({ name: USER_ROLE });
     const codeId = uuidv4();
 
     const hashPassword = this.getHashPassword(password);
@@ -88,7 +91,7 @@ export class UsersService {
       age,
       gender,
       address,
-      role: userRole?._id,
+      role: 'USER',
       isActive: false,
       codeId: codeId,
       codeExpired: dayjs().add(1, 'day'),

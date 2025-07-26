@@ -8,13 +8,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './passport/jwt.strategy';
 import ms from 'ms';
 import { AuthController } from './auth.controller';
-import { RolesModule } from 'src/roles/roles.module';
-import google_oauth_config from 'src/config/google_oauth_config';
 
 @Module({
   imports: [
     UsersModule,
-    RolesModule,
     ConfigModule,
     PassportModule,
     JwtModule.registerAsync({

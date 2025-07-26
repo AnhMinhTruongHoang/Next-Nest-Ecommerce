@@ -4,7 +4,7 @@ import { Company, CompanyDocument } from './schemas/company.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { IUser } from 'src/users/user.interface';
+import { IUser } from 'src/types/user.interface';
 import aqp from 'api-query-params';
 import mongoose from 'mongoose';
 
