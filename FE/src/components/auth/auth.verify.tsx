@@ -10,6 +10,7 @@ import {
   Col,
   Space,
   notification,
+  message,
 } from "antd";
 import {
   LockOutlined,
@@ -23,7 +24,8 @@ import { useState } from "react";
 import { sendRequest } from "@/utils/api";
 import { useRouter } from "next/navigation";
 
-const AuthSignUp = () => {
+const AuthVerify = (props: any) => {
+  const { id } = props;
   const router = useRouter();
   const { Title } = Typography;
 
@@ -39,24 +41,24 @@ const AuthSignUp = () => {
     avatarUrl: "",
   });
 
-  const handleFinish = async (values: typeof formValues) => {
-    const { email, password, name } = values;
+  const handleFinish = async (values: any) => {
+    const { _id, code } = values;
 
     const res = await sendRequest<IBackendRes<any>>({
-      url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/register`,
+      url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/check-code`,
       method: "POST",
       body: {
-        email,
-        password,
-        name,
+        _id,
+        code,
       },
     });
-    console.log("Submit:", res);
+
     if (res?.data) {
-      router.push(`/auth/verify/${res?.data?._id}`);
+      message.info("Active Success !");
+      router.push(`/auth/signin`);
     } else {
       notification.error({
-        message: "Failed !",
+        message: "Register error",
         description: res?.message,
       });
     }
@@ -87,7 +89,7 @@ const AuthSignUp = () => {
                 icon={<LockOutlined />}
                 style={{ backgroundColor: "#1890ff", marginBottom: 8 }}
               />
-              <Title level={3}>Sign Up</Title>
+              <Title level={3}>Verify</Title>
             </div>
 
             <Form
@@ -96,52 +98,22 @@ const AuthSignUp = () => {
               initialValues={formValues}
               onValuesChange={(changed, all) => setFormValues(all)}
             >
-              <Form.Item name="name" label="Name" rules={[{ required: true }]}>
-                <Input prefix={<UserOutlined />} />
+              <Form.Item name="_id" label="ID" initialValue={id} hidden>
+                <Input disabled />
               </Form.Item>
 
               <Form.Item
-                name="email"
-                label="Email"
-                rules={[{ required: true, type: "email" }]}
-              >
-                <Input prefix={<MailOutlined />} />
-              </Form.Item>
-
-              <Form.Item
-                name="password"
-                label="Password"
+                name="code"
+                label=" Active Code"
                 rules={[{ required: true }]}
                 hasFeedback
               >
-                <Input.Password prefix={<LockTwoTone />} />
-              </Form.Item>
-
-              <Form.Item
-                name="confirmPassword"
-                label="Confirm Password"
-                dependencies={["password"]}
-                hasFeedback
-                rules={[
-                  { required: true, message: "Please confirm your password!" },
-                  ({ getFieldValue }) => ({
-                    validator(_, value) {
-                      if (!value || getFieldValue("password") === value) {
-                        return Promise.resolve();
-                      }
-                      return Promise.reject(
-                        new Error("Passwords do not match!")
-                      );
-                    },
-                  }),
-                ]}
-              >
-                <Input.Password prefix={<LockTwoTone />} />
+                <Input />
               </Form.Item>
 
               <Form.Item>
                 <Button type="primary" htmlType="submit" block>
-                  Sign Up
+                  Submit
                 </Button>
               </Form.Item>
             </Form>
@@ -152,4 +124,4 @@ const AuthSignUp = () => {
   );
 };
 
-export default AuthSignUp;
+export default AuthVerify;
