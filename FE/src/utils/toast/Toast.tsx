@@ -1,50 +1,35 @@
 "use client";
-import { Alert, Snackbar, SnackbarProps } from "@mui/material";
-import * as React from "react";
-import { FC } from "react";
+
+import { notification } from "antd";
+import { useEffect } from "react";
 import { ToastMessage } from "./useToast";
 
-
-export type ToastStyle = Omit<
-  SnackbarProps,
-  "TransitionProps" | "onClose" | "open" | "children" | "message"
->;
+export type ToastStyle = {
+  duration?: number;
+  placement?: "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
+};
 
 export type ToastProps = {
   message: ToastMessage;
   onExited: () => void;
 } & ToastStyle;
 
-// https://mui.com/material-ui/react-snackbar/#consecutive-snackbars
-export const Toast: FC<ToastProps> = ({
+export const Toast = ({
   message,
   onExited,
-  autoHideDuration,
-  ...props
-}) => {
-  const [open, setOpen] = React.useState(true);
+  duration = 4.5,
+  placement = "topRight",
+}: ToastProps) => {
+  useEffect(() => {
+    notification.open({
+      message: null, // no title
+      description: message.message,
+      type: message.severity as "success" | "error" | "info" | "warning",
+      duration,
+      placement,
+      onClose: onExited,
+    });
+  }, [message, duration, placement, onExited]);
 
-  const handleClose = (
-    _event: React.SyntheticEvent | Event,
-    reason?: string
-  ) => {
-    if (reason === "clickaway") {
-      return;
-    }
-    setOpen(false);
-  };
-
-  return (
-    <Snackbar
-      key={message.key}
-      open={open}
-      onClose={handleClose}
-      TransitionProps={{ onExited }}
-      anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      autoHideDuration={autoHideDuration ?? 5000}
-      {...props}
-    >
-      <Alert severity={message.severity}>{message.message}</Alert>
-    </Snackbar>
-  );
+  return null; // No visual component needed
 };

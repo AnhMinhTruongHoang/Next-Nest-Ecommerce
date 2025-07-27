@@ -1,119 +1,124 @@
 "use client";
 
-// components/Footer.tsx
 import React from "react";
+import { Layout, Typography, Input, Button, Row, Col, Space } from "antd";
 import {
-  Box,
-  Typography,
-  Container,
-  IconButton,
-  TextField,
-  Button,
-  Link as MuiLink,
-  Grid,
-} from "@mui/material";
-import {
-  Facebook,
-  Twitter,
-  Google,
-  Instagram,
-  LinkedIn,
-  GitHub,
-} from "@mui/icons-material";
+  FacebookFilled,
+  TwitterSquareFilled,
+  GoogleSquareFilled,
+  InstagramFilled,
+  LinkedinFilled,
+  GithubFilled,
+} from "@ant-design/icons";
+
+const { Footer } = Layout;
 
 const AppFooter = () => {
   const links = ["Link 1", "Link 2", "Link 3", "Link 4"];
 
   return (
-    <Box sx={{ backgroundColor: "#212121", color: "#fff", pt: 4, pb: 2 }}>
-      <Container maxWidth="lg">
-        {/* Social Icons */}
-        <Box sx={{ textAlign: "center", mb: 3 }}>
-          {[Facebook, Twitter, Google, Instagram, LinkedIn, GitHub].map(
-            (Icon, index) => (
-              <IconButton key={index} color="inherit" sx={{ mx: 1 }}>
-                <Icon />
-              </IconButton>
-            )
-          )}
-        </Box>
+    <Footer
+      style={{ backgroundColor: "#212121", color: "#fff", paddingTop: 40 }}
+    >
+      {/* Social Icons */}
+      <div style={{ textAlign: "center", marginBottom: 24 }}>
+        <Space size="middle">
+          <FacebookFilled style={{ fontSize: 24, color: "#fff" }} />
+          <TwitterSquareFilled style={{ fontSize: 24, color: "#fff" }} />
+          <GoogleSquareFilled style={{ fontSize: 24, color: "#fff" }} />
+          <InstagramFilled style={{ fontSize: 24, color: "#fff" }} />
+          <LinkedinFilled style={{ fontSize: 24, color: "#fff" }} />
+          <GithubFilled style={{ fontSize: 24, color: "#fff" }} />
+        </Space>
+      </div>
 
-        {/* Newsletter */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: 2,
-            flexWrap: "wrap",
-            mb: 3,
+      {/* Newsletter */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          flexWrap: "wrap",
+          alignItems: "center",
+          gap: 16,
+          marginBottom: 24,
+        }}
+      >
+        <Typography.Text style={{ color: "#fff", fontWeight: "bold" }}>
+          Sign up for our newsletter
+        </Typography.Text>
+        <Input
+          placeholder="Email address"
+          size="middle"
+          style={{ width: 240, borderRadius: 4 }}
+        />
+        <Button
+          type="default"
+          style={{
+            color: "#fff",
+            borderColor: "#fff",
+            height: 40,
           }}
         >
-          <Typography variant="subtitle1" fontWeight="bold">
-            Sign up for our newsletter
-          </Typography>
-          <TextField
-            variant="outlined"
-            size="small"
-            placeholder="Email address"
-            sx={{ backgroundColor: "#fff", borderRadius: 1 }}
-          />
-          <Button
-            variant="outlined"
-            sx={{ color: "#fff", borderColor: "#fff", height: "40px" }}
-          >
-            Subscribe
-          </Button>
-        </Box>
+          Subscribe
+        </Button>
+      </div>
 
-        {/* Description */}
-        <Typography
-          variant="body2"
-          sx={{ color: "#ccc", textAlign: "center", mb: 4 }}
-        >
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Sunt
-          distinctio earum repellat quaerat voluptatibus placeat nam, commodi
-          optio pariatur est quia magnam eum harum corrupti dicta, aliquam sequi
-          voluptate quas.
-        </Typography>
+      {/* Description */}
+      <Typography.Paragraph
+        style={{
+          color: "#ccc",
+          textAlign: "center",
+          marginBottom: 32,
+          maxWidth: 800,
+          margin: "0 auto",
+        }}
+      >
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Sunt distinctio
+        earum repellat quaerat voluptatibus placeat nam, commodi optio pariatur
+        est quia magnam eum harum corrupti dicta, aliquam sequi voluptate quas.
+      </Typography.Paragraph>
 
-        <Grid container spacing={4} justifyContent="center" mb={4}>
-          {[1, 2, 3, 4].map((col) => (
-            //@ts-ignore
-            <Grid item xs={6} sm={3} key={col} component="div">
-              <Typography variant="h6" gutterBottom>
-                LINKS
-              </Typography>
-              {links.map((link, idx) => (
-                <MuiLink
-                  key={idx}
-                  href="#"
-                  underline="hover"
-                  sx={{ display: "block", color: "#ccc", mb: 1 }}
-                >
-                  {link}
-                </MuiLink>
-              ))}
-            </Grid>
-          ))}
-        </Grid>
+      {/* Links Grid */}
+      <Row gutter={[32, 24]} justify="center" style={{ marginBottom: 40 }}>
+        {[1, 2, 3, 4].map((col) => (
+          <Col key={col} xs={12} sm={6}>
+            <Typography.Title level={5} style={{ color: "#fff" }}>
+              LINKS
+            </Typography.Title>
+            {links.map((link, idx) => (
+              <a
+                key={idx}
+                href="#"
+                style={{
+                  display: "block",
+                  color: "#ccc",
+                  marginBottom: 8,
+                  textDecoration: "none",
+                }}
+              >
+                {link}
+              </a>
+            ))}
+          </Col>
+        ))}
+      </Row>
 
-        {/* Bottom Text */}
-        <Box
-          sx={{
-            textAlign: "center",
-            py: 2,
-            backgroundColor: "rgba(0, 0, 0, 0.2)",
-            fontSize: 14,
-          }}
-        >
-          © 2025 Copyright:&nbsp;
-          <MuiLink href="https://mui.com" color="inherit" underline="hover">
-            Material UI
-          </MuiLink>
-        </Box>
-      </Container>
-    </Box>
+      {/* Bottom Text */}
+      <div
+        style={{
+          textAlign: "center",
+          padding: "12px 0",
+          backgroundColor: "rgba(0, 0, 0, 0.2)",
+          fontSize: 14,
+          color: "#ccc",
+        }}
+      >
+        © 2025 Copyright:{" "}
+        <a href="https://ant.design" style={{ color: "#ccc" }}>
+          Ant Design
+        </a>
+      </div>
+    </Footer>
   );
 };
 
