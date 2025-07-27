@@ -1,5 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateUserDto, RegisterUserDto } from './dto/create-user.dto';
+import {
+  CodeAuthDto,
+  CreateUserDto,
+  RegisterUserDto,
+} from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User as UserM, UserDocument } from './schemas/user.schema';
@@ -7,8 +11,8 @@ import mongoose, { Model } from 'mongoose';
 import { genSaltSync, hashSync, compareSync } from 'bcryptjs';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import aqp from 'api-query-params';
-import { Users } from 'src/decorator/customize';
-import { IUser } from '../types/user.interface';
+import { Users } from 'src/health/decorator/customize';
+import { IUser } from 'src/types/user.interface';
 import { v4 as uuidv4 } from 'uuid';
 import { MailerService } from '@nestjs-modules/mailer';
 import dayjs from 'dayjs';
@@ -110,7 +114,32 @@ export class UsersService {
     return newRegister;
   }
 
-  //////////////////////
+  ///verify code
+  async handleActive(data: CodeAuthDto) {
+    const user = await this.userModel.findOne({
+      _id: data._id,
+      codeId: data.code,
+    });
+
+    if (!user) {
+      throw new BadRequestException('Invalid Code');
+    }
+    //check date
+    const isBeforeCheck = dayjs().isBefore(user.codeExpired);
+    if (isBeforeCheck) {
+      await this.userModel.updateOne(
+        { _id: data._id },
+        {
+          isActive: true,
+        },
+      );
+    } else {
+      throw new BadRequestException('Invalid Code');
+    }
+    return { isBeforeCheck };
+  }
+
+  ///
   async findAll(currentPage: number, limit: number, qs: string) {
     const { filter, sort, population } = aqp(qs);
     delete filter.current;

@@ -11,8 +11,8 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Public, ResponseMessage, Users } from 'src/decorator/customize';
-import { IUser } from '../types/user.interface';
+import { Public, ResponseMessage, Users } from 'src/health/decorator/customize';
+import { IUser } from 'src/types/user.interface';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('users')

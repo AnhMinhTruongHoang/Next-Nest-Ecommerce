@@ -13,7 +13,7 @@ import {
 import { FilesService } from './files.service';
 import { UpdateFileDto } from './dto/update-file.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Public, ResponseMessage } from 'src/decorator/customize';
+import { Public, ResponseMessage } from 'src/health/decorator/customize';
 import { ApiTags } from '@nestjs/swagger';
 import { HttpExceptionFilter } from 'src/core/http-exception.filter';
 

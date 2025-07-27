@@ -6,9 +6,8 @@ import { LocalStrategy } from './passport/stateless.local.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './passport/stateless.jwt.strategy';
-
 import ms from 'ms';
-import { UsersModule } from 'src/users/users.module';
+import { UsersModule } from 'src/modules/users/users.module';
 @Module({
   controllers: [StatelessController],
   providers: [StatelessService, LocalStrategy, JwtStrategy],

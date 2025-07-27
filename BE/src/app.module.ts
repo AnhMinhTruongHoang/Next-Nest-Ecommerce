@@ -3,18 +3,18 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { softDeletePlugin } from 'soft-delete-plugin-mongoose';
-import { FilesModule } from './files/files.module';
-import { DatabasesModule } from './databases/databases.module';
-import { SubscribersModule } from './subscribers/subscribers.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { HealthModule } from './health/health.module';
 import google_oauth_config from './config/google_oauth_config';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { UsersModule } from './modules/users/users.module';
+import { FilesModule } from './modules/files/files.module';
+import { DatabasesModule } from './modules/databases/databases.module';
+import { SubscribersModule } from './modules/subscribers/subscribers.module';
 
 @Module({
   imports: [
@@ -57,7 +57,6 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
         defaults: {
           from: 'minhlapro01@gmail.com',
         },
-        preview: true,
         template: {
           dir: process.cwd() + '/src/mail/templates/',
           adapter: new HandlebarsAdapter(), // or new PugAdapter() or new EjsAdapter()

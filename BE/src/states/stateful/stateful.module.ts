@@ -4,7 +4,7 @@ import { StatefulService } from './stateful.service';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './passport/stateful.local.strategy';
 import { SessionSerializer } from './passport/stateful.session.serializer';
-import { UsersModule } from 'src/users/users.module';
+import { UsersModule } from 'src/modules/users/users.module'; 
 
 @Module({
   controllers: [StatefulController],

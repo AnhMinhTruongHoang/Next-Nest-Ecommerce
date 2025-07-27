@@ -1,7 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from 'src/modules/users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { RegisterUserDto } from 'src/users/dto/create-user.dto';
+import {
+  CodeAuthDto,
+  RegisterUserDto,
+} from 'src/modules/users/dto/create-user.dto';
 import { ConfigService } from '@nestjs/config';
 import ms from 'ms';
 import { Response } from 'express';
@@ -80,6 +83,13 @@ export class AuthService {
       createdAt: newUser?.createdAt,
     };
   }
+
+  /// verify email code
+
+  checkCode = async (data: CodeAuthDto) => {
+    return await this.usersService.handleActive(data);
+  };
+  ///
 
   createRefreshToken = (payload: any) => {
     const refresh_token = this.jwtService.sign(payload, {

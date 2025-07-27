@@ -98,3 +98,11 @@ export class UserLoginDto {
   })
   readonly password: string;
 }
+
+export class CodeAuthDto {
+  @IsNotEmpty({ message: '_id is not empty' })
+  _id: string;
+
+  @IsNotEmpty({ message: 'code is not empty' })
+  code: string;
+}

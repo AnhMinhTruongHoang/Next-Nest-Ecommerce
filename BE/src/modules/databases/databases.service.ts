@@ -2,8 +2,8 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
-import { User, UserDocument } from 'src/users/schemas/user.schema';
-import { UsersService } from 'src/users/users.service';
+import { User, UserDocument } from '../users/schemas/user.schema';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class DatabasesService implements OnModuleInit {
@@ -34,16 +34,6 @@ export class DatabasesService implements OnModuleInit {
           email: 'admin@gmail.com',
           password: initPassword,
           age: 69,
-          gender: 'MALE',
-          address: 'VietNam',
-          role: 'ADMIN',
-          isActive: true,
-        },
-        {
-          name: "I'm Hỏi Dân IT",
-          email: 'hoidanit@gmail.com',
-          password: initPassword,
-          age: 96,
           gender: 'MALE',
           address: 'VietNam',
           role: 'ADMIN',

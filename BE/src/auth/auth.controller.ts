@@ -8,16 +8,20 @@ import {
   Get,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterUserDto, UserLoginDto } from 'src/users/dto/create-user.dto';
 import { Request, Response } from 'express';
-import { Public, ResponseMessage, Users } from 'src/decorator/customize';
+import { Public, ResponseMessage, Users } from 'src/health/decorator/customize';
 import { IUser } from 'src/types/user.interface';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { LocalAuthGuard } from './guards/local.auth.guard';
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from 'src/modules/users/users.service';
+import {
+  CodeAuthDto,
+  RegisterUserDto,
+  UserLoginDto,
+} from 'src/modules/users/dto/create-user.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -94,4 +98,14 @@ export class AuthController {
 
     return 'ok';
   }
+
+  /// verify mail code
+  @Public()
+  @ResponseMessage('verify register code')
+  @Post('check-code')
+  checkCode(@Body() registerUserDto: CodeAuthDto) {
+    return this.authService.checkCode(registerUserDto);
+  }
+
+  //
 }

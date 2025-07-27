@@ -16,7 +16,7 @@ import {
   ResponseMessage,
   SkipCheckPermission,
   Users,
-} from 'src/decorator/customize';
+} from 'src/health/decorator/customize';
 import { IUser } from 'src/types/user.interface';
 import { ApiTags } from '@nestjs/swagger';
 

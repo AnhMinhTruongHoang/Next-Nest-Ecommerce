@@ -6,7 +6,10 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
-import { IS_PUBLIC_KEY, IS_PUBLIC_PERMISSION } from 'src/decorator/customize';
+import {
+  IS_PUBLIC_KEY,
+  IS_PUBLIC_PERMISSION,
+} from 'src/health/decorator/customize';
 import { request, Request } from 'express';
 
 @Injectable()
