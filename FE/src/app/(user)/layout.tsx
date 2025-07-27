@@ -1,6 +1,7 @@
 import ClientLayout from "@/components/header/ClientLayout";
 import Script from "next/script";
 import type { Metadata } from "next";
+import { ReactNode } from "react";
 
 export const metadata: Metadata = {
   title: "User Pages",
@@ -51,20 +52,14 @@ const storeSchema = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function UserLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body>
-        <ClientLayout>{children}</ClientLayout>
-        <Script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(storeSchema) }}
-        />
-      </body>
-    </html>
+    <>
+      <ClientLayout>{children}</ClientLayout>
+      <Script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(storeSchema) }}
+      />
+    </>
   );
 }

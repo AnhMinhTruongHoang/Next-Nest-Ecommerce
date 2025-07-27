@@ -96,6 +96,17 @@ const AuthSignIn = () => {
           Sign In
         </Button>
 
+        <div style={{ textAlign: "center", marginTop: 16 }}>
+          <Typography.Text>
+            Don't have an account?{" "}
+            <Link href="/auth/signup">
+              <Button type="link" style={{ padding: 0 }}>
+                Sign Up
+              </Button>
+            </Link>
+          </Typography.Text>
+        </div>
+
         <Divider>Or sign in with</Divider>
 
         <div

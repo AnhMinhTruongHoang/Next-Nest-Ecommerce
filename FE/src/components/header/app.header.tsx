@@ -1,7 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import { Layout, Menu, Input, Avatar, Badge, Dropdown, Button } from "antd";
+import {
+  Layout,
+  Menu,
+  Input,
+  Avatar,
+  Badge,
+  Dropdown,
+  Button,
+  Skeleton,
+} from "antd";
 import {
   MenuOutlined,
   SearchOutlined,
@@ -9,6 +18,7 @@ import {
   MoreOutlined,
   UserOutlined,
   LogoutOutlined,
+  DashboardFilled,
 } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import NextLink from "next/link";
@@ -22,8 +32,6 @@ export default function AppHeader() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [mobileVisible, setMobileVisible] = useState(false);
-
-  if (status === "loading") return null;
 
   const handleRedirectHome = () => {
     router.push("/");
@@ -39,8 +47,17 @@ export default function AppHeader() {
         icon: <UserOutlined />,
       },
       {
+        key: "dashboard",
+        label: <NextLink href={`/dashboard`}>Dashboard</NextLink>,
+        icon: <DashboardFilled />,
+      },
+      {
         key: "logout",
-        label: <span onClick={() => signOut()}>Logout</span>,
+        label: (
+          <span onClick={() => signOut({ callbackUrl: "/auth/signin" })}>
+            Logout
+          </span>
+        ),
         icon: <LogoutOutlined />,
       },
     ],
@@ -99,7 +116,9 @@ export default function AppHeader() {
             gap: 16,
           }}
         >
-          {session ? (
+          {status === "loading" ? (
+            <Skeleton.Avatar active size={35} shape="circle" />
+          ) : session ? (
             <>
               <ActiveLink href={"/"}>FNC 1</ActiveLink>
               <ActiveLink href={"/"}>FNC 2</ActiveLink>

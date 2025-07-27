@@ -48,6 +48,14 @@ declare global {
     statusCode: number | string;
     data?: T;
   }
+  interface ILogin {
+    user: {
+      _id: string;
+      name: string;
+      email: string;
+    };
+    access_token: string;
+  }
 
   interface IModelPaginate<T> {
     meta: {
@@ -57,47 +65,5 @@ declare global {
       total: number;
     };
     result: T[];
-  }
-
-  interface IPlaylist {
-    _id: string;
-    title: string;
-    isPublic: boolean;
-    user: string;
-    tracks: IShareTrack[];
-    isDeleted: boolean;
-    createdAt: string;
-    updatedAt: string;
-  }
-
-  interface ITrackComment {
-    _id: string;
-    content: string;
-    moment: number;
-    user: {
-      _id: string;
-      email: string;
-      name: string;
-      role: string;
-      type: string;
-    };
-    track: string;
-    isDeleted: boolean;
-
-    createdAt: string;
-    updatedAt: string;
-  }
-
-  interface ITrackLike {
-    _id: string;
-    title: string;
-    description: string;
-    category: string;
-    imgUrl: string;
-    trackUrl: string;
-    countLike: number;
-    countPlay: number;
-    createdAt: string;
-    updatedAt: string;
   }
 }

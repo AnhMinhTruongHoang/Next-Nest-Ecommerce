@@ -8,5 +8,10 @@ export default withAuth({
 });
 
 export const config = {
-  matcher: ["/playlist", "/track/upload", "/like"],
+  matcher: [
+    "/playlist",
+    "/track/upload",
+    "/like",
+    "/((?!api|_next/static|_next/image|favicon.ico|auth|verify|$).*)",
+  ],
 };
