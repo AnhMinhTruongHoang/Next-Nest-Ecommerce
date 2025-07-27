@@ -1,28 +1,19 @@
 "use client";
 import {
-  Avatar,
-  Box,
-  Button,
-  Divider,
-  Grid,
-  TextField,
-  Typography,
-  Snackbar,
-  Alert,
-  InputAdornment,
-  IconButton,
-} from "@mui/material";
-import LockIcon from "@mui/icons-material/Lock";
-import GitHubIcon from "@mui/icons-material/GitHub";
-import GoogleIcon from "@mui/icons-material/Google";
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+  LockOutlined,
+  GithubOutlined,
+  GoogleOutlined,
+  ArrowLeftOutlined,
+  EyeInvisibleOutlined,
+  EyeTwoTone,
+} from "@ant-design/icons";
+import { Avatar, Button, Divider, Input, Typography, message } from "antd";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import { useState } from "react";
+
+const { Title } = Typography;
 
 const AuthSignIn = () => {
   const router = useRouter();
@@ -31,29 +22,13 @@ const AuthSignIn = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const [isErrorUsername, setIsErrorUsername] = useState(false);
-  const [isErrorPassword, setIsErrorPassword] = useState(false);
-
-  const [errorUsername, setErrorUsername] = useState("");
-  const [errorPassword, setErrorPassword] = useState("");
-
-  const [openMessage, setOpenMessage] = useState(false);
-  const [resMessage, setResMessage] = useState("");
-
   const handleSubmit = async () => {
-    setIsErrorUsername(false);
-    setIsErrorPassword(false);
-    setErrorUsername("");
-    setErrorPassword("");
-
     if (!username) {
-      setIsErrorUsername(true);
-      setErrorUsername("Username is required.");
+      message.error("Username is required.");
       return;
     }
     if (!password) {
-      setIsErrorPassword(true);
-      setErrorPassword("Password is required.");
+      message.error("Password is required.");
       return;
     }
 
@@ -66,119 +41,84 @@ const AuthSignIn = () => {
     if (!res?.error) {
       router.push("/");
     } else {
-      setOpenMessage(true);
-      setResMessage(res.error);
+      message.error(res.error);
     }
   };
 
   return (
-    <Box sx={{ backgroundColor: "#f9f9f9", minHeight: "100vh", py: 6 }}>
-      <Grid
-        container
-        justifyContent="center"
-        alignItems="center"
-        sx={{ height: "100%" }}
-      >
-        <Grid>
-          <Link href="/" style={{ position: "absolute", top: 16, left: 16 }}>
-            <IconButton>
-              <ArrowBackIcon />
-            </IconButton>
-          </Link>
-
-          <Box textAlign="center" mb={3}>
-            <Avatar sx={{ bgcolor: "primary.main", mx: "auto", mb: 1 }}>
-              <LockIcon />
-            </Avatar>
-            <Typography variant="h5" fontWeight="bold">
-              Sign In
-            </Typography>
-          </Box>
-
-          <TextField
-            onChange={(e) => setUsername(e.target.value)}
-            variant="outlined"
-            margin="normal"
-            fullWidth
-            label="Username"
-            name="username"
-            autoFocus
-            error={isErrorUsername}
-            helperText={errorUsername}
-          />
-
-          <TextField
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-            variant="outlined"
-            margin="normal"
-            fullWidth
-            label="Password"
-            type={showPassword ? "text" : "password"}
-            error={isErrorPassword}
-            helperText={errorPassword}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton onClick={() => setShowPassword(!showPassword)}>
-                    {showPassword ? <Visibility /> : <VisibilityOff />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          <Button
-            fullWidth
-            variant="contained"
-            color="primary"
-            sx={{ mt: 3, mb: 2 }}
-            onClick={handleSubmit}
-          >
-            Sign In
+    <div
+      style={{
+        backgroundColor: "#f9f9f9",
+        minHeight: "100vh",
+        padding: "48px 16px",
+      }}
+    >
+      <div style={{ maxWidth: 400, margin: "0 auto", position: "relative" }}>
+        <Link href="/" style={{ position: "absolute", top: 0, left: 0 }}>
+          <Button icon={<ArrowLeftOutlined />} type="link">
+            Back
           </Button>
+        </Link>
 
-          <Divider>Or sign in with</Divider>
-
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              gap: 3,
-              mt: 3,
-            }}
+        <div style={{ textAlign: "center", marginBottom: 24 }}>
+          <Avatar
+            size={64}
+            style={{ backgroundColor: "#ff4d4f", marginBottom: 12 }}
           >
-            <Avatar
-              sx={{ cursor: "pointer", bgcolor: "#333" }}
-              onClick={() => signIn("github")}
-            >
-              <GitHubIcon />
-            </Avatar>
-            <Avatar
-              sx={{ cursor: "pointer", bgcolor: "#db4437" }}
-              onClick={() => signIn("google")}
-            >
-              <GoogleIcon />
-            </Avatar>
-          </Box>
-        </Grid>
-      </Grid>
+            <LockOutlined />
+          </Avatar>
+          <Title level={3}>Sign In</Title>
+        </div>
 
-      <Snackbar
-        open={openMessage}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        autoHideDuration={5000}
-        onClose={() => setOpenMessage(false)}
-      >
-        <Alert
-          onClose={() => setOpenMessage(false)}
-          severity="error"
-          sx={{ width: "100%" }}
+        <Input
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          style={{ marginBottom: 16 }}
+        />
+        <Input.Password
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          onPressEnter={handleSubmit}
+          iconRender={(visible) =>
+            visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+          }
+          style={{ marginBottom: 24 }}
+        />
+
+        <Button
+          type="primary"
+          block
+          onClick={handleSubmit}
+          style={{ marginBottom: 16 }}
         >
-          {resMessage}
-        </Alert>
-      </Snackbar>
-    </Box>
+          Sign In
+        </Button>
+
+        <Divider>Or sign in with</Divider>
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: 16,
+            marginTop: 24,
+          }}
+        >
+          <Avatar
+            style={{ backgroundColor: "#000", cursor: "pointer" }}
+            icon={<GithubOutlined />}
+            onClick={() => signIn("github")}
+          />
+          <Avatar
+            style={{ backgroundColor: "#db4437", cursor: "pointer" }}
+            icon={<GoogleOutlined />}
+            onClick={() => signIn("google")}
+          />
+        </div>
+      </div>
+    </div>
   );
 };
 
