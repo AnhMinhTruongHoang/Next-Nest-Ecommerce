@@ -129,6 +129,7 @@ export default function AppHeader() {
               </Badge>
 
               <Dropdown
+                key={session?.user?._id} // ép re-render khi user login/logout
                 menu={userMenu}
                 placement="bottomRight"
                 trigger={["click"]}

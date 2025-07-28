@@ -1,4 +1,5 @@
 "use client";
+
 import {
   LockOutlined,
   GithubOutlined,
@@ -7,49 +8,40 @@ import {
   EyeInvisibleOutlined,
   EyeTwoTone,
 } from "@ant-design/icons";
-import { Avatar, Button, Divider, Input, Typography } from "antd";
+import { Avatar, Button, Divider, Input, Typography, Form } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { useState } from "react";
 import ModelReactive from "./model.reactive";
+import { useState } from "react";
 
 const { Title } = Typography;
 
 const AuthSignIn = () => {
   const router = useRouter();
+  const [form] = Form.useForm();
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-
-  // Modal state 👇
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState("");
+  const [userEmail, setUserEmail] = useState("");
 
-  const handleSubmit = async () => {
-    if (!username) {
-      setModalContent("Username is required.");
-      setIsModalOpen(true);
-      return;
-    }
-    if (!password) {
-      setModalContent("Password is required.");
-      setIsModalOpen(true);
-      return;
-    }
-
+  const handleSubmit = async (values: {
+    username: string;
+    password: string;
+  }) => {
+    setUserEmail("");
     const res = await signIn("credentials", {
-      username,
-      password,
+      username: values.username,
+      password: values.password,
       redirect: false,
     });
 
     if (!res?.error) {
       router.push("/");
     } else {
-      setModalContent(res.error); // 👈 show error from backend
+      setModalContent(res.error);
       setIsModalOpen(true);
+      setUserEmail(values.username);
     }
   };
 
@@ -78,31 +70,37 @@ const AuthSignIn = () => {
           <Title level={3}>Sign In</Title>
         </div>
 
-        <Input
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          style={{ marginBottom: 16 }}
-        />
-        <Input.Password
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          onPressEnter={handleSubmit}
-          iconRender={(visible) =>
-            visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
-          }
-          style={{ marginBottom: 24 }}
-        />
-
-        <Button
-          type="primary"
-          block
-          onClick={handleSubmit}
-          style={{ marginBottom: 16 }}
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleSubmit}
+          initialValues={{ username: "", password: "" }}
         >
-          Sign In
-        </Button>
+          <Form.Item
+            name="username"
+            rules={[{ required: true, message: "Please enter your username" }]}
+          >
+            <Input placeholder="Username" />
+          </Form.Item>
+
+          <Form.Item
+            name="password"
+            rules={[{ required: true, message: "Please enter your password" }]}
+          >
+            <Input.Password
+              placeholder="Password"
+              iconRender={(visible) =>
+                visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+              }
+            />
+          </Form.Item>
+
+          <Form.Item>
+            <Button type="primary" htmlType="submit" block>
+              Sign In
+            </Button>
+          </Form.Item>
+        </Form>
 
         <div style={{ textAlign: "center", marginTop: 16 }}>
           <Typography.Text>
@@ -128,12 +126,12 @@ const AuthSignIn = () => {
           <Avatar
             style={{ backgroundColor: "#000", cursor: "pointer" }}
             icon={<GithubOutlined />}
-            onClick={() => signIn("github")}
+            onClick={() => signIn("github", { callbackUrl: "/" })}
           />
           <Avatar
             style={{ backgroundColor: "#db4437", cursor: "pointer" }}
             icon={<GoogleOutlined />}
-            onClick={() => signIn("google")}
+            onClick={() => signIn("google", { callbackUrl: "/" })}
           />
         </div>
       </div>
@@ -145,6 +143,8 @@ const AuthSignIn = () => {
         title="Sign In Error"
         content={<p>{modalContent}</p>}
         type="error"
+        userEmail={userEmail}
+        showSteps
       />
     </div>
   );

@@ -51,6 +51,7 @@ const AuthSignUp = () => {
         name,
       },
     });
+  
     console.log("Submit:", res);
     if (res?.data) {
       router.push(`/auth/verify/${res?.data?._id}`);

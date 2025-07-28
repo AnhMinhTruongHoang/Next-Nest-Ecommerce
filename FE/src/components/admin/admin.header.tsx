@@ -66,7 +66,8 @@ const AdminHeader = (props: any) => {
             }}
           >
             <Space>
-              {session?.user.email ?? "no email"}
+              {session?.user?.email ?? "No email"}
+
               <DownOutlined />
             </Space>
           </a>
