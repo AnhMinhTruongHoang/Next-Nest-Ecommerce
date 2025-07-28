@@ -2,6 +2,7 @@
 import { useHasMounted } from "@/utils/customHook";
 import {
   Button,
+  Divider,
   Form,
   Input,
   Modal,
@@ -156,7 +157,9 @@ const ModelReactive = ({
               },
             ]}
           />
-
+          <Divider>
+            <i>Account is InActive?</i>
+          </Divider>
           {/* Step content */}
           {currentStep === 0 && (
             <Form

@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import ModelReactive from "./model.reactive";
 import { useState } from "react";
+import ModalChangePassword from "./modal.change.password";
 
 const { Title } = Typography;
 
@@ -24,6 +25,7 @@ const AuthSignIn = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState("");
   const [userEmail, setUserEmail] = useState("");
+  const [changePassword, setChangePassword] = useState(false);
 
   const handleSubmit = async (values: {
     username: string;
@@ -112,6 +114,17 @@ const AuthSignIn = () => {
             </Link>
           </Typography.Text>
         </div>
+        <div style={{ textAlign: "center", marginTop: 16 }}>
+          <Typography.Text>
+            <Button
+              onClick={() => setChangePassword(true)}
+              type="link"
+              style={{ padding: 0 }}
+            >
+              Forgot Password ?
+            </Button>
+          </Typography.Text>
+        </div>
 
         <Divider>Or sign in with</Divider>
 
@@ -136,7 +149,7 @@ const AuthSignIn = () => {
         </div>
       </div>
 
-      {/* ✅ Modal Error Message */}
+      {/*  Modal Error Message */}
       <ModelReactive
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
@@ -145,6 +158,11 @@ const AuthSignIn = () => {
         type="error"
         userEmail={userEmail}
         showSteps
+      />
+      {/*  Modal forgot password */}
+      <ModalChangePassword
+        isModalOpen={changePassword}
+        setIsModalOpen={setChangePassword}
       />
     </div>
   );
