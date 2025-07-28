@@ -27,20 +27,11 @@ export class UsersService {
 
   getHashPassword = (password: string) => {
     const salt = genSaltSync(10);
-    return hashSync(password, salt);
+    const hash = hashSync(password, salt);
+    return hash;
   };
 
-  async sendVerificationEmail(email: string, name: string, codeId: string) {
-    await this.mailerService.sendMail({
-      to: email,
-      subject: 'Activate your account',
-      template: 'register.hbs',
-      context: {
-        name: name ?? email,
-        activationCode: codeId,
-      },
-    });
-  }
+  /// create
 
   async create(createUserDto: CreateUserDto, @Users() user: IUser) {
     const {
@@ -54,14 +45,15 @@ export class UsersService {
       avatarUrl,
     } = createUserDto;
 
+    //add logic check email
     const isExist = await this.userModel.findOne({ email });
     if (isExist) {
-      throw new BadRequestException(`Email: ${email} already exists.`);
+      throw new BadRequestException(`Email: ${email} already exist !.`);
     }
 
     const hashPassword = this.getHashPassword(password);
 
-    const newUser = await this.userModel.create({
+    let newUser = await this.userModel.create({
       name,
       email,
       password: hashPassword,
@@ -77,19 +69,26 @@ export class UsersService {
       },
     });
 
+    ////
+
     return newUser;
   }
 
+  //// register
+
   async register(user: RegisterUserDto) {
     const { name, email, password, age, gender, address } = user;
+    //add logic check email
     const isExist = await this.userModel.findOne({ email });
     if (isExist) {
-      throw new BadRequestException(`Email: ${email} is existed.`);
+      throw new BadRequestException(`Email: ${email} is existed !.`);
     }
 
+    //fetch user role
     const codeId = uuidv4();
+
     const hashPassword = this.getHashPassword(password);
-    const newRegister = await this.userModel.create({
+    let newRegister = await this.userModel.create({
       name,
       email,
       password: hashPassword,
@@ -98,59 +97,90 @@ export class UsersService {
       address,
       role: 'USER',
       isActive: false,
-      codeId,
+      codeId: codeId,
       codeExpired: dayjs().add(1, 'day'),
     });
-
-    await this.sendVerificationEmail(email, name, codeId);
+    ////send mail
+    this.mailerService.sendMail({
+      to: email, // List of receivers
+      subject: 'Activate your account', // Subject line
+      template: 'register.hbs',
+      context: {
+        name: name ?? email,
+        activationCode: codeId,
+      },
+    });
 
     return newRegister;
   }
 
+  ///verify code
   async handleActive(data: CodeAuthDto) {
     const user = await this.userModel.findOne({
       _id: data._id,
       codeId: data.code,
     });
 
-    if (!user) throw new BadRequestException('Invalid Code');
-    if (dayjs().isAfter(user.codeExpired)) {
-      throw new BadRequestException('Activation code expired!');
+    if (!user) {
+      throw new BadRequestException('Invalid Code');
     }
-
-    await this.userModel.updateOne({ _id: data._id }, { isActive: true });
-    return { message: 'Account activated successfully' };
+    //check date
+    const isBeforeCheck = dayjs().isBefore(user.codeExpired);
+    if (isBeforeCheck) {
+      await this.userModel.updateOne(
+        { _id: data._id },
+        {
+          isActive: true,
+        },
+      );
+    } else {
+      throw new BadRequestException('Invalid Code');
+    }
+    return { isBeforeCheck };
   }
+
+  /// re-send gmail code
 
   async retryActive(email: string) {
     const user = await this.userModel.findOne({ email });
 
-    if (!user) throw new BadRequestException('Account does not exist');
-    if (user.isActive)
-      throw new BadRequestException('Account is already activated');
+    if (!user) {
+      throw new BadRequestException('Account is not exist !');
+    }
+    if (user.isActive) {
+      throw new BadRequestException('Account is Activated !');
+    } else {
+      /// update user code
+      const codeId = uuidv4();
+      await user.updateOne({
+        codeId: codeId,
+        codeExpired: dayjs().add(1, 'days'),
+      });
+      ////re-send mail
+      this.mailerService.sendMail({
+        to: user?.email, // List of receivers
+        subject: 'Activate your account', // Subject line
+        template: 'register.hbs',
+        context: {
+          name: user?.name ?? user?.email,
+          activationCode: codeId,
+        },
+      });
+    }
 
-    const codeId = uuidv4();
-    await this.userModel.updateOne(
-      { _id: user._id },
-      {
-        codeId,
-        codeExpired: dayjs().add(1, 'day'),
-      },
-    );
-
-    await this.sendVerificationEmail(user.email, user.name, codeId);
     return { _id: user._id };
   }
 
+  ///
   async findAll(currentPage: number, limit: number, qs: string) {
     const { filter, sort, population } = aqp(qs);
     delete filter.current;
     delete filter.pageSize;
 
-    const offset = (+currentPage - 1) * +limit;
-    const defaultLimit = +limit || 10;
+    let offset = (+currentPage - 1) * +limit;
+    let defaultLimit = +limit ? +limit : 10;
 
-    const totalItems = await this.userModel.countDocuments(filter);
+    const totalItems = (await this.userModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
 
     const result = await this.userModel
@@ -164,36 +194,48 @@ export class UsersService {
 
     return {
       meta: {
-        current: currentPage,
-        pageSize: limit,
-        pages: totalPages,
-        total: totalItems,
+        current: currentPage, //trang hiện tại
+        pageSize: limit, //số lượng bản ghi đã lấy
+        pages: totalPages, //tổng số trang với điều kiện query
+        total: totalItems, // tổng số phần tử (số bản ghi)
       },
-      result,
+      result, //kết quả query
     };
   }
 
   async findOne(id: string) {
-    if (!mongoose.Types.ObjectId.isValid(id)) return 'Not found user';
+    if (!mongoose.Types.ObjectId.isValid(id)) return `not found user`;
 
-    return this.userModel
-      .findOne({ _id: id })
+    return await this.userModel
+      .findOne({
+        _id: id,
+      })
       .select('-password')
       .populate({ path: 'role', select: { name: 1, _id: 1 } });
+
+    //exclude >< include
   }
 
   findOneByUsername(username: string) {
     return this.userModel
-      .findOne({ email: username })
-      .populate({ path: 'role', select: { name: 1 } });
+      .findOne({
+        email: username,
+      })
+      .populate({
+        path: 'role',
+        select: { name: 1 },
+      });
   }
 
   async findByEmail(email: string) {
-    if (!email) throw new BadRequestException('Email is required');
+    if (!email) {
+      throw new BadRequestException('Email is required');
+    }
 
-    return this.userModel
-      .findOne({ email })
-      .populate({ path: 'role', select: { name: 1, _id: 1 } });
+    return await this.userModel.findOne({ email }).populate({
+      path: 'role',
+      select: { name: 1, _id: 1 },
+    });
   }
 
   isValidPassword(password: string, hash: string) {
@@ -201,12 +243,11 @@ export class UsersService {
   }
 
   async update(updateUserDto: UpdateUserDto, user: IUser, _id: string) {
-    if (!mongoose.Types.ObjectId.isValid(_id)) {
-      throw new BadRequestException('Invalid user ID');
-    }
+    if (!mongoose.Types.ObjectId.isValid(_id))
+      throw new BadRequestException('not found user');
 
     const updated = await this.userModel.updateOne(
-      { _id },
+      { _id: _id },
       {
         ...updateUserDto,
         updatedBy: {
@@ -215,20 +256,16 @@ export class UsersService {
         },
       },
     );
-
-    if (updated.modifiedCount === 0) {
-      throw new BadRequestException('Update failed');
-    }
-
-    return { message: 'User updated', updated };
+    return updated;
   }
 
   async remove(id: string, user: IUser) {
-    if (!mongoose.Types.ObjectId.isValid(id)) return 'Not found user';
+    if (!mongoose.Types.ObjectId.isValid(id)) return `not found user`;
 
     const foundUser = await this.userModel.findById(id);
-    if (foundUser?.email === 'admin@gmail.com') {
-      throw new BadRequestException('Cannot delete admin@gmail.com');
+
+    if (foundUser && foundUser.email === 'admin@gmail.com') {
+      throw new BadRequestException('can not delete admin@gmail.com');
     }
 
     await this.userModel.updateOne(
@@ -240,19 +277,19 @@ export class UsersService {
         },
       },
     );
-
-    await this.userModel.softDelete({ _id: id });
-    return { message: 'User deleted' };
+    return this.userModel.softDelete({
+      _id: id,
+    });
   }
 
-  async updateUserToken(refreshToken: string, _id: string) {
-    const updated = await this.userModel.updateOne({ _id }, { refreshToken });
-    return { message: 'Token updated', updated };
-  }
+  updateUserToken = async (refreshToken: string, _id: string) => {
+    return await this.userModel.updateOne({ _id }, { refreshToken });
+  };
 
-  async findUserByToken(refreshToken: string) {
-    return this.userModel
-      .findOne({ refreshToken })
-      .populate({ path: 'role', select: { name: 1 } });
-  }
+  findUserByToken = async (refreshToken: string) => {
+    return await this.userModel.findOne({ refreshToken }).populate({
+      path: 'role',
+      select: { name: 1 },
+    });
+  };
 }

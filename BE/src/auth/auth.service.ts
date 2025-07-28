@@ -89,6 +89,12 @@ export class AuthService {
   checkCode = async (data: CodeAuthDto) => {
     return await this.usersService.handleActive(data);
   };
+
+  /// re-send email code
+  retryActive = async (data: string) => {
+    return await this.usersService.retryActive(data);
+  };
+
   ///
 
   createRefreshToken = (payload: any) => {

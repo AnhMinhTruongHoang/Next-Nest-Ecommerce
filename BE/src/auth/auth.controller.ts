@@ -106,6 +106,11 @@ export class AuthController {
   checkCode(@Body() registerUserDto: CodeAuthDto) {
     return this.authService.checkCode(registerUserDto);
   }
-
-  //
+  // re-send mail
+  @Public()
+  @ResponseMessage('re-verify register code')
+  @Post('retry-active')
+  retryActive(@Body('email') email: string) {
+    return this.authService.retryActive(email);
+  }
 }
