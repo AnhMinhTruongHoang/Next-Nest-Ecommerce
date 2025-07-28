@@ -1,9 +1,8 @@
-import { ConfigProvider } from "antd";
-import viVN from "antd/locale/vi_VN"; // nếu cần đa ngôn ngữ
+import "antd/dist/reset.css";
+import ClientConfigProvider from "@/lib/ClientConfigProvider";
 import NextAuthWrapper from "@/lib/next.auth.wrapper";
 import NProgressWrapper from "@/lib/nprogress.wrapper";
 import { ToastProvider } from "@/utils/toast";
-import "antd/dist/reset.css";
 
 export default function RootLayout({
   children,
@@ -11,12 +10,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="vi">
       <body>
-        <ConfigProvider
-          locale={viVN}
-          theme={{ token: { colorPrimary: "#ff3d00" } }}
-        >
+        <ClientConfigProvider>
           <NProgressWrapper>
             <NextAuthWrapper>
               <ToastProvider>
@@ -24,7 +20,7 @@ export default function RootLayout({
               </ToastProvider>
             </NextAuthWrapper>
           </NProgressWrapper>
-        </ConfigProvider>
+        </ClientConfigProvider>
       </body>
     </html>
   );

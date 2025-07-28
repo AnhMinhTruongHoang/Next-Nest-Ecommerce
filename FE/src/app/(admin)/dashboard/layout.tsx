@@ -6,6 +6,7 @@ import AdminSideBar from "@/components/admin/admin.sidebar";
 import AdminHeader from "@/components/admin/admin.header";
 import AdminContent from "@/components/admin/admin.content";
 import AdminFooter from "@/components/admin/admin.footer";
+import "antd/dist/reset.css";
 
 const AdminLayout = async ({
   children,

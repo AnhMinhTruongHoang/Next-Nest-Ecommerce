@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { Button, Result, Typography } from "antd";
+import { Button, Result } from "antd";
 
 export default function Error({
   error,

@@ -1,7 +1,7 @@
-import ClientLayout from "@/components/header/ClientLayout";
-import Script from "next/script";
 import type { Metadata } from "next";
-import { ReactNode } from "react";
+import Script from "next/script";
+import ClientLayout from "@/components/header/ClientLayout";
+import "antd/dist/reset.css";
 
 export const metadata: Metadata = {
   title: "User Pages",
@@ -52,7 +52,11 @@ const storeSchema = {
   },
 };
 
-export default function UserLayout({ children }: { children: ReactNode }) {
+export default function UserLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <>
       <ClientLayout>{children}</ClientLayout>

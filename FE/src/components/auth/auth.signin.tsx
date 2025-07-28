@@ -7,11 +7,12 @@ import {
   EyeInvisibleOutlined,
   EyeTwoTone,
 } from "@ant-design/icons";
-import { Avatar, Button, Divider, Input, Typography, message } from "antd";
+import { Avatar, Button, Divider, Input, Typography } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
+import ModelReactive from "./model.reactive";
 
 const { Title } = Typography;
 
@@ -22,13 +23,19 @@ const AuthSignIn = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
+  // Modal state 👇
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState("");
+
   const handleSubmit = async () => {
     if (!username) {
-      message.error("Username is required.");
+      setModalContent("Username is required.");
+      setIsModalOpen(true);
       return;
     }
     if (!password) {
-      message.error("Password is required.");
+      setModalContent("Password is required.");
+      setIsModalOpen(true);
       return;
     }
 
@@ -41,7 +48,8 @@ const AuthSignIn = () => {
     if (!res?.error) {
       router.push("/");
     } else {
-      message.error(res.error);
+      setModalContent(res.error); // 👈 show error from backend
+      setIsModalOpen(true);
     }
   };
 
@@ -129,6 +137,15 @@ const AuthSignIn = () => {
           />
         </div>
       </div>
+
+      {/* ✅ Modal Error Message */}
+      <ModelReactive
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        title="Sign In Error"
+        content={<p>{modalContent}</p>}
+        type="error"
+      />
     </div>
   );
 };
