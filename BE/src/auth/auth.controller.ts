@@ -18,6 +18,7 @@ import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
 import { UsersService } from 'src/modules/users/users.service';
 import {
+  ChangePasswordDto,
   CodeAuthDto,
   RegisterUserDto,
   UserLoginDto,
@@ -112,5 +113,20 @@ export class AuthController {
   @Post('retry-active')
   retryActive(@Body('email') email: string) {
     return this.authService.retryActive(email);
+  }
+  /// send forgot password mail
+  @Public()
+  @ResponseMessage('re-password register code')
+  @Post('retry-password')
+  retryPassword(@Body('email') email: string) {
+    return this.authService.retryPassword(email);
+  }
+  /// change-password
+
+  @Public()
+  @ResponseMessage('change-password')
+  @Post('change-password')
+  changePassword(@Body() data: ChangePasswordDto) {
+    return this.authService.changePassword(data);
   }
 }

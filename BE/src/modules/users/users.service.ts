@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import {
+  ChangePasswordDto,
   CodeAuthDto,
   CreateUserDto,
   RegisterUserDto,
@@ -25,11 +26,13 @@ export class UsersService {
     private mailerService: MailerService,
   ) {}
 
+  // NOTE: Hashes a password with bcrypt
   getHashPassword = (password: string) => {
     const salt = genSaltSync(10);
     return hashSync(password, salt);
   };
 
+  // NOTE: Sends activation email to user
   async sendVerificationEmail(email: string, name: string, codeId: string) {
     await this.mailerService.sendMail({
       to: email,
@@ -42,6 +45,7 @@ export class UsersService {
     });
   }
 
+  // NOTE: Creates a new user (admin-level creation)
   async create(createUserDto: CreateUserDto, @Users() user: IUser) {
     const {
       name,
@@ -80,6 +84,7 @@ export class UsersService {
     return newUser;
   }
 
+  // NOTE: Register user (self-registration)
   async register(user: RegisterUserDto) {
     const { name, email, password, age, gender, address } = user;
     const isExist = await this.userModel.findOne({ email });
@@ -107,6 +112,7 @@ export class UsersService {
     return newRegister;
   }
 
+  // NOTE: Verify account with code (email activation)
   async handleActive(data: CodeAuthDto) {
     const user = await this.userModel.findOne({
       _id: data._id,
@@ -122,6 +128,7 @@ export class UsersService {
     return { message: 'Account activated successfully' };
   }
 
+  // NOTE: Retry activation (resend code)
   async retryActive(email: string) {
     const user = await this.userModel.findOne({ email });
 
@@ -142,6 +149,61 @@ export class UsersService {
     return { _id: user._id };
   }
 
+  // NOTE: Retry forgot Password (resend code)
+  async retryPassword(email: string) {
+    const user = await this.userModel.findOne({ email });
+
+    if (!user) {
+      throw new BadRequestException('Account does not exist');
+    }
+
+    const codeId = uuidv4();
+    await this.userModel.updateOne(
+      { _id: user._id },
+      {
+        codeId,
+        codeExpired: dayjs().add(1, 'day'),
+      },
+    );
+
+    // Send email
+    this.mailerService.sendMail({
+      to: user.email, // recipient
+      subject: 'Change your password active code',
+      template: 'resetpassword.hbs',
+      context: {
+        name: user?.name ?? user.email,
+        resetCode: codeId,
+      },
+    });
+    return { _id: user._id, email: user.email };
+  }
+  // NOTE: change Password (resend code)
+  async changePassword(data: ChangePasswordDto) {
+    if (data.confirmPassword !== data.password) {
+      throw new BadRequestException('Password is not match !');
+    }
+    const user = await this.userModel.findOne({ email: data.email });
+
+    if (!user) {
+      throw new BadRequestException('Account does not exist');
+    }
+
+    // check expire code
+    const isBeforeCheck = dayjs().isBefore(user.codeExpired);
+
+    if (isBeforeCheck) {
+      // valid => update password
+      const newPassword = await this.getHashPassword(data.password);
+      await user.updateOne({ password: newPassword });
+
+      return { isBeforeCheck };
+    } else {
+      throw new BadRequestException('Mã code không hợp lệ hoặc đã hết hạn');
+    }
+  }
+
+  // NOTE: Find all users with pagination, filtering and sorting
   async findAll(currentPage: number, limit: number, qs: string) {
     const { filter, sort, population } = aqp(qs);
     delete filter.current;
@@ -173,6 +235,7 @@ export class UsersService {
     };
   }
 
+  // NOTE: Find a single user by ID
   async findOne(id: string) {
     if (!mongoose.Types.ObjectId.isValid(id)) return 'Not found user';
 
@@ -182,12 +245,14 @@ export class UsersService {
       .populate({ path: 'role', select: { name: 1, _id: 1 } });
   }
 
+  // NOTE: Find a user by username/email for login
   findOneByUsername(username: string) {
     return this.userModel
       .findOne({ email: username })
       .populate({ path: 'role', select: { name: 1 } });
   }
 
+  // NOTE: Find a user by email
   async findByEmail(email: string) {
     if (!email) throw new BadRequestException('Email is required');
 
@@ -196,10 +261,12 @@ export class UsersService {
       .populate({ path: 'role', select: { name: 1, _id: 1 } });
   }
 
+  // NOTE: Compare password with hash (login)
   isValidPassword(password: string, hash: string) {
     return compareSync(password, hash);
   }
 
+  // NOTE: Update user data (admin only)
   async update(updateUserDto: UpdateUserDto, user: IUser, _id: string) {
     if (!mongoose.Types.ObjectId.isValid(_id)) {
       throw new BadRequestException('Invalid user ID');
@@ -223,6 +290,7 @@ export class UsersService {
     return { message: 'User updated', updated };
   }
 
+  // NOTE: Soft delete user (admin only)
   async remove(id: string, user: IUser) {
     if (!mongoose.Types.ObjectId.isValid(id)) return 'Not found user';
 
@@ -245,11 +313,13 @@ export class UsersService {
     return { message: 'User deleted' };
   }
 
+  // NOTE: Update refresh token for user (used after login or token refresh)
   async updateUserToken(refreshToken: string, _id: string) {
     const updated = await this.userModel.updateOne({ _id }, { refreshToken });
     return { message: 'Token updated', updated };
   }
 
+  // NOTE: Find user by refresh token (used in auth flow)
   async findUserByToken(refreshToken: string) {
     return this.userModel
       .findOne({ refreshToken })

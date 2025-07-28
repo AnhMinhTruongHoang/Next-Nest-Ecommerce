@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { UsersService } from 'src/modules/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import {
+  ChangePasswordDto,
   CodeAuthDto,
   RegisterUserDto,
 } from 'src/modules/users/dto/create-user.dto';
@@ -73,7 +74,7 @@ export class AuthService {
     };
   }
 
-  //////////////////
+  ////////////////// register
 
   async register(user: RegisterUserDto) {
     let newUser = await this.usersService.register(user);
@@ -93,6 +94,16 @@ export class AuthService {
   /// re-send email code
   retryActive = async (data: string) => {
     return await this.usersService.retryActive(data);
+  };
+
+  /// re-send mail password
+  retryPassword = async (data: string) => {
+    return await this.usersService.retryPassword(data);
+  };
+
+  /// change password
+  changePassword = async (data: ChangePasswordDto) => {
+    return await this.usersService.changePassword(data);
   };
 
   ///
