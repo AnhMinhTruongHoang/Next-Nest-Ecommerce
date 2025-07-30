@@ -154,40 +154,6 @@ const UpdateUserModal = (props: IProps) => {
             <Option value="OTHER">other</Option>
           </Select>
         </Form.Item>
-
-        <Form.Item
-          style={{ marginBottom: 5 }}
-          name="role"
-          label="Role"
-          rules={[{ required: true }]}
-        >
-          <Select
-            placeholder="Select a option and change input text above"
-            // onChange={onGenderChange}
-            allowClear
-          >
-            <Option value="USER">User</Option>
-            <Option value="ADMIN">Admin</Option>
-          </Select>
-        </Form.Item>
-
-        <Form.Item
-          hidden
-          label="Company"
-          name="company"
-          initialValue="64871777c7573fac797f83f6"
-          style={{ marginBottom: 5 }}
-          rules={[
-            {
-              required: dataUpdate ? false : true,
-              message: "Please input your Company!",
-            },
-          ]}
-        >
-          <Select disabled={dataUpdate ? true : false}>
-            <Option value="64871777c7573fac797f83f6">Company XYZ</Option>
-          </Select>
-        </Form.Item>
       </Form>
     </Modal>
   );

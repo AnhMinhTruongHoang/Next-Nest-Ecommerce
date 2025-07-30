@@ -146,18 +146,6 @@ const CreateUserModal = (props: IProps) => {
             <Option value="ADMIN">ADMIN</Option>
           </Select>
         </Form.Item>
-
-        <Form.Item
-          label="Company"
-          name="company"
-          initialValue="64871777c7573fac797f83f6"
-          style={{ marginBottom: 5 }}
-          hidden
-        >
-          <Select disabled>
-            <Option value="64871777c7573fac797f83f6">Company XYZ</Option>
-          </Select>
-        </Form.Item>
       </Form>
     </Modal>
   );

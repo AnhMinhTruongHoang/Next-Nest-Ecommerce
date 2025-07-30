@@ -2,13 +2,19 @@
 
 import React, { useEffect, useState } from "react";
 import "../../styles/users.css";
-import { Table, Button, notification, Popconfirm } from "antd";
+import { Table, Button, notification, Popconfirm, Input, Space } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { PlusOutlined } from "@ant-design/icons";
+import {
+  CheckOutlined,
+  CloseOutlined,
+  PlusOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { IUser } from "next-auth";
 import UpdateUserModal from "./update.user";
 import CreateUserModal from "./create.user";
 import { deleteUserAction } from "@/lib/actions";
+import ViewUserModal from "./view.User.Modal";
 
 const UsersTable = () => {
   const [listUsers, setListUsers] = useState([]);
@@ -20,6 +26,10 @@ const UsersTable = () => {
   const [dataUpdate, setDataUpdate] = useState<null | IUser>(null);
 
   const access_token = localStorage.getItem("access_token") as string;
+
+  const [viewUser, setViewUser] = useState<IUser | null>(null);
+
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
   const [meta, setMeta] = useState({
     current: 1,
@@ -102,29 +112,90 @@ const UsersTable = () => {
     }
   };
 
-  //////////
+  ///
 
   const columns: ColumnsType<IUser> = [
     {
       title: "Email",
       dataIndex: "email",
       responsive: ["sm"],
-      render: (value, record) => <div>{record.email}</div>,
+      sorter: (a, b) => a.email.localeCompare(b.email),
+      render: (value, record) => (
+        <Button
+          type="link"
+          onClick={() => {
+            setViewUser(record);
+            setIsViewModalOpen(true);
+          }}
+        >
+          {record.email}
+        </Button>
+      ),
     },
     {
       title: "Name",
       dataIndex: "name",
       responsive: ["xs", "sm"],
+      sorter: (a, b) => a.name?.localeCompare(b.name),
+      filterDropdown: ({
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+      }) => (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search name"
+            value={selectedKeys[0]}
+            onChange={(e) =>
+              setSelectedKeys(e.target.value ? [e.target.value] : [])
+            }
+            onPressEnter={() => confirm()}
+            style={{ width: 188, marginBottom: 8, display: "block" }}
+          />
+          <Space>
+            <Button type="primary" onClick={() => confirm()} size="small">
+              Search
+            </Button>
+            <Button onClick={() => clearFilters && clearFilters()} size="small">
+              Reset
+            </Button>
+          </Space>
+        </div>
+      ),
+      filterIcon: (filtered) => (
+        <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+      ),
+      onFilter: (value, record) =>
+        record.name.toLowerCase().includes((value as string).toLowerCase()),
     },
     {
       title: "Role",
       dataIndex: "role",
       responsive: ["md"],
+      sorter: (a, b) => a.role.localeCompare(b.role),
+      filters: [
+        { text: "ADMIN", value: "ADMIN" },
+        { text: "USER", value: "USER" },
+      ],
+      onFilter: (value, record) => record.role === value,
       render: (role: string) => {
         if (role === "ADMIN") return "ADMIN";
         if (role === "USER") return "USER";
         return "UNKNOWN";
       },
+    },
+    {
+      title: "Active",
+      dataIndex: "isActive",
+      responsive: ["md"],
+      sorter: (a, b) => Number(a.isActive) - Number(b.isActive),
+      render: (isActive: boolean) =>
+        isActive ? (
+          <CheckOutlined style={{ color: "green" }} />
+        ) : (
+          <CloseOutlined style={{ color: "red" }} />
+        ),
     },
     {
       title: "Actions",
@@ -162,6 +233,7 @@ const UsersTable = () => {
     },
   ];
 
+  ///
   return (
     <div>
       <div
@@ -197,6 +269,13 @@ const UsersTable = () => {
             handleOnChange(page, pageSize),
           showSizeChanger: true,
         }}
+      />
+
+      <ViewUserModal
+        isOpen={isViewModalOpen}
+        setViewUser={setViewUser}
+        setIsViewModalOpen={setIsViewModalOpen}
+        userData={viewUser}
       />
 
       <CreateUserModal
