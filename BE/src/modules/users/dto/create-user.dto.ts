@@ -3,6 +3,7 @@ import { Type } from 'class-transformer';
 import {
   IsEmail,
   IsInt,
+  isNotEmpty,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -61,6 +62,7 @@ export class CreateUserDto {
 ///////////// register valid
 
 export class RegisterUserDto {
+ 
   @IsNotEmpty({ message: "Name mustn't empty" })
   name?: string;
 
