@@ -15,9 +15,21 @@ declare module "next-auth" {
 
   interface IUser {
     _id: string;
-    name: string;
     email: string;
-    access_token: string;
+    name: string;
+    accountType: "LOCAL" | "GOOGLE" | string;
+    role: "USER" | "ADMIN" | string;
+    age: number;
+    address: string;
+    isDeleted: boolean;
+    isActive: boolean;
+    gender: "male" | "female" | string;
+    codeId: string;
+    codeExpired: string;
+    deletedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+    __v: number;
   }
 
   interface User extends DefaultUser {

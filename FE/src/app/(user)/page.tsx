@@ -24,9 +24,9 @@ export default function RootLayout({
             <NextAuthWrapper>
               <ToastProvider>
                 <Layout style={{ minHeight: "100vh" }}>
-                  <Header style={{ background: "#001529", color: "white" }}>
-                    My Header
-                  </Header>
+                  <Header
+                    style={{ background: "#001529", color: "white" }}
+                  ></Header>
                   <Content style={{ padding: 24 }}>{children}</Content>
                   <Footer style={{ textAlign: "center" }}>
                     ©2025 Created by You

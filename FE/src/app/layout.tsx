@@ -13,13 +13,13 @@ export default function RootLayout({
     <html lang="vi">
       <body>
         <ClientConfigProvider>
-          <NProgressWrapper>
-            <NextAuthWrapper>
-              <ToastProvider>
+          <NextAuthWrapper>
+            <ToastProvider>
+              <NProgressWrapper>
                 <div style={{ marginBottom: "100px" }}>{children}</div>
-              </ToastProvider>
-            </NextAuthWrapper>
-          </NProgressWrapper>
+              </NProgressWrapper>
+            </ToastProvider>
+          </NextAuthWrapper>
         </ClientConfigProvider>
       </body>
     </html>

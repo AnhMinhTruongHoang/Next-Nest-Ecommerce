@@ -1,16 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  Layout,
-  Menu,
-  Input,
-  Avatar,
-  Badge,
-  Dropdown,
-  Button,
-  Skeleton,
-} from "antd";
+import { Layout, Input, Avatar, Badge, Dropdown, Button, Skeleton } from "antd";
 import {
   MenuOutlined,
   SearchOutlined,
@@ -46,11 +37,15 @@ export default function AppHeader() {
         ),
         icon: <UserOutlined />,
       },
-      {
-        key: "dashboard",
-        label: <NextLink href={`/dashboard`}>Dashboard</NextLink>,
-        icon: <DashboardFilled />,
-      },
+      ...(session?.user?.role !== "USER"
+        ? [
+            {
+              key: "dashboard",
+              label: <NextLink href={`/dashboard`}>Dashboard</NextLink>,
+              icon: <DashboardFilled />,
+            },
+          ]
+        : []),
       {
         key: "logout",
         label: (
@@ -66,54 +61,64 @@ export default function AppHeader() {
   return (
     <Header
       style={{
-        background: "linear-gradient(to right, #ff6e40, #ff3d00)",
+        background: "#121212",
         padding: 0,
+        borderBottom: "1px solid rgba(255,255,255,0.1)",
       }}
     >
       <div
         style={{
-          maxWidth: 1200,
+          maxWidth: 1280,
           margin: "0 auto",
           display: "flex",
           alignItems: "center",
-          padding: "0 16px",
+          justifyContent: "space-between",
+          padding: "0 24px",
+          height: 64,
         }}
       >
-        <Button type="text" icon={<MenuOutlined />} style={{ color: "#fff" }} />
+        {/* Left: Logo + Toggle */}
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <Button
+            type="text"
+            icon={<MenuOutlined />}
+            style={{ color: "#fff" }}
+          />
 
-        <div
-          onClick={handleRedirectHome}
-          style={{
-            color: "#fff",
-            fontWeight: 700,
-            fontSize: "18px",
-            cursor: "pointer",
-            marginLeft: 16,
-            marginRight: 16,
-            display: "none",
-          }}
-          className="logo-sm"
-        >
-          SoundCloud
+          <div
+            onClick={handleRedirectHome}
+            style={{
+              color: "#fff",
+              fontWeight: 700,
+              fontSize: 20,
+              cursor: "pointer",
+            }}
+          >
+            SoundCloud
+          </div>
         </div>
 
-        <Input
-          placeholder="Search…"
-          prefix={<SearchOutlined />}
-          style={{ maxWidth: 300, margin: "0 16px", flex: 1 }}
-          onPressEnter={(e: any) => {
-            const value = e?.target?.value;
-            if (value) router.push(`/search?q=${value}`);
-          }}
-        />
+        {/* Middle: Search */}
+        <div style={{ flex: 1, padding: "0 24px" }}>
+          <Input
+            placeholder="Search music, artists..."
+            prefix={<SearchOutlined />}
+            allowClear
+            size="middle"
+            style={{ borderRadius: 20 }}
+            onPressEnter={(e: any) => {
+              const value = e?.target?.value;
+              if (value) router.push(`/search?q=${value}`);
+            }}
+          />
+        </div>
 
-        <div style={{ flex: 1 }} />
-
+        {/* Right: User info */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            gap: 16,
+            gap: 24,
           }}
         >
           {status === "loading" ? (
@@ -129,7 +134,7 @@ export default function AppHeader() {
               </Badge>
 
               <Dropdown
-                key={session?.user?._id} // ép re-render khi user login/logout
+                key={session?.user?._id}
                 menu={userMenu}
                 placement="bottomRight"
                 trigger={["click"]}
@@ -148,15 +153,6 @@ export default function AppHeader() {
           ) : (
             <ActiveLink href={"/auth/signin"}>Login</ActiveLink>
           )}
-        </div>
-
-        <div className="mobile-menu-toggle" style={{ marginLeft: 16 }}>
-          <Button
-            type="text"
-            icon={<MoreOutlined />}
-            style={{ color: "#fff" }}
-            onClick={() => setMobileVisible(!mobileVisible)}
-          />
         </div>
       </div>
     </Header>

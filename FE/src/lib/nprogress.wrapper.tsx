@@ -1,15 +1,20 @@
-// Create a Providers component to wrap your application with all the components
 "use client";
 
 import { AppProgressBar as ProgressBar } from "next-nprogress-bar";
+import { useEffect } from "react";
 
 const NProgressWrapper = ({ children }: { children: React.ReactNode }) => {
+  
+  useEffect(() => {
+    console.log("NProgress mounted");
+  }, []);
+
   return (
     <>
       {children}
       <ProgressBar
         height="4px"
-        color="Green"
+        color="#1890ff"
         options={{ showSpinner: false }}
         shallowRouting
       />

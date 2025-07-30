@@ -1,6 +1,6 @@
 "use client";
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
-import { Button, Layout } from "antd";
+import { Button, Layout, Skeleton } from "antd";
 import { useContext } from "react";
 import { DownOutlined, SmileOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
@@ -49,7 +49,9 @@ const AdminHeader = (props: any) => {
         <Button
           type="text"
           icon={collapseMenu ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-          onClick={() => setCollapseMenu(!collapseMenu)}
+          onClick={() => {
+            setCollapseMenu(!collapseMenu), console.log("SESSION", session);
+          }}
           style={{
             fontSize: "16px",
             width: 64,
@@ -66,7 +68,11 @@ const AdminHeader = (props: any) => {
             }}
           >
             <Space>
-              {session?.user?.email ?? "No email"}
+              {!session ? (
+                <Skeleton.Input style={{ width: 120 }} active size="small" />
+              ) : (
+                session.user?.email || session.user?.username || "@Social"
+              )}
 
               <DownOutlined />
             </Space>

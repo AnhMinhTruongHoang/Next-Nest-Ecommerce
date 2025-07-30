@@ -64,7 +64,7 @@ export const authOptions: AuthOptions = {
   /////////// callback
   callbacks: {
     async jwt({ token, user, account, trigger }) {
-      // ✅ Login bằng Credentials: access_token trả về trực tiếp trong user
+      //  Login bằng Credentials: access_token trả về trực tiếp trong user
 
       if (account?.provider === "credentials" && user) {
         token.access_token = user.access_token;
@@ -74,7 +74,7 @@ export const authOptions: AuthOptions = {
         token.user = user.user;
       }
 
-      // ✅ Login bằng mạng xã hội: lấy access_token từ backend của bạn
+      //  Login bằng mạng xã hội: lấy access_token từ backend của bạn
       if (account && account.provider !== "credentials") {
         const res = await sendRequest<IBackendRes<JWT>>({
           url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/social-media`,

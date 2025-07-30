@@ -9,11 +9,16 @@ export default function ClientLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+      }}
+    >
       <AppHeader />
-      {children}
-      <div style={{ marginBottom: "100px" }} />
+      <main style={{ flex: 1 }}>{children}</main>
       <AppFooter />
-    </>
+    </div>
   );
 }

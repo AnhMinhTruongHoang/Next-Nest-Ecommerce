@@ -1,0 +1,18 @@
+/* Apply custom font and full width */
+.ant-table {
+  font-family: Arial, sans-serif;
+  width: 100%;
+}
+
+/* Style headers and cells */
+.ant-table th,
+.ant-table td {
+  border: 1px solid #dddddd !important;
+  text-align: left;
+  padding: 8px;
+}
+
+/* Zebra striping */
+.ant-table-tbody > tr:nth-child(even) > td {
+  background-color: #f9f9f9;
+}
