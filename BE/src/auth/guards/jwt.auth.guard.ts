@@ -29,6 +29,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     return super.canActivate(context);
   }
 
+  /// request
+
   handleRequest(err, user, info, context: ExecutionContext) {
     const request: Request = context.switchToHttp().getRequest();
 
@@ -37,27 +39,13 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       [context.getHandler(), context.getClass()],
     );
 
-    // You can throw an exception based on either "info" or "err" arguments
     if (err || !user) {
       throw err || new UnauthorizedException('Invalid Token');
     }
 
-    // check permissions
-    const targetMethod = request.method;
-    const targetEndpoint = request.route?.path as string;
-
-    const permissions = user?.permissions ?? [];
-    let isExist = permissions.find(
-      (permissions) =>
-        targetMethod === permissions.method &&
-        targetEndpoint === permissions.apiPath,
-    );
-
-    if (targetEndpoint.startsWith('/api/v1/auth')) isExist = true;
-    if (!isExist && !isSkipPermission) {
-      throw new ForbiddenException('No permission to this endpoint !');
-    }
-
+    // Tắt kiểm tra permission chi tiết nếu chưa cần
     return user;
   }
+
+  ///
 }

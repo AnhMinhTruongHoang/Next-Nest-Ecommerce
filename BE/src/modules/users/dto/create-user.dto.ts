@@ -2,9 +2,12 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsEmail,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
+  Max,
+  Min,
   ValidateNested,
 } from 'class-validator';
 import mongoose from 'mongoose';
@@ -71,6 +74,10 @@ export class RegisterUserDto {
   password: string;
 
   @IsOptional()
+  @Type(() => Number)
+  @IsInt({ message: 'Tuổi phải là số nguyên' })
+  @Min(0, { message: 'Tuổi không được nhỏ hơn 0' })
+  @Max(120, { message: 'Tuổi không được lớn hơn 120' })
   age?: number;
 
   @IsOptional()

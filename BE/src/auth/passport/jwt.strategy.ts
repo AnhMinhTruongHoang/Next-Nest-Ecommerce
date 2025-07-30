@@ -22,15 +22,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: IUser) {
     const { _id, name, email, role } = payload;
 
-    // Vì bạn đã xoá bảng role => role giờ chỉ là string: 'ADMIN' | 'USER'
-    // Bạn không cần truy vấn role nữa, mà gán permission dựa trên role
-
-    let permissions: string[] = [];
+    let permissions: { method: string; apiPath: string }[] = [];
 
     if (role === 'ADMIN') {
-      permissions = ['manage_users', 'view_reports']; // hoặc lấy từ constant
-    } else if (role === 'USER') {
-      permissions = ['view_profile'];
+      permissions = [
+        { method: 'GET', apiPath: '/users' },
+        { method: 'POST', apiPath: '/users' },
+        { method: 'PATCH', apiPath: '/users/:id' },
+        { method: 'DELETE', apiPath: '/users/:id' },
+      ];
     }
 
     // Gán req.user ở đây
