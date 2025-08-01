@@ -6,7 +6,6 @@ import {
   MenuOutlined,
   SearchOutlined,
   BellOutlined,
-  MoreOutlined,
   UserOutlined,
   LogoutOutlined,
   DashboardFilled,
@@ -98,7 +97,6 @@ export default function AppHeader() {
           </div>
         </div>
 
-        {/* Middle: Search */}
         <div style={{ flex: 1, padding: "0 24px" }}>
           <Input
             placeholder="Search music, artists..."
@@ -113,7 +111,6 @@ export default function AppHeader() {
           />
         </div>
 
-        {/* Right: User info */}
         <div
           style={{
             display: "flex",
@@ -140,14 +137,14 @@ export default function AppHeader() {
                 trigger={["click"]}
               >
                 <Avatar
-                  style={{ cursor: "pointer" }}
+                  style={{
+                    backgroundColor: "#87d068",
+                    cursor: "pointer",
+                  }}
                   size={35}
-                  src={
-                    session?.user?.type
-                      ? fetchDefaultImages(session.user.type)
-                      : "/images/noimage.png"
-                  }
-                />
+                >
+                  {session?.user?.name?.charAt(0)?.toUpperCase() || "U"}
+                </Avatar>
               </Dropdown>
             </>
           ) : (

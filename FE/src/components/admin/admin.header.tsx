@@ -1,6 +1,6 @@
 "use client";
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
-import { Button, Layout, Skeleton } from "antd";
+import { Avatar, Button, Layout, Skeleton } from "antd";
 import { useContext } from "react";
 import { DownOutlined, SmileOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
@@ -68,13 +68,15 @@ const AdminHeader = (props: any) => {
             }}
           >
             <Space>
-              {!session ? (
-                <Skeleton.Input style={{ width: 120 }} active size="small" />
-              ) : (
-                session.user?.email || session.user?.username || "@Social"
-              )}
-
-              <DownOutlined />
+              <Avatar
+                style={{
+                  backgroundColor: "#87d068",
+                  cursor: "pointer",
+                }}
+                size={35}
+              >
+                {session?.user?.name?.charAt(0)?.toUpperCase() || "U"}
+              </Avatar>
             </Space>
           </a>
         </Dropdown>

@@ -3,6 +3,7 @@ import Layout from "antd/es/layout";
 import Menu from "antd/es/menu";
 import {
   AppstoreOutlined,
+  HomeOutlined,
   MailOutlined,
   SettingOutlined,
   TeamOutlined,
@@ -20,9 +21,14 @@ const AdminSideBar = () => {
   const items: MenuItem[] = [
     {
       key: "grp",
-      label: "Hỏi Dân IT",
+
       type: "group",
       children: [
+        {
+          key: "home",
+          icon: <HomeOutlined />,
+          label: <Link href="/">HomePage</Link>,
+        },
         {
           key: "dashboard",
           label: <Link href={"/dashboard"}>Dashboard</Link>,

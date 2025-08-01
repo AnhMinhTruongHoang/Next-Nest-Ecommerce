@@ -25,7 +25,13 @@ const ViewUserModal: React.FC<ViewUserModalProps> = ({
         setViewUser(null);
       }}
       footer={null}
-      title="User Details"
+      title={
+        <div
+          style={{ textAlign: "center", width: "100%", marginBottom: "15px" }}
+        >
+          User Details
+        </div>
+      }
     >
       {userData && (
         <Descriptions bordered column={1} size="small">
