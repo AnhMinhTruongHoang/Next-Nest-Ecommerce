@@ -113,7 +113,12 @@ const CreateUserModal = (props: IProps) => {
           rules={[{ required: true, message: "Please input your age!" }]}
           style={{ marginBottom: 5 }}
         >
-          <InputNumber style={{ width: "100%" }} />
+          <InputNumber
+            style={{ width: "100%" }}
+            className="no-arrows"
+            controls={false}
+            type="number"
+          />
         </Form.Item>
 
         <Form.Item
