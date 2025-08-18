@@ -27,7 +27,7 @@ const AuthSignUp = () => {
   const router = useRouter();
   const { Title } = Typography;
 
-  const { notification } = App.useApp(); // 👈 lấy notification từ context
+  const { notification } = App.useApp();
 
   const [formValues, setFormValues] = useState({
     name: "",

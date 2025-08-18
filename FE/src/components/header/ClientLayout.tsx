@@ -9,15 +9,9 @@ export default function ClientLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        minHeight: "100vh",
-      }}
-    >
+    <div className="flex flex-col min-h-screen">
       <AppHeader />
-      <main style={{ flex: 1 }}>{children}</main>
+      <main className="flex-1">{children}</main>
       <AppFooter />
     </div>
   );
