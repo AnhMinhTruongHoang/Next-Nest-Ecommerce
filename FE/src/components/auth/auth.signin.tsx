@@ -46,7 +46,7 @@ export default function AuthSignIn() {
     const res = await signIn("credentials", {
       username: values.username,
       password: values.password,
-      callbackUrl: "/",
+      redirect: false,
     });
 
     if (res && !res.error) {
