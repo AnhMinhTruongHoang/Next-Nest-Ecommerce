@@ -8,7 +8,15 @@ import {
   EyeInvisibleOutlined,
   EyeTwoTone,
 } from "@ant-design/icons";
-import { Avatar, Button, Divider, Input, Typography, Form } from "antd";
+import {
+  Avatar,
+  Button,
+  Divider,
+  Input,
+  Typography,
+  Form,
+  notification,
+} from "antd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
@@ -27,24 +35,43 @@ export default function AuthSignIn() {
   const [modalContent, setModalContent] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [changePassword, setChangePassword] = useState(false);
+  const [api, contextHolder] = notification.useNotification();
 
   const handleSubmit = async (values: {
     username: string;
     password: string;
   }) => {
     setUserEmail("");
+
     const res = await signIn("credentials", {
       username: values.username,
       password: values.password,
       redirect: false,
     });
 
-    if (!res?.error) {
+    // Trường hợp đăng nhập thành công
+    if (res && !res.error) {
       router.push("/");
-    } else {
-      setModalContent(res.error);
-      setIsModalOpen(true);
-      setUserEmail(values.username);
+      return;
+    }
+
+    // Nếu có lỗi
+    if (res?.error) {
+      // Check trường hợp chưa kích hoạt tài khoản
+      if (res.error.toLowerCase().includes("not active")) {
+        setModalContent(
+          "Your account is not activated. Please check your email."
+        );
+        setUserEmail(values.username);
+        setIsModalOpen(true);
+      } else {
+        // Sai username hoặc password → Notification Antd
+        api.error({
+          message: "Sign In Failed",
+          description: res.error || "Invalid username or password",
+          placement: "topRight",
+        });
+      }
     }
   };
 
@@ -56,6 +83,7 @@ export default function AuthSignIn() {
         padding: "48px 16px",
       }}
     >
+      {contextHolder}
       <div style={{ maxWidth: 400, margin: "0 auto", position: "relative" }}>
         <Link href="/" style={{ position: "absolute", top: 0, left: 0 }}>
           <Button icon={<ArrowLeftOutlined />} type="link">

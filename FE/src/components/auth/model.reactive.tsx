@@ -9,7 +9,6 @@ import {
   Steps,
   Typography,
   notification,
-  theme,
 } from "antd";
 import {
   ExclamationCircleOutlined,
@@ -53,6 +52,7 @@ const ModelReactive = ({
   const [currentStep, setCurrentStep] = useState(0);
   const [form] = Form.useForm();
   const [userId, setUserId] = useState();
+  const [api, contextHolder] = notification.useNotification();
 
   /// set form value
   useEffect(() => {
@@ -86,6 +86,8 @@ const ModelReactive = ({
       });
     }
   };
+  ///
+
   const handleResend2 = async (values: any) => {
     const { code } = values;
     const res = await sendRequest<IBackendRes<any>>({
@@ -97,10 +99,16 @@ const ModelReactive = ({
       },
     });
 
-    /// nest step
     if (res?.data) {
       setUserId(res?.data?._id);
-      setCurrentStep(2); // go to complete
+      setCurrentStep(2);
+
+      api.success({
+        message: "Account Activated",
+        description: "Your account has been successfully activated!",
+      });
+
+      setIsModalOpen(false);
     } else {
       notification.error({
         message: "Failed to call APIs ...",
@@ -109,121 +117,133 @@ const ModelReactive = ({
     }
   };
 
+  ///
+
   return (
-    <Modal
-      title={"Active account"}
-      open={isModalOpen}
-      onCancel={() => {
-        setCurrentStep(0);
-        setIsModalOpen(false);
-      }}
-      footer={null}
-      centered
-      styles={{
-        body: {
-          textAlign: "center",
-          padding: 32,
-          backgroundColor: "#1f1f1f",
-          borderRadius: 8,
-        },
-      }}
-    >
-      <div style={{ marginBottom: 16 }}>{iconMap[type]}</div>
+    <>
+      {contextHolder}
+      <Modal
+        title={
+          <div style={{ textAlign: "center", width: "100%", fontSize: "20px" }}>
+            Account is InActive
+          </div>
+        }
+        open={isModalOpen}
+        onCancel={() => {
+          setCurrentStep(0);
+          setIsModalOpen(false);
+        }}
+        footer={null}
+        centered
+        styles={{
+          body: {
+            textAlign: "center",
+            padding: 32,
+            borderRadius: 8,
+          },
+        }}
+      >
+        <div style={{ marginBottom: 16 }}>{iconMap[type]}</div>
 
-      <Typography.Title level={4} style={{ color: "#fff" }}>
-        {title}
-      </Typography.Title>
+        <Typography.Title level={4} style={{ color: "#fff" }}>
+          {title}
+        </Typography.Title>
 
-      <Typography.Paragraph style={{ color: "#d9d9d9" }}>
-        {content}
-      </Typography.Paragraph>
+        <Typography.Paragraph style={{ color: "#d9d9d9" }}>
+          {content}
+        </Typography.Paragraph>
 
-      {showSteps && (
-        <>
-          <Steps
-            size="small"
-            current={currentStep}
-            style={{ marginBottom: 20 }}
-            items={[
-              {
-                title: "Email",
-                icon: <LoadingOutlined />,
-              },
-              {
-                title: "Verification",
-                icon: <MailOutlined />,
-              },
-              {
-                title: "Done",
-                icon: <CheckCircleOutlined />,
-              },
-            ]}
-          />
-          <Divider>
-            <i>Account is InActive?</i>
-          </Divider>
-          {/* Step content */}
-          {currentStep === 0 && (
-            <Form
-              name="verify1"
-              layout="vertical"
-              onFinish={handleResend1}
-              style={{ marginTop: 20 }}
-              form={form}
-            >
-              <Form.Item
-                name="email"
-                label=""
-                rules={[{ required: true, message: "Please enter your email" }]}
+        {showSteps && (
+          <>
+            <Steps
+              size="small"
+              current={currentStep}
+              style={{ marginBottom: 20 }}
+              items={[
+                {
+                  title: "Email",
+                  icon: <LoadingOutlined />,
+                },
+                {
+                  title: "Verification",
+                  icon: <MailOutlined />,
+                },
+                {
+                  title: "Done",
+                  icon: <CheckCircleOutlined />,
+                },
+              ]}
+            />
+            <Divider>
+              <i>Account is InActive?</i>
+            </Divider>
+            {/* Step content */}
+            {currentStep === 0 && (
+              <Form
+                name="verify1"
+                layout="vertical"
+                onFinish={handleResend1}
+                style={{ marginTop: 20 }}
+                form={form}
               >
-                <Input
-                  placeholder="Enter your email"
-                  disabled
-                  value={userEmail}
-                />
-              </Form.Item>
+                <Form.Item
+                  name="email"
+                  label=""
+                  rules={[
+                    { required: true, message: "Please enter your email" },
+                  ]}
+                >
+                  <Input
+                    placeholder="Enter your email"
+                    disabled
+                    value={userEmail}
+                  />
+                </Form.Item>
 
-              <Form.Item>
-                <Button type="primary" htmlType="submit" block>
-                  Resend Verification Email
-                </Button>
-              </Form.Item>
-            </Form>
-          )}
+                <Form.Item>
+                  <Button type="primary" htmlType="submit" block>
+                    Resend Verification Email
+                  </Button>
+                </Form.Item>
+              </Form>
+            )}
 
-          {currentStep === 1 && (
-            <Form
-              name="verify2"
-              layout="vertical"
-              autoComplete="off"
-              onFinish={handleResend2}
-              style={{ marginTop: 20 }}
-            >
-              <Form.Item
-                name="code"
-                label="Code"
-                rules={[{ required: true, message: "Please enter your code" }]}
+            {currentStep === 1 && (
+              <Form
+                name="verify2"
+                layout="vertical"
+                autoComplete="off"
+                onFinish={handleResend2}
+                style={{ marginTop: 20 }}
               >
-                <Input placeholder="Enter your verify code" />
-              </Form.Item>
+                <Form.Item
+                  name="code"
+                  label="Code"
+                  rules={[
+                    { required: true, message: "Please enter your code" },
+                  ]}
+                >
+                  <Input placeholder="Enter your verify code" />
+                </Form.Item>
 
-              <Form.Item>
-                <Button type="primary" htmlType="submit" block>
-                  Active
-                </Button>
-              </Form.Item>
-            </Form>
-          )}
-          {currentStep === 2 && (
-            <div>
-              <div style={{ margin: "20px 0" }}>
-                <p>Your account is active !</p>
+                <Form.Item>
+                  <Button type="primary" htmlType="submit" block>
+                    Active
+                  </Button>
+                </Form.Item>
+              </Form>
+            )}
+            {currentStep === 2 && (
+              <div>
+                <div style={{ margin: "20px 0" }}>
+                  <p>Your account is active !</p>
+                </div>
               </div>
-            </div>
-          )}
-        </>
-      )}
-    </Modal>
+            )}
+          </>
+        )}
+      </Modal>
+    </>
   );
 };
 
