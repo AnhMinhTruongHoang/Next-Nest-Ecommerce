@@ -49,15 +49,13 @@ export default function AuthSignIn() {
       redirect: false,
     });
 
-    // Trường hợp đăng nhập thành công
     if (res && !res.error) {
       router.push("/");
+      router.refresh();
       return;
     }
 
-    // Nếu có lỗi
     if (res?.error) {
-      // Check trường hợp chưa kích hoạt tài khoản
       if (res.error.toLowerCase().includes("not active")) {
         setModalContent(
           "Your account is not activated. Please check your email."
@@ -65,7 +63,6 @@ export default function AuthSignIn() {
         setUserEmail(values.username);
         setIsModalOpen(true);
       } else {
-        // Sai username hoặc password → Notification Antd
         api.error({
           message: "Sign In Failed",
           description: res.error || "Invalid username or password",
