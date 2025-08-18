@@ -9,7 +9,7 @@ import {
   Row,
   Col,
   Space,
-  notification,
+  App,
 } from "antd";
 import {
   LockOutlined,
@@ -26,6 +26,8 @@ import { useRouter } from "next/navigation";
 const AuthSignUp = () => {
   const router = useRouter();
   const { Title } = Typography;
+
+  const { notification } = App.useApp(); // 👈 lấy notification từ context
 
   const [formValues, setFormValues] = useState({
     name: "",
@@ -45,20 +47,19 @@ const AuthSignUp = () => {
     const res = await sendRequest<IBackendRes<any>>({
       url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/register`,
       method: "POST",
-      body: {
-        email,
-        password,
-        name,
-      },
+      body: { email, password, name },
     });
-  
-    console.log("Submit:", res);
+
     if (res?.data) {
       router.push(`/auth/verify/${res?.data?._id}`);
     } else {
       notification.error({
-        message: "Failed !",
-        description: res?.message,
+        message: "Register failed",
+        description:
+          res?.message ||
+          res?.error ||
+          res?.error?.[0] ||
+          "Something went wrong, please try again!",
       });
     }
   };
@@ -71,7 +72,10 @@ const AuthSignUp = () => {
         padding: "48px 16px",
       }}
     >
-      <Link href="signin" style={{ position: "absolute", top: 16, left: 16 }}>
+      <Link
+        href="/auth/signin"
+        style={{ position: "absolute", top: 16, left: 16 }}
+      >
         <Button
           type="text"
           icon={<ArrowLeftOutlined />}

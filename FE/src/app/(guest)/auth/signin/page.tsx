@@ -9,7 +9,11 @@ const SignInPage = async () => {
     // redirect to homepage
     redirect("/");
   }
-  return <AuthSignIn />;
+  return (
+    <>
+      <AuthSignIn />
+    </>
+  );
 };
 
 export default SignInPage;

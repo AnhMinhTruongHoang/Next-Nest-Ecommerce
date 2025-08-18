@@ -12,13 +12,14 @@ import { Avatar, Button, Divider, Input, Typography, Form } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import ModelReactive from "./model.reactive";
+// 👈 rename cho dễ hiểu
 import { useState } from "react";
 import ModalChangePassword from "./modal.change.password";
+import ModelReactive from "./model.reactive";
 
 const { Title } = Typography;
 
-const AuthSignIn = () => {
+export default function AuthSignIn() {
   const router = useRouter();
   const [form] = Form.useForm();
 
@@ -72,12 +73,7 @@ const AuthSignIn = () => {
           <Title level={3}>Sign In</Title>
         </div>
 
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleSubmit}
-          initialValues={{ username: "", password: "" }}
-        >
+        <Form form={form} layout="vertical" onFinish={handleSubmit}>
           <Form.Item
             name="username"
             rules={[{ required: true, message: "Please enter your username" }]}
@@ -114,6 +110,7 @@ const AuthSignIn = () => {
             </Link>
           </Typography.Text>
         </div>
+
         <div style={{ textAlign: "center", marginTop: 16 }}>
           <Typography.Text>
             <Button
@@ -121,7 +118,7 @@ const AuthSignIn = () => {
               type="link"
               style={{ padding: 0 }}
             >
-              Forgot Password ?
+              Forgot Password?
             </Button>
           </Typography.Text>
         </div>
@@ -149,7 +146,7 @@ const AuthSignIn = () => {
         </div>
       </div>
 
-      {/*  Modal Error Message */}
+      {/* Modal Error */}
       <ModelReactive
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
@@ -159,13 +156,12 @@ const AuthSignIn = () => {
         userEmail={userEmail}
         showSteps
       />
-      {/*  Modal forgot password */}
+
+      {/* Modal Forgot Password */}
       <ModalChangePassword
         isModalOpen={changePassword}
         setIsModalOpen={setChangePassword}
       />
     </div>
   );
-};
-
-export default AuthSignIn;
+}

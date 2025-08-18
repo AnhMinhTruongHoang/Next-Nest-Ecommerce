@@ -119,11 +119,13 @@ const ModelReactive = ({
       }}
       footer={null}
       centered
-      bodyStyle={{
-        textAlign: "center",
-        padding: 32,
-        backgroundColor: "#1f1f1f",
-        borderRadius: 8,
+      styles={{
+        body: {
+          textAlign: "center",
+          padding: 32,
+          backgroundColor: "#1f1f1f",
+          borderRadius: 8,
+        },
       }}
     >
       <div style={{ marginBottom: 16 }}>{iconMap[type]}</div>

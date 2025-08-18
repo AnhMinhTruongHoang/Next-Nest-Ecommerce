@@ -3,6 +3,12 @@ import ClientConfigProvider from "@/lib/ClientConfigProvider";
 import NextAuthWrapper from "@/lib/next.auth.wrapper";
 import NProgressWrapper from "@/lib/nprogress.wrapper";
 import { ToastProvider } from "@/utils/toast";
+import { App } from "antd";
+
+export const metadata = {
+  title: "Base",
+  description: "Base Next.js app",
+};
 
 export default function RootLayout({
   children,
@@ -11,12 +17,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="vi">
-      <body>
+      <body suppressHydrationWarning={true}>
         <ClientConfigProvider>
           <NextAuthWrapper>
             <ToastProvider>
               <NProgressWrapper>
-                <div style={{ marginBottom: "100px" }}>{children}</div>
+                <App>{children}</App>
               </NProgressWrapper>
             </ToastProvider>
           </NextAuthWrapper>
