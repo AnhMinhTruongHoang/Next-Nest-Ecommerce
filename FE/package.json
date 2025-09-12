@@ -1,5 +1,5 @@
 {
-  "name": "nextjs-mui-ts-template",
+  "name": "nextjs-Antd-ts-template",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -10,6 +10,8 @@
     "post-update": "echo \"codesandbox preview only, need an update\" && yarn upgrade --latest"
   },
   "dependencies": {
+    "@ant-design/cssinjs": "^1.24.0",
+    "@ant-design/nextjs-registry": "^1.1.0",
     "antd": "^5.26.6",
     "axios": "1.10.0",
     "dayjs": "1.11.13",

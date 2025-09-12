@@ -1,9 +1,11 @@
 import "antd/dist/reset.css";
+
 import ClientConfigProvider from "@/lib/ClientConfigProvider";
 import NextAuthWrapper from "@/lib/next.auth.wrapper";
 import NProgressWrapper from "@/lib/nprogress.wrapper";
 import { ToastProvider } from "@/utils/toast";
 import { App } from "antd";
+import { AntdRegistry } from "@ant-design/nextjs-registry";
 
 export const metadata = {
   title: "Base",
@@ -18,15 +20,17 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body suppressHydrationWarning={true}>
-        <ClientConfigProvider>
-          <NextAuthWrapper>
-            <ToastProvider>
-              <NProgressWrapper>
-                <App>{children}</App>
-              </NProgressWrapper>
-            </ToastProvider>
-          </NextAuthWrapper>
-        </ClientConfigProvider>
+        <AntdRegistry>
+          <ClientConfigProvider>
+            <NextAuthWrapper>
+              <ToastProvider>
+                <NProgressWrapper>
+                  <App>{children}</App>
+                </NProgressWrapper>
+              </ToastProvider>
+            </NextAuthWrapper>
+          </ClientConfigProvider>
+        </AntdRegistry>
       </body>
     </html>
   );
