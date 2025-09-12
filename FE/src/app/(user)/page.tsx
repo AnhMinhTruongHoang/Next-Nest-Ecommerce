@@ -6,7 +6,7 @@ import NextAuthWrapper from "@/lib/next.auth.wrapper";
 import NProgressWrapper from "@/lib/nprogress.wrapper";
 import { ToastProvider } from "@/utils/toast";
 
-const { Header, Content, Footer } = Layout;
+const { Content, Footer } = Layout;
 
 export default function RootLayout({
   children,
@@ -24,13 +24,8 @@ export default function RootLayout({
             <NextAuthWrapper>
               <ToastProvider>
                 <Layout style={{ minHeight: "100vh" }}>
-                  <Header
-                    style={{ background: "#001529", color: "white" }}
-                  ></Header>
                   <Content style={{ padding: 24 }}>{children}</Content>
-                  <Footer style={{ textAlign: "center" }}>
-                    ©2025 Created by You
-                  </Footer>
+                  <Footer style={{ textAlign: "center" }} />
                 </Layout>
               </ToastProvider>
             </NextAuthWrapper>
