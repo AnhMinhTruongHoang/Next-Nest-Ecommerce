@@ -53,6 +53,14 @@ export class AuthController {
     return this.authService.register(registerUserDto);
   }
 
+  /// verify mail code
+  @Public()
+  @ResponseMessage('verify register code')
+  @Post('check-code')
+  checkCode(@Body() registerUserDto: CodeAuthDto) {
+    return this.authService.checkCode(registerUserDto);
+  }
+
   @ResponseMessage('Get user information')
   @Get('/account')
   async handleGetAccount(@Users() user: IUser) {
@@ -88,7 +96,7 @@ export class AuthController {
   testMail() {
     this.mailerService.sendMail({
       to: 'minhlapro01@gmail.com', // List of receivers
-      subject: 'Testing Nest MailerModule ✔', // Subject line
+      subject: 'Testing Nest MailerModule', // Subject line
       text: 'welcome', // Plaintext body
       template: 'register',
       context: {
@@ -100,13 +108,6 @@ export class AuthController {
     return 'ok';
   }
 
-  /// verify mail code
-  @Public()
-  @ResponseMessage('verify register code')
-  @Post('check-code')
-  checkCode(@Body() registerUserDto: CodeAuthDto) {
-    return this.authService.checkCode(registerUserDto);
-  }
   // re-send mail
   @Public()
   @ResponseMessage('re-verify register code')

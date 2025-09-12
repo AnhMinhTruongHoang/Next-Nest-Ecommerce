@@ -12,13 +12,7 @@ import {
   notification,
   message,
 } from "antd";
-import {
-  LockOutlined,
-  ArrowLeftOutlined,
-  UserOutlined,
-  MailOutlined,
-  LockTwoTone,
-} from "@ant-design/icons";
+import { LockOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import { useState } from "react";
 import { sendRequest } from "@/utils/api";
@@ -45,7 +39,7 @@ const AuthVerify = (props: any) => {
     const { _id, code } = values;
 
     const res = await sendRequest<IBackendRes<any>>({
-      url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/check-code`,
+      url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/check-code`, /// goi api back end update is active = 1
       method: "POST",
       body: {
         _id,
@@ -55,8 +49,7 @@ const AuthVerify = (props: any) => {
 
     if (res?.data) {
       message.info("Active Success !");
-      router.push(`/auth/signin`);
-    } else {
+      router.push(`/auth/signin`); // da ve trang dang nhap
       notification.error({
         message: "Register error",
         description: res?.message,
