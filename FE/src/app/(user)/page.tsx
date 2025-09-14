@@ -1,37 +1,50 @@
 "use client";
 
-import { ConfigProvider, Layout } from "antd";
-import viVN from "antd/locale/vi_VN";
-import NextAuthWrapper from "@/lib/next.auth.wrapper";
-import NProgressWrapper from "@/lib/nprogress.wrapper";
-import { ToastProvider } from "@/utils/toast";
+import { Carousel } from "antd";
 
-const { Content, Footer } = Layout;
+const slides = [
+  {
+    id: 1,
+    title: "Khuyến mãi hè rực rỡ",
+    image: "https://picsum.photos/id/1015/800/300",
+  },
+  {
+    id: 2,
+    title: "Giảm giá tới 50%",
+    image: "https://picsum.photos/id/1025/800/300",
+  },
+  {
+    id: 3,
+    title: "Mua 1 tặng 1",
+    image: "https://picsum.photos/id/1035/800/300",
+  },
+];
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function UserPage() {
   return (
-    <html lang="vi">
-      <body>
-        <ConfigProvider
-          locale={viVN}
-          theme={{ token: { colorPrimary: "#ff3d00" } }}
-        >
-          <NProgressWrapper>
-            <NextAuthWrapper>
-              <ToastProvider>
-                <Layout style={{ minHeight: "100vh" }}>
-                  <Content style={{ padding: 24 }}>{children}</Content>
-                  <Footer style={{ textAlign: "center" }} />
-                </Layout>
-              </ToastProvider>
-            </NextAuthWrapper>
-          </NProgressWrapper>
-        </ConfigProvider>
-      </body>
-    </html>
+    <div>
+      <h1 className="text-xl font-bold mb-4">Trang User</h1>
+      <Carousel autoplay>
+        {slides.map((slide) => (
+          <div key={slide.id}>
+            <div
+              style={{
+                height: 300,
+                background: `url(${slide.image}) center / cover no-repeat`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#fff",
+                fontSize: 24,
+                fontWeight: 600,
+                textShadow: "0 2px 8px rgba(0,0,0,0.6)",
+              }}
+            >
+              {slide.title}
+            </div>
+          </div>
+        ))}
+      </Carousel>
+    </div>
   );
 }

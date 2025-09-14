@@ -1,7 +1,10 @@
 "use client";
 
+import { Layout } from "antd";
 import AppHeader from "@/components/header/app.header";
 import AppFooter from "@/components/footer/app.footer";
+
+const { Header, Content, Footer } = Layout;
 
 export default function ClientLayout({
   children,
@@ -9,10 +12,16 @@ export default function ClientLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col min-h-screen">
-      <AppHeader />
-      <main className="flex-1">{children}</main>
-      <AppFooter />
-    </div>
+    <Layout style={{ minHeight: "100vh" }}>
+      <Header style={{ padding: 0, margin: 0 }}>
+        <AppHeader />
+      </Header>
+
+      <Content style={{ flex: 1, padding: 0, margin: 0 }}>{children}</Content>
+
+      <Footer style={{ padding: 0, margin: 0 }}>
+        <AppFooter />
+      </Footer>
+    </Layout>
   );
 }
