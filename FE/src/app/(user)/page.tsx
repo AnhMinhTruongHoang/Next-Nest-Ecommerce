@@ -1,6 +1,6 @@
 "use client";
 
-import MainCarousel from "@/components/carousel/carausel";
+import MainCarousel from "@/components/carousel/carousel";
 
 export default function UserPage() {
   return (
