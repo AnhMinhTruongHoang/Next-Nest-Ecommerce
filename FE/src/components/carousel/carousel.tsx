@@ -2,7 +2,6 @@
 
 import { Carousel } from "antd";
 import Image from "next/image";
-import React from "react";
 
 type Slide = {
   id: number;
@@ -13,25 +12,37 @@ type Slide = {
 const slides: Slide[] = [
   {
     id: 1,
-    title: "Khuyến mãi hè rực rỡ",
+    title: "",
     image: "/images/banners/banner6.png",
   },
   {
     id: 2,
-    title: "Giảm giá tới 50%",
-    image: "/images/banners/banner2.png",
+    title: "",
+    image: "/images/banners/banner7.png",
   },
   {
     id: 3,
-    title: "Mua 1 tặng 1",
+    title: "",
     image: "/images/banners/banner5.jpg",
   },
 ];
 
 const MainCarousel: React.FC = () => {
   return (
-    <div className="w-full">
-      <Carousel autoplay>
+    <div className="w-full relative" style={{ border: "2px grey" }}>
+      <div
+        style={{
+          textAlign: "center",
+          background: "red",
+          border: "5px  grey",
+          padding: "8px",
+          color: "#fff",
+          fontWeight: "bold",
+        }}
+      >
+        Nhập code "GamerZone" giảm 30%
+      </div>
+      <Carousel autoplay arrows fade adaptiveHeight>
         {slides.map((slide) => (
           <div key={slide.id}>
             <div
@@ -39,7 +50,7 @@ const MainCarousel: React.FC = () => {
                 width: "100%",
                 height: "700px",
                 position: "relative",
-                backgroundColor: "#000", // nền đen để tránh khoảng trống
+                backgroundColor: "#000",
               }}
             >
               <Image
@@ -47,7 +58,7 @@ const MainCarousel: React.FC = () => {
                 alt={slide.title}
                 fill
                 style={{
-                  objectFit: "fill", // ❗ hiện đầy đủ ảnh không cắt
+                  objectFit: "fill",
                 }}
                 sizes="100vw"
               />
