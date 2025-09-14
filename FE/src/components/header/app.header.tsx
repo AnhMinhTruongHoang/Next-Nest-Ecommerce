@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Layout, Input, Avatar, Badge, Dropdown, Menu, Row, Col } from "antd";
+import { Layout, Input, Avatar, Badge, Dropdown } from "antd";
 import {
   SearchOutlined,
   ShoppingCartOutlined,
@@ -50,68 +50,53 @@ export default function AppHeader() {
   };
 
   const navItems = [
-    { key: "new", label: "NEW" },
-    { key: "men", label: "MEN" },
-    { key: "women", label: "WOMEN" },
-    { key: "sports", label: "SPORTS" },
-    { key: "sale", label: "SALE", style: { color: "red" } },
-    { key: "c&s", label: "C&S" },
+    { key: "mouse", label: "Chuột Gaming" },
+    { key: "keyboard", label: "Bàn phím" },
+    { key: "headset", label: "Tai nghe" },
+    { key: "chair", label: "Ghế gaming" },
+    { key: "monitor", label: "Màn hình" },
+    { key: "accessories", label: "Phụ kiện" },
   ];
 
   const megaMenu = (
     <div
       style={{
-        background: "#1e1e1e",
+        background: "#1a1a1a",
         color: "#fff",
         padding: "32px 48px",
         display: "grid",
-        gridTemplateColumns: "repeat(5, 1fr)",
+        gridTemplateColumns: "repeat(4, 1fr)",
         gap: 32,
-        minWidth: 900,
+        minWidth: 800,
       }}
     >
       <div>
-        <h4 style={{ color: "#fff" }}>All Products →</h4>
-        <a style={{ color: "#1890ff", display: "block", marginTop: 8 }}>
-          New Arrivals
-        </a>
-        <a style={{ display: "block", marginTop: 8 }}>Best Sellers</a>
-        <a style={{ display: "block", marginTop: 8 }}>ECC Collection</a>
-        <a style={{ display: "block", marginTop: 8 }}>Excool Collection</a>
-        <a style={{ display: "block", marginTop: 8 }}>Copper Denim</a>
-        <a style={{ display: "block", marginTop: 8 }}>Promax</a>
+        <h4 style={{ color: "#9b59b6" }}>Chuột</h4>
+        <a>Logitech</a>
+        <a>Razer</a>
+        <a>SteelSeries</a>
+        <a>HyperX</a>
       </div>
       <div>
-        <h4 style={{ color: "#fff" }}>Men Tops →</h4>
-        <a>Tanktops</a>
-        <a>T-Shirts</a>
-        <a>Sports Shirts</a>
-        <a>Polo</a>
-        <a>Shirts</a>
-        <a>Jackets</a>
+        <h4 style={{ color: "#9b59b6" }}>Bàn phím</h4>
+        <a>Akko</a>
+        <a>Keychron</a>
+        <a>Ducky</a>
+        <a>Leopold</a>
       </div>
       <div>
-        <h4 style={{ color: "#fff" }}>Men Bottoms →</h4>
-        <a>Shorts</a>
-        <a>Joggers</a>
-        <a>Sports Pants</a>
-        <a>Jeans</a>
-        <a>Chinos</a>
-        <a>Swimwear</a>
+        <h4 style={{ color: "#9b59b6" }}>Tai nghe</h4>
+        <a>HyperX</a>
+        <a>Razer</a>
+        <a>Corsair</a>
+        <a>Asus</a>
       </div>
       <div>
-        <h4 style={{ color: "#fff" }}>Underwear →</h4>
-        <a>Briefs</a>
-        <a>Boxers</a>
-        <a>Long Leg</a>
-        <a>Homewear</a>
-      </div>
-      <div>
-        <h4 style={{ color: "#fff" }}>Accessories →</h4>
-        <a>Hats</a>
-        <a>Socks</a>
-        <a>Bags</a>
-        <a>Belts</a>
+        <h4 style={{ color: "#9b59b6" }}>Ghế / Phụ kiện</h4>
+        <a>Ghế E-Dra</a>
+        <a>Ghế SecretLab</a>
+        <a>Miếng kê tay</a>
+        <a>Mousepad RGB</a>
       </div>
     </div>
   );
@@ -119,13 +104,12 @@ export default function AppHeader() {
   return (
     <Header
       style={{
-        background: "#121212",
+        background: "#0d0d0d",
         borderBottom: "1px solid rgba(255,255,255,0.1)",
         padding: 0,
         position: "sticky",
         top: 0,
         zIndex: 1000,
-        justifyContent: "space-between",
       }}
     >
       <div
@@ -136,25 +120,28 @@ export default function AppHeader() {
           alignItems: "center",
           justifyContent: "space-between",
           padding: "0 24px",
-          height: 64,
+          height: 72,
         }}
       >
         {/* Left: Logo */}
         <div
           onClick={() => router.push("/")}
           style={{
-            color: "#fff",
+            color: "#00ffe0",
             fontWeight: 700,
-            fontSize: 20,
+            fontSize: 24,
             cursor: "pointer",
             marginRight: 32,
+            fontFamily: "Orbitron, sans-serif",
+            textTransform: "uppercase",
+            letterSpacing: 1,
           }}
         >
-          CoolStore
+          GamerZone
         </div>
 
-        {/* Center: Nav menu */}
-        <div style={{ display: "flex", gap: 24, marginLeft: "12px" }}>
+        {/* Center: Nav */}
+        <div style={{ display: "flex", gap: 24 }}>
           {navItems.map((item) => (
             <Dropdown key={item.key} popupRender={() => megaMenu}>
               <div
@@ -162,7 +149,7 @@ export default function AppHeader() {
                   color: "#fff",
                   cursor: "pointer",
                   fontWeight: 500,
-                  ...item.style,
+                  transition: "color 0.2s",
                 }}
               >
                 {item.label}
@@ -171,14 +158,14 @@ export default function AppHeader() {
           ))}
         </div>
 
-        {/* Center: Search */}
+        {/* Search */}
         <div style={{ flex: 1, padding: "0 32px" }}>
           <Input
-            placeholder="Search for products..."
+            placeholder="Tìm sản phẩm gaming..."
             prefix={<SearchOutlined />}
             allowClear
             size="middle"
-            style={{ borderRadius: 20 }}
+            style={{ borderRadius: 20, background: "#1e1e1e", color: "#fff" }}
             onPressEnter={(e: any) => {
               const value = e?.target?.value;
               if (value) router.push(`/search?q=${value}`);
@@ -186,24 +173,25 @@ export default function AppHeader() {
           />
         </div>
 
-        {/* Right: Account + Cart */}
+        {/* Account + Cart */}
         <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
           {status === "loading" ? null : session ? (
-            <>
-              <Dropdown
-                key={session?.user?._id}
-                menu={userMenu}
-                placement="bottomRight"
-                trigger={["click"]}
+            <Dropdown
+              menu={userMenu}
+              placement="bottomRight"
+              trigger={["click"]}
+            >
+              <Avatar
+                style={{
+                  backgroundColor: "#9b59b6",
+                  cursor: "pointer",
+                  border: "2px solid #00ffe0",
+                }}
+                size={35}
               >
-                <Avatar
-                  style={{ backgroundColor: "#87d068", cursor: "pointer" }}
-                  size={35}
-                >
-                  {session?.user?.name?.charAt(0)?.toUpperCase() || "U"}
-                </Avatar>
-              </Dropdown>
-            </>
+                {session?.user?.name?.charAt(0)?.toUpperCase() || "U"}
+              </Avatar>
+            </Dropdown>
           ) : (
             <NextLink
               href="/auth/signin"
@@ -214,7 +202,7 @@ export default function AppHeader() {
           )}
 
           <Badge count={2} offset={[-2, 2]}>
-            <ShoppingCartOutlined style={{ fontSize: 22, color: "#fff" }} />
+            <ShoppingCartOutlined style={{ fontSize: 22, color: "#00ffe0" }} />
           </Badge>
         </div>
       </div>
