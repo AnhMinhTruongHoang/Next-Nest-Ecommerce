@@ -73,13 +73,15 @@ const Cards = () => (
             overflow: "hidden",
           }}
           cover={
-            <Image
-              alt={card.title}
-              src={card.image}
-              width={340}
-              height={450}
-              className="transition-transform duration-500 hover:scale-110 object-cover"
-            />
+            <div className="group overflow-hidden">
+              <Image
+                alt={card.title}
+                src={card.image}
+                width={340}
+                height={450}
+                className="object-cover transition-transform duration-500 group-hover:scale-1010"
+              />
+            </div>
           }
         />
       ))}
