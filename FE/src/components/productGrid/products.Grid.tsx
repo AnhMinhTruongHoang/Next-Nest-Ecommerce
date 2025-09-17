@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Card, Carousel } from "antd";
 import Image from "next/image";
 
@@ -23,8 +24,26 @@ const chunkArray = (arr: any[], size: number) => {
 };
 
 const ProductsGrid = () => {
-  // Chia sản phẩm thành từng nhóm 5
-  const slides = chunkArray(cardList, 5);
+  const [itemsPerSlide, setItemsPerSlide] = useState(5);
+
+  // Xác định số sản phẩm mỗi slide theo kích thước màn hình
+  useEffect(() => {
+    const updateItemsPerSlide = () => {
+      if (window.innerWidth < 640) {
+        setItemsPerSlide(1); // Mobile nhỏ
+      } else if (window.innerWidth < 1024) {
+        setItemsPerSlide(3); // Tablet
+      } else {
+        setItemsPerSlide(5); // Desktop
+      }
+    };
+
+    updateItemsPerSlide();
+    window.addEventListener("resize", updateItemsPerSlide);
+    return () => window.removeEventListener("resize", updateItemsPerSlide);
+  }, []);
+
+  const slides = chunkArray(cardList, itemsPerSlide);
 
   return (
     <>
@@ -36,7 +55,7 @@ const ProductsGrid = () => {
                 textAlign: "center",
                 padding: "8px",
                 fontWeight: "bold",
-                marginTop: 50,
+                marginTop: 30,
               }}
             >
               <h1>Razer Exclusive</h1>
@@ -45,11 +64,11 @@ const ProductsGrid = () => {
             <div
               style={{
                 display: "flex",
-                gap: "24px",
+                gap: "36px",
                 flexWrap: "wrap",
                 justifyContent: "center",
                 marginTop: 16,
-                marginBottom: 50,
+                marginBottom: 30,
               }}
             >
               {group.map((card) => (
@@ -58,7 +77,7 @@ const ProductsGrid = () => {
                   hoverable
                   style={{
                     width: 300,
-                    borderRadius: 16,
+                    borderRadius: 12,
                     overflow: "hidden",
                   }}
                   cover={
@@ -66,7 +85,7 @@ const ProductsGrid = () => {
                       <Image
                         alt={card.title}
                         src={card.image}
-                        width={300}
+                        width={350}
                         height={300}
                         className="object-cover transition-transform duration-500 group-hover:scale-110"
                       />
@@ -84,7 +103,7 @@ const ProductsGrid = () => {
         ))}
       </Carousel>
 
-      {/* CSS hiển thị arrow đẹp hơn */}
+      {/* CSS hiển thị arrow đẹp */}
       <style jsx global>{`
         .ant-carousel .slick-prev,
         .ant-carousel .slick-next {
