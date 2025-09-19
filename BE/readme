@@ -1,0 +1,32 @@
+## 📦 E-Commerce Backend — NestJS Modules
+
+**Các module hiện có:**
+- `members` — Quản lý người dùng
+- `promotions` — Quản lý khuyến mãi
+- `categories` — Quản lý danh mục sản phẩm
+- `products` — Quản lý sản phẩm
+- `orders` — Quản lý đơn hàng
+- `carts` — Quản lý giỏ hàng
+- `payments` — Xử lý thanh toán
+- `reviews` — Quản lý đánh giá sản phẩm
+
+**Cách tạo module:**
+```bash
+nest g module <name>
+nest g controller <name> --no-spec
+nest g service <name> --no-spec
+# hoặc tạo đầy đủ
+nest g resource <name> --no-spec
+#
+src/modules/<name>/
+│── dto/
+│   ├── create-<name>.dto.ts
+│   └── update-<name>.dto.ts
+│── interfaces/
+│   └── <name>.interface.ts
+│── schemas/
+│   └── <name>.schema.ts
+│── <name>.controller.ts
+│── <name>.service.ts
+└── <name>.module.ts
+
