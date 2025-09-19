@@ -17,6 +17,11 @@ import { DatabasesModule } from './modules/databases/databases.module';
 import { ProductsModule } from './modules/products/products.module';
 import { MembershipsModule } from './modules/memberships/memberships.module';
 import { PromotionsModule } from './modules/promotions/promotions.module';
+import { CategoriesModule } from './modules/categories/categories.module';
+import { OrdersModule } from './modules/orders/orders.module';
+import { PaymentsModule } from './modules/payments/payments.module';
+import { CartsModule } from './modules/carts/carts.module';
+import { ReviewsModule } from './modules/reviews/reviews.module';
 
 @Module({
   imports: [
@@ -79,6 +84,11 @@ import { PromotionsModule } from './modules/promotions/promotions.module';
     ProductsModule,
     MembershipsModule,
     PromotionsModule,
+    CategoriesModule,
+    OrdersModule,
+    PaymentsModule,
+    CartsModule,
+    ReviewsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
