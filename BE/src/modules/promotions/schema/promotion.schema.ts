@@ -32,6 +32,9 @@ export class Promo {
   @Prop({ default: false })
   isDeleted: boolean;
 
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Product' })
+  productId?: mongoose.Types.ObjectId;
+
   @Prop()
   createdAt: Date;
 

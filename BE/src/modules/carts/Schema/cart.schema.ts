@@ -21,6 +21,8 @@ export class Cart {
   @Prop({ default: 0 })
   totalPrice: number;
 
+  ///
+
   @Prop({ default: false })
   isDeleted: boolean;
 

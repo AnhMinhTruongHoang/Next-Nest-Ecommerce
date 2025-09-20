@@ -62,7 +62,6 @@ export class CreateUserDto {
 ///////////// register valid
 
 export class RegisterUserDto {
- 
   @IsNotEmpty({ message: "Name mustn't empty" })
   name?: string;
 

@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument, Types } from 'mongoose';
+import { Membership } from 'src/modules/memberships/schema/membership.schema';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -34,6 +35,11 @@ export class User {
 
   @Prop()
   avatar: string;
+
+  @Prop({ type: Types.ObjectId, ref: Membership.name })
+  membership: Types.ObjectId;
+
+  ////
 
   @Prop()
   isDeleted: boolean;

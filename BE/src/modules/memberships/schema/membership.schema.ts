@@ -5,21 +5,23 @@ export type MembershipDocument = HydratedDocument<Membership>;
 
 @Schema({ timestamps: true })
 export class Membership {
-  @Prop({ required: true })
-  name: string; // ví dụ: Silver, Gold, Platinum
+  @Prop({ required: true, unique: true })
+  name: string; // Bronze, Silver, Gold
 
   @Prop()
   description: string;
 
-  @Prop()
-  price: number;
+  @Prop({ default: 0 })
+  discountRate: number; // % giảm giá
 
-  @Prop()
-  durationInDays: number;
+  @Prop({ default: 0 })
+  pointMultiplier: number; // hệ số tích điểm
 
-  @Prop({ default: true })
-  isActive: boolean;
+  @Prop({ default: false })
+  freeShipping: boolean;
 
+  @Prop({ default: 0 })
+  monthlyFee: number; // nếu là gói trả phí
   ///
 
   @Prop()
