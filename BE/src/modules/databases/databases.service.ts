@@ -2,7 +2,6 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
-
 import { User, UserDocument } from '../users/schemas/user.schema';
 import {
   Membership,
@@ -15,7 +14,6 @@ import {
 import { Product, ProductDocument } from '../products/schema/product.schema';
 import { Order, OrderDocument } from '../orders/schema/order.schema';
 import { Payment, PaymentDocument } from '../payments/schema/payment.schema';
-
 import { UsersService } from '../users/users.service';
 
 @Injectable()
@@ -128,9 +126,13 @@ export class DatabasesService implements OnModuleInit {
     // Seed Products
     const countProducts = await this.productModel.countDocuments();
     if (countProducts === 0) {
-      const categories = await this.categoryModel.find();
-      const mouse = categories.find((c) => c.name === 'Mouse');
-      const keyboard = categories.find((c) => c.name === 'Keyboard');
+      const mouse = await this.categoryModel.findOne({ name: 'Mouse' });
+      const keyboard = await this.categoryModel.findOne({ name: 'Keyboard' });
+
+      if (!mouse || !keyboard) {
+        this.logger.error('Missing categories, cannot seed products.');
+        return;
+      }
 
       await this.productModel.insertMany([
         {
@@ -138,14 +140,14 @@ export class DatabasesService implements OnModuleInit {
           description: 'Gaming mouse',
           price: 20,
           stock: 100,
-          category: mouse?._id,
+          category: mouse._id,
         },
         {
           name: 'Razer BlackWidow',
           description: 'Mechanical keyboard',
           price: 120,
           stock: 50,
-          category: keyboard?._id,
+          category: keyboard._id,
         },
       ]);
       this.logger.log('>>> INIT PRODUCTS DONE...');
