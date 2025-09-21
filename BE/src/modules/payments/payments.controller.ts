@@ -1,22 +1,13 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Patch,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Patch } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
-import { IPayment } from 'src/types/payments.interface';
 
 @Controller('payments')
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
-  @Post()
-  create(@Body() data: IPayment) {
-    return this.paymentsService.create(data);
+  @Post(':orderId')
+  create(@Param('orderId') orderId: string, @Body('method') method: string) {
+    return this.paymentsService.create(orderId, method);
   }
 
   @Get()
@@ -30,12 +21,7 @@ export class PaymentsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() data: Partial<IPayment>) {
-    return this.paymentsService.update(id, data);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.paymentsService.remove(id);
+  updateStatus(@Param('id') id: string, @Body('status') status: string) {
+    return this.paymentsService.updateStatus(id, status);
   }
 }

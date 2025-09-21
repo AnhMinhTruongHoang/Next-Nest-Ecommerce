@@ -10,7 +10,7 @@ export const INIT_PERMISSIONS = [
     module: 'USERS',
     createdBy: {
       _id: '647b5108a8a243e8191855b5',
-      email: 'hoidanit@gmail.com',
+      email: 'admin@gmail.com',
     },
     isDeleted: false,
     deletedAt: null,
@@ -26,7 +26,7 @@ export const INIT_PERMISSIONS = [
     module: 'USERS',
     createdBy: {
       _id: '647b5108a8a243e8191855b5',
-      email: 'hoidanit@gmail.com',
+      email: 'admin@gmail.com',
     },
     isDeleted: false,
     deletedAt: null,
@@ -42,7 +42,7 @@ export const INIT_PERMISSIONS = [
     module: 'USERS',
     createdBy: {
       _id: '647b5108a8a243e8191855b5',
-      email: 'hoidanit@gmail.com',
+      email: 'admin@gmail.com',
     },
     isDeleted: false,
     deletedAt: null,
@@ -58,7 +58,7 @@ export const INIT_PERMISSIONS = [
     module: 'USERS',
     createdBy: {
       _id: '647b5108a8a243e8191855b5',
-      email: 'hoidanit@gmail.com',
+      email: 'admin@gmail.com',
     },
     isDeleted: false,
     deletedAt: null,
@@ -74,7 +74,7 @@ export const INIT_PERMISSIONS = [
     module: 'USERS',
     createdBy: {
       _id: '647b5108a8a243e8191855b5',
-      email: 'hoidanit@gmail.com',
+      email: 'admin@gmail.com',
     },
     isDeleted: false,
     deletedAt: null,
@@ -90,7 +90,7 @@ export const INIT_PERMISSIONS = [
     module: 'FILES',
     createdBy: {
       _id: '647b5108a8a243e8191855b5',
-      email: 'hoidanit@gmail.com',
+      email: 'admin@gmail.com',
     },
     isDeleted: false,
     deletedAt: null,

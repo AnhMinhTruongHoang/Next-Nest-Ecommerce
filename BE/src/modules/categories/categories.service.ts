@@ -5,6 +5,7 @@ import { Category, CategoryDocument } from './schema/category.schema';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
+import { Public } from 'src/health/decorator/customize';
 
 @Injectable()
 export class CategoriesService {
@@ -18,10 +19,12 @@ export class CategoriesService {
     return created.save();
   }
 
+  @Public()
   async findAll() {
     return this.categoryModel.find({ isDeleted: false }).exec();
   }
 
+  @Public()
   async findOne(id: string) {
     const category = await this.categoryModel.findById(id).exec();
     if (!category || category.isDeleted)

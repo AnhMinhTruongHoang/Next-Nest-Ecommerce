@@ -1,40 +1,46 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Payment, PaymentDocument } from './Schema/payment.schema';
-import { IPayment } from 'src/types/payments.interface';
-import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
+import { Model } from 'mongoose';
+import { Payment, PaymentDocument } from './schema/payment.schema';
+import { Order, OrderDocument } from '../orders/schema/order.schema';
 
 @Injectable()
 export class PaymentsService {
   constructor(
-    @InjectModel(Payment.name)
-    private paymentModel: SoftDeleteModel<PaymentDocument>,
+    @InjectModel(Payment.name) private paymentModel: Model<PaymentDocument>,
+    @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
   ) {}
 
-  create(data: IPayment) {
-    const created = new this.paymentModel(data);
-    return created.save();
+  async create(orderId: string, method: string) {
+    const order = await this.orderModel.findById(orderId);
+    if (!order) throw new NotFoundException('Order not found');
+
+    const payment = new this.paymentModel({
+      orderId: order._id,
+      amount: order.totalPrice,
+      method,
+      status: 'pending',
+    });
+    return payment.save();
   }
 
-  findAll() {
-    return this.paymentModel.find().exec();
+  async findAll() {
+    return this.paymentModel.find().populate('orderId').exec();
   }
 
-  findOne(id: string) {
-    return this.paymentModel.findById(id).exec();
+  async findOne(id: string) {
+    const payment = await this.paymentModel.findById(id).populate('orderId');
+    if (!payment) throw new NotFoundException('Payment not found');
+    return payment;
   }
 
-  update(id: string, data: Partial<IPayment>) {
-    return this.paymentModel.findByIdAndUpdate(id, data, { new: true }).exec();
-  }
-
-  remove(id: string) {
-    return this.paymentModel
-      .findByIdAndUpdate(
-        id,
-        { isDeleted: true, deletedAt: new Date() },
-        { new: true },
-      )
-      .exec();
+  async updateStatus(id: string, status: string) {
+    const payment = await this.paymentModel.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true },
+    );
+    if (!payment) throw new NotFoundException('Payment not found');
+    return payment;
   }
 }

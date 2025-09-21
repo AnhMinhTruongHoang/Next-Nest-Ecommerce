@@ -2,7 +2,20 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
+
 import { User, UserDocument } from '../users/schemas/user.schema';
+import {
+  Membership,
+  MembershipDocument,
+} from '../memberships/schema/membership.schema';
+import {
+  Category,
+  CategoryDocument,
+} from '../categories/schema/category.schema';
+import { Product, ProductDocument } from '../products/schema/product.schema';
+import { Order, OrderDocument } from '../orders/schema/order.schema';
+import { Payment, PaymentDocument } from '../payments/schema/payment.schema';
+
 import { UsersService } from '../users/users.service';
 
 @Injectable()
@@ -13,6 +26,21 @@ export class DatabasesService implements OnModuleInit {
     @InjectModel(User.name)
     private userModel: SoftDeleteModel<UserDocument>,
 
+    @InjectModel(Membership.name)
+    private membershipsModel: SoftDeleteModel<MembershipDocument>,
+
+    @InjectModel(Category.name)
+    private categoryModel: SoftDeleteModel<CategoryDocument>,
+
+    @InjectModel(Product.name)
+    private productModel: SoftDeleteModel<ProductDocument>,
+
+    @InjectModel(Order.name)
+    private orderModel: SoftDeleteModel<OrderDocument>,
+
+    @InjectModel(Payment.name)
+    private paymentModel: SoftDeleteModel<PaymentDocument>,
+
     private configService: ConfigService,
     private userService: UsersService,
   ) {}
@@ -21,9 +49,9 @@ export class DatabasesService implements OnModuleInit {
     const isInit = this.configService.get<string>('SHOULD_INIT');
     if (!isInit || isInit === 'false') return;
 
-    const countUser = await this.userModel.count();
-
-    if (countUser === 0) {
+    // Seed Users
+    const countUsers = await this.userModel.countDocuments();
+    if (countUsers === 0) {
       const initPassword = this.userService.getHashPassword(
         this.configService.get<string>('INIT_PASSWORD'),
       );
@@ -33,7 +61,7 @@ export class DatabasesService implements OnModuleInit {
           name: "I'm admin",
           email: 'admin@gmail.com',
           password: initPassword,
-          age: 69,
+          age: 30,
           gender: 'MALE',
           address: 'VietNam',
           role: 'ADMIN',
@@ -43,17 +71,114 @@ export class DatabasesService implements OnModuleInit {
           name: "I'm normal user",
           email: 'user@gmail.com',
           password: initPassword,
-          age: 69,
-          gender: 'MALE',
+          age: 25,
+          gender: 'FEMALE',
           address: 'VietNam',
           role: 'USER',
           isActive: true,
         },
       ]);
-
       this.logger.log('>>> INIT USERS DONE...');
-    } else {
-      this.logger.log('>>> USERS ALREADY EXIST, SKIP INIT...');
+    }
+
+    // Seed Memberships
+    const countMemberships = await this.membershipsModel.countDocuments();
+    if (countMemberships === 0) {
+      await this.membershipsModel.insertMany([
+        {
+          name: 'Bronze',
+          description: 'Basic membership',
+          discountRate: 0,
+          pointMultiplier: 1,
+          freeShipping: false,
+          monthlyFee: 0,
+        },
+        {
+          name: 'Silver',
+          description: 'Better benefits',
+          discountRate: 5,
+          pointMultiplier: 1.5,
+          freeShipping: false,
+          monthlyFee: 5,
+        },
+        {
+          name: 'Gold',
+          description: 'Premium benefits',
+          discountRate: 10,
+          pointMultiplier: 2,
+          freeShipping: true,
+          monthlyFee: 10,
+        },
+      ]);
+      this.logger.log('>>> INIT MEMBERSHIPS DONE...');
+    }
+
+    // Seed Categories
+    const countCategories = await this.categoryModel.countDocuments();
+    if (countCategories === 0) {
+      await this.categoryModel.insertMany([
+        { name: 'Mouse', description: 'gaming gear' },
+        { name: 'Keyboard', description: 'gaming gear' },
+        { name: 'Monitor', description: 'gaming gear' },
+        { name: 'Chairs', description: 'gaming gear' },
+      ]);
+      this.logger.log('>>> INIT CATEGORIES DONE...');
+    }
+
+    // Seed Products
+    const countProducts = await this.productModel.countDocuments();
+    if (countProducts === 0) {
+      const categories = await this.categoryModel.find();
+      const mouse = categories.find((c) => c.name === 'Mouse');
+      const keyboard = categories.find((c) => c.name === 'Keyboard');
+
+      await this.productModel.insertMany([
+        {
+          name: 'Logitech G102',
+          description: 'Gaming mouse',
+          price: 20,
+          stock: 100,
+          category: mouse?._id,
+        },
+        {
+          name: 'Razer BlackWidow',
+          description: 'Mechanical keyboard',
+          price: 120,
+          stock: 50,
+          category: keyboard?._id,
+        },
+      ]);
+      this.logger.log('>>> INIT PRODUCTS DONE...');
+    }
+
+    // Seed Orders
+    const countOrders = await this.orderModel.countDocuments();
+    if (countOrders === 0) {
+      const user = await this.userModel.findOne({ email: 'user@gmail.com' });
+      const product = await this.productModel.findOne({
+        name: 'Logitech G102',
+      });
+
+      if (user && product) {
+        const order = await this.orderModel.create({
+          userId: user._id,
+          items: [
+            { productId: product._id, quantity: 2, price: product.price },
+          ],
+          totalPrice: product.price * 2,
+          status: 'pending',
+        });
+        this.logger.log('>>> INIT ORDERS DONE...');
+
+        // Seed Payment
+        await this.paymentModel.create({
+          orderId: order._id,
+          amount: order.totalPrice,
+          method: 'cash',
+          status: 'pending',
+        });
+        this.logger.log('>>> INIT PAYMENTS DONE...');
+      }
     }
   }
 }

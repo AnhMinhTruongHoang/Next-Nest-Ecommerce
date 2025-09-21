@@ -6,7 +6,7 @@ export type OrderDocument = HydratedDocument<Order>;
 @Schema({ timestamps: true })
 export class Order {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
-  user: mongoose.Schema.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
 
   @Prop([
     {
@@ -16,40 +16,16 @@ export class Order {
     },
   ])
   items: {
-    productId: mongoose.Schema.Types.ObjectId;
+    productId: mongoose.Types.ObjectId;
     quantity: number;
     price: number;
   }[];
 
-  @Prop({ required: true })
-  totalPrice: number;
-
-  @Prop({
-    default: 'PENDING',
-    enum: ['PENDING', 'PAID', 'SHIPPED', 'COMPLETED', 'CANCELED'],
-  })
+  @Prop({ default: 'pending' })
   status: string;
 
-  @Prop({ default: 'COD' })
-  paymentMethod: string;
-
-  @Prop()
-  shippingAddress: string;
-
-  @Prop({ default: false })
-  isDeleted: boolean;
-
-  @Prop({ type: Object })
-  createdBy: { _id: mongoose.Schema.Types.ObjectId; email: string };
-
-  @Prop({ type: Object })
-  updatedBy: { _id: mongoose.Schema.Types.ObjectId; email: string };
-
-  @Prop({ type: Object })
-  deletedBy: { _id: mongoose.Schema.Types.ObjectId; email: string };
-
-  @Prop()
-  deletedAt: Date;
+  @Prop({ required: true })
+  totalPrice: number;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
