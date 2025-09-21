@@ -126,60 +126,160 @@ export class DatabasesService implements OnModuleInit {
     // Seed Products
     const countProducts = await this.productModel.countDocuments();
     if (countProducts === 0) {
-      const mouse = await this.categoryModel.findOne({ name: 'Mouse' });
-      const keyboard = await this.categoryModel.findOne({ name: 'Keyboard' });
+      const categories = await this.categoryModel.find();
 
-      if (!mouse || !keyboard) {
-        this.logger.error('Missing categories, cannot seed products.');
-        return;
-      }
+      const mouse = categories.find((c) => c.name === 'Mouse');
+      const keyboard = categories.find((c) => c.name === 'Keyboard');
+      const monitor = categories.find((c) => c.name === 'Monitor');
+      const chairs = categories.find((c) => c.name === 'Chairs');
 
-      await this.productModel.insertMany([
+      const products = [
+        // Mouse
         {
           name: 'Logitech G102',
           description: 'Gaming mouse',
           price: 20,
           stock: 100,
-          category: mouse._id,
+          category: mouse?._id,
         },
+        {
+          name: 'Razer DeathAdder',
+          description: 'Ergonomic gaming mouse',
+          price: 50,
+          stock: 80,
+          category: mouse?._id,
+        },
+        {
+          name: 'SteelSeries Rival 3',
+          description: 'Budget-friendly gaming mouse',
+          price: 30,
+          stock: 120,
+          category: mouse?._id,
+        },
+
+        // Keyboard
         {
           name: 'Razer BlackWidow',
           description: 'Mechanical keyboard',
           price: 120,
           stock: 50,
-          category: keyboard._id,
+          category: keyboard?._id,
         },
-      ]);
+        {
+          name: 'Corsair K95 RGB',
+          description: 'Premium gaming keyboard',
+          price: 180,
+          stock: 40,
+          category: keyboard?._id,
+        },
+        {
+          name: 'Logitech G213',
+          description: 'Membrane gaming keyboard',
+          price: 70,
+          stock: 60,
+          category: keyboard?._id,
+        },
+
+        // Monitor
+        {
+          name: 'ASUS TUF 24"',
+          description: '144Hz gaming monitor',
+          price: 200,
+          stock: 30,
+          category: monitor?._id,
+        },
+        {
+          name: 'Acer Predator 27"',
+          description: '2K 165Hz gaming monitor',
+          price: 400,
+          stock: 20,
+          category: monitor?._id,
+        },
+        {
+          name: 'Samsung Odyssey G5',
+          description: 'Curved 144Hz monitor',
+          price: 350,
+          stock: 25,
+          category: monitor?._id,
+        },
+
+        // Chairs
+        {
+          name: 'DXRacer Formula',
+          description: 'Professional gaming chair',
+          price: 250,
+          stock: 15,
+          category: chairs?._id,
+        },
+        {
+          name: 'Secretlab Titan Evo',
+          description: 'Premium ergonomic chair',
+          price: 450,
+          stock: 10,
+          category: chairs?._id,
+        },
+        {
+          name: 'AKRacing Core EX',
+          description: 'Affordable gaming chair',
+          price: 200,
+          stock: 20,
+          category: chairs?._id,
+        },
+      ];
+
+      await this.productModel.insertMany(products);
       this.logger.log('>>> INIT PRODUCTS DONE...');
     }
 
-    // Seed Orders
+    // Seed Orders + Payments
     const countOrders = await this.orderModel.countDocuments();
     if (countOrders === 0) {
-      const user = await this.userModel.findOne({ email: 'user@gmail.com' });
-      const product = await this.productModel.findOne({
-        name: 'Logitech G102',
-      });
+      const users = await this.userModel.find({ role: 'USER' });
+      const products = await this.productModel.find();
 
-      if (user && product) {
-        const order = await this.orderModel.create({
-          userId: user._id,
-          items: [
-            { productId: product._id, quantity: 2, price: product.price },
-          ],
-          totalPrice: product.price * 2,
-          status: 'pending',
-        });
-        this.logger.log('>>> INIT ORDERS DONE...');
+      if (users.length === 0 || products.length === 0) {
+        this.logger.error(
+          'Missing users or products, cannot seed orders/payments.',
+        );
+      } else {
+        for (const user of users) {
+          // random số đơn hàng (3-5)
+          const orderCount = Math.floor(Math.random() * 3) + 3;
 
-        // Seed Payment
-        await this.paymentModel.create({
-          orderId: order._id,
-          amount: order.totalPrice,
-          method: 'cash',
-          status: 'pending',
-        });
-        this.logger.log('>>> INIT PAYMENTS DONE...');
+          for (let i = 0; i < orderCount; i++) {
+            // random 1–3 sản phẩm mỗi order
+            const selectedProducts = products
+              .sort(() => 0.5 - Math.random())
+              .slice(0, Math.floor(Math.random() * 3) + 1);
+
+            const items = selectedProducts.map((p) => ({
+              productId: p._id,
+              quantity: Math.floor(Math.random() * 3) + 1,
+              price: p.price,
+            }));
+
+            const totalPrice = items.reduce(
+              (sum, item) => sum + item.price * item.quantity,
+              0,
+            );
+
+            const order = await this.orderModel.create({
+              userId: user._id,
+              items,
+              totalPrice,
+              status: 'pending',
+            });
+
+            await this.paymentModel.create({
+              orderId: order._id,
+              amount: order.totalPrice,
+              method: Math.random() > 0.5 ? 'cash' : 'credit_card',
+              status: Math.random() > 0.3 ? 'paid' : 'pending',
+            });
+          }
+        }
+
+        this.logger.log('>>> INIT ORDERS & PAYMENTS DONE...');
       }
     }
   }
