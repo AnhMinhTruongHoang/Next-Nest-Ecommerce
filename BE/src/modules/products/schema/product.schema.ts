@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, Types } from 'mongoose';
+import { Category } from 'src/modules/categories/schema/category.schema';
 
 export type ProductDocument = HydratedDocument<Product>;
 
@@ -23,9 +24,8 @@ export class Product {
   @Prop({ default: 0 })
   sold: number;
 
-  // Tham chiếu Category
-  @Prop({ type: Types.ObjectId, ref: 'Category', required: true })
-  category: Types.ObjectId;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Category' })
+  category: Category;
 
   @Prop([String])
   images: string[];

@@ -35,7 +35,7 @@ export class ProductsService {
       .skip(offset)
       .limit(defaultLimit)
       .sort(sort as any)
-      .populate(population)
+      .populate('category', 'name')
       .exec();
 
     return {
