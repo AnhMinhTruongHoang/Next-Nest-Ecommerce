@@ -20,6 +20,9 @@ export class Product {
   @Prop({ default: 0 })
   stock: number;
 
+  @Prop({ default: 0 })
+  sold: number;
+
   // Tham chiếu Category
   @Prop({ type: Types.ObjectId, ref: 'Category', required: true })
   category: Types.ObjectId;

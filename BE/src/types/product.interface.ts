@@ -5,6 +5,7 @@ export interface Product {
   brand: string;
   price: number;
   stock?: number;
+  sold?: number;
   images?: string[];
   isDeleted?: boolean;
   category: string;
