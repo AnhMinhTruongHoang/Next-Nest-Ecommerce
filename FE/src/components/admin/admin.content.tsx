@@ -15,8 +15,6 @@ const AdminContent = ({
         style={{
           padding: 24,
           minHeight: "calc(100vh - 180px)",
-          // background: "#ccc",
-          // borderRadius: "#ccc",
         }}
       >
         {children}

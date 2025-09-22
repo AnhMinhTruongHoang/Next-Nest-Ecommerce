@@ -47,7 +47,7 @@ const ProductsGrid = () => {
 
   return (
     <>
-      <Carousel arrows dots autoplay>
+      <Carousel arrows dots>
         {slides.map((group, index) => (
           <div key={index}>
             <div

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Input, notification, Select, Form, InputNumber } from "antd";
 import { IUser } from "next-auth";
-import { updateUserAction } from "@/lib/actions";
+import { updateUserAction } from "@/lib/user.actions";
 
 const { Option } = Select;
 interface IProps {

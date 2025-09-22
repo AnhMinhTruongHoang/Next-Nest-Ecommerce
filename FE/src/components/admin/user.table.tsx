@@ -13,7 +13,7 @@ import {
 import { IUser } from "next-auth";
 import UpdateUserModal from "./update.user";
 import CreateUserModal from "./create.user";
-import { deleteUserAction } from "@/lib/actions";
+import { deleteUserAction } from "@/lib/user.actions";
 import ViewUserModal from "./view.User.Modal";
 
 const UsersTable = () => {
@@ -101,7 +101,7 @@ const UsersTable = () => {
     const d = await deleteUserAction(user, access_token);
     if (d.data) {
       notification.success({
-        message: "Xóa user thành công.",
+        message: "Xóa product thành công.",
       });
       getData();
     } else {
@@ -117,6 +117,7 @@ const UsersTable = () => {
     {
       title: "Email",
       dataIndex: "email",
+      align: "center",
       responsive: ["sm"],
       sorter: (a, b) => a.email.localeCompare(b.email),
       render: (value, record) => (
@@ -134,6 +135,7 @@ const UsersTable = () => {
     {
       title: "Name",
       dataIndex: "name",
+      align: "center",
       responsive: ["xs", "sm"],
       sorter: (a, b) => a.name?.localeCompare(b.name),
       filterDropdown: ({
@@ -171,6 +173,7 @@ const UsersTable = () => {
     {
       title: "Role",
       dataIndex: "role",
+      align: "center",
       responsive: ["md"],
       sorter: (a, b) => a.role.localeCompare(b.role),
       filters: [
@@ -187,6 +190,7 @@ const UsersTable = () => {
     {
       title: "Active",
       dataIndex: "isActive",
+      align: "center",
       responsive: ["md"],
       sorter: (a, b) => Number(a.isActive) - Number(b.isActive),
       render: (isActive: boolean) =>

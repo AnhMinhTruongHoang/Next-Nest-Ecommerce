@@ -1,4 +1,3 @@
-// components/SafeHydrate.tsx
 "use client";
 
 import React from "react";
@@ -8,6 +7,9 @@ export default function SafeHydrate({
 }: {
   children: React.ReactNode;
 }) {
-  if (typeof window === "undefined") return null;
-  return <>{children}</>;
+  return (
+    <div suppressHydrationWarning>
+      {typeof window === "undefined" ? null : children}
+    </div>
+  );
 }

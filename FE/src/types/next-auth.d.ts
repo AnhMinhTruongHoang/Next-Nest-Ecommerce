@@ -32,6 +32,21 @@ declare module "next-auth" {
     __v: number;
   }
 
+  interface IProduct {
+    _id: string;
+    thumbnail: string;
+    slider: string[];
+    name: string;
+    brand: string;
+    price: number;
+    stock: number;
+    sold: number;
+    quantity: number;
+    category: string;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+
   interface User extends DefaultUser {
     access_token?: string;
     refresh_token?: string;

@@ -5,6 +5,7 @@ import {
   AppstoreOutlined,
   HomeOutlined,
   MailOutlined,
+  ProductFilled,
   SettingOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
@@ -36,8 +37,13 @@ const AdminSideBar = () => {
         },
         {
           key: "users",
-          label: <Link href={"/dashboard/user"}>Manage Users</Link>,
+          label: <Link href={"/dashboard/users"}>Manage Users</Link>,
           icon: <TeamOutlined />,
+        },
+        {
+          key: "products",
+          label: <Link href={"/dashboard/products"}>Manage Products</Link>,
+          icon: <ProductFilled />,
         },
         {
           key: "sub1",
