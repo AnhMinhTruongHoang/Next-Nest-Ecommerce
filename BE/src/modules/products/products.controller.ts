@@ -6,10 +6,12 @@ import {
   Param,
   Patch,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { ResponseMessage } from 'src/health/decorator/customize';
 
 @Controller('products')
 export class ProductsController {
@@ -21,8 +23,13 @@ export class ProductsController {
   }
 
   @Get()
-  findAll() {
-    return this.productsService.findAll();
+  @ResponseMessage('Fetch product with paginate')
+  findAll(
+    @Query('current') currentPage: string,
+    @Query('pageSize') limit: string,
+    @Query() qs: string,
+  ) {
+    return this.productsService.findAll(+currentPage, +limit, qs);
   }
 
   @Get(':id')

@@ -4,6 +4,7 @@ import { ProductDocument, Product } from './schema/product.schema';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
+import aqp from 'api-query-params';
 
 @Injectable()
 export class ProductsService {
@@ -16,10 +17,38 @@ export class ProductsService {
     const created = new this.productModel(dto);
     return created.save();
   }
+  // NOTE: Find all products with pagination, filtering and sorting
+  async findAll(currentPage: number, limit: number, qs: string) {
+    const { filter, sort, population } = aqp(qs);
+    delete filter.current;
+    delete filter.pageSize;
 
-  async findAll() {
-    return this.productModel.find({ isDeleted: false }).exec();
+    const offset = (+currentPage - 1) * +limit;
+    const defaultLimit = +limit || 10;
+
+    const totalItems = await this.productModel.countDocuments(filter);
+    const totalPages = Math.ceil(totalItems / defaultLimit);
+
+    const result = await this.productModel
+      .find(filter)
+      .skip(offset)
+      .limit(defaultLimit)
+      .sort(sort as any)
+      .populate(population)
+      .exec();
+
+    return {
+      meta: {
+        current: currentPage,
+        pageSize: limit,
+        pages: totalPages,
+        total: totalItems,
+      },
+      result,
+    };
   }
+
+  ///
 
   async findOne(id: string) {
     const product = await this.productModel.findById(id).exec();

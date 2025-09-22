@@ -17,15 +17,15 @@ export class Product {
   @Prop({ default: 0 })
   stock: number;
 
+  // Tham chiếu Category
+  @Prop({ type: Types.ObjectId, ref: 'Category', required: true })
+  category: Types.ObjectId;
+
   @Prop([String])
   images: string[];
 
   @Prop({ default: false })
   isDeleted: boolean;
-
-  // Tham chiếu Category
-  @Prop({ type: Types.ObjectId, ref: 'Category', required: true })
-  category: Types.ObjectId;
 
   @Prop({ type: Object })
   createdBy: {
