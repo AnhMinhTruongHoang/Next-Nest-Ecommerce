@@ -9,6 +9,9 @@ export class Product {
   name: string;
 
   @Prop()
+  brand: string;
+
+  @Prop()
   description: string;
 
   @Prop({ required: true })

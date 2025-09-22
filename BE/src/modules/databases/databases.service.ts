@@ -133,6 +133,7 @@ export class DatabasesService implements OnModuleInit {
       const monitor = categories.find((c) => c.name === 'Monitor');
       const chairs = categories.find((c) => c.name === 'Chairs');
 
+      // Product sample
       const products = [
         // Mouse
         {
@@ -141,6 +142,7 @@ export class DatabasesService implements OnModuleInit {
           price: 20,
           stock: 100,
           category: mouse?._id,
+          brand: 'Logitech',
         },
         {
           name: 'Razer DeathAdder',
@@ -148,6 +150,7 @@ export class DatabasesService implements OnModuleInit {
           price: 50,
           stock: 80,
           category: mouse?._id,
+          brand: 'Razer',
         },
         {
           name: 'SteelSeries Rival 3',
@@ -155,6 +158,7 @@ export class DatabasesService implements OnModuleInit {
           price: 30,
           stock: 120,
           category: mouse?._id,
+          brand: 'SteelSeries',
         },
 
         // Keyboard
@@ -164,6 +168,7 @@ export class DatabasesService implements OnModuleInit {
           price: 120,
           stock: 50,
           category: keyboard?._id,
+          brand: 'Razer',
         },
         {
           name: 'Corsair K95 RGB',
@@ -171,6 +176,7 @@ export class DatabasesService implements OnModuleInit {
           price: 180,
           stock: 40,
           category: keyboard?._id,
+          brand: 'Corsair',
         },
         {
           name: 'Logitech G213',
@@ -178,6 +184,7 @@ export class DatabasesService implements OnModuleInit {
           price: 70,
           stock: 60,
           category: keyboard?._id,
+          brand: 'Logitech',
         },
 
         // Monitor
@@ -187,6 +194,7 @@ export class DatabasesService implements OnModuleInit {
           price: 200,
           stock: 30,
           category: monitor?._id,
+          brand: 'ASUS',
         },
         {
           name: 'Acer Predator 27"',
@@ -194,6 +202,7 @@ export class DatabasesService implements OnModuleInit {
           price: 400,
           stock: 20,
           category: monitor?._id,
+          brand: 'Acer',
         },
         {
           name: 'Samsung Odyssey G5',
@@ -201,6 +210,7 @@ export class DatabasesService implements OnModuleInit {
           price: 350,
           stock: 25,
           category: monitor?._id,
+          brand: 'Samsung',
         },
 
         // Chairs
@@ -210,6 +220,7 @@ export class DatabasesService implements OnModuleInit {
           price: 250,
           stock: 15,
           category: chairs?._id,
+          brand: 'DXRacer',
         },
         {
           name: 'Secretlab Titan Evo',
@@ -217,6 +228,7 @@ export class DatabasesService implements OnModuleInit {
           price: 450,
           stock: 10,
           category: chairs?._id,
+          brand: 'Secretlab',
         },
         {
           name: 'AKRacing Core EX',
@@ -224,6 +236,7 @@ export class DatabasesService implements OnModuleInit {
           price: 200,
           stock: 20,
           category: chairs?._id,
+          brand: 'AKRacing',
         },
       ];
 

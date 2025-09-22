@@ -17,6 +17,7 @@ export class ProductsService {
     const created = new this.productModel(dto);
     return created.save();
   }
+
   // NOTE: Find all products with pagination, filtering and sorting
   async findAll(currentPage: number, limit: number, qs: string) {
     const { filter, sort, population } = aqp(qs);

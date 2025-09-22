@@ -4,6 +4,9 @@ export class CreateProductDto {
   @IsString()
   name: string;
 
+  @IsString()
+  brand: string;
+
   @IsOptional()
   @IsString()
   description?: string;
