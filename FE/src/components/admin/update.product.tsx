@@ -7,6 +7,11 @@ import { IProduct } from "next-auth";
 
 const { Option } = Select;
 
+interface ICategory {
+  _id: string;
+  name: string;
+}
+
 interface IProps {
   access_token: string;
   getData: () => Promise<void>;
@@ -28,7 +33,22 @@ const UpdateProductModal = (props: IProps) => {
 
   const [form] = Form.useForm();
   const [isSubmit, setIsSubmit] = useState(false);
+  const [categories, setCategories] = useState<ICategory[]>([]);
 
+  // Lấy danh sách category khi modal mở
+  useEffect(() => {
+    if (isUpdateModalOpen) {
+      fetch("http://localhost:8000/api/v1/categories", {
+        headers: { Authorization: `Bearer ${access_token}` },
+      })
+        .then((res) => res.json())
+        .then((d) => {
+          if (d.data) setCategories(d.data);
+        });
+    }
+  }, [isUpdateModalOpen]);
+
+  // Set giá trị form khi có dataUpdate
   useEffect(() => {
     if (dataUpdate) {
       form.setFieldsValue({
@@ -38,9 +58,10 @@ const UpdateProductModal = (props: IProps) => {
         slider: dataUpdate.slider?.join(", "),
         price: dataUpdate.price,
         stock: dataUpdate.stock,
-        sold: dataUpdate.sold,
-        quantity: dataUpdate.quantity,
-        category: dataUpdate.category,
+        category:
+          typeof dataUpdate.category === "object"
+            ? (dataUpdate.category as any)._id
+            : dataUpdate.category,
       });
     }
   }, [dataUpdate]);
@@ -138,25 +159,17 @@ const UpdateProductModal = (props: IProps) => {
           <InputNumber style={{ width: "100%" }} min={0} />
         </Form.Item>
 
-        <Form.Item label="Sold" name="sold">
-          <InputNumber style={{ width: "100%" }} min={0} />
-        </Form.Item>
-
-        <Form.Item label="Quantity" name="quantity">
-          <InputNumber style={{ width: "100%" }} min={0} />
-        </Form.Item>
-
         <Form.Item
           label="Category"
           name="category"
           rules={[{ required: true, message: "Please select category!" }]}
         >
           <Select placeholder="Select category">
-            {/* Option list có thể fetch từ API categories */}
-            <Option value="Mouse">Mouse</Option>
-            <Option value="Keyboard">Keyboard</Option>
-            <Option value="Monitor">Monitor</Option>
-            <Option value="Chairs">Chairs</Option>
+            {categories.map((cat) => (
+              <Option key={cat._id} value={cat._id}>
+                {cat.name}
+              </Option>
+            ))}
           </Select>
         </Form.Item>
       </Form>
