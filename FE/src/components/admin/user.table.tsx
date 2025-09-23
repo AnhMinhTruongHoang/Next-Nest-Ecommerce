@@ -132,6 +132,7 @@ const UsersTable = () => {
         </Button>
       ),
     },
+    
     {
       title: "Name",
       dataIndex: "name",
@@ -170,6 +171,7 @@ const UsersTable = () => {
       onFilter: (value, record) =>
         record.name.toLowerCase().includes((value as string).toLowerCase()),
     },
+   
     {
       title: "Role",
       dataIndex: "role",

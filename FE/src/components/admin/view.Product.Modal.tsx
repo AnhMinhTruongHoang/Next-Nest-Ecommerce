@@ -17,6 +17,9 @@ const ViewProductModal: React.FC<ViewProductModalProps> = ({
   setIsViewModalOpen,
   productData,
 }) => {
+  const safeText = (val: any) =>
+    typeof val === "object" && val !== null ? val.name : val;
+
   return (
     <Modal
       open={isOpen}
@@ -39,7 +42,7 @@ const ViewProductModal: React.FC<ViewProductModalProps> = ({
           <Descriptions.Item label="Thumbnail">
             <Image
               src={productData.thumbnail}
-              alt={productData.name}
+              alt={safeText(productData.name)}
               width={100}
             />
           </Descriptions.Item>
@@ -56,12 +59,14 @@ const ViewProductModal: React.FC<ViewProductModalProps> = ({
             </Descriptions.Item>
           )}
 
-          <Descriptions.Item label="Name">{productData.name}</Descriptions.Item>
+          <Descriptions.Item label="Name">
+            {safeText(productData.name)}
+          </Descriptions.Item>
           <Descriptions.Item label="Brand">
-            {productData.brand}
+            {safeText(productData.brand)}
           </Descriptions.Item>
           <Descriptions.Item label="Category">
-            {productData.category}
+            {safeText(productData.category)}
           </Descriptions.Item>
           <Descriptions.Item label="Price">
             ${productData.price}
@@ -70,9 +75,6 @@ const ViewProductModal: React.FC<ViewProductModalProps> = ({
             {productData.stock}
           </Descriptions.Item>
           <Descriptions.Item label="Sold">{productData.sold}</Descriptions.Item>
-          <Descriptions.Item label="Quantity">
-            {productData.quantity}
-          </Descriptions.Item>
           <Descriptions.Item label="Created At">
             {new Date(productData.createdAt).toLocaleString()}
           </Descriptions.Item>

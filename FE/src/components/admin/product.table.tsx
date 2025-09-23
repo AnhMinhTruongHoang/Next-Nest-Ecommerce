@@ -96,6 +96,17 @@ const ProductsTable = () => {
       dataIndex: "name",
       align: "center",
       responsive: ["xs", "sm", "md", "lg"],
+      render: (value, record) => (
+        <Button
+          type="link"
+          onClick={() => {
+            setViewProduct(record);
+            setIsViewModalOpen(true);
+          }}
+        >
+          {typeof value === "object" && value !== null ? value.name : value}
+        </Button>
+      ),
       filterDropdown: ({
         setSelectedKeys,
         selectedKeys,
@@ -125,8 +136,13 @@ const ProductsTable = () => {
       filterIcon: (filtered) => (
         <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
       ),
-      onFilter: (value, record) =>
-        record.name.toLowerCase().includes((value as string).toLowerCase()),
+      onFilter: (value, record) => {
+        const nameValue =
+          typeof record.name === "object" ? record.name : record.name;
+        return nameValue
+          .toLowerCase()
+          .includes((value as string).toLowerCase());
+      },
     },
 
     {
