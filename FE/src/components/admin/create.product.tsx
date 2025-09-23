@@ -123,21 +123,16 @@ const CreateProductModal = (props: IProps) => {
           <InputNumber style={{ width: "100%" }} min={0} />
         </Form.Item>
 
-        <Form.Item label="Quantity" name="quantity">
-          <InputNumber style={{ width: "100%" }} min={0} />
-        </Form.Item>
-
         <Form.Item
           label="Category"
           name="category"
           rules={[{ required: true, message: "Please select category!" }]}
         >
           <Select placeholder="Select category">
-            {/* Option list có thể fetch từ API categories */}
-            <Option value="Mouse">Mouse</Option>
-            <Option value="Keyboard">Keyboard</Option>
-            <Option value="Monitor">Monitor</Option>
-            <Option value="Chairs">Chairs</Option>
+            <Option value="68d05ecd4bf0f2b18e61ba5f">Mouse</Option>
+            <Option value="68d05ecd4bf0f2b18e61ba60">Keyboard</Option>
+            <Option value="68d05ecd4bf0f2b18e61ba61">Monitor</Option>
+            <Option value="68d05ecd4bf0f2b18e61ba62">Chairs</Option>
           </Select>
         </Form.Item>
       </Form>

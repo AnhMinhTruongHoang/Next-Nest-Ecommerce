@@ -8,12 +8,8 @@ export default function UserLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="vi">
-      <body>
-        <ClientLayout>
-          <main className="p-4">{children}</main>
-        </ClientLayout>
-      </body>
-    </html>
+    <ClientLayout>
+      <main className="p-4">{children}</main>
+    </ClientLayout>
   );
 }
