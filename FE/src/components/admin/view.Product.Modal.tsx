@@ -10,6 +10,7 @@ import {
   GetProp,
   UploadFile,
   Upload,
+  Divider,
 } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { IProduct } from "next-auth";
@@ -150,7 +151,7 @@ const ViewProductModal: React.FC<ViewProductModalProps> = ({
           </Descriptions.Item>
         </Descriptions>
       )}
-      <hr />
+      <Divider>Images</Divider>
       <>
         <Upload
           action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
@@ -158,6 +159,7 @@ const ViewProductModal: React.FC<ViewProductModalProps> = ({
           fileList={fileList}
           onPreview={handlePreview}
           onChange={handleChange}
+          showUploadList={{ showRemoveIcon: false }}
         ></Upload>
         {previewImage && (
           <Image
