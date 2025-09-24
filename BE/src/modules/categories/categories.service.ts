@@ -20,7 +20,7 @@ export class CategoriesService {
   }
 
   async findAll() {
-    return this.categoryModel.find().exec(); 
+    return this.categoryModel.find().exec();
   }
 
   @Public()
@@ -32,11 +32,11 @@ export class CategoriesService {
   }
 
   async update(id: string, dto: UpdateCategoryDto) {
-    const category = await this.categoryModel
-      .findByIdAndUpdate(id, dto, { new: true })
-      .exec();
-    if (!category) throw new NotFoundException('Category not found');
-    return category;
+    const category = await this.categoryModel.findById(id).exec();
+    if (!category || category.isDeleted) {
+      throw new NotFoundException('Category not found or deleted');
+    }
+    return this.categoryModel.findByIdAndUpdate(id, dto, { new: true }).exec();
   }
 
   async remove(id: string) {
