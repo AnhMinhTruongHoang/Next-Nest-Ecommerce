@@ -144,11 +144,11 @@ export class DatabasesService implements OnModuleInit {
           sold: 0,
           category: mouse?._id,
           brand: 'Logitech',
-          thumbnail: '/images/thumbnails/LogitechG102t.jpg',
+          thumbnail: '/public/images/thumbnails/LogitechG102t.jpg',
           images: [
-            '/images/slider/LogitechG102s1.jpg',
-            '/images/slider/LogitechG102s2.jpg',
-            '/images/slider/LogitechG102s3.jpg',
+            '/public/images/slider/LogitechG102s1.jpg',
+            '/public/images/slider/LogitechG102s2.jpg',
+            '/public/images/slider/LogitechG102s3.jpg',
           ],
         },
         {
@@ -159,11 +159,11 @@ export class DatabasesService implements OnModuleInit {
           sold: 0,
           category: mouse?._id,
           brand: 'Razer',
-          thumbnail: '/images/thumbnails/RazerDeathAdderT.jpg',
+          thumbnail: '/public/images/thumbnails/RazerDeathAdderT.jpg',
           images: [
-            '/images/slider/RazerDeathAdders1.jpg',
-            '/images/slider/RazerDeathAdders2.jpg',
-            '/images/slider/RazerDeathAdders3.jpg',
+            '/public/images/slider/RazerDeathAdders1.jpg',
+            '/public/images/slider/RazerDeathAdders2.jpg',
+            '/public/images/slider/RazerDeathAdders3.jpg',
           ],
         },
         {
@@ -174,11 +174,11 @@ export class DatabasesService implements OnModuleInit {
           sold: 0,
           category: mouse?._id,
           brand: 'SteelSeries',
-          thumbnail: '/images/thumbnails/SteelSeriesRivalT.jpg',
+          thumbnail: '/public/images/thumbnails/SteelSeriesRivalT.jpg',
           images: [
-            '/images/slider/SteelSeriesRivals1.jpg',
-            '/images/slider/SteelSeriesRivals2.jpg',
-            '/images/slider/SteelSeriesRivals3.jpg',
+            '/public/images/slider/SteelSeriesRivals1.jpg',
+            '/public/images/slider/SteelSeriesRivals2.jpg',
+            '/public/images/slider/SteelSeriesRivals3.jpg',
           ],
         },
 
@@ -191,11 +191,11 @@ export class DatabasesService implements OnModuleInit {
           sold: 0,
           category: keyboard?._id,
           brand: 'Razer',
-          thumbnail: '/images/thumbnails/RazerBlackWidowT.jpg',
+          thumbnail: '/public/images/thumbnails/RazerBlackWidowT.jpg',
           images: [
-            '/images/slider/RazerBlackWidows1.jpg',
-            '/images/slider/RazerBlackWidows2.jpg',
-            '/images/slider/RazerBlackWidows3.jpg',
+            '/public/images/slider/RazerBlackWidows1.jpg',
+            '/public/images/slider/RazerBlackWidows2.jpg',
+            '/public/images/slider/RazerBlackWidows3.jpg',
           ],
         },
         {
@@ -206,11 +206,11 @@ export class DatabasesService implements OnModuleInit {
           sold: 0,
           category: keyboard?._id,
           brand: 'Corsair',
-          thumbnail: '/images/thumbnails/CorsairK95T.jpg',
+          thumbnail: '/public/images/thumbnails/CorsairK95T.jpg',
           images: [
-            '/images/slider/CorsairK95s1.jpg',
-            '/images/slider/CorsairK95s2.jpg',
-            '/images/slider/CorsairK95s3.jpg',
+            '/public/images/slider/CorsairK95s1.jpg',
+            '/public/images/slider/CorsairK95s2.jpg',
+            '/public/images/slider/CorsairK95s3.jpg',
           ],
         },
         {
@@ -221,11 +221,11 @@ export class DatabasesService implements OnModuleInit {
           sold: 0,
           category: keyboard?._id,
           brand: 'Logitech',
-          thumbnail: '/images/thumbnails/LogitechAuroraT.jpg',
+          thumbnail: '/public/images/thumbnails/LogitechAuroraT.jpg',
           images: [
-            '/images/slider/LogitechAuroras1.jpg',
-            '/images/slider/LogitechAuroras2.jpg',
-            '/images/slider/LogitechAuroras3.jpg',
+            '/public/images/slider/LogitechAuroras1.jpg',
+            '/public/images/slider/LogitechAuroras2.jpg',
+            '/public/images/slider/LogitechAuroras3.jpg',
           ],
         },
 
@@ -238,10 +238,10 @@ export class DatabasesService implements OnModuleInit {
           sold: 0,
           category: monitor?._id,
           brand: 'ASUS',
-          thumbnail: '/images/thumbnails/ASUSTUF24T.jpg',
+          thumbnail: '/public/images/thumbnails/ASUSTUF24T.jpg',
           images: [
-            '/images/slider/ASUSTUF24s1.jpg',
-            '/images/slider/ASUSTUF24s2.jpg',
+            '/public/images/slider/ASUSTUF24s1.jpg',
+            '/public/images/slider/ASUSTUF24s2.jpg',
           ],
         },
         {
@@ -252,10 +252,10 @@ export class DatabasesService implements OnModuleInit {
           sold: 0,
           category: monitor?._id,
           brand: 'Acer',
-          thumbnail: '/images/thumbnails/AcerPredator27T.jpg',
+          thumbnail: '/public/images/thumbnails/AcerPredator27T.jpg',
           images: [
-            '/images/slider/AcerPredator27s1.jpg',
-            '/images/slider/AcerPredator27s2.jpg',
+            '/public/images/slider/AcerPredator27s1.jpg',
+            '/public/images/slider/AcerPredator27s2.jpg',
           ],
         },
         {
@@ -266,10 +266,10 @@ export class DatabasesService implements OnModuleInit {
           sold: 0,
           category: monitor?._id,
           brand: 'Samsung',
-          thumbnail: '/images/thumbnails/SamsungOdysseyG5T.jpg',
+          thumbnail: '/public/images/thumbnails/SamsungOdysseyG5T.jpg',
           images: [
-            '/images/slider/SamsungOdysseyG5s1.jpg',
-            '/images/slider/SamsungOdysseyG5s2.jpg',
+            '/public/images/slider/SamsungOdysseyG5s1.jpg',
+            '/public/images/slider/SamsungOdysseyG5s2.jpg',
           ],
         },
 
@@ -282,10 +282,10 @@ export class DatabasesService implements OnModuleInit {
           sold: 0,
           category: chairs?._id,
           brand: 'DXRacer',
-          thumbnail: '/images/thumbnails/DXRacerFormulaT.jpg',
+          thumbnail: '/public/images/thumbnails/DXRacerFormulaT.jpg',
           images: [
-            '/images/slider/DXRacerFormulas1.png',
-            '/images/slider/DXRacerFormulas2.jpg',
+            '/public/images/slider/DXRacerFormulas1.png',
+            '/public/images/slider/DXRacerFormulas2.jpg',
           ],
         },
         {
@@ -296,10 +296,10 @@ export class DatabasesService implements OnModuleInit {
           sold: 0,
           category: chairs?._id,
           brand: 'Secretlab',
-          thumbnail: '/images/thumbnails/SecretlabTitanEvoT.jpg',
+          thumbnail: '/public/images/thumbnails/SecretlabTitanEvoT.jpg',
           images: [
-            '/images/slider/SecretlabTitanEvos1.jpg',
-            '/images/slider/SteelSeriesRivals2.jpg',
+            '/public/images/slider/SecretlabTitanEvos1.jpg',
+            '/public/images/slider/SteelSeriesRivals2.jpg',
           ],
         },
         {
@@ -310,10 +310,10 @@ export class DatabasesService implements OnModuleInit {
           sold: 0,
           category: chairs?._id,
           brand: 'AKRacing',
-          thumbnail: '/images/thumbnails/AKRacingCoreExT.jpg',
+          thumbnail: '/public/images/thumbnails/AKRacingCoreExT.jpg',
           images: [
-            '/images/slider/AKRacingCoreExs1.jpg',
-            '/images/slider/AKRacingCoreEXs2.jpg',
+            '/public/images/slider/AKRacingCoreExs1.jpg',
+            '/public/images/slider/AKRacingCoreEXs2.jpg',
           ],
         },
       ];
