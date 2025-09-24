@@ -6,6 +6,9 @@ export class CreateProductDto {
 
   @IsString()
   thumbnail: string;
+  
+  @IsString()
+  images: string[];
 
   @IsString()
   brand: string;

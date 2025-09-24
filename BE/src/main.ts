@@ -83,6 +83,11 @@ async function bootstrap() {
 
   app.use('/images', express.static(join(__dirname, '..', 'public/images')));
 
+  // Cho phep serve static file
+  app.useStaticAssets(join(__dirname, '..', 'public'), {
+    prefix: '/public/',
+  });
+
   //////////////////////
   await app.listen(configService.get<string>('PORT'));
 }

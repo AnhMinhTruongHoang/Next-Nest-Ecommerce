@@ -7,7 +7,7 @@ export interface Product {
   stock?: number;
   sold?: number;
   thumbnail: string;
-  slider?: string[];
+  images?: string[];
   isDeleted?: boolean;
   category: string;
 

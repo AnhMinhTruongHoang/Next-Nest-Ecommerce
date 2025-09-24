@@ -30,8 +30,8 @@ export class Product {
   @Prop({ required: true })
   thumbnail: string;
 
-  @Prop([String])
-  slider: string[];
+  @Prop({ type: [String], default: [] })
+  images: string[];
 
   @Prop({ default: false })
   isDeleted: boolean;

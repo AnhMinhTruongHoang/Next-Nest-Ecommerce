@@ -20,7 +20,7 @@ export class ProductsService {
 
   // NOTE: Find all products with pagination, filtering and sorting
   async findAll(currentPage: number, limit: number, qs: string) {
-    const { filter, sort, population } = aqp(qs);
+    const { filter, sort } = aqp(qs);
     delete filter.current;
     delete filter.pageSize;
 

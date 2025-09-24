@@ -22,12 +22,16 @@ import { OrdersModule } from './modules/orders/orders.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { CartsModule } from './modules/carts/carts.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
+import { MulterModule } from '@nestjs/platform-express';
+import { multerConfig } from './modules/files/multer.config';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
+
+    MulterModule.register(multerConfig),
+
     ThrottlerModule.forRoot({
-      ///limit api call
       ttl: 60,
       limit: 10,
     }),
@@ -47,7 +51,7 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
       isGlobal: true,
       load: [google_oauth_config],
     }),
-    /// mailer
+
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -60,13 +64,12 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
             pass: configService.get<string>('EMAIL_AUTH_PASS'),
           },
         },
-
         defaults: {
           from: 'minhlapro01@gmail.com',
         },
         template: {
           dir: process.cwd() + '/src/mail/templates/',
-          adapter: new HandlebarsAdapter(), // or new PugAdapter() or new EjsAdapter()
+          adapter: new HandlebarsAdapter(),
           options: {
             strict: true,
           },
@@ -74,7 +77,6 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
       }),
       inject: [ConfigService],
     }),
-    ///
 
     UsersModule,
     AuthModule,
