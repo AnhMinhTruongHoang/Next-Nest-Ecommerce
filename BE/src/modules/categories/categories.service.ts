@@ -19,9 +19,8 @@ export class CategoriesService {
     return created.save();
   }
 
-  @Public()
   async findAll() {
-    return this.categoryModel.find({ isDeleted: false }).exec();
+    return this.categoryModel.find().exec(); 
   }
 
   @Public()
