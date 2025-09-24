@@ -1,18 +1,6 @@
-// types/next-auth.d.ts
 import NextAuth, { DefaultSession, DefaultUser } from "next-auth";
 
 declare module "next-auth" {
-  interface Session {
-    access_token?: string;
-    refresh_token?: string;
-    user: {
-      id?: string;
-      username?: string;
-      email?: string;
-      [key: string]: any;
-    };
-  }
-
   interface IUser {
     _id: string;
     email: string;
@@ -32,6 +20,11 @@ declare module "next-auth" {
     __v: number;
   }
 
+  interface ICategory {
+    _id?: string;
+    name: string;
+  }
+
   interface IProduct {
     _id: string;
     thumbnail: string;
@@ -42,9 +35,17 @@ declare module "next-auth" {
     stock: number;
     sold: number;
     quantity: number;
-    category: string;
+    category: ICategory | string;
     createdAt: Date;
     updatedAt: Date;
+  }
+
+  interface Session {
+    user: IUser; // 👈 dùng IUser luôn, không cần object lỏng lẻo nữa
+    access_token: string;
+    refresh_token: string;
+    access_expire: number;
+    error?: string;
   }
 
   interface User extends DefaultUser {
@@ -59,18 +60,5 @@ declare module "next-auth/jwt" {
     access_token?: string;
     refresh_token?: string;
     user?: any;
-  }
-}
-
-declare module "next-auth" {
-  /**
-   * Returned by `useSession`, `getSession` and received as a prop on the `SessionProvider` React Context
-   */
-  interface Session {
-    user: IUser;
-    access_token: string;
-    refresh_token: string;
-    access_expire: number;
-    error: string;
   }
 }

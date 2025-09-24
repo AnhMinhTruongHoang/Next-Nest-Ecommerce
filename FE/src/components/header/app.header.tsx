@@ -53,7 +53,7 @@ export default function AppHeader() {
     { key: "mouse", label: "Chuột Gaming" },
     { key: "keyboard", label: "Bàn phím" },
     { key: "headset", label: "Tai nghe" },
-    { key: "chair", label: "Ghế gaming" },
+    { key: "chairs", label: "Ghế gaming" },
     { key: "monitor", label: "Màn hình" },
     { key: "accessories", label: "Phụ kiện" },
   ];

@@ -10,9 +10,15 @@ import {
   Input,
   Space,
   Image,
+  Select,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  ArrowDownOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { deleteProductAction } from "@/lib/product.actions";
 import CreateProductModal from "./create.product";
 import UpdateProductModal from "./update.product";
@@ -136,13 +142,10 @@ const ProductsTable = () => {
       filterIcon: (filtered) => (
         <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
       ),
-      onFilter: (value, record) => {
-        const nameValue =
-          typeof record.name === "object" ? record.name : record.name;
-        return nameValue
+      onFilter: (value, record) =>
+        String(record.name)
           .toLowerCase()
-          .includes((value as string).toLowerCase());
-      },
+          .includes((value as string).toLowerCase()),
     },
 
     {
@@ -158,7 +161,7 @@ const ProductsTable = () => {
       }) => (
         <div style={{ padding: 8 }}>
           <Input
-            placeholder="Search name"
+            placeholder="Search brand"
             value={selectedKeys[0]}
             onChange={(e) =>
               setSelectedKeys(e.target.value ? [e.target.value] : [])
@@ -180,46 +183,59 @@ const ProductsTable = () => {
         <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
       ),
       onFilter: (value, record) =>
-        record.name.toLowerCase().includes((value as string).toLowerCase()),
+        record.brand?.toLowerCase().includes((value as string).toLowerCase()),
     },
+
     {
       title: "Category",
-      dataIndex: "category",
+      dataIndex: ["category", "name"], // vẫn hỗ trợ nested field
       align: "center",
-      responsive: ["xs", "sm", "md", "lg"],
-      render: (category) => category?.name || category,
-      filterDropdown: ({
-        setSelectedKeys,
-        selectedKeys,
-        confirm,
-        clearFilters,
-      }) => (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search name"
-            value={selectedKeys[0]}
-            onChange={(e) =>
-              setSelectedKeys(e.target.value ? [e.target.value] : [])
-            }
-            onPressEnter={() => confirm()}
-            style={{ width: 188, marginBottom: 8, display: "block" }}
-          />
-          <Space>
-            <Button type="primary" onClick={() => confirm()} size="small">
-              Search
-            </Button>
-            <Button onClick={() => clearFilters && clearFilters()} size="small">
-              Reset
-            </Button>
-          </Space>
-        </div>
-      ),
-      filterIcon: (filtered) => (
-        <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
-      ),
-      onFilter: (value, record) =>
-        record.name.toLowerCase().includes((value as string).toLowerCase()),
+      filters: [
+        { text: "Mouse", value: "Mouse" },
+        { text: "Keyboard", value: "Keyboard" },
+        { text: "Monitor", value: "Monitor" },
+        { text: "Chairs", value: "Chairs" },
+      ],
+      onFilter: (value, record) => {
+        const categoryName =
+          typeof record.category === "string"
+            ? record.category
+            : record.category?.name;
+
+        return categoryName?.toLowerCase() === (value as string).toLowerCase();
+      },
+      render: (value, record) => {
+        const categoryName =
+          typeof record.category === "string"
+            ? record.category
+            : record.category?.name;
+
+        return categoryName || "N/A";
+      },
     },
+
+    {
+      title: "Thumbnail",
+      dataIndex: "thumbnail",
+      align: "center",
+      render: (thumbnail: string) =>
+        thumbnail ? (
+          <Image
+            src={
+              thumbnail.startsWith("http")
+                ? thumbnail
+                : `http://localhost:8000${thumbnail}`
+            }
+            alt="thumbnail"
+            width={60}
+            height={60}
+            style={{ objectFit: "cover", borderRadius: 4 }}
+          />
+        ) : (
+          <span>No image</span>
+        ),
+    },
+
     {
       title: "Price",
       dataIndex: "price",
@@ -228,6 +244,7 @@ const ProductsTable = () => {
       sorter: (a, b) => a.price - b.price,
       render: (price: number) => `$${price}`,
     },
+
     {
       title: "Stock",
       dataIndex: "stock",
@@ -242,6 +259,7 @@ const ProductsTable = () => {
       responsive: ["xs", "sm", "md", "lg"],
       sorter: (a, b) => a.sold - b.sold,
     },
+
     {
       title: "Actions",
       align: "center",
@@ -280,6 +298,9 @@ const ProductsTable = () => {
         }}
       >
         <h2>Table products</h2>
+        <ReloadOutlined onClick={getData} style={{ color: "green" }}>
+          Refresh
+        </ReloadOutlined>
         <Button
           icon={<PlusOutlined />}
           type="primary"
