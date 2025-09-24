@@ -41,12 +41,8 @@ export class CategoriesService {
   }
 
   async remove(id: string) {
-    const result = await this.categoryModel.findByIdAndUpdate(
-      id,
-      { isDeleted: true },
-      { new: true },
-    );
-    if (!result) throw new NotFoundException('Category not found');
-    return result;
+    const category = await this.categoryModel.softDelete({ _id: id });
+    if (!category) throw new NotFoundException('Category not found');
+    return { message: 'Category deleted successfully' };
   }
 }
