@@ -6,7 +6,8 @@ export interface Product {
   price: number;
   stock?: number;
   sold?: number;
-  images?: string[];
+  thumbnail: string;
+  slider?: string[];
   isDeleted?: boolean;
   category: string;
 

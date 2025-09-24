@@ -3,85 +3,59 @@ import {
   MulterModuleOptions,
   MulterOptionsFactory,
 } from '@nestjs/platform-express';
-import fs from 'fs';
 import { diskStorage } from 'multer';
-import path, { join } from 'path';
+import { extname, basename, join } from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class MulterConfigService implements MulterOptionsFactory {
-  getRootPath = () => {
-    return process.cwd();
-  };
+  getRootPath = () => process.cwd();
 
   ensureExists(targetDirectory: string) {
-    fs.mkdir(targetDirectory, { recursive: true }, (error) => {
-      if (!error) {
-        console.log('Directory successfully created, or it already exists.');
-        return;
-      }
-      switch (error.code) {
-        case 'EEXIST':
-          // Error:
-          // Requested location already exists, but it's not a directory.
-          break;
-        case 'ENOTDIR':
-          // Error:
-          // The parent hierarchy contains a file with the same name as the dir
-          // you're trying to create.
-          break;
-        default:
-          // Some other error like permission denied.
-          console.error(error);
-          break;
-      }
-    });
+    try {
+      fs.mkdirSync(targetDirectory, { recursive: true });
+    } catch (error) {
+      console.error('Failed to create folder:', error);
+    }
   }
 
   createMulterOptions(): MulterModuleOptions {
     return {
       storage: diskStorage({
         destination: (req, file, cb) => {
-          const folder = req?.headers?.folder_type ?? 'default';
-          this.ensureExists(`public/images/${folder}`);
-          cb(null, join(this.getRootPath(), `public/images/${folder}`));
+          const folder = (req?.headers?.folder_type as string) ?? 'default';
+          const target = join(this.getRootPath(), `public/images/${folder}`);
+          this.ensureExists(target);
+          cb(null, target);
         },
         filename: (req, file, cb) => {
-          //get image extension
-          let extName = path.extname(file.originalname);
-
-          //get image's name (without extension)
-          let baseName = path.basename(file.originalname, extName);
-
-          let finalName = `${baseName}-${Date.now()}${extName}`;
+          const ext = extname(file.originalname);
+          const baseName = basename(file.originalname, ext);
+          const finalName = `${baseName}-${Date.now()}${ext}`;
           cb(null, finalName);
         },
       }),
       fileFilter: (req, file, cb) => {
-        const allowedFileTypes = [
-          'jpg',
-          'jpeg',
-          'png',
-          'gif',
-          'pdf',
-          'doc',
-          'docx',
+        const allowedMimeTypes = [
+          'image/jpeg',
+          'image/png',
+          'image/gif',
+          'application/pdf',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         ];
-        const fileExtension = file.originalname.split('.').pop().toLowerCase();
-        const isValidFileType = allowedFileTypes.includes(fileExtension);
-
-        if (!isValidFileType) {
-          cb(
+        if (!allowedMimeTypes.includes(file.mimetype)) {
+          return cb(
             new HttpException(
               'Invalid file type',
               HttpStatus.UNPROCESSABLE_ENTITY,
             ),
-            null,
+            false,
           );
-        } else cb(null, true);
+        }
+        cb(null, true);
       },
-      limits: {
-        fileSize: 1024 * 1024 * 1, // 1MB
-      },
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
     };
   }
 }

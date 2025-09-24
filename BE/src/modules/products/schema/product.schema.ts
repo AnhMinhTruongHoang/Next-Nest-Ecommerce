@@ -27,8 +27,11 @@ export class Product {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Category' })
   category: Category;
 
+  @Prop({ required: true })
+  thumbnail: string;
+
   @Prop([String])
-  images: string[];
+  slider: string[];
 
   @Prop({ default: false })
   isDeleted: boolean;

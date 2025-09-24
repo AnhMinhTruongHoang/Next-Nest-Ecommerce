@@ -9,6 +9,7 @@ import helmet from 'helmet';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser = require('cookie-parser');
 import { JwtAuthGuard } from './auth/guards/jwt.auth.guard';
+import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -78,6 +79,9 @@ async function bootstrap() {
       persistAuthorization: true,
     },
   });
+  /// img
+
+  app.use('/images', express.static(join(__dirname, '..', 'public/images')));
 
   //////////////////////
   await app.listen(configService.get<string>('PORT'));

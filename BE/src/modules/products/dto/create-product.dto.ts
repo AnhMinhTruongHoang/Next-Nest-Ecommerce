@@ -5,6 +5,9 @@ export class CreateProductDto {
   name: string;
 
   @IsString()
+  thumbnail: string;
+
+  @IsString()
   brand: string;
 
   @IsOptional()
@@ -32,5 +35,5 @@ export class CreateProductDto {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  images?: string[];
+  slider?: string[];
 }
