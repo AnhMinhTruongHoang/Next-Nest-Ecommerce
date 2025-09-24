@@ -144,6 +144,12 @@ export class DatabasesService implements OnModuleInit {
           sold: 0,
           category: mouse?._id,
           brand: 'Logitech',
+          thumbnail: '/public/images/thumbnails/LogitechG102t.jpg',
+          images: [
+            '/public/images/slider/LogitechG102s1.jpg',
+            '/public/images/slider/LogitechG102s2.jpg',
+            '/public/images/slider/LogitechG102s3.jpg',
+          ],
         },
         {
           name: 'Razer DeathAdder',
@@ -153,6 +159,12 @@ export class DatabasesService implements OnModuleInit {
           sold: 0,
           category: mouse?._id,
           brand: 'Razer',
+          thumbnail: '/public/images/thumbnails/RazerDeathAdderT.jpg',
+          images: [
+            '/public/images/slider/RazerDeathAdders1.jpg',
+            '/public/images/slider/RazerDeathAdders2.jpg',
+            '/public/images/slider/RazerDeathAdders3.jpg',
+          ],
         },
         {
           name: 'SteelSeries Rival 3',
@@ -162,6 +174,12 @@ export class DatabasesService implements OnModuleInit {
           sold: 0,
           category: mouse?._id,
           brand: 'SteelSeries',
+          thumbnail: '/public/images/thumbnails/SteelSeriesRivalT.jpg',
+          images: [
+            '/public/images/slider/SteelSeriesRivals1.jpg',
+            '/public/images/slider/SteelSeriesRivals2.jpg',
+            '/public/images/slider/SteelSeriesRivals3.jpg',
+          ],
         },
 
         // Keyboard
@@ -173,6 +191,12 @@ export class DatabasesService implements OnModuleInit {
           sold: 0,
           category: keyboard?._id,
           brand: 'Razer',
+          thumbnail: '/public/images/thumbnails/RazerBlackWidowT.jpg',
+          images: [
+            '/public/images/slider/RazerBlackWidows1.jpg',
+            '/public/images/slider/RazerBlackWidows2.jpg',
+            '/public/images/slider/RazerBlackWidows3.jpg',
+          ],
         },
         {
           name: 'Corsair K95 RGB',
@@ -182,15 +206,27 @@ export class DatabasesService implements OnModuleInit {
           sold: 0,
           category: keyboard?._id,
           brand: 'Corsair',
+          thumbnail: '/public/images/thumbnails/CorsairK95T.jpg',
+          images: [
+            '/public/images/slider/CorsairK95s1.jpg',
+            '/public/images/slider/CorsairK95s2.jpg',
+            '/public/images/slider/CorsairK95s3.jpg',
+          ],
         },
         {
-          name: 'Logitech G213',
+          name: 'Logitech Aurora G715 RGB',
           description: 'Membrane gaming keyboard',
           price: 70,
           stock: 60,
           sold: 0,
           category: keyboard?._id,
           brand: 'Logitech',
+          thumbnail: '/public/images/thumbnails/LogitechAuroraT.jpg',
+          images: [
+            '/public/images/slider/LogitechAuroras1.jpg',
+            '/public/images/slider/LogitechAuroras2.jpg',
+            '/public/images/slider/LogitechAuroras3.jpg',
+          ],
         },
 
         // Monitor
@@ -202,15 +238,25 @@ export class DatabasesService implements OnModuleInit {
           sold: 0,
           category: monitor?._id,
           brand: 'ASUS',
+          thumbnail: '/public/images/thumbnails/ASUSTUF24T.jpg',
+          images: [
+            '/public/images/slider/ASUSTUF24s1.jpg',
+            '/public/images/slider/ASUSTUF24s2.jpg',
+          ],
         },
         {
-          name: 'Acer Predator 27"',
+          name: 'Acer Predator 27" ',
           description: '2K 165Hz gaming monitor',
           price: 400,
           stock: 20,
           sold: 0,
           category: monitor?._id,
           brand: 'Acer',
+          thumbnail: '/public/images/thumbnails/AcerPredator27T.jpg',
+          images: [
+            '/public/images/slider/AcerPredator27s1.jpg',
+            '/public/images/slider/AcerPredator27s2.jpg',
+          ],
         },
         {
           name: 'Samsung Odyssey G5',
@@ -220,6 +266,11 @@ export class DatabasesService implements OnModuleInit {
           sold: 0,
           category: monitor?._id,
           brand: 'Samsung',
+          thumbnail: '/public/images/thumbnails/SamsungOdysseyG5T.jpg',
+          images: [
+            '/public/images/slider/SamsungOdysseyG5s1.jpg',
+            '/public/images/slider/SamsungOdysseyG5s2.jpg',
+          ],
         },
 
         // Chairs
@@ -231,6 +282,11 @@ export class DatabasesService implements OnModuleInit {
           sold: 0,
           category: chairs?._id,
           brand: 'DXRacer',
+          thumbnail: '/public/images/thumbnails/DXRacerFormulaT.jpg',
+          images: [
+            '/public/images/slider/DXRacerFormulas1.png',
+            '/public/images/slider/DXRacerFormulas2.jpg',
+          ],
         },
         {
           name: 'Secretlab Titan Evo',
@@ -240,6 +296,11 @@ export class DatabasesService implements OnModuleInit {
           sold: 0,
           category: chairs?._id,
           brand: 'Secretlab',
+          thumbnail: '/public/images/thumbnails/SecretlabTitanEvoT.jpg',
+          images: [
+            '/public/images/slider/SecretlabTitanEvos1.jpg',
+            '/public/images/slider/SteelSeriesRivals2.jpg',
+          ],
         },
         {
           name: 'AKRacing Core EX',
@@ -249,6 +310,11 @@ export class DatabasesService implements OnModuleInit {
           sold: 0,
           category: chairs?._id,
           brand: 'AKRacing',
+          thumbnail: '/public/images/thumbnails/AKRacingCoreExT.jpg',
+          images: [
+            '/public/images/slider/AKRacingCoreExs1.jpg',
+            '/public/images/slider/AKRacingCoreEXs2.jpg',
+          ],
         },
       ];
 
