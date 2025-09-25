@@ -111,215 +111,218 @@ export class DatabasesService implements OnModuleInit {
       this.logger.log('>>> INIT MEMBERSHIPS DONE...');
     }
 
-    // Seed Categories
-    const countCategories = await this.categoryModel.countDocuments();
-    if (countCategories === 0) {
-      await this.categoryModel.insertMany([
-        { name: 'Mouse', description: 'gaming gear' },
-        { name: 'Keyboard', description: 'gaming gear' },
-        { name: 'Monitor', description: 'gaming gear' },
-        { name: 'Chairs', description: 'gaming gear' },
-      ]);
-      this.logger.log('>>> INIT CATEGORIES DONE...');
-    }
+    // Seed Products (idempotent cho từng category)
+    const categories = await this.categoryModel.find();
 
-    // Seed Products
-    const countProducts = await this.productModel.countDocuments();
-    if (countProducts === 0) {
-      const categories = await this.categoryModel.find();
+    for (const category of categories) {
+      const countProductsInCat = await this.productModel.countDocuments({
+        category: category._id,
+      });
 
-      const mouse = categories.find((c) => c.name === 'Mouse');
-      const keyboard = categories.find((c) => c.name === 'Keyboard');
-      const monitor = categories.find((c) => c.name === 'Monitor');
-      const chairs = categories.find((c) => c.name === 'Chairs');
+      if (countProductsInCat === 0) {
+        let productsToInsert: any[] = [];
 
-      // Product sample
-      const products = [
-        // Mouse
-        {
-          name: 'Logitech G102',
-          description: 'Gaming mouse',
-          price: 20,
-          stock: 100,
-          sold: 0,
-          category: mouse?._id,
-          brand: 'Logitech',
-          thumbnail: '/images/thumbnails/LogitechG102t.jpg',
-          images: [
-            '/images/slider/LogitechG102s1.jpg',
-            '/images/slider/LogitechG102s2.jpg',
-            '/images/slider/LogitechG102s3.jpg',
-          ],
-        },
-        {
-          name: 'Razer DeathAdder',
-          description: 'Ergonomic gaming mouse',
-          price: 50,
-          stock: 80,
-          sold: 0,
-          category: mouse?._id,
-          brand: 'Razer',
-          thumbnail: '/images/thumbnails/RazerDeathAdderT.jpg',
-          images: [
-            '/images/slider/RazerDeathAdders1.jpg',
-            '/images/slider/RazerDeathAdders2.jpg',
-            '/images/slider/RazerDeathAdders3.jpg',
-          ],
-        },
-        {
-          name: 'SteelSeries Rival 3',
-          description: 'Budget-friendly gaming mouse',
-          price: 30,
-          stock: 120,
-          sold: 0,
-          category: mouse?._id,
-          brand: 'SteelSeries',
-          thumbnail: '/images/thumbnails/SteelSeriesRivalT.jpg',
-          images: [
-            '/images/slider/SteelSeriesRivals1.jpg',
-            '/images/slider/SteelSeriesRivals2.jpg',
-            '/images/slider/SteelSeriesRivals3.jpg',
-          ],
-        },
+        switch (category.name) {
+          case 'Mouse':
+            productsToInsert = [
+              {
+                name: 'Logitech G102',
+                description: 'Gaming mouse',
+                price: 20,
+                stock: 100,
+                sold: 0,
+                brand: 'Logitech',
+                category: category._id,
+                thumbnail: '/images/thumbnails/LogitechG102t.jpg',
+                images: [
+                  '/images/slider/LogitechG102s1.jpg',
+                  '/images/slider/LogitechG102s2.jpg',
+                  '/images/slider/LogitechG102s3.jpg',
+                ],
+              },
+              {
+                name: 'Razer DeathAdder',
+                description: 'Ergonomic gaming mouse',
+                price: 50,
+                stock: 80,
+                sold: 0,
+                brand: 'Razer',
+                category: category._id,
+                thumbnail: '/images/thumbnails/RazerDeathAdderT.jpg',
+                images: [
+                  '/images/slider/RazerDeathAdders1.jpg',
+                  '/images/slider/RazerDeathAdders2.jpg',
+                  '/images/slider/RazerDeathAdders3.jpg',
+                ],
+              },
+              {
+                name: 'SteelSeries Rival 3',
+                description: 'Budget-friendly mouse',
+                price: 30,
+                stock: 120,
+                sold: 0,
+                brand: 'SteelSeries',
+                category: category._id,
+                thumbnail: '/images/thumbnails/SteelSeriesRivalT.jpg',
+                images: [
+                  '/images/slider/SteelSeriesRivals1.jpg',
+                  '/images/slider/SteelSeriesRivals2.jpg',
+                  '/images/slider/SteelSeriesRivals3.jpg',
+                ],
+              },
+            ];
+            break;
 
-        // Keyboard
-        {
-          name: 'Razer BlackWidow',
-          description: 'Mechanical keyboard',
-          price: 120,
-          stock: 50,
-          sold: 0,
-          category: keyboard?._id,
-          brand: 'Razer',
-          thumbnail: '/images/thumbnails/RazerBlackWidowT.jpg',
-          images: [
-            '/images/slider/RazerBlackWidows1.jpg',
-            '/images/slider/RazerBlackWidows2.jpg',
-            '/images/slider/RazerBlackWidows3.jpg',
-          ],
-        },
-        {
-          name: 'Corsair K95 RGB',
-          description: 'Premium gaming keyboard',
-          price: 180,
-          stock: 40,
-          sold: 0,
-          category: keyboard?._id,
-          brand: 'Corsair',
-          thumbnail: '/images/thumbnails/CorsairK95T.jpg',
-          images: [
-            '/images/slider/CorsairK95s1.jpg',
-            '/images/slider/CorsairK95s2.jpg',
-            '/images/slider/CorsairK95s3.jpg',
-          ],
-        },
-        {
-          name: 'Logitech Aurora G715 RGB',
-          description: 'Membrane gaming keyboard',
-          price: 70,
-          stock: 60,
-          sold: 0,
-          category: keyboard?._id,
-          brand: 'Logitech',
-          thumbnail: '/images/thumbnails/LogitechAuroraT.jpg',
-          images: [
-            '/images/slider/LogitechAuroras1.jpg',
-            '/images/slider/LogitechAuroras2.jpg',
-            '/images/slider/LogitechAuroras3.jpg',
-          ],
-        },
+          case 'Keyboard':
+            productsToInsert = [
+              {
+                name: 'Razer BlackWidow',
+                description: 'Mechanical keyboard',
+                price: 120,
+                stock: 50,
+                sold: 0,
+                brand: 'Razer',
+                category: category._id,
+                thumbnail: '/images/thumbnails/RazerBlackWidowT.jpg',
+                images: [
+                  '/images/slider/RazerBlackWidows1.jpg',
+                  '/images/slider/RazerBlackWidows2.jpg',
+                  '/images/slider/RazerBlackWidows3.jpg',
+                ],
+              },
+              {
+                name: 'Corsair K95 RGB',
+                description: 'Premium gaming keyboard',
+                price: 180,
+                stock: 40,
+                sold: 0,
+                brand: 'Corsair',
+                category: category._id,
+                thumbnail: '/images/thumbnails/CorsairK95T.jpg',
+                images: [
+                  '/images/slider/CorsairK95s1.jpg',
+                  '/images/slider/CorsairK95s2.jpg',
+                  '/images/slider/CorsairK95s3.jpg',
+                ],
+              },
+              {
+                name: 'Logitech Aurora G715 RGB',
+                description: 'RGB gaming keyboard',
+                price: 70,
+                stock: 60,
+                sold: 0,
+                brand: 'Logitech',
+                category: category._id,
+                thumbnail: '/images/thumbnails/LogitechAuroraT.jpg',
+                images: [
+                  '/images/slider/LogitechAuroras1.jpg',
+                  '/images/slider/LogitechAuroras2.jpg',
+                  '/images/slider/LogitechAuroras3.jpg',
+                ],
+              },
+            ];
+            break;
 
-        // Monitor
-        {
-          name: 'ASUS TUF 24"',
-          description: '144Hz gaming monitor',
-          price: 200,
-          stock: 30,
-          sold: 0,
-          category: monitor?._id,
-          brand: 'ASUS',
-          thumbnail: '/images/thumbnails/ASUSTUF24T.jpg',
-          images: [
-            '/images/slider/ASUSTUF24s1.jpg',
-            '/images/slider/ASUSTUF24s2.jpg',
-          ],
-        },
-        {
-          name: 'Acer Predator 27" ',
-          description: '2K 165Hz gaming monitor',
-          price: 400,
-          stock: 20,
-          sold: 0,
-          category: monitor?._id,
-          brand: 'Acer',
-          thumbnail: '/images/thumbnails/AcerPredator27T.jpg',
-          images: [
-            '/images/slider/AcerPredator27s1.jpg',
-            '/images/slider/AcerPredator27s2.jpg',
-          ],
-        },
-        {
-          name: 'Samsung Odyssey G5',
-          description: 'Curved 144Hz monitor',
-          price: 350,
-          stock: 25,
-          sold: 0,
-          category: monitor?._id,
-          brand: 'Samsung',
-          thumbnail: '/images/thumbnails/SamsungOdysseyG5T.jpg',
-          images: [
-            '/images/slider/SamsungOdysseyG5s1.jpg',
-            '/images/slider/SamsungOdysseyG5s2.jpg',
-          ],
-        },
+          case 'Monitor':
+            productsToInsert = [
+              {
+                name: 'ASUS TUF 24"',
+                description: '144Hz gaming monitor',
+                price: 200,
+                stock: 30,
+                sold: 0,
+                brand: 'ASUS',
+                category: category._id,
+                thumbnail: '/images/thumbnails/ASUSTUF24T.jpg',
+                images: [
+                  '/images/slider/ASUSTUF24s1.jpg',
+                  '/images/slider/ASUSTUF24s2.jpg',
+                ],
+              },
+              {
+                name: 'Acer Predator 27"',
+                description: '2K 165Hz gaming monitor',
+                price: 400,
+                stock: 20,
+                sold: 0,
+                brand: 'Acer',
+                category: category._id,
+                thumbnail: '/images/thumbnails/AcerPredator27T.jpg',
+                images: [
+                  '/images/slider/AcerPredator27s1.jpg',
+                  '/images/slider/AcerPredator27s2.jpg',
+                ],
+              },
+              {
+                name: 'Samsung Odyssey G5',
+                description: 'Curved 144Hz monitor',
+                price: 350,
+                stock: 25,
+                sold: 0,
+                brand: 'Samsung',
+                category: category._id,
+                thumbnail: '/images/thumbnails/SamsungOdysseyG5T.jpg',
+                images: [
+                  '/images/slider/SamsungOdysseyG5s1.jpg',
+                  '/images/slider/SamsungOdysseyG5s2.jpg',
+                ],
+              },
+            ];
+            break;
 
-        // Chairs
-        {
-          name: 'DXRacer Formula',
-          description: 'Professional gaming chair',
-          price: 250,
-          stock: 15,
-          sold: 0,
-          category: chairs?._id,
-          brand: 'DXRacer',
-          thumbnail: '/images/thumbnails/DXRacerFormulaT.jpg',
-          images: [
-            '/images/slider/DXRacerFormulas1.png',
-            '/images/slider/DXRacerFormulas2.jpg',
-          ],
-        },
-        {
-          name: 'Secretlab Titan Evo',
-          description: 'Premium ergonomic chair',
-          price: 450,
-          stock: 10,
-          sold: 0,
-          category: chairs?._id,
-          brand: 'Secretlab',
-          thumbnail: '/images/thumbnails/SecretlabTitanEvoT.jpg',
-          images: [
-            '/images/slider/SecretlabTitanEvos1.jpg',
-            '/images/slider/SteelSeriesRivals2.jpg',
-          ],
-        },
-        {
-          name: 'AKRacing Core EX',
-          description: 'Affordable gaming chair',
-          price: 200,
-          stock: 20,
-          sold: 0,
-          category: chairs?._id,
-          brand: 'AKRacing',
-          thumbnail: '/images/thumbnails/AKRacingCoreExT.jpg',
-          images: [
-            '/images/slider/AKRacingCoreExs1.jpg',
-            '/images/slider/AKRacingCoreEXs2.jpg',
-          ],
-        },
-      ];
+          case 'Chairs':
+            productsToInsert = [
+              {
+                name: 'DXRacer Formula',
+                description: 'Professional gaming chair',
+                price: 250,
+                stock: 15,
+                sold: 0,
+                brand: 'DXRacer',
+                category: category._id,
+                thumbnail: '/images/thumbnails/DXRacerFormulaT.jpg',
+                images: [
+                  '/images/slider/DXRacerFormulas1.png',
+                  '/images/slider/DXRacerFormulas2.jpg',
+                ],
+              },
+              {
+                name: 'Secretlab Titan Evo',
+                description: 'Premium ergonomic chair',
+                price: 450,
+                stock: 10,
+                sold: 0,
+                brand: 'Secretlab',
+                category: category._id,
+                thumbnail: '/images/thumbnails/SecretlabTitanEvoT.jpg',
+                images: [
+                  '/images/slider/SecretlabTitanEvos1.jpg',
+                  '/images/slider/SteelSeriesRivals2.jpg',
+                ],
+              },
+              {
+                name: 'AKRacing Core EX',
+                description: 'Affordable gaming chair',
+                price: 200,
+                stock: 20,
+                sold: 0,
+                brand: 'AKRacing',
+                category: category._id,
+                thumbnail: '/images/thumbnails/AKRacingCoreExT.jpg',
+                images: [
+                  '/images/slider/AKRacingCoreExs1.jpg',
+                  '/images/slider/AKRacingCoreEXs2.jpg',
+                ],
+              },
+            ];
+            break;
+        }
 
-      await this.productModel.insertMany(products);
-      this.logger.log('>>> INIT PRODUCTS DONE...');
+        if (productsToInsert.length > 0) {
+          await this.productModel.insertMany(productsToInsert);
+          this.logger.log(`>>> INIT PRODUCTS for ${category.name} DONE...`);
+        }
+      }
     }
 
     // Seed Orders + Payments
