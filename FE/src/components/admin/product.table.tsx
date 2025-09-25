@@ -10,11 +10,9 @@ import {
   Input,
   Space,
   Image,
-  Select,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import {
-  ArrowDownOutlined,
   PlusOutlined,
   ReloadOutlined,
   SearchOutlined,
@@ -32,26 +30,32 @@ const ProductsTable = () => {
   const [dataUpdate, setDataUpdate] = useState<null | IProduct>(null);
   const [viewProduct, setViewProduct] = useState<IProduct | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-
-  const access_token = localStorage.getItem("access_token") as string;
+  const [accessToken, setAccessToken] = useState<string>("");
 
   const [meta, setMeta] = useState({
     current: 1,
-    pageSize: 5,
+    pageSize: 20,
     pages: 0,
     total: 0,
   });
 
   useEffect(() => {
-    getData();
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("access_token");
+      if (token) setAccessToken(token);
+    }
   }, []);
 
-  const getData = async () => {
+  useEffect(() => {
+    if (accessToken) getData(meta.current, meta.pageSize);
+  }, [accessToken]);
+
+  const getData = async (current = 1, pageSize = 20) => {
     const res = await fetch(
-      `http://localhost:8000/api/v1/products?current=${meta.current}&pageSize=${meta.pageSize}`,
+      `http://localhost:8000/api/v1/products?current=${current}&pageSize=${pageSize}`,
       {
         headers: {
-          Authorization: `Bearer ${access_token}`,
+          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
       }
@@ -67,30 +71,14 @@ const ProductsTable = () => {
   };
 
   const handleOnChange = async (page: number, pageSize: number) => {
-    const res = await fetch(
-      `http://localhost:8000/api/v1/products?current=${page}&pageSize=${pageSize}`,
-      {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    const d = await res.json();
-    if (!d.data) {
-      notification.error({ message: JSON.stringify(d.message) });
-      return;
-    }
-    setListProducts(d.data.result);
-    setMeta(d.data.meta);
+    getData(page, pageSize);
   };
 
   const handleDeleteProduct = async (product: IProduct) => {
-    const d = await deleteProductAction(product, access_token);
+    const d = await deleteProductAction(product, accessToken);
     if (d.data) {
-      notification.success({ message: "Xóa san pham thành công." });
-      getData();
+      notification.success({ message: "Xóa sản phẩm thành công." });
+      getData(meta.current, meta.pageSize);
     } else {
       notification.error({ message: JSON.stringify(d.message) });
     }
@@ -147,7 +135,6 @@ const ProductsTable = () => {
           .toLowerCase()
           .includes((value as string).toLowerCase()),
     },
-
     {
       title: "Brand",
       dataIndex: "brand",
@@ -185,10 +172,9 @@ const ProductsTable = () => {
       onFilter: (value, record) =>
         record.brand?.toLowerCase().includes((value as string).toLowerCase()),
     },
-
     {
       title: "Category",
-      dataIndex: ["category", "name"], // vẫn hỗ trợ nested field
+      dataIndex: ["category", "name"],
       align: "center",
       filters: [
         { text: "Mouse", value: "Mouse" },
@@ -201,7 +187,6 @@ const ProductsTable = () => {
           typeof record.category === "string"
             ? record.category
             : record.category?.name;
-
         return categoryName?.toLowerCase() === (value as string).toLowerCase();
       },
       render: (value, record) => {
@@ -209,11 +194,9 @@ const ProductsTable = () => {
           typeof record.category === "string"
             ? record.category
             : record.category?.name;
-
         return categoryName || "N/A";
       },
     },
-
     {
       title: "Thumbnail",
       dataIndex: "thumbnail",
@@ -235,7 +218,6 @@ const ProductsTable = () => {
           <span>No image</span>
         ),
     },
-
     {
       title: "Price",
       dataIndex: "price",
@@ -244,7 +226,6 @@ const ProductsTable = () => {
       sorter: (a, b) => a.price - b.price,
       render: (price: number) => `$${price}`,
     },
-
     {
       title: "Stock",
       dataIndex: "stock",
@@ -259,7 +240,6 @@ const ProductsTable = () => {
       responsive: ["xs", "sm", "md", "lg"],
       sorter: (a, b) => a.sold - b.sold,
     },
-
     {
       title: "Actions",
       align: "center",
@@ -298,9 +278,10 @@ const ProductsTable = () => {
         }}
       >
         <h2>Table products</h2>
-        <ReloadOutlined onClick={getData} style={{ color: "green" }}>
-          Refresh
-        </ReloadOutlined>
+        <ReloadOutlined
+          onClick={() => getData(meta.current, meta.pageSize)}
+          style={{ color: "green" }}
+        />
         <Button
           icon={<PlusOutlined />}
           type="primary"
@@ -333,14 +314,14 @@ const ProductsTable = () => {
         productData={viewProduct}
       />
       <CreateProductModal
-        access_token={access_token}
-        getData={getData}
+        access_token={accessToken}
+        getData={() => getData(meta.current, meta.pageSize)}
         isCreateModalOpen={isCreateModalOpen}
         setIsCreateModalOpen={setIsCreateModalOpen}
       />
       <UpdateProductModal
-        access_token={access_token}
-        getData={getData}
+        access_token={accessToken}
+        getData={() => getData(meta.current, meta.pageSize)}
         isUpdateModalOpen={isUpdateModalOpen}
         setIsUpdateModalOpen={setIsUpdateModalOpen}
         dataUpdate={dataUpdate}

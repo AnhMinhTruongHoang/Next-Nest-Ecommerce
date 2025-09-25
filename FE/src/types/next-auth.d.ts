@@ -35,7 +35,7 @@ declare module "next-auth" {
     stock: number;
     sold: number;
     quantity: number;
-    category: ICategory | string;
+    category: any;
     createdAt: Date;
     updatedAt: Date;
   }
