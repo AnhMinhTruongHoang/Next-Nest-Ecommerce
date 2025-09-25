@@ -24,24 +24,26 @@ export class ProductsService {
     delete filter.current;
     delete filter.pageSize;
 
-    const offset = (+currentPage - 1) * +limit;
-    const defaultLimit = +limit || 10;
+    const safePage = Math.max(1, Number(currentPage) || 1);
+    const safeLimit = Math.max(1, Number(limit) || 20);
+
+    const offset = (safePage - 1) * safeLimit;
 
     const totalItems = await this.productModel.countDocuments(filter);
-    const totalPages = Math.ceil(totalItems / defaultLimit);
+    const totalPages = Math.ceil(totalItems / safeLimit);
 
     const result = await this.productModel
       .find(filter)
       .skip(offset)
-      .limit(defaultLimit)
+      .limit(safeLimit)
       .sort(sort as any)
       .populate('category', 'name')
       .exec();
 
     return {
       meta: {
-        current: currentPage,
-        pageSize: limit,
+        current: safePage,
+        pageSize: safeLimit,
         pages: totalPages,
         total: totalItems,
       },
