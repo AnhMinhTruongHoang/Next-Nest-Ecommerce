@@ -15,6 +15,7 @@ import { Product, ProductDocument } from '../products/schema/product.schema';
 import { Order, OrderDocument } from '../orders/schema/order.schema';
 import { Payment, PaymentDocument } from '../payments/schema/payment.schema';
 import { UsersService } from '../users/users.service';
+import axios from 'axios';
 
 @Injectable()
 export class DatabasesService implements OnModuleInit {
@@ -43,7 +44,20 @@ export class DatabasesService implements OnModuleInit {
     private userService: UsersService,
   ) {}
 
+  async getUsdToVndRate(): Promise<number> {
+    try {
+      const res = await axios.get('https://open.er-api.com/v6/latest/USD');
+      return res.data.rates.VND || 24500;
+    } catch (e) {
+      this.logger.error('Cannot fetch exchange rate, fallback 24,500');
+      return 24500;
+    }
+  }
+
   async onModuleInit() {
+    const rate = await this.getUsdToVndRate();
+    this.logger.log(`>>> Exchange rate USD -> VND: ${rate}`);
+    const priceVnd = 20 * rate;
     const isInit = this.configService.get<string>('SHOULD_INIT');
     if (!isInit || isInit === 'false') return;
 
@@ -121,6 +135,7 @@ export class DatabasesService implements OnModuleInit {
 
       if (countProductsInCat === 0) {
         let productsToInsert: any[] = [];
+        const rate = this.configService.get<number>('USD_TO_VND') || 24500;
 
         switch (category.name) {
           case 'Mouse':
@@ -128,7 +143,7 @@ export class DatabasesService implements OnModuleInit {
               {
                 name: 'Logitech G102',
                 description: 'Gaming mouse',
-                price: 20,
+                price: 20 * rate,
                 stock: 100,
                 sold: 0,
                 brand: 'Logitech',
@@ -143,7 +158,7 @@ export class DatabasesService implements OnModuleInit {
               {
                 name: 'Razer DeathAdder',
                 description: 'Ergonomic gaming mouse',
-                price: 50,
+                price: 50 * rate,
                 stock: 80,
                 sold: 0,
                 brand: 'Razer',
@@ -158,7 +173,7 @@ export class DatabasesService implements OnModuleInit {
               {
                 name: 'SteelSeries Rival 3',
                 description: 'Budget-friendly mouse',
-                price: 30,
+                price: 30 * rate,
                 stock: 120,
                 sold: 0,
                 brand: 'SteelSeries',
@@ -178,7 +193,7 @@ export class DatabasesService implements OnModuleInit {
               {
                 name: 'Razer BlackWidow',
                 description: 'Mechanical keyboard',
-                price: 120,
+                price: 120 * rate,
                 stock: 50,
                 sold: 0,
                 brand: 'Razer',
@@ -193,7 +208,7 @@ export class DatabasesService implements OnModuleInit {
               {
                 name: 'Corsair K95 RGB',
                 description: 'Premium gaming keyboard',
-                price: 180,
+                price: 180 * rate,
                 stock: 40,
                 sold: 0,
                 brand: 'Corsair',
@@ -208,7 +223,7 @@ export class DatabasesService implements OnModuleInit {
               {
                 name: 'Logitech Aurora G715 RGB',
                 description: 'RGB gaming keyboard',
-                price: 70,
+                price: 70 * rate,
                 stock: 60,
                 sold: 0,
                 brand: 'Logitech',
@@ -228,7 +243,7 @@ export class DatabasesService implements OnModuleInit {
               {
                 name: 'ASUS TUF 24"',
                 description: '144Hz gaming monitor',
-                price: 200,
+                price: 200 * rate,
                 stock: 30,
                 sold: 0,
                 brand: 'ASUS',
@@ -242,7 +257,7 @@ export class DatabasesService implements OnModuleInit {
               {
                 name: 'Acer Predator 27"',
                 description: '2K 165Hz gaming monitor',
-                price: 400,
+                price: 400 * rate,
                 stock: 20,
                 sold: 0,
                 brand: 'Acer',
@@ -256,7 +271,7 @@ export class DatabasesService implements OnModuleInit {
               {
                 name: 'Samsung Odyssey G5',
                 description: 'Curved 144Hz monitor',
-                price: 350,
+                price: 350 * rate,
                 stock: 25,
                 sold: 0,
                 brand: 'Samsung',
@@ -275,7 +290,7 @@ export class DatabasesService implements OnModuleInit {
               {
                 name: 'DXRacer Formula',
                 description: 'Professional gaming chair',
-                price: 250,
+                price: 250 * rate,
                 stock: 15,
                 sold: 0,
                 brand: 'DXRacer',
@@ -289,7 +304,7 @@ export class DatabasesService implements OnModuleInit {
               {
                 name: 'Secretlab Titan Evo',
                 description: 'Premium ergonomic chair',
-                price: 450,
+                price: 450 * rate,
                 stock: 10,
                 sold: 0,
                 brand: 'Secretlab',
@@ -303,7 +318,7 @@ export class DatabasesService implements OnModuleInit {
               {
                 name: 'AKRacing Core EX',
                 description: 'Affordable gaming chair',
-                price: 200,
+                price: 200 * rate,
                 stock: 20,
                 sold: 0,
                 brand: 'AKRacing',
