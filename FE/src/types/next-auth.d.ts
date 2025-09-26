@@ -29,6 +29,7 @@ declare module "next-auth" {
     _id: string;
     thumbnail: string;
     slider: string[];
+    images: string[];
     name: string;
     brand: string;
     price: number;

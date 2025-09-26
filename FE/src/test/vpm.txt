@@ -12,6 +12,7 @@ import {
   Upload,
   Divider,
 } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
 import { IProduct } from "next-auth";
 import { v4 as uuidv4 } from "uuid";
 
@@ -33,7 +34,7 @@ const ViewProductModal: React.FC<ViewProductModalProps> = ({
   const safeText = (val: any) =>
     typeof val === "object" && val !== null ? val.name : val;
 
-  // preview base64
+  // Convert file to base64 for preview
   const getBase64 = (file: FileType): Promise<string> =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -46,32 +47,31 @@ const ViewProductModal: React.FC<ViewProductModalProps> = ({
   const [previewImage, setPreviewImage] = useState("");
   const [fileList, setFileList] = useState<UploadFile[]>([]);
 
-  // build UploadFile list from thumbnail + images
+  // Build thumbnail + slider images into UploadFile[]
   useEffect(() => {
     if (productData) {
-      const imgs: UploadFile[] = [];
+      let imgThumbnail: UploadFile | null = null;
+      let imgSlider: UploadFile[] = [];
 
       if (productData.thumbnail) {
-        imgs.push({
+        imgThumbnail = {
           uid: uuidv4(),
-          name: "thumbnail",
+          name: productData.thumbnail,
           status: "done",
           url: `${process.env.NEXT_PUBLIC_BACKEND_URL}${productData.thumbnail}`,
-        });
+        };
       }
 
-      if (productData.images?.length) {
-        productData.images.forEach((item) => {
-          imgs.push({
-            uid: uuidv4(),
-            name: item,
-            status: "done",
-            url: `${process.env.NEXT_PUBLIC_BACKEND_URL}${item}`,
-          });
-        });
+      if (productData.slider?.length) {
+        imgSlider = productData.slider.map((item) => ({
+          uid: uuidv4(),
+          name: item,
+          status: "done",
+          url: `${process.env.NEXT_PUBLIC_BACKEND_URL}${item}`,
+        }));
       }
 
-      setFileList(imgs);
+      setFileList(imgThumbnail ? [imgThumbnail, ...imgSlider] : imgSlider);
     }
   }, [productData]);
 
@@ -79,6 +79,7 @@ const ViewProductModal: React.FC<ViewProductModalProps> = ({
     if (!file.url && !file.preview) {
       file.preview = await getBase64(file.originFileObj as FileType);
     }
+
     setPreviewImage(file.url || (file.preview as string));
     setPreviewOpen(true);
   };
@@ -95,22 +96,31 @@ const ViewProductModal: React.FC<ViewProductModalProps> = ({
       }}
       footer={null}
       width={700}
-      title={<div style={{ textAlign: "center" }}>Product Details</div>}
+      title={
+        <div
+          style={{ textAlign: "center", width: "100%", marginBottom: "15px" }}
+        >
+          Product Details
+        </div>
+      }
     >
       {productData && (
         <Descriptions bordered column={1} size="small">
-          {/* Thumbnail riêng */}
-          {productData.thumbnail && (
-            <Descriptions.Item label="Thumbnail">
-              <Image
-                src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${productData.thumbnail}`}
-                alt="thumbnail"
-                width={120}
-              />
+          {productData.slider?.length > 0 && (
+            <Descriptions.Item label="Slider Images">
+              <Carousel autoplay>
+                {productData.slider.map((img, idx) => (
+                  <div key={idx} style={{ textAlign: "center" }}>
+                    <Image
+                      src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/images/slider/${img}`}
+                      alt={`slider-${idx}`}
+                      width={200}
+                    />
+                  </div>
+                ))}
+              </Carousel>
             </Descriptions.Item>
           )}
-
-          {/* Slider images */}
 
           <Descriptions.Item label="Name">
             {safeText(productData.name)}
@@ -136,19 +146,15 @@ const ViewProductModal: React.FC<ViewProductModalProps> = ({
           </Descriptions.Item>
         </Descriptions>
       )}
-
-      <Divider>Images Preview</Divider>
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <Upload
-          action="#"
-          listType="picture-card"
-          fileList={fileList}
-          onPreview={handlePreview}
-          onChange={handleChange}
-          showUploadList={{ showRemoveIcon: false }}
-        />
-      </div>
-
+      <Divider>Images</Divider>
+      <Upload
+        action="#"
+        listType="picture-card"
+        fileList={fileList}
+        onPreview={handlePreview}
+        onChange={handleChange}
+        showUploadList={{ showRemoveIcon: false }}
+      />
       {previewImage && (
         <Image
           wrapperStyle={{ display: "none" }}

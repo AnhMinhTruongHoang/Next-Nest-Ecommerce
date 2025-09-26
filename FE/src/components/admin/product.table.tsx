@@ -224,8 +224,14 @@ const ProductsTable = () => {
       align: "center",
       responsive: ["xs", "sm", "md", "lg"],
       sorter: (a, b) => a.price - b.price,
-      render: (price: number) => `$${price}`,
+      render: (price: number) =>
+        new Intl.NumberFormat("vi-VN", {
+          style: "currency",
+          currency: "VND",
+          minimumFractionDigits: 0,
+        }).format(price),
     },
+
     {
       title: "Stock",
       dataIndex: "stock",
@@ -278,10 +284,14 @@ const ProductsTable = () => {
         }}
       >
         <h2>Table products</h2>
-        <ReloadOutlined
-          onClick={() => getData(meta.current, meta.pageSize)}
-          style={{ color: "green" }}
-        />
+        <Button
+          type="text"
+          icon={<ReloadOutlined style={{ color: "green" }} />}
+          onClick={() => window.location.reload()}
+        >
+          Refresh
+        </Button>
+
         <Button
           icon={<PlusOutlined />}
           type="primary"
@@ -308,10 +318,10 @@ const ProductsTable = () => {
 
       {/* Modal components */}
       <ViewProductModal
-        isOpen={isViewModalOpen}
-        setViewProduct={setViewProduct}
-        setIsViewModalOpen={setIsViewModalOpen}
         productData={viewProduct}
+        isOpen={isViewModalOpen}
+        setIsViewModalOpen={setIsViewModalOpen}
+        setViewProduct={setViewProduct}
       />
       <CreateProductModal
         access_token={accessToken}

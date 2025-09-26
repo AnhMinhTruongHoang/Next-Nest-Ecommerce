@@ -6,7 +6,7 @@ import { Form, Input, Modal, notification, Select, InputNumber } from "antd";
 const { Option } = Select;
 
 interface IProps {
-  access_token: any;
+  access_token: string;
   getData: () => Promise<void>;
   isCreateModalOpen: boolean;
   setIsCreateModalOpen: (v: boolean) => void;

@@ -13,7 +13,7 @@ interface ICategory {
 }
 
 interface IProps {
-  access_token: any;
+  access_token: string;
   getData: () => Promise<void>;
   isUpdateModalOpen: boolean;
   setIsUpdateModalOpen: (v: boolean) => void;
