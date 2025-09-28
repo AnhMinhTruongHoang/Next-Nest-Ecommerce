@@ -14,8 +14,6 @@ import { IUser } from 'src/types/user.interface';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { LocalAuthGuard } from './guards/local.auth.guard';
-import { ConfigService } from '@nestjs/config';
-import { MailerService } from '@nestjs-modules/mailer';
 import { UsersService } from 'src/modules/users/users.service';
 import {
   ChangePasswordDto,
@@ -29,8 +27,6 @@ import {
 export class AuthController {
   constructor(
     private authService: AuthService,
-    private configService: ConfigService,
-    private mailerService: MailerService,
     private usersService: UsersService,
   ) {}
 
@@ -87,25 +83,6 @@ export class AuthController {
     @Users() user: IUser,
   ) {
     return this.authService.logout(response, user);
-  }
-
-  ///send mail
-
-  @Get('mail')
-  @Public()
-  testMail() {
-    this.mailerService.sendMail({
-      to: 'minhlapro01@gmail.com', // List of receivers
-      subject: 'Testing Nest MailerModule', // Subject line
-      text: 'welcome', // Plaintext body
-      template: 'register',
-      context: {
-        name: 'minh',
-        activationCode: 123,
-      },
-    });
-
-    return 'ok';
   }
 
   // re-send mail

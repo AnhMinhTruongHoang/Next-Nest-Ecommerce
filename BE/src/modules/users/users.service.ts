@@ -32,19 +32,6 @@ export class UsersService {
     return hashSync(password, salt);
   };
 
-  // NOTE: Sends activation email to user
-  async sendVerificationEmail(email: string, name: string, codeId: string) {
-    await this.mailerService.sendMail({
-      to: email,
-      subject: 'Activate your account',
-      template: 'register.hbs',
-      context: {
-        name: name ?? email,
-        activationCode: codeId,
-      },
-    });
-  }
-
   // NOTE: Creates a new user (admin-level creation)
   async create(createUserDto: CreateUserDto, @Users() user: IUser) {
     const {
@@ -82,6 +69,19 @@ export class UsersService {
     });
 
     return newUser;
+  }
+
+  // NOTE: Sends activation email to user
+  async sendVerificationEmail(email: string, name: string, codeId: string) {
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'Activate your account',
+      template: 'register.hbs',
+      context: {
+        name: name ?? email,
+        activationCode: codeId,
+      },
+    });
   }
 
   // NOTE: Register user (self-registration)
@@ -178,6 +178,7 @@ export class UsersService {
     });
     return { _id: user._id, email: user.email };
   }
+  
   // NOTE: change Password (resend code)
   async changePassword(data: ChangePasswordDto) {
     if (data.confirmPassword !== data.password) {
