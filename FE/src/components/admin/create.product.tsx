@@ -108,12 +108,37 @@ const CreateProductModal = (props: IProps) => {
   };
 
   const onFinish = async (values: any) => {
-    const thumbnailFile = thumbnailList.find((f) => f.status === "done");
-    const thumbnailUrl = thumbnailFile?.response?.url || thumbnailFile?.url;
+    console.log("👉 Form values:", values);
 
+    // Thumbnail
+    const thumbnailFile = thumbnailList.find((f) => f.status === "done");
+    const thumbnailUrl =
+      thumbnailFile?.response?.file || // BE trả về { file: "..." }
+      thumbnailFile?.response?.url || // fallback nếu BE dùng url
+      thumbnailFile?.url ||
+      "";
+
+    // Slider
     const sliderUrls = sliderList
       .filter((f) => f.status === "done")
-      .map((f) => f.response?.url || f.url);
+      .flatMap((f) => {
+        if (Array.isArray(f.response?.files)) {
+          return f.response.files; // BE trả về { files: [...] }
+        }
+        if (typeof f.response?.url === "string") {
+          return [f.response.url];
+        }
+        if (typeof f.url === "string") {
+          return [f.url];
+        }
+        return [];
+      })
+      .filter((url) => !!url); // loại null/undefined
+
+    console.log("Thumbnail list:", thumbnailList);
+    console.log("Slider list:", sliderList);
+    console.log("Thumbnail URL:", thumbnailUrl);
+    console.log("Slider URLs:", sliderUrls);
 
     setLoading(true);
     try {
@@ -129,6 +154,8 @@ const CreateProductModal = (props: IProps) => {
         images: sliderUrls,
       };
 
+      console.log("👉 Payload gửi API:", payload);
+
       const res = await fetch("http://localhost:8000/api/v1/products", {
         method: "POST",
         headers: {
@@ -139,6 +166,8 @@ const CreateProductModal = (props: IProps) => {
       });
 
       const d = await res.json();
+      console.log("👉 Response API:", d);
+
       if (d.data) {
         await getData();
         notification.success({ message: "Tạo mới product thành công." });
@@ -150,6 +179,7 @@ const CreateProductModal = (props: IProps) => {
         });
       }
     } catch (error) {
+      console.error("👉 Fetch error:", error);
       notification.error({
         message: "Có lỗi xảy ra",
         description: "Không thể kết nối tới server.",
@@ -179,11 +209,26 @@ const CreateProductModal = (props: IProps) => {
         <Divider>Thumbnail</Divider>
         <div style={{ display: "flex", justifyContent: "center" }}>
           <Upload
+            name="thumbnail"
             listType="picture-circle"
             beforeUpload={beforeUpload}
-            action="..."
+            action="http://localhost:8000/api/v1/products/upload"
+            headers={{
+              Authorization: `Bearer ${access_token}`,
+            }}
             fileList={thumbnailList}
-            onChange={({ fileList }) => setThumbnailList(fileList)}
+            onChange={({ file, fileList }) => {
+              if (file.status === "done") {
+                const url =
+                  file.response?.file ||
+                  URL.createObjectURL(file.originFileObj as File);
+
+                file.url = url.startsWith("http")
+                  ? url
+                  : `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`;
+              }
+              setThumbnailList(fileList);
+            }}
             onPreview={handlePreview}
           >
             {thumbnailList.length >= 1 ? null : uploadButton}
@@ -229,7 +274,16 @@ const CreateProductModal = (props: IProps) => {
               name="price"
               rules={[{ required: true, message: "Please input price!" }]}
             >
-              <InputNumber style={{ width: "100%" }} min={0} />
+              <InputNumber<number>
+                style={{ width: "100%" }}
+                min={0}
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " ₫"
+                }
+                parser={(value) =>
+                  (value ? value.replace(/[₫.\s]/g, "") : "") as any
+                }
+              />
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
@@ -263,12 +317,21 @@ const CreateProductModal = (props: IProps) => {
       )}
 
       <Upload
+        name="slider"
         listType="picture-card"
         multiple
         beforeUpload={beforeUpload}
-        action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
+        action="http://localhost:8000/api/v1/products/upload-slider"
+        headers={{
+          Authorization: `Bearer ${access_token}`,
+        }}
         fileList={sliderList}
-        onChange={({ fileList }) => setSliderList(fileList)}
+        onChange={({ file, fileList }) => {
+          if (file.status === "done" && file.response?.files) {
+            file.url = `${process.env.NEXT_PUBLIC_BACKEND_URL}${file.response.files[0]}`;
+          }
+          setSliderList(fileList);
+        }}
         onPreview={handlePreview}
       >
         {uploadButton}
