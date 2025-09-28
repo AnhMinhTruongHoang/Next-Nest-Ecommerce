@@ -113,8 +113,7 @@ const CreateProductModal = (props: IProps) => {
     // Thumbnail
     const thumbnailFile = thumbnailList.find((f) => f.status === "done");
     const thumbnailUrl =
-      thumbnailFile?.response?.file || // BE trả về { file: "..." }
-      thumbnailFile?.response?.url || // fallback nếu BE dùng url
+      thumbnailFile?.response?.data?.file || // BE trả về { data: { file: "..." } }
       thumbnailFile?.url ||
       "";
 
@@ -122,21 +121,16 @@ const CreateProductModal = (props: IProps) => {
     const sliderUrls = sliderList
       .filter((f) => f.status === "done")
       .flatMap((f) => {
-        if (Array.isArray(f.response?.files)) {
-          return f.response.files; // BE trả về { files: [...] }
-        }
-        if (typeof f.response?.url === "string") {
-          return [f.response.url];
+        if (Array.isArray(f.response?.data?.files)) {
+          return f.response.data.files; // BE trả về { data: { files: [...] } }
         }
         if (typeof f.url === "string") {
           return [f.url];
         }
         return [];
       })
-      .filter((url) => !!url); // loại null/undefined
+      .filter((url) => !!url);
 
-    console.log("Thumbnail list:", thumbnailList);
-    console.log("Slider list:", sliderList);
     console.log("Thumbnail URL:", thumbnailUrl);
     console.log("Slider URLs:", sliderUrls);
 
@@ -219,13 +213,10 @@ const CreateProductModal = (props: IProps) => {
             fileList={thumbnailList}
             onChange={({ file, fileList }) => {
               if (file.status === "done") {
-                const url =
-                  file.response?.file ||
-                  URL.createObjectURL(file.originFileObj as File);
-
-                file.url = url.startsWith("http")
-                  ? url
-                  : `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`;
+                const url = file.response?.data?.file;
+                if (url) {
+                  file.url = `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`;
+                }
               }
               setThumbnailList(fileList);
             }}
@@ -327,8 +318,11 @@ const CreateProductModal = (props: IProps) => {
         }}
         fileList={sliderList}
         onChange={({ file, fileList }) => {
-          if (file.status === "done" && file.response?.files) {
-            file.url = `${process.env.NEXT_PUBLIC_BACKEND_URL}${file.response.files[0]}`;
+          if (file.status === "done") {
+            const urls = file.response?.data?.files;
+            if (Array.isArray(urls) && urls.length > 0) {
+              file.url = `${process.env.NEXT_PUBLIC_BACKEND_URL}${urls[0]}`;
+            }
           }
           setSliderList(fileList);
         }}
