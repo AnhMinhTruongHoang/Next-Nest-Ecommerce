@@ -1,12 +1,13 @@
 "use client";
 
 import AdminCard from "@/components/admin/admin.card";
+import { App } from "antd";
 
 const DashboardPage = () => {
   return (
-    <div>
+    <App>
       <AdminCard />
-    </div>
+    </App>
   );
 };
 

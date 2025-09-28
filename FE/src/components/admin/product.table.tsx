@@ -2,15 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import "../../styles/users.css";
-import {
-  Table,
-  Button,
-  notification,
-  Popconfirm,
-  Input,
-  Space,
-  Image,
-} from "antd";
+import { Table, Button, Popconfirm, Input, Space, Image, App } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import {
   PlusOutlined,
@@ -31,6 +23,7 @@ const ProductsTable = () => {
   const [viewProduct, setViewProduct] = useState<IProduct | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [accessToken, setAccessToken] = useState<string>("");
+  const { notification } = App.useApp();
 
   const [meta, setMeta] = useState({
     current: 1,
@@ -83,6 +76,8 @@ const ProductsTable = () => {
       notification.error({ message: JSON.stringify(d.message) });
     }
   };
+
+  // console.log(dataUpdate);
 
   const columns: ColumnsType<IProduct> = [
     {
