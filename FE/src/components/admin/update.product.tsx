@@ -72,9 +72,16 @@ const UpdateProductModal = (props: IProps) => {
     }
   }, [isUpdateModalOpen]);
 
-  // Set giá trị form + load hình ảnh khi có dataUpdate
+  // Set giá trị form + load sẵn ảnh khi có dataUpdate
+  const getFullUrl = (url: string) => {
+    if (!url) return "";
+    // Nếu đã là absolute url thì return luôn
+    if (url.startsWith("http://") || url.startsWith("https://")) return url;
+    return `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`;
+  };
+
   useEffect(() => {
-    if (dataUpdate && isUpdateModalOpen) {
+    if (dataUpdate) {
       form.setFieldsValue({
         name: dataUpdate.name,
         brand: dataUpdate.brand,
@@ -86,31 +93,42 @@ const UpdateProductModal = (props: IProps) => {
             : dataUpdate.category,
       });
 
-      // set thumbnail có sẵn
+      // Set thumbnailList
       if (dataUpdate.thumbnail) {
         setThumbnailList([
           {
             uid: "-1",
             name: "thumbnail.png",
             status: "done",
-            url: `${process.env.NEXT_PUBLIC_BACKEND_URL}${dataUpdate.thumbnail}`,
-          },
+            url: getFullUrl(dataUpdate.thumbnail),
+          } as UploadFile,
         ]);
-      }
 
-      // set slider có sẵn
-      if (Array.isArray(dataUpdate.images)) {
         setSliderList(
-          dataUpdate.images.map((img, idx) => ({
-            uid: String(-idx - 1),
+          (dataUpdate.images || []).map((url, idx) => ({
+            uid: String(idx),
             name: `slider-${idx}.png`,
             status: "done",
-            url: `${process.env.NEXT_PUBLIC_BACKEND_URL}${img}`,
-          }))
+            url: getFullUrl(url),
+          })) as UploadFile[]
         );
       }
+
+      // Set sliderList
+      if (Array.isArray(dataUpdate.images)) {
+        setSliderList(
+          dataUpdate.images.map((url, idx) => ({
+            uid: String(idx),
+            name: `slider-${idx}.png`,
+            status: "done",
+            url: `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`,
+          })) as UploadFile[]
+        );
+      } else {
+        setSliderList([]);
+      }
     }
-  }, [dataUpdate, isUpdateModalOpen]);
+  }, [dataUpdate]);
 
   /// img func
   const getBase64 = (file: FileType): Promise<string> =>
@@ -235,7 +253,7 @@ const UpdateProductModal = (props: IProps) => {
               if (file.status === "done") {
                 const url = file.response?.data?.file;
                 if (url) {
-                  file.url = `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`;
+                  file.url = getFullUrl(url);
                 }
               }
               setThumbnailList(fileList);
