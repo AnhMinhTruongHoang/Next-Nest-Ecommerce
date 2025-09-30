@@ -2,6 +2,8 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
+import axios from 'axios';
+
 import { User, UserDocument } from '../users/schemas/user.schema';
 import {
   Membership,
@@ -15,7 +17,6 @@ import { Product, ProductDocument } from '../products/schema/product.schema';
 import { Order, OrderDocument } from '../orders/schema/order.schema';
 import { Payment, PaymentDocument } from '../payments/schema/payment.schema';
 import { UsersService } from '../users/users.service';
-import axios from 'axios';
 
 @Injectable()
 export class DatabasesService implements OnModuleInit {
@@ -44,6 +45,7 @@ export class DatabasesService implements OnModuleInit {
     private userService: UsersService,
   ) {}
 
+  /** Lấy tỉ giá USD -> VND (fallback = 24,500) */
   async getUsdToVndRate(): Promise<number> {
     try {
       const res = await axios.get('https://open.er-api.com/v6/latest/USD');
@@ -55,13 +57,13 @@ export class DatabasesService implements OnModuleInit {
   }
 
   async onModuleInit() {
-    const rate = await this.getUsdToVndRate();
-    this.logger.log(`>>> Exchange rate USD -> VND: ${rate}`);
-    const priceVnd = 20 * rate;
     const isInit = this.configService.get<string>('SHOULD_INIT');
     if (!isInit || isInit === 'false') return;
 
-    // Seed Users
+    const rate = await this.getUsdToVndRate();
+    this.logger.log(`>>> Exchange rate USD -> VND: ${rate}`);
+
+    /** ---------------- Seed Users ---------------- */
     const countUsers = await this.userModel.countDocuments();
     if (countUsers === 0) {
       const initPassword = this.userService.getHashPassword(
@@ -93,7 +95,7 @@ export class DatabasesService implements OnModuleInit {
       this.logger.log('>>> INIT USERS DONE...');
     }
 
-    // Seed Memberships
+    /** ---------------- Seed Memberships ---------------- */
     const countMemberships = await this.membershipsModel.countDocuments();
     if (countMemberships === 0) {
       await this.membershipsModel.insertMany([
@@ -125,7 +127,19 @@ export class DatabasesService implements OnModuleInit {
       this.logger.log('>>> INIT MEMBERSHIPS DONE...');
     }
 
-    // Seed Products (idempotent cho từng category)
+    /** ---------------- Seed Categories ---------------- */
+    const countCategories = await this.categoryModel.countDocuments();
+    if (countCategories === 0) {
+      await this.categoryModel.insertMany([
+        { name: 'Mouse' },
+        { name: 'Keyboard' },
+        { name: 'Monitor' },
+        { name: 'Chairs' },
+      ]);
+      this.logger.log('>>> INIT CATEGORIES DONE...');
+    }
+
+    /** ---------------- Seed Products ---------------- */
     const categories = await this.categoryModel.find();
 
     for (const category of categories) {
@@ -135,7 +149,6 @@ export class DatabasesService implements OnModuleInit {
 
       if (countProductsInCat === 0) {
         let productsToInsert: any[] = [];
-        const rate = this.configService.get<number>('USD_TO_VND') || 24500;
 
         switch (category.name) {
           case 'Mouse':
@@ -155,37 +168,6 @@ export class DatabasesService implements OnModuleInit {
                   '/images/slider/LogitechG102s3.jpg',
                 ],
               },
-
-              {
-                name: 'Razer Gigantus V2 Medium',
-                description: 'Gaming mousepad',
-                price: 30 * rate,
-                stock: 200,
-                sold: 0,
-                brand: 'Razer/zzz',
-                category: category._id,
-                thumbnail: '/images/thumbnails/razer.zzz.pad.jpg',
-                images: [
-                  '/images/slider/mouse.razer.zzz2.jpg',
-                  '/images/slider/razer.zzz.jpg',
-                ],
-              },
-
-              {
-                name: 'Razer Cobra',
-                description: 'Lightweight gaming mouse',
-                price: 60 * rate,
-                stock: 100,
-                sold: 0,
-                brand: 'Razer/zzz',
-                category: category._id,
-                thumbnail: '/images/thumbnails/razer.zzz.mouse.jpg',
-                images: [
-                  '/images/slider/mouse.razer.zzz1.jpg',
-                  '/images/slider/mouse.razer.zzz2.jpg',
-                ],
-              },
-
               {
                 name: 'Razer DeathAdder',
                 description: 'Ergonomic gaming mouse',
@@ -216,25 +198,39 @@ export class DatabasesService implements OnModuleInit {
                   '/images/slider/SteelSeriesRivals3.jpg',
                 ],
               },
+              {
+                name: 'Razer Cobra',
+                description: 'Ergonomic gaming Mouse',
+                price: 450 * rate,
+                stock: 10,
+                sold: 0,
+                brand: 'Razer/zzz',
+                category: category._id,
+                thumbnail: '/images/thumbnails/razer.zzz.mouse.jpg',
+                images: [
+                  '/images/slider/mouse.razer.zzz1.jpg',
+                  '/images/slider/mouse.razer.zzz2.jpg',
+                ],
+              },
+              {
+                name: 'Razer Gigantus V2 Medium',
+                description: 'Ergonomic gaming Pad',
+                price: 450 * rate,
+                stock: 10,
+                sold: 0,
+                brand: 'Razer/zzz',
+                category: category._id,
+                thumbnail: '/images/thumbnails/razer.zzz.pad.jpg',
+                images: [
+                  '/images/slider/mouse.razer.zzz2.jpg',
+                  '/images/slider/razer.zzz.jpg',
+                ],
+              },
             ];
             break;
 
           case 'Keyboard':
             productsToInsert = [
-              {
-                name: 'Razer BlackWidow V4 X',
-                description: 'Mechanical gaming keyboard',
-                price: 190 * rate,
-                stock: 40,
-                sold: 0,
-                brand: 'Razer/zzz',
-                category: category._id,
-                thumbnail: '/images/thumbnails/razer.zzz.keyboard.jpg',
-                images: [
-                  '/images/slider/keyoard.razer.zzz1.jpg',
-                  '/images/slider/razer.zzz.jpg',
-                ],
-              },
               {
                 name: 'Razer BlackWidow',
                 description: 'Mechanical keyboard',
@@ -278,6 +274,20 @@ export class DatabasesService implements OnModuleInit {
                   '/images/slider/LogitechAuroras1.jpg',
                   '/images/slider/LogitechAuroras2.jpg',
                   '/images/slider/LogitechAuroras3.jpg',
+                ],
+              },
+              {
+                name: 'Razer BlackWidow V4 X',
+                description: 'Razer anime gaming keyboard',
+                price: 70 * rate,
+                stock: 60,
+                sold: 0,
+                brand: 'Razer/zzz',
+                category: category._id,
+                thumbnail: '/images/thumbnails/razer.zzz.keyboard.jpg',
+                images: [
+                  '/images/slider/keyoard.razer.zzz1.jpg',
+                  '/images/slider/razer.zzz.jpg',
                 ],
               },
             ];
@@ -399,23 +409,21 @@ export class DatabasesService implements OnModuleInit {
       }
     }
 
-    // Seed Orders + Payments
+    /** ---------------- Seed Orders + Payments ---------------- */
     const countOrders = await this.orderModel.countDocuments();
     if (countOrders === 0) {
       const users = await this.userModel.find({ role: 'USER' });
       const products = await this.productModel.find();
 
       if (users.length === 0 || products.length === 0) {
-        this.logger.error(
-          'Missing users or products, cannot seed orders/payments.',
+        this.logger.warn(
+          '⚠️ Missing users or products, skip seeding orders/payments.',
         );
       } else {
         for (const user of users) {
-          // random số đơn hàng (3-5)
-          const orderCount = Math.floor(Math.random() * 3) + 3;
+          const orderCount = Math.floor(Math.random() * 3) + 3; // 3–5 orders
 
           for (let i = 0; i < orderCount; i++) {
-            // random 1–3 sản phẩm mỗi order
             const selectedProducts = products
               .sort(() => 0.5 - Math.random())
               .slice(0, Math.floor(Math.random() * 3) + 1);
