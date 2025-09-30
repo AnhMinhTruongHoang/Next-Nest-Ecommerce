@@ -157,6 +157,21 @@ export class DatabasesService implements OnModuleInit {
               },
 
               {
+                name: 'Razer Gigantus V2 Medium',
+                description: 'Gaming mousepad',
+                price: 30 * rate,
+                stock: 200,
+                sold: 0,
+                brand: 'Razer/zzz',
+                category: category._id,
+                thumbnail: '/images/thumbnails/razer.zzz.pad.jpg',
+                images: [
+                  '/images/slider/mouse.razer.zzz2.jpg',
+                  '/images/slider/razer.zzz.jpg',
+                ],
+              },
+
+              {
                 name: 'Razer Cobra',
                 description: 'Lightweight gaming mouse',
                 price: 60 * rate,
@@ -199,24 +214,6 @@ export class DatabasesService implements OnModuleInit {
                   '/images/slider/SteelSeriesRivals1.jpg',
                   '/images/slider/SteelSeriesRivals2.jpg',
                   '/images/slider/SteelSeriesRivals3.jpg',
-                ],
-              },
-            ];
-            break;
-          case 'MousePad':
-            productsToInsert = [
-              {
-                name: 'Razer Gigantus V2 Medium',
-                description: 'Gaming mousepad',
-                price: 30 * rate,
-                stock: 200,
-                sold: 0,
-                brand: 'Razer/zzz',
-                category: category._id,
-                thumbnail: '/images/thumbnails/razer.zzz.pad.jpg',
-                images: [
-                  '/images/slider/mouse.razer.zzz2.jpg',
-                  '/images/slider/razer.zzz.jpg',
                 ],
               },
             ];
