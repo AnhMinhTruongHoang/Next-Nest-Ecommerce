@@ -155,6 +155,22 @@ export class DatabasesService implements OnModuleInit {
                   '/images/slider/LogitechG102s3.jpg',
                 ],
               },
+
+              {
+                name: 'Razer Cobra',
+                description: 'Lightweight gaming mouse',
+                price: 60 * rate,
+                stock: 100,
+                sold: 0,
+                brand: 'Razer/zzz',
+                category: category._id,
+                thumbnail: '/images/thumbnails/razer.zzz.mouse.jpg',
+                images: [
+                  '/images/slider/mouse.razer.zzz1.jpg',
+                  '/images/slider/mouse.razer.zzz2.jpg',
+                ],
+              },
+
               {
                 name: 'Razer DeathAdder',
                 description: 'Ergonomic gaming mouse',
@@ -187,9 +203,41 @@ export class DatabasesService implements OnModuleInit {
               },
             ];
             break;
+          case 'MousePad':
+            productsToInsert = [
+              {
+                name: 'Razer Gigantus V2 Medium',
+                description: 'Gaming mousepad',
+                price: 30 * rate,
+                stock: 200,
+                sold: 0,
+                brand: 'Razer/zzz',
+                category: category._id,
+                thumbnail: '/images/thumbnails/razer.zzz.pad.jpg',
+                images: [
+                  '/images/slider/mouse.razer.zzz2.jpg',
+                  '/images/slider/razer.zzz.jpg',
+                ],
+              },
+            ];
+            break;
 
           case 'Keyboard':
             productsToInsert = [
+              {
+                name: 'Razer BlackWidow V4 X',
+                description: 'Mechanical gaming keyboard',
+                price: 190 * rate,
+                stock: 40,
+                sold: 0,
+                brand: 'Razer/zzz',
+                category: category._id,
+                thumbnail: '/images/thumbnails/razer.zzz.keyboard.jpg',
+                images: [
+                  '/images/slider/keyoard.razer.zzz1.jpg',
+                  '/images/slider/razer.zzz.jpg',
+                ],
+              },
               {
                 name: 'Razer BlackWidow',
                 description: 'Mechanical keyboard',
@@ -287,6 +335,20 @@ export class DatabasesService implements OnModuleInit {
 
           case 'Chairs':
             productsToInsert = [
+              {
+                name: 'Razer Iskur V2 X',
+                description: 'Ergonomic gaming chair',
+                price: 450 * rate,
+                stock: 10,
+                sold: 0,
+                brand: 'Razer/zzz',
+                category: category._id,
+                thumbnail: '/images/thumbnails/razer.zzz.chair.jpg',
+                images: [
+                  '/images/slider/chair.razer.zzz1.jpg',
+                  '/images/slider/razer.zzz.jpg',
+                ],
+              },
               {
                 name: 'DXRacer Formula',
                 description: 'Professional gaming chair',

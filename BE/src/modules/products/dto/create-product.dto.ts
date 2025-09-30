@@ -8,7 +8,7 @@ export class CreateProductDto {
   thumbnail: string;
 
   @IsArray()
-  @IsString({ each: true }) //  kiểm tra từng phần tử trong array là string
+  @IsString({ each: true }) // kiểm tra từng phần tử trong array là string
   images: string[];
 
   @IsString()
