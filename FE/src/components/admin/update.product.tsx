@@ -93,7 +93,7 @@ const UpdateProductModal = (props: IProps) => {
             : dataUpdate.category,
       });
 
-      // Set thumbnailList
+      // Thumbnail
       if (dataUpdate.thumbnail) {
         setThumbnailList([
           {
@@ -103,25 +103,18 @@ const UpdateProductModal = (props: IProps) => {
             url: getFullUrl(dataUpdate.thumbnail),
           } as UploadFile,
         ]);
-
-        setSliderList(
-          (dataUpdate.images || []).map((url, idx) => ({
-            uid: String(idx),
-            name: `slider-${idx}.png`,
-            status: "done",
-            url: getFullUrl(url),
-          })) as UploadFile[]
-        );
+      } else {
+        setThumbnailList([]);
       }
 
-      // Set sliderList
+      // Slider images
       if (Array.isArray(dataUpdate.images)) {
         setSliderList(
           dataUpdate.images.map((url, idx) => ({
             uid: String(idx),
             name: `slider-${idx}.png`,
             status: "done",
-            url: `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`,
+            url: getFullUrl(url),
           })) as UploadFile[]
         );
       } else {

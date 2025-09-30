@@ -2,7 +2,15 @@
 
 import React, { useEffect, useState } from "react";
 import "../../styles/users.css";
-import { Table, Button, notification, Popconfirm, Input, Space } from "antd";
+import {
+  Table,
+  Button,
+  notification,
+  Popconfirm,
+  Input,
+  Space,
+  App,
+} from "antd";
 import type { ColumnsType } from "antd/es/table";
 import {
   CheckOutlined,
@@ -30,6 +38,8 @@ const UsersTable = () => {
   const [viewUser, setViewUser] = useState<IUser | null>(null);
 
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+
+  const { notification } = App.useApp();
 
   const [meta, setMeta] = useState({
     current: 1,
@@ -101,7 +111,7 @@ const UsersTable = () => {
     const d = await deleteUserAction(user, access_token);
     if (d.data) {
       notification.success({
-        message: "Xóa product thành công.",
+        message: "Xóa User thành công.",
       });
       getData();
     } else {
@@ -132,7 +142,7 @@ const UsersTable = () => {
         </Button>
       ),
     },
-    
+
     {
       title: "Name",
       dataIndex: "name",
@@ -171,7 +181,7 @@ const UsersTable = () => {
       onFilter: (value, record) =>
         record.name.toLowerCase().includes((value as string).toLowerCase()),
     },
-   
+
     {
       title: "Role",
       dataIndex: "role",

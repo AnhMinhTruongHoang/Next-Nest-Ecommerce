@@ -1,7 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import { Form, Input, Modal, notification, Select, InputNumber } from "antd";
+import {
+  Form,
+  Input,
+  Modal,
+  notification,
+  Select,
+  InputNumber,
+  App,
+} from "antd";
 
 const { Option } = Select;
 
@@ -18,6 +26,7 @@ const CreateUserModal = (props: IProps) => {
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const { notification } = App.useApp();
 
   const handleCloseCreateModal = () => {
     form.resetFields();

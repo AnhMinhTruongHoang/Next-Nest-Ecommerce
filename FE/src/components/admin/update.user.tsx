@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Input, notification, Select, Form, InputNumber } from "antd";
+import {
+  Modal,
+  Input,
+  notification,
+  Select,
+  Form,
+  InputNumber,
+  App,
+} from "antd";
 import { IUser } from "next-auth";
 import { updateUserAction } from "@/lib/user.actions";
 
@@ -25,6 +33,7 @@ const UpdateUserModal = (props: IProps) => {
 
   const [form] = Form.useForm();
   const [isSubmit, setIsSubmit] = useState(false);
+  const { notification } = App.useApp();
 
   useEffect(() => {
     if (dataUpdate) {
