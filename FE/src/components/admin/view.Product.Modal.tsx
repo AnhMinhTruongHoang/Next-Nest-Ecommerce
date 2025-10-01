@@ -5,14 +5,12 @@ import {
   Modal,
   Descriptions,
   Image,
-  Carousel,
   UploadProps,
   GetProp,
   UploadFile,
   Upload,
   Divider,
 } from "antd";
-import { IProduct } from "next-auth";
 import { v4 as uuidv4 } from "uuid";
 
 interface ViewProductModalProps {
@@ -24,6 +22,13 @@ interface ViewProductModalProps {
 
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
+// helper build full url
+const getImageUrl = (url?: string) => {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`;
+};
+
 const ViewProductModal: React.FC<ViewProductModalProps> = ({
   isOpen,
   setViewProduct,
@@ -33,7 +38,6 @@ const ViewProductModal: React.FC<ViewProductModalProps> = ({
   const safeText = (val: any) =>
     typeof val === "object" && val !== null ? val.name : val;
 
-  // preview base64
   const getBase64 = (file: FileType): Promise<string> =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -46,7 +50,6 @@ const ViewProductModal: React.FC<ViewProductModalProps> = ({
   const [previewImage, setPreviewImage] = useState("");
   const [fileList, setFileList] = useState<UploadFile[]>([]);
 
-  // build UploadFile list from thumbnail + images
   useEffect(() => {
     if (productData) {
       const imgs: UploadFile[] = [];
@@ -56,7 +59,7 @@ const ViewProductModal: React.FC<ViewProductModalProps> = ({
           uid: uuidv4(),
           name: "thumbnail",
           status: "done",
-          url: `${process.env.NEXT_PUBLIC_BACKEND_URL}${productData.thumbnail}`,
+          url: getImageUrl(productData.thumbnail),
         });
       }
 
@@ -66,7 +69,7 @@ const ViewProductModal: React.FC<ViewProductModalProps> = ({
             uid: uuidv4(),
             name: item,
             status: "done",
-            url: `${process.env.NEXT_PUBLIC_BACKEND_URL}${item}`,
+            url: getImageUrl(item),
           });
         });
       }
@@ -99,19 +102,15 @@ const ViewProductModal: React.FC<ViewProductModalProps> = ({
     >
       {productData && (
         <Descriptions bordered column={1} size="small">
-          {/* Thumbnail riêng */}
           {productData.thumbnail && (
             <Descriptions.Item label="Thumbnail">
               <Image
-                src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${productData.thumbnail}`}
+                src={getImageUrl(productData.thumbnail)}
                 alt="thumbnail"
                 width={120}
               />
             </Descriptions.Item>
           )}
-
-          {/* Slider images */}
-
           <Descriptions.Item label="Name">
             {safeText(productData.name)}
           </Descriptions.Item>

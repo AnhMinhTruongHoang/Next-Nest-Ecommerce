@@ -9,8 +9,8 @@ import {
   Row,
   Col,
   Space,
-  notification,
   message,
+  App,
 } from "antd";
 import { LockOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import Link from "next/link";
@@ -22,6 +22,7 @@ const AuthVerify = (props: any) => {
   const { id } = props;
   const router = useRouter();
   const { Title } = Typography;
+  const { notification } = App.useApp();
 
   const [formValues, setFormValues] = useState({
     name: "",

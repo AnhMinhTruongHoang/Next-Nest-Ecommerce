@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import {
   Modal,
   Input,
-  notification,
   Select,
   Form,
   InputNumber,
@@ -18,7 +17,6 @@ import {
   App,
 } from "antd";
 import { updateProductAction } from "@/lib/product.actions";
-import { IProduct } from "next-auth";
 import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 
 interface ICategory {
@@ -75,7 +73,7 @@ const UpdateProductModal = (props: IProps) => {
   // Set giá trị form + load sẵn ảnh khi có dataUpdate
   const getFullUrl = (url: string) => {
     if (!url) return "";
-    // Nếu đã là absolute url thì return luôn
+    // Nếu đã là absolute url thì return
     if (url.startsWith("http://") || url.startsWith("https://")) return url;
     return `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`;
   };

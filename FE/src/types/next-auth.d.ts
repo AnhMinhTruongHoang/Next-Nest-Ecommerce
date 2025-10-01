@@ -20,27 +20,6 @@ declare module "next-auth" {
     __v: number;
   }
 
-  interface ICategory {
-    _id?: string;
-    name: string;
-  }
-
-  interface IProduct {
-    _id: string;
-    thumbnail: string;
-    slider: string[];
-    images: string[];
-    name: string;
-    brand: string;
-    price: number;
-    stock: number;
-    sold: number;
-    quantity: number;
-    category: any;
-    createdAt: Date;
-    updatedAt: Date;
-  }
-
   interface Session {
     user: IUser; // 👈 dùng IUser luôn, không cần object lỏng lẻo nữa
     access_token: string;

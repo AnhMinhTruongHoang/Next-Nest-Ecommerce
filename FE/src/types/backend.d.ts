@@ -12,6 +12,27 @@ declare global {
     nextOption?: any;
   }
 
+  interface ICategory {
+    _id?: string;
+    name: string;
+  }
+
+  interface IProduct {
+    _id: string;
+    thumbnail: string;
+    slider: string[];
+    images: string[];
+    name: string;
+    brand: string;
+    price: number;
+    stock: number;
+    sold: number;
+    quantity: number;
+    category: any;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+
   interface IBackendRes<T> {
     error?: string | string[];
     message?: string;

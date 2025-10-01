@@ -5,19 +5,27 @@ const ExclusiveBanner1 = () => {
   return (
     <div className="banner-container">
       <Image
-        src="/images/cards/gitwar2.png"
+        src="/images/banners/razerBanner.jpg"
         alt="No image"
         draggable="false"
         fill
-        style={{
-          objectFit: "cover",
-          color: "transparent",
-        }}
-        sizes="100vw"
+        priority
+        style={{ objectFit: "inherit" }}
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
       />
-      <div className="banner-overlay">
-        <h2>Razer Exclusive</h2>
-        <Button className="banner-btn" type="primary" size="large">
+
+      <div className="banner-overlay" style={{ marginBottom: 55 }}>
+        <h2 className="razer-text">Razer Exclusive</h2>
+        <Button
+          type="primary"
+          size="large"
+          style={{
+            backgroundColor: "greenyellow",
+            borderColor: "#66B933",
+            color: "#000",
+            fontWeight: "bold",
+          }}
+        >
           KHÁM PHÁ
         </Button>
       </div>
@@ -36,7 +44,6 @@ const ExclusiveBanner1 = () => {
           left: 0;
           width: 100%;
           padding: 150px;
-          background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
           color: #fff;
           display: flex;
           flex-direction: column;
@@ -49,11 +56,10 @@ const ExclusiveBanner1 = () => {
           margin-bottom: 10px;
         }
 
-        .banner-btn {
-          background-color: #fff !important;
-          color: #000 !important;
+        .razer-text {
+          color: black;
+          -webkit-text-stroke: 2px #66b933;
           font-weight: bold;
-          border: none;
         }
 
         /* Mobile responsive */

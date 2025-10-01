@@ -12,7 +12,6 @@ import {
 import { deleteProductAction } from "@/lib/product.actions";
 import CreateProductModal from "./create.product";
 import UpdateProductModal from "./update.product";
-import { IProduct } from "next-auth";
 import ViewProductModal from "./view.Product.Modal";
 
 const ProductsTable = () => {
