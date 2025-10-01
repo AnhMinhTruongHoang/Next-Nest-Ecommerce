@@ -43,11 +43,13 @@ export class FilesController {
     };
   }
 
+  @Public()
   @Get()
   findAll() {
     return this.filesService.findAll();
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.filesService.findOne(+id);
