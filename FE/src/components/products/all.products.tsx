@@ -14,7 +14,7 @@ import {
 } from "antd";
 import type { FormProps } from "antd";
 import { useEffect, useState } from "react";
-import "styles/home.scss";
+import "../../styles/home.scss";
 
 type IProduct = {
   _id: string;
@@ -28,13 +28,13 @@ type IProduct = {
   quantity: number;
 };
 
-const HomePage = () => {
+const ProductsPage = () => {
   const [listCategory, setListCategory] = useState<
     { label: string; value: string }[]
   >([]);
   const [listBook, setListBook] = useState<IProduct[]>([]);
   const [current, setCurrent] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(5);
+  const [pageSize, setPageSize] = useState<number>(20);
   const [total, setTotal] = useState<number>(0);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -98,7 +98,28 @@ const HomePage = () => {
   };
 
   const handleChangeFilter = (changedValues: any, values: any) => {
-    console.log(">>> check handleChangeFilter", changedValues, values);
+    let queryParts: string[] = [];
+
+    // lọc theo category
+    if (values.category?.length > 0) {
+      queryParts.push(`category[in]=${values.category.join(",")}`);
+    }
+
+    // lọc theo khoảng giá
+    if (values.range?.from) {
+      queryParts.push(`price[gte]=${values.range.from}`);
+    }
+    if (values.range?.to) {
+      queryParts.push(`price[lte]=${values.range.to}`);
+    }
+
+    // lọc theo rating (nếu bạn muốn)
+    if (values.rating) {
+      queryParts.push(`rating[gte]=${values.rating}`);
+    }
+
+    setFilter(queryParts.join("&"));
+    setCurrent(1); // reset về trang 1
   };
 
   const onFinish: FormProps<IProduct>["onFinish"] = async (values) => {};
@@ -233,22 +254,34 @@ const HomePage = () => {
                             alt="thumbnail"
                           />
                         </div>
-                        <div className="text" title={item.name}>
+                        <div
+                          style={{ textAlign: "center" }}
+                          className="text"
+                          title={item.name}
+                        >
                           {item.name}
                         </div>
-                        <div className="price">
+                        <div className="price" style={{ textAlign: "center" }}>
                           {new Intl.NumberFormat("vi-VN", {
                             style: "currency",
                             currency: "VND",
                           }).format(item?.price ?? 0)}
                         </div>
-                        <div className="rating">
+                        <div
+                          className="rating"
+                          style={{
+                            textAlign: "center",
+                            justifyContent: "center",
+                          }}
+                        >
                           <Rate
                             value={5}
                             disabled
                             style={{ color: "#ffce3d", fontSize: 10 }}
                           />
-                          <span>Đã bán {item?.sold ?? 0}</span>
+                          <span style={{ textAlign: "center" }}>
+                            {item?.sold ?? 0}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -280,4 +313,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default ProductsPage;

@@ -2,6 +2,8 @@ import { Card } from "antd";
 import Image from "next/image";
 import "antd/dist/reset.css";
 import "../../styles/globals.css";
+import { ProductOutlined } from "@ant-design/icons";
+import Link from "next/link";
 
 const { Meta } = Card;
 
@@ -50,6 +52,33 @@ const Cards = () => (
       }}
     >
       <h1>Sản phẩm nổi bật</h1>
+    </div>
+
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        gap: 12,
+        marginTop: 30,
+      }}
+    >
+      <Link href={`/productsList`}>
+        <button
+          title="All Products"
+          style={{
+            textAlign: "center",
+            padding: "8px 20px",
+            borderRadius: 20,
+            border: "none",
+            fontWeight: 600,
+            cursor: "pointer",
+            minWidth: 80,
+            backgroundColor: "gainsboro",
+          }}
+        >
+          <ProductOutlined />
+        </button>
+      </Link>
     </div>
 
     <div

@@ -61,13 +61,16 @@ export default function AppHeader() {
   const megaMenu = (
     <div
       style={{
-        width: "100vw", // full màn hình
+        width: "100vw",
         background: "#111",
         color: "#fff",
         padding: "32px 48px",
         display: "grid",
         gridTemplateColumns: "repeat(4, 1fr)",
         gap: 32,
+        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+        borderRadius: "0 0 12px 12px",
+        zIndex: 1200,
       }}
     >
       <div>

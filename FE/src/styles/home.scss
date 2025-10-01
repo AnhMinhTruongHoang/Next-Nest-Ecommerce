@@ -2,14 +2,13 @@
   .customize-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px 10px; //gap 10px, có 5 items trên 1 row => 4*10 = 40px cần được bớt ở width. 40/5items = 8px => calc trừ đi 8px
+    gap: 20px 10px;
 
     .column {
       width: calc(20% - 8px);
 
       &:hover {
         box-shadow: 0 0.0625rem 20px 0 rgba(0, 0, 0, 0.05);
-        -webkit-transform: translateY(-0.0625rem);
         transform: translateY(-0.0625rem);
       }
 
@@ -19,15 +18,40 @@
         border-radius: 0.125rem;
         padding: 0.3rem;
 
+        // 👇 thêm chiều cao cố định cho card
+        height: 320px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+
+        .thumbnail {
+          flex: 0 0 160px; // cố định khung ảnh
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+
+          img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+          }
+        }
+
         .text {
           padding: 0.5rem 0;
           font-size: 0.75rem;
-          height: 50px;
+          height: 40px; // cố định chiều cao tên
           display: -webkit-box;
           -webkit-line-clamp: 2;
           -webkit-box-orient: vertical;
           overflow: hidden;
           text-overflow: ellipsis;
+        }
+
+        .price {
+          font-weight: 600;
+          color: #d0021b;
         }
 
         .rating {
@@ -38,32 +62,15 @@
       }
     }
 
-    .thumbnail {
-      max-height: 200px;
-      max-width: 200px;
-      margin: 0 auto;
-
-      img {
-        max-width: 100%;
-        max-height: 100%;
-        background-color: white;
-        object-fit: contain;
-      }
-    }
-
     @media screen and (max-width: 600px) {
       .column {
-        flex: unset;
         width: calc(50% - 8px);
-        flex-wrap: wrap;
       }
     }
 
     @media screen and (max-width: 800px) and (min-width: 601px) {
       .column {
-        flex: unset;
         width: calc(25% - 8px);
-        flex-wrap: wrap;
       }
     }
   }
