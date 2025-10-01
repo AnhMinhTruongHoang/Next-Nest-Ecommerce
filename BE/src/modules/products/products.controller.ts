@@ -14,7 +14,7 @@ import {
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ResponseMessage } from 'src/health/decorator/customize';
+import { Public, ResponseMessage } from 'src/health/decorator/customize';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from '../files/multer.config';
 
@@ -56,6 +56,7 @@ export class ProductsController {
 
   ///
 
+  @Public()
   @Get()
   @ResponseMessage('Fetch product with paginate')
   findAll(
@@ -66,6 +67,7 @@ export class ProductsController {
     return this.productsService.findAll(+currentPage, +limit, qs);
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.productsService.findOne(id);
