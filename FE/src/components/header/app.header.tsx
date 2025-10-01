@@ -61,13 +61,13 @@ export default function AppHeader() {
   const megaMenu = (
     <div
       style={{
-        background: "#1a1a1a",
+        width: "100vw", // full màn hình
+        background: "#111",
         color: "#fff",
         padding: "32px 48px",
         display: "grid",
         gridTemplateColumns: "repeat(4, 1fr)",
         gap: 32,
-        minWidth: 800,
       }}
     >
       <div>
@@ -114,7 +114,7 @@ export default function AppHeader() {
     >
       <div
         style={{
-          maxWidth: 1280,
+          maxWidth: 1480,
           margin: "0 auto",
           display: "flex",
           alignItems: "center",
@@ -123,7 +123,7 @@ export default function AppHeader() {
           height: 72,
         }}
       >
-        {/* Left: Logo */}
+        {/* Logo */}
         <div
           onClick={() => router.push("/")}
           style={{
@@ -140,10 +140,15 @@ export default function AppHeader() {
           GamerZone
         </div>
 
-        {/* Center: Nav */}
+        {/* Nav */}
         <div style={{ display: "flex", gap: 24 }}>
           {navItems.map((item) => (
-            <Dropdown key={item.key} popupRender={() => megaMenu}>
+            <Dropdown
+              key={item.key}
+              popupRender={() => megaMenu}
+              placement="bottom"
+              trigger={["hover"]}
+            >
               <div
                 style={{
                   color: "#fff",
