@@ -25,37 +25,24 @@ export class ProductsService {
     delete filter.current;
     delete filter.pageSize;
 
-    // 👉 Convert category
+    // ✅ ép kiểu cho category nếu có
     if (filter.category) {
       if (typeof filter.category === 'string') {
-        // Nếu có nhiều id (cách nhau dấu phẩy)
-        if (filter.category.includes(',')) {
-          filter.category = {
-            $in: filter.category
-              .split(',')
-              .map((id) => new mongoose.Types.ObjectId(id)),
-          };
-        } else {
-          // 1 id duy nhất
-          filter.category = new mongoose.Types.ObjectId(filter.category);
-        }
+        // Nếu gửi lên dạng "id1,id2"
+        filter.category = { $in: filter.category.split(',') };
+      } else if (
+        filter.category.$in &&
+        typeof filter.category.$in === 'string'
+      ) {
+        // Nếu AQP parse ra sai kiểu
+        filter.category.$in = filter.category.$in.split(',');
       }
     }
 
-    // 👉 Convert price filter
+    // ✅ ép kiểu giá thành số
     if (filter.price) {
-      const priceFilter: any = {};
-      if (filter.price.gte !== undefined) {
-        priceFilter.$gte = Number(filter.price.gte);
-      }
-      if (filter.price.lte !== undefined) {
-        priceFilter.$lte = Number(filter.price.lte);
-      }
-      if (Object.keys(priceFilter).length > 0) {
-        filter.price = priceFilter;
-      } else {
-        delete filter.price;
-      }
+      if (filter.price.$gte) filter.price.$gte = Number(filter.price.$gte);
+      if (filter.price.$lte) filter.price.$lte = Number(filter.price.$lte);
     }
 
     console.log('👉 Final filter:', JSON.stringify(filter));
