@@ -26,23 +26,29 @@ type IProduct = {
   stock: number;
   sold: number;
   quantity: number;
+  category: string[];
+  range: {
+    from: number;
+    to: number;
+  };
 };
 
 const ProductsPage = () => {
   const [listCategory, setListCategory] = useState<
     { label: string; value: string }[]
   >([]);
-  const [listBook, setListBook] = useState<IProduct[]>([]);
+  const [listProduct, setListProduct] = useState<IProduct[]>([]);
   const [current, setCurrent] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(20);
   const [total, setTotal] = useState<number>(0);
-
+  const [showMobileFilter, setShowMobileFilter] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [filter, setFilter] = useState<string>("");
   const [sortQuery, setSortQuery] = useState<string>("sort=-sold");
 
   const [form] = Form.useForm();
 
+  // Lấy danh mục
   useEffect(() => {
     const initCategory = async () => {
       try {
@@ -62,21 +68,24 @@ const ProductsPage = () => {
     initCategory();
   }, []);
 
+  // Lấy sản phẩm
   useEffect(() => {
-    fetchBook();
+    fetchProduct();
   }, [current, pageSize, filter, sortQuery]);
 
-  const fetchBook = async () => {
+  const fetchProduct = async () => {
     setIsLoading(true);
     let query = `current=${current}&pageSize=${pageSize}`;
     if (filter) query += `&${filter}`;
     if (sortQuery) query += `&${sortQuery}`;
 
+    console.log("👉 Query:", query);
+
     try {
       const res = await fetch(`http://localhost:8000/api/v1/products?${query}`);
       const data = await res.json();
       if (data && data.data) {
-        setListBook(data.data.result);
+        setListProduct(data.data.result);
         setTotal(data.data.meta.total);
       }
     } catch (e) {
@@ -86,6 +95,7 @@ const ProductsPage = () => {
     }
   };
 
+  // Xử lý phân trang
   const handleOnchangePage = (pagination: {
     current: number;
     pageSize: number;
@@ -98,32 +108,49 @@ const ProductsPage = () => {
   };
 
   const handleChangeFilter = (changedValues: any, values: any) => {
+    console.log("changedValues:", changedValues);
+    console.log("full form values:", values);
+
     let queryParts: string[] = [];
 
-    // lọc theo category
+    // category=id1,id2
     if (values.category?.length > 0) {
-      queryParts.push(`category[in]=${values.category.join(",")}`);
+      queryParts.push(`category=${values.category.join(",")}`);
     }
 
-    // lọc theo khoảng giá
+    // price range
     if (values.range?.from) {
+      console.log("👉 range.from:", values.range.from);
       queryParts.push(`price[gte]=${values.range.from}`);
     }
     if (values.range?.to) {
+      console.log("👉 range.to:", values.range.to);
       queryParts.push(`price[lte]=${values.range.to}`);
     }
 
-    // lọc theo rating (nếu bạn muốn)
+    // rating (nếu cần)
     if (values.rating) {
       queryParts.push(`rating[gte]=${values.rating}`);
     }
 
+    console.log("👉 Final queryParts:", queryParts);
+
     setFilter(queryParts.join("&"));
-    setCurrent(1); // reset về trang 1
+    setCurrent(1);
   };
 
-  const onFinish: FormProps<IProduct>["onFinish"] = async (values) => {};
-
+  const onFinish: FormProps<IProduct>["onFinish"] = async (values) => {
+    if (values?.range?.from >= 0 && values?.range?.to >= 0) {
+      // Tạo query lọc theo khoảng giá
+      let f = `price>=${values?.range?.from}&price<=${values?.range?.to}`;
+      // Nếu có chọn thêm category thì gắn thêm
+      if (values?.category?.length) {
+        const cate = values?.category?.join(",");
+        f += `&category=${cate}`;
+      }
+      setFilter(f);
+    }
+  };
   const items = [
     { key: "sort=-sold", label: `Phổ biến`, children: <></> },
     { key: "sort=-createdAt", label: `Hàng Mới`, children: <></> },
@@ -150,7 +177,11 @@ const ProductsPage = () => {
                 </span>
                 <ReloadOutlined
                   title="Reset"
-                  onClick={() => form.resetFields()}
+                  onClick={() => {
+                    form.resetFields();
+                    setFilter("");
+                    setCurrent(1);
+                  }}
                 />
               </div>
               <Divider />
@@ -184,9 +215,11 @@ const ProductsPage = () => {
                 <Form.Item label="Khoảng giá" labelCol={{ span: 24 }}>
                   <Row gutter={[10, 10]} style={{ width: "100%" }}>
                     <Col xl={11} md={24}>
-                      <Form.Item name={["range", "from"]}>
+                      <Form.Item name={["range", "from"]} noStyle>
                         <InputNumber
+                          name="from"
                           min={0}
+                          formatter={(value) => `${value}`}
                           placeholder="đ TỪ"
                           style={{ width: "100%" }}
                         />
@@ -196,8 +229,10 @@ const ProductsPage = () => {
                       <div> - </div>
                     </Col>
                     <Col xl={11} md={24}>
-                      <Form.Item name={["range", "to"]}>
+                      <Form.Item name={["range", "to"]} noStyle>
                         <InputNumber
+                          name="to"
+                          formatter={(value) => `${value}`}
                           min={0}
                           placeholder="đ ĐẾN"
                           style={{ width: "100%" }}
@@ -213,6 +248,7 @@ const ProductsPage = () => {
                     Áp dụng
                   </Button>
                 </Form.Item>
+
                 <Divider />
                 <Form.Item label="Đánh giá" labelCol={{ span: 24 }}>
                   {[5, 4, 3, 2, 1].map((val) => (
@@ -245,8 +281,8 @@ const ProductsPage = () => {
                   style={{ overflowX: "auto" }}
                 />
                 <Row className="customize-row">
-                  {listBook?.map((item, index) => (
-                    <div className="column" key={`book-${index}`}>
+                  {listProduct?.map((item, index) => (
+                    <div className="column" key={`products-${index}`}>
                       <div className="wrapper">
                         <div className="thumbnail">
                           <img
@@ -279,14 +315,16 @@ const ProductsPage = () => {
                             disabled
                             style={{ color: "#ffce3d", fontSize: 10 }}
                           />
-                          <span style={{ textAlign: "center" }}>
-                            {item?.sold ?? 0}
+                          <span style={{ marginLeft: 5 }}>
+                            {item?.sold ?? 0} đã bán
                           </span>
                         </div>
                       </div>
                     </div>
                   ))}
                 </Row>
+
+                {/* Pagination */}
                 <Row
                   style={{
                     display: "flex",
@@ -296,11 +334,11 @@ const ProductsPage = () => {
                 >
                   <Pagination
                     current={current}
-                    total={total}
                     pageSize={pageSize}
-                    responsive
-                    onChange={(p, s) =>
-                      handleOnchangePage({ current: p, pageSize: s })
+                    total={total}
+                    showSizeChanger
+                    onChange={(page, pageSize) =>
+                      handleOnchangePage({ current: page, pageSize })
                     }
                   />
                 </Row>
