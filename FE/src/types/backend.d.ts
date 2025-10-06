@@ -33,6 +33,12 @@ declare global {
     updatedAt: Date;
   }
 
+  interface ICart {
+    _id: string;
+    quantity: number;
+    detail: IBookTable;
+  }
+
   interface IBackendRes<T> {
     error?: string | string[];
     message?: string;

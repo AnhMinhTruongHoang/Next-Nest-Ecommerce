@@ -13,6 +13,7 @@ import {
   Spin,
 } from "antd";
 import type { FormProps } from "antd";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import "../../styles/home.scss";
 
@@ -34,6 +35,7 @@ type IProduct = {
 };
 
 const ProductsPage = () => {
+  const router = useRouter();
   const [listCategory, setListCategory] = useState<
     { label: string; value: string }[]
   >([]);
@@ -151,6 +153,7 @@ const ProductsPage = () => {
       setFilter(f);
     }
   };
+
   const items = [
     { key: "sort=-sold", label: `Phổ biến`, children: <></> },
     { key: "sort=-createdAt", label: `Hàng Mới`, children: <></> },
@@ -282,7 +285,12 @@ const ProductsPage = () => {
                 />
                 <Row className="customize-row">
                   {listProduct?.map((item, index) => (
-                    <div className="column" key={`products-${index}`}>
+                    <div
+                      className="column"
+                      key={`products-${index}`}
+                      onClick={() => router.push(`/product-detail/${item._id}`)} // 👉 Navigate theo id
+                      style={{ cursor: "pointer" }}
+                    >
                       <div className="wrapper">
                         <div className="thumbnail">
                           <img

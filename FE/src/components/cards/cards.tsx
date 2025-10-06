@@ -1,7 +1,7 @@
 import { Card } from "antd";
 import Image from "next/image";
 import "antd/dist/reset.css";
-import "../../styles/globals.css";
+import "../../styles/global.css";
 import { ProductOutlined } from "@ant-design/icons";
 import Link from "next/link";
 

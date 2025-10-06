@@ -21,11 +21,15 @@ declare module "next-auth" {
   }
 
   interface Session {
-    user: IUser; // 👈 dùng IUser luôn, không cần object lỏng lẻo nữa
+    user: IUser;
     access_token: string;
     refresh_token: string;
     access_expire: number;
     error?: string;
+  }
+
+  interface IFetchAccount {
+    user: IUser;
   }
 
   interface User extends DefaultUser {
