@@ -21,8 +21,8 @@ const ProductDetail = ({ currentProduct }: IProps) => {
     {
       original: string;
       thumbnail: string;
-      originalClass: string;
-      thumbnailClass: string;
+      originalClass?: string;
+      thumbnailClass?: string;
     }[]
   >([]);
 
@@ -37,23 +37,30 @@ const ProductDetail = ({ currentProduct }: IProps) => {
 
   useEffect(() => {
     if (currentProduct) {
-      const images: any[] = [];
       const baseURL = process.env.NEXT_PUBLIC_BACKEND_URL;
+      const images: {
+        original: string;
+        thumbnail: string;
+        originalClass?: string;
+        thumbnailClass?: string;
+      }[] = [];
 
+      // Thumbnail chính
       if (currentProduct.thumbnail) {
         images.push({
-          original: `${baseURL}/images/Product/${currentProduct.thumbnail}`,
-          thumbnail: `${baseURL}/images/Product/${currentProduct.thumbnail}`,
+          original: `${baseURL}/images/thumbnails/${currentProduct.thumbnail}`,
+          thumbnail: `${baseURL}/images/thumbnails/${currentProduct.thumbnail}`,
           originalClass: "original-image",
           thumbnailClass: "thumbnail-image",
         });
       }
 
+      // Danh sách slider (nếu có)
       if (currentProduct.slider?.length) {
-        currentProduct.slider.forEach((item) => {
+        currentProduct.slider.forEach((img: string) => {
           images.push({
-            original: `${baseURL}/images/Product/${item}`,
-            thumbnail: `${baseURL}/images/Product/${item}`,
+            original: `${baseURL}/images/slider/${img}`,
+            thumbnail: `${baseURL}/images/slider/${img}`,
             originalClass: "original-image",
             thumbnailClass: "thumbnail-image",
           });

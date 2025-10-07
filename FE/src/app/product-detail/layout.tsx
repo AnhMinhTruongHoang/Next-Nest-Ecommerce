@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "../../styles/global.css";
 import { AppProvider } from "@/components/context/app.context";
+import ClientLayout from "@/components/header/ClientLayout";
 
 export const metadata: Metadata = {
   title: "Ecommerce App",
@@ -13,9 +14,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="vi">
+    <html lang="en">
       <body>
-        <AppProvider>{children}</AppProvider>
+        <AppProvider>
+          <ClientLayout>{children}</ClientLayout>
+        </AppProvider>
       </body>
     </html>
   );

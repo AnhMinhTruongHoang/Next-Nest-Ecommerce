@@ -9,13 +9,13 @@ interface IProps {
   isOpen: boolean;
   setIsOpen: (v: boolean) => void;
   currentIndex: number;
+  title: string;
   items: {
     original: string;
     thumbnail: string;
-    originalClass: string;
-    thumbnailClass: string;
+    originalClass?: string;
+    thumbnailClass?: string;
   }[];
-  title: string;
 }
 
 const ModalGallery = ({
