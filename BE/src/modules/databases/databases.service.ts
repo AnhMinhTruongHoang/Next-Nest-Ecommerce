@@ -164,7 +164,6 @@ export class DatabasesService implements OnModuleInit {
                 category: category._id,
                 thumbnail: '/images/thumbnails/LogitechG102t.jpg',
                 images: [
-                  '/images/slider/LogitechG102s1.jpg',
                   '/images/slider/LogitechG102s2.jpg',
                   '/images/slider/LogitechG102s3.jpg',
                 ],

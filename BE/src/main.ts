@@ -7,7 +7,7 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { TransformInterceptor } from './core/transform.interceptor';
 import helmet from 'helmet';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import cookieParser from 'cookie-parser'; // ✅ Sửa lại import
+import cookieParser from 'cookie-parser';
 import * as express from 'express';
 
 async function bootstrap() {
