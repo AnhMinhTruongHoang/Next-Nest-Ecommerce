@@ -60,9 +60,8 @@ export class AuthController {
   @ResponseMessage('Get user information')
   @Get('/account')
   async handleGetAccount(@Users() user: IUser) {
-    const temp = (await this.usersService.findOne(user.role)) as any;
-
-    return { user };
+    const foundUser = await this.usersService.findOne(user._id);
+    return { user: foundUser };
   }
 
   @Public()

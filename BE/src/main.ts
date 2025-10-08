@@ -7,8 +7,7 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { TransformInterceptor } from './core/transform.interceptor';
 import helmet from 'helmet';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import cookieParser = require('cookie-parser');
-import { JwtAuthGuard } from './auth/guards/jwt.auth.guard';
+import cookieParser from 'cookie-parser'; // ✅ Sửa lại import
 import * as express from 'express';
 
 async function bootstrap() {
@@ -16,45 +15,47 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   const reflector = app.get(Reflector);
-  app.useGlobalGuards(new JwtAuthGuard(reflector)); //disable to test
 
-  //////version config
+  // Global interceptor
   app.useGlobalInterceptors(new TransformInterceptor(reflector));
+
+  // Versioning + prefix
   app.setGlobalPrefix('api');
   app.enableVersioning({
     type: VersioningType.URI,
-    defaultVersion: ['1', '2'], /// add version
+    defaultVersion: ['1', '2'],
   });
 
-  //////////cookies
+  // Cookie parser
   app.use(cookieParser());
 
+  // CORS config
   app.enableCors({
-    origin: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    preflightContinue: false,
+    origin: ['http://localhost:3000'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true,
-  }); ///////// fix loi cors
+  });
 
-  /// valid
+  // Validation
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
     }),
   );
 
-  ////// import link config
+  // Static files
   app.useStaticAssets(join(__dirname, '..', 'public'));
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
-
   app.setViewEngine('ejs');
-  // config helmet
+  app.use('/images', express.static(join(__dirname, '..', 'public/images')));
+
+  // Helmet
   app.use(helmet());
 
-  //config swagger
+  // Swagger
   const config = new DocumentBuilder()
-    .setTitle('NestJs Apis Doc')
-    .setDescription('All Modules APIS')
+    .setTitle('NestJS APIs')
+    .setDescription('All API endpoints')
     .setVersion('1.0')
     .addBearerAuth(
       {
@@ -67,22 +68,20 @@ async function bootstrap() {
     )
     .addSecurityRequirements('token')
     .build();
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document, {
     swaggerOptions: {
       persistAuthorization: true,
     },
   });
-  /// img
 
-  app.use('/images', express.static(join(__dirname, '..', 'public/images')));
-
-  // Cho phep serve static file
-  app.useStaticAssets(join(__dirname, '..', 'public'), {
-    prefix: '/public/',
-  });
-
-  //////////////////////
-  await app.listen(configService.get<string>('PORT'));
+  await app.listen(configService.get<string>('PORT') || 8000);
+  console.log(
+    `🚀 Server running on http://localhost:${
+      configService.get<string>('PORT') || 8000
+    }`,
+  );
 }
+
 bootstrap();

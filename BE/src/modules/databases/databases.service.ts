@@ -155,7 +155,8 @@ export class DatabasesService implements OnModuleInit {
             productsToInsert = [
               {
                 name: 'Logitech G102',
-                description: 'Gaming mouse',
+                description:
+                  'Chuột gaming nhỏ gọn với cảm biến chính xác, thiết kế đơn giản nhưng bền bỉ. Phù hợp cho cả game thủ và dân văn phòng, hỗ trợ đèn LED RGB tùy chỉnh.',
                 price: 20 * rate,
                 stock: 100,
                 sold: 0,
@@ -170,7 +171,8 @@ export class DatabasesService implements OnModuleInit {
               },
               {
                 name: 'Razer DeathAdder',
-                description: 'Ergonomic gaming mouse',
+                description:
+                  'Chuột gaming huyền thoại với thiết kế công thái học, ôm tay thoải mái. Trang bị cảm biến quang học cao cấp, tốc độ phản hồi nhanh, lý tưởng cho các tựa game FPS.',
                 price: 50 * rate,
                 stock: 80,
                 sold: 0,
@@ -185,7 +187,8 @@ export class DatabasesService implements OnModuleInit {
               },
               {
                 name: 'SteelSeries Rival 3',
-                description: 'Budget-friendly mouse',
+                description:
+                  'Chuột gaming giá rẻ nhưng hiệu năng vượt trội. Độ bền cao, cảm biến chính xác, đèn RGB tinh tế – lựa chọn hoàn hảo cho game thủ mới bắt đầu.',
                 price: 30 * rate,
                 stock: 120,
                 sold: 0,
@@ -200,7 +203,8 @@ export class DatabasesService implements OnModuleInit {
               },
               {
                 name: 'Razer Cobra',
-                description: 'Ergonomic gaming Mouse',
+                description:
+                  'Chuột gaming cao cấp với thiết kế hiện đại, cảm biến siêu nhạy và độ bền vượt trội. Mang lại trải nghiệm mượt mà cho cả game thủ chuyên nghiệp.',
                 price: 450 * rate,
                 stock: 10,
                 sold: 0,
@@ -214,7 +218,8 @@ export class DatabasesService implements OnModuleInit {
               },
               {
                 name: 'Razer Gigantus V2 Medium',
-                description: 'Ergonomic gaming Pad',
+                description:
+                  'Bàn di chuột gaming với bề mặt vải mịn, tối ưu cho cả tốc độ và độ chính xác. Đế cao su chống trượt, kích thước vừa phải cho mọi setup.',
                 price: 450 * rate,
                 stock: 10,
                 sold: 0,
@@ -233,7 +238,8 @@ export class DatabasesService implements OnModuleInit {
             productsToInsert = [
               {
                 name: 'Razer BlackWidow',
-                description: 'Mechanical keyboard',
+                description:
+                  'Bàn phím cơ gaming nổi tiếng với switch Razer độc quyền, độ bền cao, phản hồi nhanh. Thiết kế mạnh mẽ, đèn RGB sống động.',
                 price: 120 * rate,
                 stock: 50,
                 sold: 0,
@@ -248,7 +254,8 @@ export class DatabasesService implements OnModuleInit {
               },
               {
                 name: 'Corsair K95 RGB',
-                description: 'Premium gaming keyboard',
+                description:
+                  'Bàn phím cơ cao cấp với khung nhôm chắc chắn, switch Cherry MX, hệ thống đèn RGB đa dạng. Tích hợp phím macro chuyên dụng cho game thủ chuyên nghiệp.',
                 price: 180 * rate,
                 stock: 40,
                 sold: 0,
@@ -263,7 +270,8 @@ export class DatabasesService implements OnModuleInit {
               },
               {
                 name: 'Logitech Aurora G715 RGB',
-                description: 'RGB gaming keyboard',
+                description:
+                  'Bàn phím cơ nhỏ gọn, phong cách trẻ trung với hệ thống đèn RGB rực rỡ. Switch cơ học mượt mà, phù hợp cho cả chơi game và gõ văn bản.',
                 price: 70 * rate,
                 stock: 60,
                 sold: 0,
@@ -278,7 +286,8 @@ export class DatabasesService implements OnModuleInit {
               },
               {
                 name: 'Razer BlackWidow V4 X',
-                description: 'Razer anime gaming keyboard',
+                description:
+                  'Phiên bản đặc biệt với thiết kế độc đáo, switch cơ học bền bỉ, đèn nền RGB tùy chỉnh. Mang lại trải nghiệm gõ phím êm ái và chính xác.',
                 price: 70 * rate,
                 stock: 60,
                 sold: 0,
@@ -297,7 +306,8 @@ export class DatabasesService implements OnModuleInit {
             productsToInsert = [
               {
                 name: 'ASUS TUF 24"',
-                description: '144Hz gaming monitor',
+                description:
+                  'Màn hình gaming 24 inch, tần số quét 144Hz, thời gian phản hồi nhanh. Công nghệ Adaptive-Sync giúp hình ảnh mượt mà, không xé hình.',
                 price: 200 * rate,
                 stock: 30,
                 sold: 0,
@@ -311,7 +321,8 @@ export class DatabasesService implements OnModuleInit {
               },
               {
                 name: 'Acer Predator 27"',
-                description: '2K 165Hz gaming monitor',
+                description:
+                  'Màn hình gaming 27 inch độ phân giải 2K, tần số quét 165Hz. Thiết kế hầm hố, màu sắc sống động, tối ưu cho trải nghiệm chơi game cao cấp.',
                 price: 400 * rate,
                 stock: 20,
                 sold: 0,
@@ -325,7 +336,8 @@ export class DatabasesService implements OnModuleInit {
               },
               {
                 name: 'Samsung Odyssey G5',
-                description: 'Curved 144Hz monitor',
+                description:
+                  'Màn hình cong 27 inch, tần số quét 144Hz, độ phân giải QHD. Mang lại trải nghiệm đắm chìm, hình ảnh sắc nét, phù hợp cho cả game và giải trí.',
                 price: 350 * rate,
                 stock: 25,
                 sold: 0,
@@ -344,7 +356,8 @@ export class DatabasesService implements OnModuleInit {
             productsToInsert = [
               {
                 name: 'Razer Iskur V2 X',
-                description: 'Ergonomic gaming chair',
+                description:
+                  'Ghế gaming công thái học với thiết kế ôm lưng, hỗ trợ cột sống tối ưu. Chất liệu cao cấp, bền bỉ, mang lại sự thoải mái khi chơi game lâu dài.',
                 price: 450 * rate,
                 stock: 10,
                 sold: 0,
@@ -358,7 +371,8 @@ export class DatabasesService implements OnModuleInit {
               },
               {
                 name: 'DXRacer Formula',
-                description: 'Professional gaming chair',
+                description:
+                  'Ghế gaming chuyên nghiệp với thiết kế thể thao, khung thép chắc chắn. Đệm mút dày, điều chỉnh linh hoạt, phù hợp cho cả game thủ và streamer.',
                 price: 250 * rate,
                 stock: 15,
                 sold: 0,
@@ -372,7 +386,8 @@ export class DatabasesService implements OnModuleInit {
               },
               {
                 name: 'Secretlab Titan Evo',
-                description: 'Premium ergonomic chair',
+                description:
+                  'Ghế gaming cao cấp với chất liệu da PU bền bỉ, thiết kế sang trọng. Tích hợp nhiều tính năng điều chỉnh, mang lại sự thoải mái tối đa cho game thủ hardcore.',
                 price: 450 * rate,
                 stock: 10,
                 sold: 0,
@@ -386,7 +401,8 @@ export class DatabasesService implements OnModuleInit {
               },
               {
                 name: 'AKRacing Core EX',
-                description: 'Affordable gaming chair',
+                description:
+                  'Ghế gaming giá phải chăng nhưng chất lượng vượt trội. Thiết kế trẻ trung, khung thép bền, đệm ngồi thoải mái cho nhiều giờ sử dụng.',
                 price: 200 * rate,
                 stock: 20,
                 sold: 0,
