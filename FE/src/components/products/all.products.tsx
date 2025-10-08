@@ -81,8 +81,6 @@ const ProductsPage = () => {
     if (filter) query += `&${filter}`;
     if (sortQuery) query += `&${sortQuery}`;
 
-    console.log("👉 Query:", query);
-
     try {
       const res = await fetch(`http://localhost:8000/api/v1/products?${query}`);
       const data = await res.json();
@@ -110,9 +108,6 @@ const ProductsPage = () => {
   };
 
   const handleChangeFilter = (changedValues: any, values: any) => {
-    console.log("changedValues:", changedValues);
-    console.log("full form values:", values);
-
     let queryParts: string[] = [];
 
     // category=id1,id2
@@ -122,11 +117,9 @@ const ProductsPage = () => {
 
     // price range
     if (values.range?.from) {
-      console.log("👉 range.from:", values.range.from);
       queryParts.push(`price[gte]=${values.range.from}`);
     }
     if (values.range?.to) {
-      console.log("👉 range.to:", values.range.to);
       queryParts.push(`price[lte]=${values.range.to}`);
     }
 
@@ -288,7 +281,7 @@ const ProductsPage = () => {
                     <div
                       className="column"
                       key={`products-${index}`}
-                      onClick={() => router.push(`/product-detail/${item._id}`)} // 👉 Navigate theo id
+                      onClick={() => router.push(`/product-detail/${item._id}`)} /// go to detail
                       style={{ cursor: "pointer" }}
                     >
                       <div className="wrapper">

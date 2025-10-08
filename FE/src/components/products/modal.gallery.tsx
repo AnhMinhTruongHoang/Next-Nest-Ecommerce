@@ -25,81 +25,65 @@ const ModalGallery = ({
   items,
   title,
 }: IProps) => {
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState<number>(currentIndex || 0);
   const refGallery = useRef<ImageGallery>(null);
 
+  // 👉 Khi modal mở, nhảy đến đúng hình đang xem ở trang chi tiết
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && items.length > 0) {
       setActiveIndex(currentIndex);
-      // Khi modal mở, nhảy tới ảnh hiện tại
       setTimeout(() => {
         refGallery.current?.slideToIndex(currentIndex);
-      }, 100);
-    } else {
-      setActiveIndex(0); // reset khi đóng modal
+      }, 150);
     }
-  }, [isOpen, currentIndex]);
+  }, [isOpen, currentIndex, items]);
 
   return (
     <Modal
-      width={
-        typeof window !== "undefined" && window.innerWidth < 768
-          ? "90vw"
-          : "60vw"
-      }
       open={isOpen}
       onCancel={() => setIsOpen(false)}
       footer={null}
-      closable={false}
-      className="modal-gallery"
       centered
+      className="modal-gallery"
+      // 👉 Tùy chỉnh độ rộng modal theo kích thước màn hình
+      width={
+        typeof window !== "undefined" && window.innerWidth < 768
+          ? "95vw" // Mobile
+          : "70vw" // Desktop
+      }
+      destroyOnHidden
+      // 👉 styles: thay thế cho bodyStyle/contentStyle (Ant Design v5+)
+      styles={{
+        body: {
+          // 👉 Điều chỉnh chiều cao hiển thị modal
+          // Ví dụ: tăng lên "80vh" nếu muốn modal cao hơn
+          height: window.innerWidth < 768 ? "75vh" : "65vh",
+          overflow: "hidden",
+          padding: "10px 20px",
+        },
+        content: {
+          borderRadius: 16, // 👉 Bo góc modal
+          maxHeight: "90vh", // 👉 Giới hạn max chiều cao modal
+        },
+      }}
     >
-      <Row gutter={[20, 20]}>
+      <Row gutter={[20, 20]} align="middle" justify="center">
+        {/* 🖼 Khu vực hiển thị ảnh chính */}
         <Col xs={24} md={16}>
           {items?.length > 0 && (
-            <ImageGallery
-              ref={refGallery}
-              items={items}
-              showPlayButton={false}
-              showFullscreenButton={false}
-              showThumbnails={false}
-              startIndex={currentIndex}
-              onSlide={(i) => setActiveIndex(i)}
-              slideDuration={0}
-            />
+            <div className="modal-gallery__main">
+              <ImageGallery
+                ref={refGallery}
+                items={items}
+                showPlayButton={false} // 👉 Ẩn nút play slideshow
+                showFullscreenButton={false} // 👉 Ẩn nút fullscreen
+                showThumbnails={false} // 👉 Ẩn dải ảnh nhỏ bên dưới
+                startIndex={currentIndex}
+                onSlide={(i) => setActiveIndex(i)} // 👉 Lưu chỉ số ảnh hiện tại
+                slideDuration={0} // 👉 Không hiệu ứng trượt
+              />
+            </div>
           )}
-        </Col>
-
-        <Col xs={24} md={8}>
-          <div style={{ padding: "5px 0 20px 0", fontWeight: 500 }}>
-            {title}
-          </div>
-          <Row gutter={[10, 10]}>
-            {items?.map((item, i) => (
-              <Col key={`image-${i}`}>
-                <div
-                  className={`thumb-item ${activeIndex === i ? "active" : ""}`}
-                  style={{
-                    border:
-                      activeIndex === i
-                        ? "2px solid #1890ff"
-                        : "2px solid transparent",
-                    borderRadius: 8,
-                    overflow: "hidden",
-                    cursor: "pointer",
-                  }}
-                >
-                  <Image
-                    width={90}
-                    height={90}
-                    src={item.original}
-                    preview={false}
-                    onClick={() => refGallery.current?.slideToIndex(i)}
-                  />
-                </div>
-              </Col>
-            ))}
-          </Row>
         </Col>
       </Row>
     </Modal>

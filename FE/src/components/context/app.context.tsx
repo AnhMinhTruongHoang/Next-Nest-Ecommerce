@@ -49,7 +49,7 @@ const CurrentAppContext = createContext<IAppContext | null>(null);
 const fetchAccountAPI = async () => {
   const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/account`;
   return axios.get<IBackendRes<IFetchAccount>>(url, {
-    withCredentials: true, // nếu bạn dùng cookie cho JWT
+    withCredentials: true,
   });
 };
 
@@ -65,6 +65,13 @@ export const AppProvider = ({ children }: TProps) => {
   const [carts, setCarts] = useState<ICart[]>([]);
 
   useEffect(() => {
+    const pathname = window.location.pathname;
+
+    // Các trang PUBLIC (không cần fetch user)
+    const publicPaths = ["/", "/products", "/product", "/cart"];
+
+    const isPublic = publicPaths.some((path) => pathname.startsWith(path));
+
     const fetchAccount = async () => {
       try {
         const res = await fetchAccountAPI();
@@ -90,7 +97,16 @@ export const AppProvider = ({ children }: TProps) => {
       }
     };
 
-    fetchAccount();
+    // Nếu là trang public thì không cần gọi API account
+    if (isPublic) {
+      const cartsStorage = localStorage.getItem("carts");
+      if (cartsStorage) {
+        setCarts(JSON.parse(cartsStorage));
+      }
+      setIsAppLoading(false);
+    } else {
+      fetchAccount();
+    }
   }, []);
 
   if (isAppLoading) {

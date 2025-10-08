@@ -20,8 +20,8 @@ declare global {
   interface IProduct {
     _id: string;
     thumbnail: string;
-    slider: string[];
     images: string[];
+    description: string;
     name: string;
     brand: string;
     price: number;

@@ -1,98 +1,81 @@
 "use client";
 
-import { Row, Col, Rate, Divider, App, Breadcrumb } from "antd";
-import ImageGallery from "react-image-gallery";
-import { useEffect, useRef, useState } from "react";
-import { CarTwoTone, MinusOutlined, PlusOutlined } from "@ant-design/icons";
-import "../../styles/product.scss";
-import ModalGallery from "@/components/products/modal.gallery";
+import {
+  Row,
+  Col,
+  Rate,
+  Divider,
+  App,
+  Breadcrumb,
+  Button,
+  Card,
+  InputNumber,
+  Space,
+  Typography,
+  Tag,
+} from "antd";
+import {
+  MinusOutlined,
+  PlusOutlined,
+  ShoppingCartOutlined,
+} from "@ant-design/icons";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import ReactImageGallery from "react-image-gallery";
+import "react-image-gallery/styles/css/image-gallery.css";
 import { useCurrentApp } from "@/components/context/app.context";
+import ModalGallery from "@/components/products/modal.gallery";
+import "@/styles/product.scss";
+
+const { Title, Text } = Typography;
 
 interface IProps {
   currentProduct: IProduct | null;
 }
 
-type UserAction = "MINUS" | "PLUS";
-
 const ProductDetail = ({ currentProduct }: IProps) => {
-  const [imageGallery, setImageGallery] = useState<
-    {
-      original: string;
-      thumbnail: string;
-      originalClass?: string;
-      thumbnailClass?: string;
-    }[]
-  >([]);
-
+  const [imageGallery, setImageGallery] = useState<any[]>([]);
   const [isOpenModalGallery, setIsOpenModalGallery] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [currentQuantity, setCurrentQuantity] = useState(1);
 
-  const refGallery = useRef<ImageGallery>(null);
+  const refGallery = useRef<ReactImageGallery>(null);
   const router = useRouter();
   const { setCarts, user } = useCurrentApp();
   const { message } = App.useApp();
 
+  // Build image list for gallery
   useEffect(() => {
-    if (currentProduct) {
-      const baseURL = process.env.NEXT_PUBLIC_BACKEND_URL;
-      const images: {
-        original: string;
-        thumbnail: string;
-        originalClass?: string;
-        thumbnailClass?: string;
-      }[] = [];
+    if (!currentProduct) return;
 
-      // Thumbnail chính
-      if (currentProduct.thumbnail) {
-        images.push({
-          original: `${baseURL}/images/thumbnails/${currentProduct.thumbnail}`,
-          thumbnail: `${baseURL}/images/thumbnails/${currentProduct.thumbnail}`,
-          originalClass: "original-image",
-          thumbnailClass: "thumbnail-image",
-        });
-      }
-
-      // Danh sách slider (nếu có)
-      if (currentProduct.slider?.length) {
-        currentProduct.slider.forEach((img: string) => {
-          images.push({
-            original: `${baseURL}/images/slider/${img}`,
-            thumbnail: `${baseURL}/images/slider/${img}`,
-            originalClass: "original-image",
-            thumbnailClass: "thumbnail-image",
-          });
-        });
-      }
-
-      setImageGallery(images);
+    const images: any[] = [];
+    if (currentProduct.thumbnail) {
+      images.push({
+        original: `${process.env.NEXT_PUBLIC_BACKEND_URL}${currentProduct.thumbnail}`,
+        thumbnail: `${process.env.NEXT_PUBLIC_BACKEND_URL}${currentProduct.thumbnail}`,
+      });
     }
+
+    if (Array.isArray(currentProduct.images)) {
+      currentProduct.images.forEach((item) => {
+        const url = item.startsWith("/images/")
+          ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${item}`
+          : `${process.env.NEXT_PUBLIC_BACKEND_URL}images/slider/${item}`;
+        images.push({ original: url, thumbnail: url });
+      });
+    }
+
+    setImageGallery(images);
   }, [currentProduct]);
 
-  const handleOnClickImage = () => {
-    setIsOpenModalGallery(true);
-    setCurrentIndex(refGallery.current?.getCurrentIndex() ?? 0);
+  // Quantity logic
+  const handleQuantityChange = (value: number | null) => {
+    if (!value || value <= 0) return;
+    const maxQty = currentProduct?.quantity ?? 1;
+    setCurrentQuantity(value > maxQty ? maxQty : value);
   };
 
-  const handleChangeButton = (type: UserAction) => {
-    if (type === "MINUS" && currentQuantity > 1)
-      setCurrentQuantity(currentQuantity - 1);
-    if (
-      type === "PLUS" &&
-      currentProduct &&
-      currentQuantity < +currentProduct.quantity
-    )
-      setCurrentQuantity(currentQuantity + 1);
-  };
-
-  const handleChangeInput = (value: string) => {
-    const num = +value;
-    if (!isNaN(num) && num > 0 && num <= (currentProduct?.quantity ?? 1))
-      setCurrentQuantity(num);
-  };
-
+  // Add to cart
   const handleAddToCart = (isBuyNow = false) => {
     if (!user) {
       message.error("Bạn cần đăng nhập để thực hiện tính năng này.");
@@ -104,135 +87,145 @@ const ProductDetail = ({ currentProduct }: IProps) => {
 
     if (currentProduct) {
       const index = carts.findIndex((c) => c._id === currentProduct._id);
-      if (index > -1) {
-        carts[index].quantity += currentQuantity;
-      } else {
+      if (index > -1) carts[index].quantity += currentQuantity;
+      else
         carts.push({
           _id: currentProduct._id,
           quantity: currentQuantity,
           detail: currentProduct,
         });
-      }
+
       localStorage.setItem("carts", JSON.stringify(carts));
       setCarts(carts);
     }
 
     if (isBuyNow) router.push("/order");
-    else message.success("Thêm sản phẩm vào giỏ hàng thành công.");
+    else message.success("Đã thêm sản phẩm vào giỏ hàng 🎉");
   };
 
+  if (!currentProduct) return null;
+
   return (
-    <div style={{ background: "#efefef", padding: "20px 0" }}>
-      <div
-        className="view-detail-product"
-        style={{
-          maxWidth: 1440,
-          margin: "0 auto",
-          minHeight: "calc(100vh - 150px)",
-        }}
-      >
+    <div style={{ background: "#f5f5f5", padding: "30px 0" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
         <Breadcrumb
-          separator=">"
+          style={{ marginBottom: 16 }}
           items={[
-            { title: <Link href="/">Trang Chủ</Link> },
-            { title: "Xem chi tiết sản phẩm" },
+            { title: <Link href="/">Trang chủ</Link> },
+            { title: "Chi tiết sản phẩm" },
           ]}
         />
 
-        <div style={{ padding: 20, background: "#fff", borderRadius: 5 }}>
-          <Row gutter={[20, 20]}>
-            <Col md={10} sm={0} xs={0}>
-              <ImageGallery
+        <Card
+          variant="borderless"
+          style={{
+            borderRadius: 12,
+            overflow: "hidden",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+          }}
+        >
+          <Row gutter={[32, 32]}>
+            {/*  Hình ảnh bên trái */}
+            <Col xs={24} md={10}>
+              <ReactImageGallery
                 ref={refGallery}
                 items={imageGallery}
                 showPlayButton={false}
                 showFullscreenButton={false}
-                renderLeftNav={() => <></>}
-                renderRightNav={() => <></>}
                 slideOnThumbnailOver
-                onClick={handleOnClickImage}
+                onClick={() => setIsOpenModalGallery(true)}
               />
             </Col>
 
-            <Col md={14} sm={24}>
-              <Col span={24}>
-                <div className="author">
-                  Thương hiệu: <a href="#">{currentProduct?.brand}</a>
-                </div>
-                <div className="title">{currentProduct?.name}</div>
+            {/*  Thông tin sản phẩm */}
+            <Col xs={24} md={14}>
+              <Space
+                direction="vertical"
+                size="middle"
+                style={{ width: "100%" }}
+              >
+                <Tag color="blue">{currentProduct.brand}</Tag>
 
-                <div className="rating">
-                  <Rate
-                    value={5}
-                    disabled
-                    style={{ color: "#ffce3d", fontSize: 12 }}
-                  />
-                  <span className="sold">
-                    <Divider type="vertical" /> Đã bán{" "}
-                    {currentProduct?.sold ?? 0}
-                  </span>
-                </div>
+                <Title level={3} style={{ margin: 0 }}>
+                  {currentProduct.name}
+                </Title>
 
-                <div className="price">
-                  <span className="currency">
-                    {new Intl.NumberFormat("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    }).format(currentProduct?.price ?? 0)}
-                  </span>
+                <div>
+                  <Rate disabled defaultValue={5} style={{ fontSize: 14 }} />
+                  <Text type="secondary" style={{ marginLeft: 8 }}>
+                    Đã bán {currentProduct.sold ?? 0}
+                  </Text>
+                </div>
+                <div>
+                  <Text type="secondary" style={{ marginLeft: 8 }}>
+                    {currentProduct.description}
+                  </Text>
                 </div>
 
-                <div className="delivery">
-                  <div>
-                    <span className="left">Vận chuyển</span>
-                    <span className="right">Miễn phí vận chuyển</span>
-                  </div>
-                </div>
+                <Title
+                  level={4}
+                  style={{ color: "#ff4d4f", fontWeight: 600, marginTop: 8 }}
+                >
+                  {new Intl.NumberFormat("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                  }).format(currentProduct.price ?? 0)}
+                </Title>
 
-                <div className="quantity">
-                  <span className="left">Số lượng</span>
-                  <span className="right">
-                    <button
-                      title="minus"
-                      onClick={() => handleChangeButton("MINUS")}
-                    >
-                      <MinusOutlined />
-                    </button>
-                    <input
-                      placeholder="Quantity"
-                      value={currentQuantity}
-                      onChange={(e) => handleChangeInput(e.target.value)}
+                <Divider style={{ margin: "12px 0" }} />
+
+                <div>
+                  <Text strong>Số lượng: </Text>
+                  <Space>
+                    <Button
+                      icon={<MinusOutlined />}
+                      onClick={() => handleQuantityChange(currentQuantity - 1)}
                     />
-                    <button
-                      title="plus"
-                      onClick={() => handleChangeButton("PLUS")}
-                    >
-                      <PlusOutlined />
-                    </button>
-                  </span>
+                    <InputNumber
+                      value={currentQuantity}
+                      min={1}
+                      max={currentProduct.quantity}
+                      onChange={handleQuantityChange}
+                      style={{ width: 60 }}
+                    />
+                    <Button
+                      icon={<PlusOutlined />}
+                      onClick={() => handleQuantityChange(currentQuantity + 1)}
+                    />
+                  </Space>
                 </div>
 
-                <div className="buy">
-                  <button className="cart" onClick={() => handleAddToCart()}>
-                    <CarTwoTone className="icon-cart" />
-                    <span>Thêm vào giỏ hàng</span>
-                  </button>
-                  <button onClick={() => handleAddToCart(true)} className="now">
+                <Divider style={{ margin: "12px 0" }} />
+
+                <Space>
+                  <Button
+                    type="primary"
+                    size="large"
+                    icon={<ShoppingCartOutlined />}
+                    onClick={() => handleAddToCart()}
+                  >
+                    Thêm vào giỏ hàng
+                  </Button>
+                  <Button
+                    size="large"
+                    danger
+                    onClick={() => handleAddToCart(true)}
+                  >
                     Mua ngay
-                  </button>
-                </div>
-              </Col>
+                  </Button>
+                </Space>
+              </Space>
             </Col>
           </Row>
-        </div>
+        </Card>
       </div>
 
       <ModalGallery
         isOpen={isOpenModalGallery}
         setIsOpen={setIsOpenModalGallery}
-        currentIndex={currentIndex}
+        currentIndex={0}
         items={imageGallery}
-        title={currentProduct?.name ?? ""}
+        title={currentProduct.name}
       />
     </div>
   );
