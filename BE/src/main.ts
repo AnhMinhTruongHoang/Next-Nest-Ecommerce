@@ -36,12 +36,6 @@ async function bootstrap() {
     credentials: true,
   }); ///////// fix loi cors
 
-  // app.enableCors({
-  //   origin: 'http://localhost:3000', // Cụ thể với frontend Vite
-  //   credentials: true,
-  //   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  // });
-
   /// valid
   app.useGlobalPipes(
     new ValidationPipe({

@@ -5,7 +5,6 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import aqp from 'api-query-params';
-import mongoose from 'mongoose';
 
 @Injectable()
 export class ProductsService {
@@ -18,34 +17,32 @@ export class ProductsService {
     const created = new this.productModel(dto);
     return created.save();
   }
+  /// find all
 
-  // NOTE: Find all products with pagination, filtering and sorting
   async findAll(currentPage: number, limit: number, qs: any) {
     const { filter, sort } = aqp(qs);
     delete filter.current;
     delete filter.pageSize;
 
-    // ✅ ép kiểu cho category nếu có
-    if (filter.category) {
-      if (typeof filter.category === 'string') {
-        // Nếu gửi lên dạng "id1,id2"
-        filter.category = { $in: filter.category.split(',') };
-      } else if (
-        filter.category.$in &&
-        typeof filter.category.$in === 'string'
-      ) {
-        // Nếu AQP parse ra sai kiểu
-        filter.category.$in = filter.category.$in.split(',');
+    if (filter.price) {
+      if (filter.price.$gte && typeof filter.price.$gte === 'object') {
+        filter.price.$gte = Number(Object.values(filter.price.$gte)[0]);
+      }
+      if (filter.price.$lte && typeof filter.price.$lte === 'object') {
+        filter.price.$lte = Number(Object.values(filter.price.$lte)[0]);
+      }
+
+      if (filter.price.gte) {
+        filter.price.$gte = Number(filter.price.gte);
+        delete filter.price.gte;
+      }
+      if (filter.price.lte) {
+        filter.price.$lte = Number(filter.price.lte);
+        delete filter.price.lte;
       }
     }
 
-    // ✅ ép kiểu giá thành số
-    if (filter.price) {
-      if (filter.price.$gte) filter.price.$gte = Number(filter.price.$gte);
-      if (filter.price.$lte) filter.price.$lte = Number(filter.price.$lte);
-    }
-
-    console.log('👉 Final filter:', JSON.stringify(filter));
+    console.log('Final filter:', filter);
 
     const safePage = Math.max(1, Number(currentPage) || 1);
     const safeLimit = Math.max(1, Number(limit) || 20);
