@@ -26,7 +26,7 @@ import ReactImageGallery from "react-image-gallery";
 import "react-image-gallery/styles/css/image-gallery.css";
 import { useCurrentApp } from "@/components/context/app.context";
 import ModalGallery from "@/components/products/modal.gallery";
-import "@/styles/product.scss";
+import "../../styles/product.scss";
 
 const { Title, Text } = Typography;
 
@@ -34,11 +34,14 @@ interface IProps {
   currentProduct: IProduct | null;
 }
 
+type UserAction = "MINUS" | "PLUS";
+
 const ProductDetail = ({ currentProduct }: IProps) => {
+  const [loading, setLoading] = useState(true);
   const [imageGallery, setImageGallery] = useState<any[]>([]);
   const [isOpenModalGallery, setIsOpenModalGallery] = useState(false);
-  const [currentQuantity, setCurrentQuantity] = useState(1);
-
+  const [currentQuantity, setCurrentQuantity] = useState<number>(1);
+  const [listProduct, setListProduct] = useState<IProduct[]>([]);
   const refGallery = useRef<ReactImageGallery>(null);
   const router = useRouter();
   const { setCarts, user } = useCurrentApp();
@@ -69,10 +72,26 @@ const ProductDetail = ({ currentProduct }: IProps) => {
   }, [currentProduct]);
 
   // Quantity logic
-  const handleQuantityChange = (value: number | null) => {
-    if (!value || value <= 0) return;
-    const maxQty = currentProduct?.quantity ?? 1;
-    setCurrentQuantity(value > maxQty ? maxQty : value);
+  const handleQuantityChange = (type: UserAction) => {
+    if (type == "MINUS") {
+      if (currentQuantity - 1 <= 0) return;
+      setCurrentQuantity(currentQuantity - 1);
+    }
+    if (type === "PLUS" && currentProduct) {
+      if (currentQuantity === +currentProduct.quantity) return; //max
+
+      setCurrentQuantity(currentQuantity + 1);
+    }
+  };
+
+  /// input value
+
+  const handleChangeInput = (value: string) => {
+    if (!isNaN(+value)) {
+      if (+value > 0 && currentProduct && +value <= +currentProduct.quantity) {
+        setCurrentQuantity(+value);
+      }
+    }
   };
 
   // Add to cart
@@ -133,6 +152,7 @@ const ProductDetail = ({ currentProduct }: IProps) => {
                 showPlayButton={false}
                 showFullscreenButton={false}
                 slideOnThumbnailOver
+                lazyLoad={true}
                 onClick={() => setIsOpenModalGallery(true)}
               />
             </Col>
@@ -152,14 +172,13 @@ const ProductDetail = ({ currentProduct }: IProps) => {
 
                 <div>
                   <Rate disabled defaultValue={5} style={{ fontSize: 14 }} />
+
                   <Text type="secondary" style={{ marginLeft: 8 }}>
                     Đã bán {currentProduct.sold ?? 0}
                   </Text>
                 </div>
-                <div>
-                  <Text type="secondary" style={{ marginLeft: 8 }}>
-                    {currentProduct.description}
-                  </Text>
+                <div style={{ width: "100%", marginTop: 8 }}>
+                  <Text type="secondary">{currentProduct.description}</Text>
                 </div>
 
                 <Title
@@ -179,18 +198,23 @@ const ProductDetail = ({ currentProduct }: IProps) => {
                   <Space>
                     <Button
                       icon={<MinusOutlined />}
-                      onClick={() => handleQuantityChange(currentQuantity - 1)}
+                      onClick={() => handleQuantityChange("MINUS")}
                     />
                     <InputNumber
                       value={currentQuantity}
                       min={1}
                       max={currentProduct.quantity}
-                      onChange={handleQuantityChange}
+                      onChange={(value) => {
+                        if (value !== null) {
+                          handleChangeInput(value.toString());
+                        }
+                      }}
                       style={{ width: 60 }}
                     />
+
                     <Button
                       icon={<PlusOutlined />}
-                      onClick={() => handleQuantityChange(currentQuantity + 1)}
+                      onClick={() => handleQuantityChange("PLUS")}
                     />
                   </Space>
                 </div>
@@ -223,7 +247,7 @@ const ProductDetail = ({ currentProduct }: IProps) => {
       <ModalGallery
         isOpen={isOpenModalGallery}
         setIsOpen={setIsOpenModalGallery}
-        currentIndex={0}
+        currentIndex={refGallery.current?.getCurrentIndex() ?? 0}
         items={imageGallery}
         title={currentProduct.name}
       />

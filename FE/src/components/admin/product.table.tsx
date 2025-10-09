@@ -2,7 +2,16 @@
 
 import React, { useEffect, useState } from "react";
 import "../../styles/users.css";
-import { Table, Button, Popconfirm, Input, Space, Image, App } from "antd";
+import {
+  Table,
+  Button,
+  Popconfirm,
+  Input,
+  Space,
+  Image,
+  App,
+  Spin, // 👉 thêm Spin
+} from "antd";
 import type { ColumnsType } from "antd/es/table";
 import {
   PlusOutlined,
@@ -24,6 +33,8 @@ const ProductsTable = () => {
   const [accessToken, setAccessToken] = useState<string>("");
   const { notification } = App.useApp();
 
+  const [loading, setLoading] = useState(false); // 👉 thêm state loading
+
   const [meta, setMeta] = useState({
     current: 1,
     pageSize: 20,
@@ -43,23 +54,30 @@ const ProductsTable = () => {
   }, [accessToken]);
 
   const getData = async (current = 1, pageSize = 20) => {
-    const res = await fetch(
-      `http://localhost:8000/api/v1/products?current=${current}&pageSize=${pageSize}`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    try {
+      setLoading(true); // 👉 bật loading
+      const res = await fetch(
+        `http://localhost:8000/api/v1/products?current=${current}&pageSize=${pageSize}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-    const d = await res.json();
-    if (!d.data) {
-      notification.error({ message: JSON.stringify(d.message) });
-      return;
+      const d = await res.json();
+      if (!d.data) {
+        notification.error({ message: JSON.stringify(d.message) });
+        return;
+      }
+      setListProducts(d.data.result);
+      setMeta(d.data.meta);
+    } catch (error) {
+      notification.error({ message: "Lỗi tải dữ liệu!" });
+    } finally {
+      setLoading(false); // 👉 tắt loading
     }
-    setListProducts(d.data.result);
-    setMeta(d.data.meta);
   };
 
   const handleOnChange = async (page: number, pageSize: number) => {
@@ -75,8 +93,6 @@ const ProductsTable = () => {
       notification.error({ message: JSON.stringify(d.message) });
     }
   };
-
-  // console.log(dataUpdate);
 
   const columns: ColumnsType<IProduct> = [
     {
@@ -275,13 +291,14 @@ const ProductsTable = () => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          marginBottom: 16,
         }}
       >
         <h2>Table products</h2>
         <Button
           type="text"
           icon={<ReloadOutlined style={{ color: "green" }} />}
-          onClick={() => window.location.reload()}
+          onClick={() => getData(meta.current, meta.pageSize)}
         >
           Refresh
         </Button>
@@ -295,20 +312,23 @@ const ProductsTable = () => {
         </Button>
       </div>
 
-      <Table
-        columns={columns}
-        dataSource={listProducts}
-        rowKey="_id"
-        pagination={{
-          current: meta.current,
-          pageSize: meta.pageSize,
-          total: meta.total,
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} items`,
-          onChange: handleOnChange,
-          showSizeChanger: true,
-        }}
-      />
+      {/* 👉 Thêm Spin bao quanh Table */}
+      <Spin spinning={loading} tip="Đang tải dữ liệu...">
+        <Table
+          columns={columns}
+          dataSource={listProducts}
+          rowKey="_id"
+          pagination={{
+            current: meta.current,
+            pageSize: meta.pageSize,
+            total: meta.total,
+            showTotal: (total, range) =>
+              `${range[0]}-${range[1]} of ${total} items`,
+            onChange: handleOnChange,
+            showSizeChanger: true,
+          }}
+        />
+      </Spin>
 
       {/* Modal components */}
       <ViewProductModal

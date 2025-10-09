@@ -11,6 +11,7 @@ import {
   Tabs,
   Pagination,
   Spin,
+  Drawer,
 } from "antd";
 import type { FormProps } from "antd";
 import { useRouter } from "next/navigation";
@@ -207,6 +208,19 @@ const ProductsPage = () => {
                     </Row>
                   </Checkbox.Group>
                 </Form.Item>
+                <div
+                  className="mobile-filter-btn"
+                  style={{ display: "none", marginBottom: 10 }}
+                >
+                  <Button
+                    icon={<FilterTwoTone />}
+                    onClick={() => setShowMobileFilter(true)}
+                    type="primary"
+                  >
+                    Bộ lọc
+                  </Button>
+                </div>
+
                 <Divider />
                 <Form.Item label="Khoảng giá" labelCol={{ span: 24 }}>
                   <Row gutter={[10, 10]} style={{ width: "100%" }}>
@@ -348,6 +362,93 @@ const ProductsPage = () => {
           </Col>
         </Row>
       </div>
+      <Drawer
+        title="Bộ lọc tìm kiếm"
+        placement="left"
+        open={showMobileFilter}
+        onClose={() => setShowMobileFilter(false)}
+        width={"80%"}
+      >
+        <Form
+          onFinish={onFinish}
+          form={form}
+          onValuesChange={(changedValues, values) =>
+            handleChangeFilter(changedValues, values)
+          }
+        >
+          {/* copy toàn bộ nội dung trong sidebar cũ (Checkbox, Range, Rate) vào đây */}
+          {/* Category */}
+          <Form.Item
+            name="category"
+            label="Danh mục sản phẩm"
+            labelCol={{ span: 24 }}
+          >
+            <Checkbox.Group>
+              <Row>
+                {listCategory?.map((item, index) => (
+                  <Col
+                    span={24}
+                    key={`cat-mobile-${index}`}
+                    style={{ padding: "7px 0" }}
+                  >
+                    <Checkbox value={item.value}>{item.label}</Checkbox>
+                  </Col>
+                ))}
+              </Row>
+            </Checkbox.Group>
+          </Form.Item>
+          <Divider />
+
+          {/* Khoảng giá */}
+          <Form.Item label="Khoảng giá" labelCol={{ span: 24 }}>
+            <Row gutter={[10, 10]} style={{ width: "100%" }}>
+              <Col span={11}>
+                <Form.Item name={["range", "from"]} noStyle>
+                  <InputNumber
+                    min={0}
+                    placeholder="đ TỪ"
+                    style={{ width: "100%" }}
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={2} style={{ textAlign: "center" }}>
+                -
+              </Col>
+              <Col span={11}>
+                <Form.Item name={["range", "to"]} noStyle>
+                  <InputNumber
+                    min={0}
+                    placeholder="đ ĐẾN"
+                    style={{ width: "100%" }}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Button
+              onClick={() => form.submit()}
+              style={{ width: "100%", marginTop: 10 }}
+              type="primary"
+            >
+              Áp dụng
+            </Button>
+          </Form.Item>
+          <Divider />
+
+          {/* Rating */}
+          <Form.Item label="Đánh giá" labelCol={{ span: 24 }}>
+            {[5, 4, 3, 2, 1].map((val) => (
+              <div key={val}>
+                <Rate
+                  value={val}
+                  disabled
+                  style={{ color: "#ffce3d", fontSize: 15 }}
+                />
+                <span className="ant-rate-text">{val < 5 && "trở lên"}</span>
+              </div>
+            ))}
+          </Form.Item>
+        </Form>
+      </Drawer>
     </div>
   );
 };

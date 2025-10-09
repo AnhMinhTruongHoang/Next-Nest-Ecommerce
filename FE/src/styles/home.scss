@@ -1,4 +1,13 @@
 .homepage-container {
+  .mobile-filter-btn {
+    display: none;
+  }
+  @media (max-width: 768px) {
+    .mobile-filter-btn {
+      display: block;
+    }
+  }
+
   .customize-row {
     display: flex;
     flex-wrap: wrap;
