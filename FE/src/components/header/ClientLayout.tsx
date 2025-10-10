@@ -3,6 +3,7 @@
 import { Layout } from "antd";
 import AppHeader from "@/components/header/app.header";
 import AppFooter from "@/components/footer/app.footer";
+import { AppProvider } from "@/components/context/app.context";
 
 const { Header, Content, Footer } = Layout;
 
@@ -12,16 +13,18 @@ export default function ClientLayout({
   children: React.ReactNode;
 }) {
   return (
-    <Layout style={{ minHeight: "100vh" }}>
-      <Header style={{ padding: 0, margin: 0 }}>
-        <AppHeader />
-      </Header>
+    <AppProvider>
+      <Layout style={{ minHeight: "100vh" }}>
+        <Header style={{ padding: 0, margin: 0 }}>
+          <AppHeader />
+        </Header>
 
-      <Content style={{ flex: 1, padding: 0, margin: 0 }}>{children}</Content>
+        <Content style={{ flex: 1, padding: 0, margin: 0 }}>{children}</Content>
 
-      <Footer style={{ padding: 0, margin: 0 }}>
-        <AppFooter />
-      </Footer>
-    </Layout>
+        <Footer style={{ padding: 0, margin: 0 }}>
+          <AppFooter />
+        </Footer>
+      </Layout>
+    </AppProvider>
   );
 }

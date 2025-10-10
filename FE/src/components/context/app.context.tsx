@@ -1,148 +1,123 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
-import { ClipLoader } from "react-spinners";
+import { IFetchAccount, IUser } from "next-auth";
+import { createContext, useContext, useEffect, useState } from "react";
+import PacmanLoader from "react-spinners/PacmanLoader";
 
-/* ========= TYPES ========= */
-export interface IUser {
-  _id: string;
-  fullName: string;
-  email: string;
-  role?: string;
-}
-
-export interface IFetchAccount {
-  user: IUser;
-}
-
-export interface ICart {
-  _id: string;
-  quantity: number;
-  detail: any;
-}
-
-export interface IBackendRes<T> {
-  data: T;
-  statusCode?: number;
-  message?: string;
-}
-
-/* ========= CONTEXT ========= */
 interface IAppContext {
   isAuthenticated: boolean;
   setIsAuthenticated: (v: boolean) => void;
-
   user: IUser | null;
   setUser: (v: IUser | null) => void;
-
   isAppLoading: boolean;
   setIsAppLoading: (v: boolean) => void;
-
   carts: ICart[];
   setCarts: (v: ICart[]) => void;
 }
 
 const CurrentAppContext = createContext<IAppContext | null>(null);
 
-/* ========= API ========= */
-const fetchAccountAPI = async () => {
-  const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/account`;
-  return axios.get<IBackendRes<IFetchAccount>>(url, {
-    withCredentials: true,
-  });
-};
-
-/* ========= PROVIDER ========= */
 type TProps = {
   children: React.ReactNode;
 };
 
+// API Fetch Account
+export const fetchAccountAPI = async (): Promise<IUser | null> => {
+  const urlBackend = "/api/v1/auth/account";
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+
+  if (!token) return null;
+
+  try {
+    const res = await axios.get<IBackendRes<IFetchAccount>>(urlBackend, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    // Kiểm tra data hợp lệ
+    if (res.data?.data?.user) {
+      return res.data.data.user;
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Fetch account failed:", error);
+    return null;
+  }
+};
+
 export const AppProvider = ({ children }: TProps) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<IUser | null>(null);
-  const [isAppLoading, setIsAppLoading] = useState(true);
+  const [isAppLoading, setIsAppLoading] = useState<boolean>(true);
   const [carts, setCarts] = useState<ICart[]>([]);
 
   useEffect(() => {
-    const pathname = window.location.pathname;
+    const initApp = async () => {
+      const data = await fetchAccountAPI();
 
-    // Các trang PUBLIC (không cần fetch user)
-    const publicPaths = ["/", "/products", "/product", "/cart"];
+      if (data) {
+        setUser(data);
+        setIsAuthenticated(true);
 
-    const isPublic = publicPaths.some((path) => pathname.startsWith(path));
-
-    const fetchAccount = async () => {
-      try {
-        const res = await fetchAccountAPI();
-        const cartsStorage = localStorage.getItem("carts");
-
-        if (res.data?.data?.user) {
-          setUser(res.data.data.user);
-          setIsAuthenticated(true);
-        } else {
-          setUser(null);
-          setIsAuthenticated(false);
+        const storedCarts = localStorage.getItem("carts");
+        if (storedCarts) {
+          setCarts(JSON.parse(storedCarts));
         }
-
-        if (cartsStorage) {
-          setCarts(JSON.parse(cartsStorage));
-        }
-      } catch (error) {
-        console.error("Fetch account failed:", error);
-        setUser(null);
+      } else {
         setIsAuthenticated(false);
-      } finally {
-        setIsAppLoading(false);
+        setUser(null);
       }
+
+      setIsAppLoading(false);
     };
 
-    // Nếu là trang public thì không cần gọi API account
-    if (isPublic) {
-      const cartsStorage = localStorage.getItem("carts");
-      if (cartsStorage) {
-        setCarts(JSON.parse(cartsStorage));
-      }
-      setIsAppLoading(false);
-    } else {
-      fetchAccount();
-    }
+    initApp();
   }, []);
 
-  if (isAppLoading) {
-    return (
-      <div
-        style={{
-          position: "fixed",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-        }}
-      >
-        <ClipLoader size={35} color="#36d6b4" />
-      </div>
-    );
-  }
+  // Đồng bộ carts vào localStorage khi thay đổi
+  useEffect(() => {
+    if (carts.length > 0) {
+      localStorage.setItem("carts", JSON.stringify(carts));
+    }
+  }, [carts]);
 
   return (
-    <CurrentAppContext.Provider
-      value={{
-        isAuthenticated,
-        setIsAuthenticated,
-        user,
-        setUser,
-        isAppLoading,
-        setIsAppLoading,
-        carts,
-        setCarts,
-      }}
-    >
-      {children}
-    </CurrentAppContext.Provider>
+    <>
+      {isAppLoading ? (
+        <div
+          style={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          <PacmanLoader size={30} color="#36d6b4" />
+        </div>
+      ) : (
+        <CurrentAppContext.Provider
+          value={{
+            isAuthenticated,
+            user,
+            setIsAuthenticated,
+            setUser,
+            isAppLoading,
+            setIsAppLoading,
+            carts,
+            setCarts,
+          }}
+        >
+          {children}
+        </CurrentAppContext.Provider>
+      )}
+    </>
   );
 };
 
-/* ========= CUSTOM HOOK ========= */
 export const useCurrentApp = () => {
   const context = useContext(CurrentAppContext);
   if (!context) {

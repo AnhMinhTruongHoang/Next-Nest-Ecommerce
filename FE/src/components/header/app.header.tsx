@@ -12,12 +12,14 @@ import {
 import { useRouter } from "next/navigation";
 import NextLink from "next/link";
 import { useSession, signOut } from "next-auth/react";
+import { useCurrentApp } from "../context/app.context";
 
 const { Header } = Layout;
 
 export default function AppHeader() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { carts } = useCurrentApp();
 
   const userMenu = {
     items: [
@@ -209,7 +211,7 @@ export default function AppHeader() {
             </NextLink>
           )}
 
-          <Badge count={2} offset={[-2, 2]}>
+          <Badge count={carts?.length ?? 0} offset={[-2, 2]}>
             <ShoppingCartOutlined style={{ fontSize: 22, color: "#00ffe0" }} />
           </Badge>
         </div>

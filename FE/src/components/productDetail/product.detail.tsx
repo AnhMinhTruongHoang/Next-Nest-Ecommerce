@@ -37,14 +37,13 @@ interface IProps {
 type UserAction = "MINUS" | "PLUS";
 
 const ProductDetail = ({ currentProduct }: IProps) => {
-  const [loading, setLoading] = useState(true);
   const [imageGallery, setImageGallery] = useState<any[]>([]);
   const [isOpenModalGallery, setIsOpenModalGallery] = useState(false);
   const [currentQuantity, setCurrentQuantity] = useState<number>(1);
   const [listProduct, setListProduct] = useState<IProduct[]>([]);
   const refGallery = useRef<ReactImageGallery>(null);
   const router = useRouter();
-  const { setCarts, user } = useCurrentApp();
+  const { setCarts } = useCurrentApp();
   const { message } = App.useApp();
 
   // Build image list for gallery
@@ -95,31 +94,41 @@ const ProductDetail = ({ currentProduct }: IProps) => {
   };
 
   // Add to cart
-  const handleAddToCart = (isBuyNow = false) => {
-    if (!user) {
-      message.error("Bạn cần đăng nhập để thực hiện tính năng này.");
-      return;
-    }
-
+  const handleAddToCart = () => {
+    //set local storage
     const cartStorage = localStorage.getItem("carts");
-    let carts: ICart[] = cartStorage ? JSON.parse(cartStorage) : [];
-
-    if (currentProduct) {
-      const index = carts.findIndex((c) => c._id === currentProduct._id);
-      if (index > -1) carts[index].quantity += currentQuantity;
-      else
+    if (cartStorage && currentProduct) {
+      // update carts
+      const carts = JSON.parse(cartStorage) as ICart[];
+      // check cart
+      let isExistIndex = carts.findIndex((c) => c._id === currentProduct?._id);
+      if (isExistIndex > -1) {
+        carts[isExistIndex].quantity =
+          carts[isExistIndex].quantity + currentQuantity;
+      } else {
         carts.push({
-          _id: currentProduct._id,
           quantity: currentQuantity,
+          _id: currentProduct._id,
           detail: currentProduct,
         });
-
+      }
       localStorage.setItem("carts", JSON.stringify(carts));
       setCarts(carts);
+      console.log(currentProduct);
+      console.log(carts);
     }
-
-    if (isBuyNow) router.push("/order");
-    else message.success("Đã thêm sản phẩm vào giỏ hàng 🎉");
+    /// neu chua co cart
+    else {
+      const data = [
+        {
+          _id: currentProduct?._id!,
+          quantity: currentQuantity,
+          detail: currentProduct!,
+        },
+      ];
+      localStorage.setItem("carts", JSON.stringify(data));
+      setCarts(data);
+    }
   };
 
   if (!currentProduct) return null;
@@ -230,11 +239,7 @@ const ProductDetail = ({ currentProduct }: IProps) => {
                   >
                     Thêm vào giỏ hàng
                   </Button>
-                  <Button
-                    size="large"
-                    danger
-                    onClick={() => handleAddToCart(true)}
-                  >
+                  <Button size="large" danger onClick={() => handleAddToCart()}>
                     Mua ngay
                   </Button>
                 </Space>

@@ -1,6 +1,9 @@
-export {};
-// https://bobbyhadz.com/blog/typescript-make-types-global#declare-global-types-in-typescript
+import NextAuth, { DefaultSession, DefaultUser } from "next-auth";
+import { IUser } from "next-auth";
 
+export {}; // bắt buộc để biến đây thành module, tránh lỗi duplicate
+
+//  GLOBAL TYPES DÙNG CHUNG
 declare global {
   interface IRequest {
     url: string;
@@ -36,15 +39,16 @@ declare global {
   interface ICart {
     _id: string;
     quantity: number;
-    detail: IBookTable;
+    detail: IProduct;
   }
 
   interface IBackendRes<T> {
     error?: string | string[];
     message?: string;
     statusCode: number | string;
-    data?: T;
+    data: T;
   }
+
   interface ILogin {
     user: {
       _id: string;
@@ -62,5 +66,53 @@ declare global {
       total: number;
     };
     result: T[];
+  }
+}
+
+//  NEXT-AUTH MODULE EXTEND
+declare module "next-auth" {
+  interface IUser {
+    _id: string;
+    email: string;
+    name: string;
+    accountType: "LOCAL" | "GOOGLE" | string;
+    role: "USER" | "ADMIN" | string;
+    age: number;
+    address: string;
+    isDeleted: boolean;
+    isActive: boolean;
+    gender: "male" | "female" | string;
+    codeId: string;
+    codeExpired: string;
+    deletedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+    __v: number;
+  }
+
+  interface IFetchAccount {
+    user: IUser;
+  }
+
+  interface Session {
+    user: IUser;
+    access_token: string;
+    refresh_token: string;
+    access_expire: number;
+    error?: string;
+  }
+
+  interface User extends DefaultUser {
+    access_token?: string;
+    refresh_token?: string;
+    user?: any;
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    access_token?: string;
+    refresh_token?: string;
+    user?: any;
   }
 }
