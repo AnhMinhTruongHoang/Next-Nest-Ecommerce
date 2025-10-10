@@ -21,6 +21,7 @@ import {
   RegisterUserDto,
   UserLoginDto,
 } from 'src/modules/users/dto/create-user.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -41,6 +42,16 @@ export class AuthController {
     return this.authService.login(req.user, response);
   }
 
+  // get current user
+
+  @ResponseMessage('Get user information')
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/account')
+  async handleGetAccount(@Users() user: IUser) {
+    const foundUser = await this.usersService.findOne(user._id);
+    return { user: foundUser };
+  }
+
   //////////////
   @Public()
   @ResponseMessage('Register a new user')
@@ -55,13 +66,6 @@ export class AuthController {
   @Post('check-code')
   checkCode(@Body() registerUserDto: CodeAuthDto) {
     return this.authService.checkCode(registerUserDto);
-  }
-
-  @ResponseMessage('Get user information')
-  @Get('/account')
-  async handleGetAccount(@Users() user: IUser) {
-    const foundUser = await this.usersService.findOne(user._id);
-    return { user: foundUser };
   }
 
   @Public()
