@@ -80,6 +80,7 @@ export class AuthController {
   }
 
   @ResponseMessage('Logout User')
+  @UseGuards(AuthGuard('jwt'))
   @Post('/logout')
   handleLogout(
     @Res({ passthrough: true }) response: Response,
