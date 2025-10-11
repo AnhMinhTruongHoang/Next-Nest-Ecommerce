@@ -1,7 +1,16 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Layout, Input, Avatar, Badge, Dropdown, Popover, Empty } from "antd";
+import {
+  Layout,
+  Input,
+  Avatar,
+  Badge,
+  Dropdown,
+  Popover,
+  Empty,
+  Button,
+} from "antd";
 import {
   SearchOutlined,
   ShoppingCartOutlined,
@@ -13,6 +22,7 @@ import { useRouter } from "next/navigation";
 import NextLink from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { useCurrentApp } from "../context/app.context";
+import "../../styles/product.scss";
 
 const { Header } = Layout;
 
@@ -21,6 +31,7 @@ export default function AppHeader() {
   const router = useRouter();
   const [openDrawer, setOpenDrawer] = useState(false);
   const [openManageAccount, setOpenManageAccount] = useState<boolean>(false);
+
   const {
     carts,
     isAuthenticated,
@@ -29,6 +40,15 @@ export default function AppHeader() {
     setIsAuthenticated,
     setCarts,
   } = useCurrentApp();
+
+  const handleLogout = () => {
+    if (session?.user?._id) {
+      localStorage.removeItem(`carts_user_${session.user._id}`);
+    }
+    setCarts([]);
+    localStorage.removeItem("carts");
+    signOut({ callbackUrl: "/" });
+  };
 
   const userMenu = {
     items: [
@@ -55,10 +75,7 @@ export default function AppHeader() {
       {
         key: "logout",
         label: (
-          <span
-            style={{ cursor: "pointer" }}
-            onClick={() => signOut({ callbackUrl: "/" })}
-          >
+          <span style={{ cursor: "pointer" }} onClick={() => handleLogout()}>
             Logout
           </span>
         ),
@@ -69,32 +86,143 @@ export default function AppHeader() {
 
   const ContentPopover = () => {
     return (
-      <div className="pop-cart-body">
-        <div className="pop-cart-content">
-          {carts?.map((product, index) => {
-            return (
-              <div className="product" key={`product-${index}`}>
+      <div
+        style={{
+          width: 260,
+          background: "#fff",
+          borderRadius: 8,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+          overflow: "hidden",
+        }}
+      >
+        {/* Header */}
+        <div
+          style={{
+            background: "#00FFE0",
+            fontSize: 13,
+            fontWeight: 600,
+            padding: "6px 8px",
+            textAlign: "center",
+          }}
+        >
+          Sản phẩm mới thêm
+        </div>
+
+        {/* Product list */}
+        <div
+          style={{
+            maxHeight: 220,
+            overflowY: "auto",
+            borderBottom: "1px solid #f0f0f0",
+          }}
+        >
+          {carts && carts.length > 0 ? (
+            carts.map((product, index) => (
+              <div
+                key={`product-${index}`}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "6px 8px",
+                  cursor: "pointer",
+                  transition: "background 0.2s",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.background = "#fafafa")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.background = "#fff")
+                }
+              >
                 <img
-                  src={`${process.env.VITE_BACKEND_URL}/images/thumbnails/${product?.detail?.thumbnail}`}
-                  alt="No Image"
+                  src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${product?.detail?.thumbnail}`}
+                  alt={product?.detail?.name}
+                  style={{
+                    width: 60,
+                    height: 55,
+                    objectFit: "cover",
+                    borderRadius: 4,
+                    border: "1px solid #eee",
+                  }}
                 />
-                <div>{product?.detail?.name}</div>
-                <div className="price">
-                  {new Intl.NumberFormat("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                  }).format(product?.detail?.price ?? 0)}
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  <div
+                    style={{
+                      fontSize: 13,
+                      color: "#333",
+                      lineHeight: "1.2",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      maxWidth: 160,
+                    }}
+                  >
+                    {product?.detail?.name}
+                  </div>
+                  <div
+                    style={{
+                      color: "#d0021b",
+                      fontWeight: 500,
+                      fontSize: 13,
+                      marginTop: 2,
+                    }}
+                  >
+                    {new Intl.NumberFormat("vi-VN", {
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0,
+                    }).format(product?.detail?.price ?? 0)}{" "}
+                    đ
+                  </div>
                 </div>
               </div>
-            );
-          })}
+            ))
+          ) : (
+            <div
+              style={{
+                textAlign: "center",
+                color: "#999",
+                fontSize: 13,
+                padding: "16px 0",
+              }}
+            >
+              Không có sản phẩm trong giỏ hàng
+            </div>
+          )}
         </div>
-        {carts.length > 0 ? (
-          <div className="pop-cart-footer">
-            <button onClick={() => router.push("/order")}>Xem giỏ hàng</button>
+
+        {/* Footer */}
+        {carts && carts.length > 0 && (
+          <div
+            style={{
+              padding: "8px 0",
+              display: "flex",
+              justifyContent: "center",
+              background: "#fff",
+            }}
+          >
+            <button
+              onClick={() => router.push("/order")}
+              style={{
+                background: "#ff4d4f",
+                color: "#fff",
+                border: "none",
+                padding: "6px 12px",
+                borderRadius: 4,
+                cursor: "pointer",
+                fontSize: 13,
+                fontWeight: 500,
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.background = "#ff3333")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.background = "#ff4d4f")
+              }
+            >
+              Xem giỏ hàng
+            </button>
           </div>
-        ) : (
-          <Empty description="Không có sản phẩm trong giỏ hàng" />
         )}
       </div>
     );
@@ -233,12 +361,21 @@ export default function AppHeader() {
         </div>
 
         {/* Account + Cart */}
-        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center", // căn giữa dọc
+            justifyContent: "center", // căn giữa ngang (nếu muốn)
+            gap: 24,
+          }}
+        >
           {status === "loading" ? null : session ? (
             <Dropdown
               menu={userMenu}
-              placement="bottomRight"
+              placement="bottom"
+              arrow
               trigger={["click"]}
+              overlayStyle={{ textAlign: "center" }} // căn giữa menu
             >
               <Avatar
                 style={{
@@ -261,12 +398,10 @@ export default function AppHeader() {
           )}
 
           <Popover
-            className="popover-carts"
-            placement="topRight"
-            rootClassName="popover-carts"
-            title={"Giỏ hàng"}
-            content={ContentPopover}
-            arrow={true}
+            content={<ContentPopover />}
+            trigger="hover"
+            placement="bottomRight"
+            classNames={{ root: "popover-carts" }}
           >
             <Badge count={carts?.length ?? 0} offset={[-2, 2]}>
               <ShoppingCartOutlined

@@ -17,6 +17,8 @@ interface IAppContext {
   isCartModalOpen: boolean;
   openCartModal: () => void;
   closeCartModal: () => void;
+  accessToken: string | null;
+  setAccessToken: (v: string | null) => void;
 }
 
 const CurrentAppContext = createContext<IAppContext | null>(null);
@@ -58,6 +60,7 @@ export const AppProvider = ({ children }: TProps) => {
   const [isAppLoading, setIsAppLoading] = useState<boolean>(true);
   const [carts, setCarts] = useState<ICart[]>([]);
   const [isCartModalOpen, setIsCartModalOpen] = useState(false);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   const openCartModal = () => {
     setIsCartModalOpen(true);
@@ -74,6 +77,7 @@ export const AppProvider = ({ children }: TProps) => {
       if (data) {
         setUser(data);
         setIsAuthenticated(true);
+        setAccessToken(localStorage.getItem("access_token"));
 
         const storedCarts = localStorage.getItem("carts");
         if (storedCarts) {
@@ -92,10 +96,29 @@ export const AppProvider = ({ children }: TProps) => {
 
   // Đồng bộ carts vào localStorage khi thay đổi
   useEffect(() => {
-    if (carts.length > 0) {
-      localStorage.setItem("carts", JSON.stringify(carts));
-    }
-  }, [carts]);
+    const initApp = async () => {
+      // Luôn load carts từ localStorage trước
+      const storedCarts = localStorage.getItem("carts");
+      if (storedCarts) {
+        setCarts(JSON.parse(storedCarts));
+      }
+
+      // Sau đó mới kiểm tra user
+      const data = await fetchAccountAPI();
+
+      if (data) {
+        setUser(data);
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+        setUser(null);
+      }
+
+      setIsAppLoading(false);
+    };
+
+    initApp();
+  }, []);
 
   return (
     <>
@@ -115,7 +138,9 @@ export const AppProvider = ({ children }: TProps) => {
           value={{
             isAuthenticated,
             user,
+            accessToken,
             setIsAuthenticated,
+            setAccessToken,
             setUser,
             isAppLoading,
             setIsAppLoading,

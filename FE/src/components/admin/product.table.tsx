@@ -10,7 +10,7 @@ import {
   Space,
   Image,
   App,
-  Spin, // 👉 thêm Spin
+  Spin,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import {
@@ -50,8 +50,8 @@ const ProductsTable = () => {
   }, []);
 
   useEffect(() => {
-    if (accessToken) getData(meta.current, meta.pageSize);
-  }, [accessToken]);
+    getData(meta.current, meta.pageSize);
+  }, []);
 
   const getData = async (current = 1, pageSize = 20) => {
     try {
