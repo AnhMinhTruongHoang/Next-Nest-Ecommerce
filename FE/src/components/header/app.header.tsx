@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
-import { Layout, Input, Avatar, Badge, Dropdown } from "antd";
+import React, { useEffect, useState } from "react";
+import { Layout, Input, Avatar, Badge, Dropdown, Popover, Empty } from "antd";
 import {
   SearchOutlined,
   ShoppingCartOutlined,
@@ -19,7 +19,16 @@ const { Header } = Layout;
 export default function AppHeader() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const { carts } = useCurrentApp();
+  const [openDrawer, setOpenDrawer] = useState(false);
+  const [openManageAccount, setOpenManageAccount] = useState<boolean>(false);
+  const {
+    carts,
+    isAuthenticated,
+    user,
+    setUser,
+    setIsAuthenticated,
+    setCarts,
+  } = useCurrentApp();
 
   const userMenu = {
     items: [
@@ -29,6 +38,10 @@ export default function AppHeader() {
           <NextLink href={`/profile/${session?.user?._id}`}>Profile</NextLink>
         ),
         icon: <UserOutlined />,
+      },
+      {
+        label: <NextLink href="/history">Lịch sử mua hàng</NextLink>,
+        key: "history",
       },
       ...(session?.user?.role !== "USER"
         ? [
@@ -42,13 +55,49 @@ export default function AppHeader() {
       {
         key: "logout",
         label: (
-          <span onClick={() => signOut({ callbackUrl: "/auth/signin" })}>
+          <span
+            style={{ cursor: "pointer" }}
+            onClick={() => signOut({ callbackUrl: "/" })}
+          >
             Logout
           </span>
         ),
         icon: <LogoutOutlined />,
       },
     ],
+  };
+
+  const ContentPopover = () => {
+    return (
+      <div className="pop-cart-body">
+        <div className="pop-cart-content">
+          {carts?.map((product, index) => {
+            return (
+              <div className="product" key={`product-${index}`}>
+                <img
+                  src={`${process.env.VITE_BACKEND_URL}/images/thumbnails/${product?.detail?.thumbnail}`}
+                  alt="No Image"
+                />
+                <div>{product?.detail?.name}</div>
+                <div className="price">
+                  {new Intl.NumberFormat("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                  }).format(product?.detail?.price ?? 0)}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        {carts.length > 0 ? (
+          <div className="pop-cart-footer">
+            <button onClick={() => router.push("/order")}>Xem giỏ hàng</button>
+          </div>
+        ) : (
+          <Empty description="Không có sản phẩm trong giỏ hàng" />
+        )}
+      </div>
+    );
   };
 
   const navItems = [
@@ -205,15 +254,26 @@ export default function AppHeader() {
           ) : (
             <NextLink
               href="/auth/signin"
-              style={{ color: "#fff", fontWeight: 500 }}
+              style={{ color: "#fff", fontWeight: 500, cursor: "pointer" }}
             >
               Login
             </NextLink>
           )}
 
-          <Badge count={carts?.length ?? 0} offset={[-2, 2]}>
-            <ShoppingCartOutlined style={{ fontSize: 22, color: "#00ffe0" }} />
-          </Badge>
+          <Popover
+            className="popover-carts"
+            placement="topRight"
+            rootClassName="popover-carts"
+            title={"Giỏ hàng"}
+            content={ContentPopover}
+            arrow={true}
+          >
+            <Badge count={carts?.length ?? 0} offset={[-2, 2]}>
+              <ShoppingCartOutlined
+                style={{ fontSize: 22, color: "#00ffe0", cursor: "pointer" }}
+              />
+            </Badge>
+          </Popover>
         </div>
       </div>
     </Header>

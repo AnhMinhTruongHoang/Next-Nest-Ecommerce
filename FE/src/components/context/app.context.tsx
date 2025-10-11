@@ -14,6 +14,9 @@ interface IAppContext {
   setIsAppLoading: (v: boolean) => void;
   carts: ICart[];
   setCarts: (v: ICart[]) => void;
+  isCartModalOpen: boolean;
+  openCartModal: () => void;
+  closeCartModal: () => void;
 }
 
 const CurrentAppContext = createContext<IAppContext | null>(null);
@@ -54,6 +57,15 @@ export const AppProvider = ({ children }: TProps) => {
   const [user, setUser] = useState<IUser | null>(null);
   const [isAppLoading, setIsAppLoading] = useState<boolean>(true);
   const [carts, setCarts] = useState<ICart[]>([]);
+  const [isCartModalOpen, setIsCartModalOpen] = useState(false);
+
+  const openCartModal = () => {
+    setIsCartModalOpen(true);
+  };
+
+  const closeCartModal = () => {
+    setIsCartModalOpen(false);
+  };
 
   useEffect(() => {
     const initApp = async () => {
@@ -109,6 +121,9 @@ export const AppProvider = ({ children }: TProps) => {
             setIsAppLoading,
             carts,
             setCarts,
+            isCartModalOpen,
+            openCartModal,
+            closeCartModal,
           }}
         >
           {children}

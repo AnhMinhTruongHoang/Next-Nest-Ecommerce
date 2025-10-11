@@ -107,6 +107,14 @@ declare module "next-auth" {
     refresh_token?: string;
     user?: any;
   }
+
+  type Menu = {
+    id: number;
+    title: string;
+    path?: string;
+    newTab: boolean;
+    submenu?: Menu[];
+  };
 }
 
 declare module "next-auth/jwt" {

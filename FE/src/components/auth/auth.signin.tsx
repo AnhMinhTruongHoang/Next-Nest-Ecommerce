@@ -20,7 +20,6 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-// 👈 rename cho dễ hiểu
 import { useState } from "react";
 import ModalChangePassword from "./modal.change.password";
 import ModelReactive from "./model.reactive";

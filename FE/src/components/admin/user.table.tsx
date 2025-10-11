@@ -18,8 +18,7 @@ import ViewUserModal from "./view.User.Modal";
 
 const UsersTable = () => {
   const [listUsers, setListUsers] = useState<IUser[]>([]);
-  const [loading, setLoading] = useState(false); // 👈 thêm loading
-
+  const [loading, setLoading] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [dataUpdate, setDataUpdate] = useState<null | IUser>(null);

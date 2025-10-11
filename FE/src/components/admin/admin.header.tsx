@@ -1,8 +1,7 @@
 "use client";
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
-import { Avatar, Button, Layout, Skeleton } from "antd";
+import { Avatar, Button, Layout } from "antd";
 import { useContext } from "react";
-import { DownOutlined, SmileOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Dropdown, Space } from "antd";
 import { AdminContext } from "@/lib/admin.context";
