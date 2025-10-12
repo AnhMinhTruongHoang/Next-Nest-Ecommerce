@@ -22,6 +22,7 @@ import { deleteProductAction } from "@/lib/product.actions";
 import CreateProductModal from "./create.product";
 import UpdateProductModal from "./update.product";
 import ViewProductModal from "./view.Product.Modal";
+import { getImageUrl } from "@/utils/getImageUrl";
 
 const ProductsTable = () => {
   const [listProducts, setListProducts] = useState<IProduct[]>([]);
@@ -214,11 +215,7 @@ const ProductsTable = () => {
       render: (thumbnail: string) =>
         thumbnail ? (
           <Image
-            src={
-              thumbnail.startsWith("http")
-                ? thumbnail
-                : `http://localhost:8000${thumbnail}`
-            }
+            src={getImageUrl(thumbnail)}
             alt="thumbnail"
             width={60}
             height={60}

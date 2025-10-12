@@ -51,18 +51,25 @@ const ProductDetail = ({ currentProduct }: IProps) => {
     if (!currentProduct) return;
 
     const images: any[] = [];
+
+    const buildUrl = (url: string) => {
+      if (!url) return "";
+      return url.startsWith("http")
+        ? url
+        : `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`;
+    };
+
     if (currentProduct.thumbnail) {
+      const thumb = buildUrl(currentProduct.thumbnail);
       images.push({
-        original: `${process.env.NEXT_PUBLIC_BACKEND_URL}${currentProduct.thumbnail}`,
-        thumbnail: `${process.env.NEXT_PUBLIC_BACKEND_URL}${currentProduct.thumbnail}`,
+        original: thumb,
+        thumbnail: thumb,
       });
     }
 
     if (Array.isArray(currentProduct.images)) {
       currentProduct.images.forEach((item) => {
-        const url = item.startsWith("/images/")
-          ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${item}`
-          : `${process.env.NEXT_PUBLIC_BACKEND_URL}images/slider/${item}`;
+        const url = buildUrl(item);
         images.push({ original: url, thumbnail: url });
       });
     }

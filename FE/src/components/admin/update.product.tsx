@@ -73,8 +73,7 @@ const UpdateProductModal = (props: IProps) => {
   // Set giá trị form + load sẵn ảnh khi có dataUpdate
   const getFullUrl = (url: string) => {
     if (!url) return "";
-    // Nếu đã là absolute url thì return
-    if (url.startsWith("http://") || url.startsWith("https://")) return url;
+    if (url.startsWith("http")) return url;
     return `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`;
   };
 
@@ -209,6 +208,7 @@ const UpdateProductModal = (props: IProps) => {
         });
       }
     }
+
     setIsSubmit(false);
   };
 
@@ -331,7 +331,8 @@ const UpdateProductModal = (props: IProps) => {
           if (file.status === "done") {
             const urls = file.response?.data?.files;
             if (Array.isArray(urls) && urls.length > 0) {
-              file.url = `${process.env.NEXT_PUBLIC_BACKEND_URL}${urls[0]}`;
+              file.url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/images/slider/${urls[0]}`;
+              console.log("Slider URL:", file.url);
             }
           }
           setSliderList(fileList);
