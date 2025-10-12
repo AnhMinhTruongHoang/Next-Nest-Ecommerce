@@ -43,11 +43,15 @@ export default function AppHeader() {
   } = useCurrentApp();
 
   const handleLogout = () => {
-    if (session?.user?._id) {
-      localStorage.removeItem(`carts_user_${session.user._id}`);
-    }
+    // Nếu đang login thì chỉ clear state hiện tại
     setCarts([]);
-    localStorage.removeItem("carts");
+
+    // Xóa access_token để lần sau phải login lại
+    localStorage.removeItem("access_token");
+
+    // Nếu có giỏ guest thì xóa (user thì giữ lại carts_user để login lại còn)
+    localStorage.removeItem("carts_guest");
+
     signOut({ callbackUrl: "/" });
   };
 

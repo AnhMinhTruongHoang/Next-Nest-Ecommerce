@@ -42,11 +42,9 @@ export const fetchAccountAPI = async (): Promise<IUser | null> => {
       },
     });
 
-    // Kiểm tra data hợp lệ
     if (res.data?.data?.user) {
       return res.data.data.user;
     }
-
     return null;
   } catch (error) {
     console.error("Fetch account failed:", error);
@@ -62,16 +60,17 @@ export const AppProvider = ({ children }: TProps) => {
   const [isCartModalOpen, setIsCartModalOpen] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
 
-  const openCartModal = () => {
-    setIsCartModalOpen(true);
-  };
-
-  const closeCartModal = () => {
-    setIsCartModalOpen(false);
-  };
+  const openCartModal = () => setIsCartModalOpen(true);
+  const closeCartModal = () => setIsCartModalOpen(false);
 
   useEffect(() => {
     const initApp = async () => {
+      // Load guest carts trước để tránh nháy trống
+      const guestCarts = localStorage.getItem("carts_guest");
+      if (guestCarts) {
+        setCarts(JSON.parse(guestCarts));
+      }
+
       const data = await fetchAccountAPI();
 
       if (data) {
@@ -79,9 +78,12 @@ export const AppProvider = ({ children }: TProps) => {
         setIsAuthenticated(true);
         setAccessToken(localStorage.getItem("access_token"));
 
-        const storedCarts = localStorage.getItem("carts");
+        // Load carts theo userId
+        const storedCarts = localStorage.getItem(`carts_user_${data._id}`);
         if (storedCarts) {
           setCarts(JSON.parse(storedCarts));
+        } else {
+          setCarts([]);
         }
       } else {
         setIsAuthenticated(false);
@@ -96,29 +98,14 @@ export const AppProvider = ({ children }: TProps) => {
 
   // Đồng bộ carts vào localStorage khi thay đổi
   useEffect(() => {
-    const initApp = async () => {
-      // Luôn load carts từ localStorage trước
-      const storedCarts = localStorage.getItem("carts");
-      if (storedCarts) {
-        setCarts(JSON.parse(storedCarts));
-      }
-
-      // Sau đó mới kiểm tra user
-      const data = await fetchAccountAPI();
-
-      if (data) {
-        setUser(data);
-        setIsAuthenticated(true);
+    if (!isAppLoading) {
+      if (user) {
+        localStorage.setItem(`carts_user_${user._id}`, JSON.stringify(carts));
       } else {
-        setIsAuthenticated(false);
-        setUser(null);
+        localStorage.setItem("carts_guest", JSON.stringify(carts));
       }
-
-      setIsAppLoading(false);
-    };
-
-    initApp();
-  }, []);
+    }
+  }, [carts, user, isAppLoading]);
 
   return (
     <>

@@ -29,7 +29,6 @@ const { Title } = Typography;
 export default function AuthSignIn() {
   const router = useRouter();
   const [form] = Form.useForm();
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState("");
   const [userEmail, setUserEmail] = useState("");
@@ -50,6 +49,7 @@ export default function AuthSignIn() {
 
     if (res && !res.error) {
       router.push("/");
+
       router.refresh();
       return;
     }

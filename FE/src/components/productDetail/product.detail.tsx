@@ -146,7 +146,7 @@ const ProductDetail = ({ currentProduct }: IProps) => {
         <Breadcrumb
           style={{ marginBottom: 16 }}
           items={[
-            { title: <Link href="/">Trang chủ</Link> },
+            { title: <Link href="/productsList">Sản phẩm</Link> },
             { title: "Chi tiết sản phẩm" },
           ]}
         />
