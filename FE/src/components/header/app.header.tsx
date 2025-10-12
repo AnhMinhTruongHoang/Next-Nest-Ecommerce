@@ -23,6 +23,7 @@ import NextLink from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { useCurrentApp } from "../context/app.context";
 import "../../styles/product.scss";
+import { getImageUrl } from "@/utils/getImageUrl";
 
 const { Header } = Layout;
 
@@ -59,10 +60,7 @@ export default function AppHeader() {
         ),
         icon: <UserOutlined />,
       },
-      {
-        label: <NextLink href="/history">Lịch sử mua hàng</NextLink>,
-        key: "history",
-      },
+
       ...(session?.user?.role !== "USER"
         ? [
             {
@@ -136,7 +134,7 @@ export default function AppHeader() {
                 }
               >
                 <img
-                  src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${product?.detail?.thumbnail}`}
+                  src={getImageUrl(product?.detail?.thumbnail)}
                   alt={product?.detail?.name}
                   style={{
                     width: 60,

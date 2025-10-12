@@ -33,9 +33,7 @@ const ProductsTable = () => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [accessToken, setAccessToken] = useState<string>("");
   const { notification } = App.useApp();
-
   const [loading, setLoading] = useState(false); // 👉 thêm state loading
-
   const [meta, setMeta] = useState({
     current: 1,
     pageSize: 20,
@@ -77,7 +75,7 @@ const ProductsTable = () => {
     } catch (error) {
       notification.error({ message: "Lỗi tải dữ liệu!" });
     } finally {
-      setLoading(false); // 👉 tắt loading
+      setLoading(false);
     }
   };
 
@@ -212,8 +210,8 @@ const ProductsTable = () => {
       title: "Thumbnail",
       dataIndex: "thumbnail",
       align: "center",
-      render: (thumbnail: string) =>
-        thumbnail ? (
+      render: (thumbnail: string) => {
+        return thumbnail ? (
           <Image
             src={getImageUrl(thumbnail)}
             alt="thumbnail"
@@ -223,8 +221,10 @@ const ProductsTable = () => {
           />
         ) : (
           <span>No image</span>
-        ),
+        );
+      },
     },
+
     {
       title: "Price",
       dataIndex: "price",

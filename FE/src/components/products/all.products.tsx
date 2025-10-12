@@ -17,6 +17,7 @@ import type { FormProps } from "antd";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import "../../styles/home.scss";
+import { getImageUrl } from "@/utils/getImageUrl";
 
 type IProduct = {
   _id: string;
@@ -301,7 +302,7 @@ const ProductsPage = () => {
                       <div className="wrapper">
                         <div className="thumbnail">
                           <img
-                            src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${item.thumbnail}`}
+                            src={getImageUrl(item.thumbnail)}
                             alt="thumbnail"
                           />
                         </div>
