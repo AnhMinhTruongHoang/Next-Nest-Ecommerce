@@ -425,6 +425,11 @@ export class DatabasesService implements OnModuleInit {
     }
 
     /** ---------------- Seed Orders + Payments ---------------- */
+    import {
+      PaymentMethod,
+      PaymentStatus,
+    } from '../payments/schema/payment.schema';
+
     const countOrders = await this.orderModel.countDocuments();
     if (countOrders === 0) {
       const users = await this.userModel.find({ role: 'USER' });
@@ -439,6 +444,7 @@ export class DatabasesService implements OnModuleInit {
           const orderCount = Math.floor(Math.random() * 3) + 3; // 3–5 orders
 
           for (let i = 0; i < orderCount; i++) {
+            // chọn ngẫu nhiên 1–3 sản phẩm
             const selectedProducts = products
               .sort(() => 0.5 - Math.random())
               .slice(0, Math.floor(Math.random() * 3) + 1);
@@ -454,18 +460,28 @@ export class DatabasesService implements OnModuleInit {
               0,
             );
 
+            // random trạng thái payment
+            const paymentStatus =
+              Math.random() > 0.3 ? PaymentStatus.PAID : PaymentStatus.PENDING;
+
+            // tạo order
             const order = await this.orderModel.create({
               userId: user._id,
               items,
               totalPrice,
-              status: 'pending',
+              status:
+                paymentStatus === PaymentStatus.PAID ? 'confirmed' : 'pending',
             });
 
+            // tạo payment gắn với order
             await this.paymentModel.create({
               orderId: order._id,
               amount: order.totalPrice,
-              method: Math.random() > 0.5 ? 'cash' : 'credit_card',
-              status: Math.random() > 0.3 ? 'paid' : 'pending',
+              method:
+                Math.random() > 0.5
+                  ? PaymentMethod.CASH
+                  : PaymentMethod.CREDIT_CARD,
+              status: paymentStatus,
             });
           }
         }
