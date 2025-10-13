@@ -15,7 +15,12 @@ import {
 } from '../categories/schema/category.schema';
 import { Product, ProductDocument } from '../products/schema/product.schema';
 import { Order, OrderDocument } from '../orders/schema/order.schema';
-import { Payment, PaymentDocument } from '../payments/schema/payment.schema';
+import {
+  Payment,
+  PaymentDocument,
+  PaymentMethod,
+  PaymentStatus,
+} from '../payments/schema/payment.schema';
 import { UsersService } from '../users/users.service';
 
 @Injectable()
@@ -425,10 +430,6 @@ export class DatabasesService implements OnModuleInit {
     }
 
     /** ---------------- Seed Orders + Payments ---------------- */
-    import {
-      PaymentMethod,
-      PaymentStatus,
-    } from '../payments/schema/payment.schema';
 
     const countOrders = await this.orderModel.countDocuments();
     if (countOrders === 0) {
