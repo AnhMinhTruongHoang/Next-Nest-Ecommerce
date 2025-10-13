@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { Order, OrderDocument } from './Schema/order.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IOrder } from 'src/types/order.interface';
+import { Public } from 'src/health/decorator/customize';
 
 @Injectable()
 export class OrdersService {
@@ -11,6 +12,7 @@ export class OrdersService {
     @InjectModel(Order.name) private orderModel: SoftDeleteModel<OrderDocument>,
   ) {}
 
+  @Public()
   create(data: IOrder) {
     const created = new this.orderModel(data);
     return created.save();
