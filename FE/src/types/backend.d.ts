@@ -75,6 +75,7 @@ declare module "next-auth" {
     _id: string;
     email: string;
     name: string;
+    phone: string;
     accountType: "LOCAL" | "GOOGLE" | string;
     role: "USER" | "ADMIN" | string;
     age: number;
@@ -115,6 +116,12 @@ declare module "next-auth" {
     newTab: boolean;
     submenu?: Menu[];
   };
+}
+
+interface IRegister {
+  _id: string;
+  email: string;
+  fullName: string;
 }
 
 declare module "next-auth/jwt" {

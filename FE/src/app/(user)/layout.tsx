@@ -1,6 +1,6 @@
 "use client";
 
-import { Layout } from "antd";
+import { App, Layout } from "antd";
 import AppHeader from "@/components/header/app.header";
 import AppFooter from "@/components/footer/app.footer";
 import { AppProvider } from "@/components/context/app.context";
@@ -20,8 +20,9 @@ export default function UnifiedLayout({
         </Header>
 
         <Content style={{ flex: 1, padding: 0, margin: 0 }}>
-          {/* 👇 phần này chính là <main className="p-4"> từ UserLayout */}
-          <main className="p-4">{children}</main>
+          <App>
+            <main className="p-4">{children}</main>
+          </App>
         </Content>
 
         <Footer style={{ padding: 0, margin: 0 }}>

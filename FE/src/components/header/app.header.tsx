@@ -43,9 +43,6 @@ export default function AppHeader() {
   } = useCurrentApp();
 
   const handleLogout = () => {
-    // Nếu đang login thì chỉ clear state hiện tại
-    setCarts([]);
-
     // Xóa access_token để lần sau phải login lại
     localStorage.removeItem("access_token");
 

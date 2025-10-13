@@ -246,7 +246,11 @@ const ProductDetail = ({ currentProduct }: IProps) => {
                   >
                     Thêm vào giỏ hàng
                   </Button>
-                  <Button size="large" danger onClick={() => handleAddToCart()}>
+                  <Button
+                    size="large"
+                    danger
+                    onClick={() => router.push("/order")}
+                  >
                     Mua ngay
                   </Button>
                 </Space>
