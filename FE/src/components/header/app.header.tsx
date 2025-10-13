@@ -127,6 +127,9 @@ export default function AppHeader() {
                   cursor: "pointer",
                   transition: "background 0.2s",
                 }}
+                onClick={() =>
+                  router.push(`/product-detail/${product.detail._id}`)
+                } // ✅ chuyển tới chi tiết sản phẩm
                 onMouseEnter={(e) =>
                   (e.currentTarget.style.background = "#fafafa")
                 }
@@ -201,7 +204,7 @@ export default function AppHeader() {
             }}
           >
             <button
-              onClick={() => router.push("/order")}
+              onClick={() => router.push("/order")} // ✅ icon giỏ hàng -> trang order
               style={{
                 background: "#ff4d4f",
                 color: "#fff",

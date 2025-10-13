@@ -102,39 +102,39 @@ const ProductDetail = ({ currentProduct }: IProps) => {
 
   // Add to cart
   const handleAddToCart = () => {
-    //set local storage
-    const cartStorage = localStorage.getItem("carts");
-    if (cartStorage && currentProduct) {
-      // update carts
-      const carts = JSON.parse(cartStorage) as ICart[];
-      // check cart
-      let isExistIndex = carts.findIndex((c) => c._id === currentProduct?._id);
-      if (isExistIndex > -1) {
-        carts[isExistIndex].quantity =
-          carts[isExistIndex].quantity + currentQuantity;
-      } else {
-        carts.push({
-          quantity: currentQuantity,
-          _id: currentProduct._id,
-          detail: currentProduct,
-        });
-      }
-      localStorage.setItem("carts", JSON.stringify(carts));
-      setCarts(carts);
-      console.log(currentProduct);
-      console.log(carts);
+    if (!currentProduct) {
+      message.error("Không tìm thấy sản phẩm");
+      return;
     }
-    /// neu chua co cart
-    else {
-      const data = [
-        {
-          _id: currentProduct?._id!,
-          quantity: currentQuantity,
-          detail: currentProduct!,
-        },
-      ];
-      localStorage.setItem("carts", JSON.stringify(data));
-      setCarts(data);
+    if (currentQuantity <= 0) {
+      message.error("Số lượng không hợp lệ");
+      return;
+    }
+
+    const cartStorage = localStorage.getItem("carts");
+    let carts: ICart[] = cartStorage ? JSON.parse(cartStorage) : [];
+
+    const idx = carts.findIndex((c) => c._id === currentProduct._id);
+    if (idx > -1) {
+      carts[idx].quantity += currentQuantity;
+    } else {
+      carts.push({
+        _id: currentProduct._id,
+        quantity: currentQuantity,
+        detail: currentProduct,
+      });
+    }
+
+    localStorage.setItem("carts", JSON.stringify(carts));
+    setCarts(carts);
+  };
+
+  const handleAddBuyNow = () => {
+    if (currentQuantity > 0) {
+      handleAddToCart();
+      router.push("/order");
+    } else {
+      message.error("Hết hàng");
     }
   };
 
@@ -246,11 +246,7 @@ const ProductDetail = ({ currentProduct }: IProps) => {
                   >
                     Thêm vào giỏ hàng
                   </Button>
-                  <Button
-                    size="large"
-                    danger
-                    onClick={() => router.push("/order")}
-                  >
+                  <Button size="large" danger onClick={() => handleAddBuyNow()}>
                     Mua ngay
                   </Button>
                 </Space>

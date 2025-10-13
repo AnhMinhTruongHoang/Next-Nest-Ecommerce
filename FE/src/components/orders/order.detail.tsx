@@ -5,6 +5,7 @@ import { useCurrentApp } from "@/components/context/app.context";
 import Image from "next/image";
 import { getImageUrl } from "@/utils/getImageUrl";
 import { isMobile } from "react-device-detect";
+import { useRouter } from "next/navigation";
 
 interface IProps {
   setCurrentStep: (v: number) => void;
@@ -15,6 +16,7 @@ const OrderDetail = (props: IProps) => {
   const { carts, setCarts } = useCurrentApp();
   const [totalPrice, setTotalPrice] = useState(0);
   const { message } = App.useApp();
+  const router = useRouter();
 
   useEffect(() => {
     if (carts && carts.length > 0) {
@@ -93,14 +95,22 @@ const OrderDetail = (props: IProps) => {
                     }}
                   >
                     <Image
+                      onClick={() => router.push(`/product-detail/${item._id}`)}
+                      style={{ cursor: "pointer" }}
                       src={getImageUrl(item.detail.thumbnail)}
                       alt="thumbnail"
                       width={70}
                       height={70}
                     />
                     <div style={{ flex: 1, marginLeft: "10px" }}>
-                      <div style={{ fontWeight: 500 }}>
-                        {item?.detail?.name}
+                      <div style={{ fontWeight: 500, cursor: "pointer" }}>
+                        <a
+                          onClick={() =>
+                            router.push(`/product-detail/${item._id}`)
+                          }
+                        >
+                          {item?.detail?.name}
+                        </a>
                       </div>
                       <div style={{ color: "#555" }}>
                         {new Intl.NumberFormat("vi-VN", {

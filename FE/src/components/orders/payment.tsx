@@ -1,5 +1,5 @@
 import { App, Button, Col, Divider, Form, Radio, Row, Space } from "antd";
-import { DeleteTwoTone, LeftCircleFilled } from "@ant-design/icons";
+import { LeftCircleFilled } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { Input } from "antd";
 import { useCurrentApp } from "@/components/context/app.context";
@@ -54,39 +54,35 @@ const Payment = (props: IProps) => {
     }
   }, [carts]);
 
-  const handleRemoveProduct = (_id: string) => {
-    const cartStorage = localStorage.getItem("carts");
-    if (cartStorage) {
-      const carts = JSON.parse(cartStorage) as ICart[];
-      const newCarts = carts.filter((item) => item._id !== _id);
-      localStorage.setItem("carts", JSON.stringify(newCarts));
-      setCarts(newCarts);
-    }
-  };
-
   const handlePlaceOrder: FormProps<FieldType>["onFinish"] = async (values) => {
     const { address, fullName, method, phone } = values;
-    const detail = carts.map((item) => ({
-      _id: item._id,
+
+    // map carts thành items đúng schema
+    const items = carts.map((item) => ({
+      productId: item._id, // backend yêu cầu productId
       quantity: item.quantity,
-      productName: item.detail.name,
+      price: item.detail.price, // lưu giá tại thời điểm đặt hàng
     }));
 
     setIsSubmit(true);
 
     try {
-      const res = await fetch("/api/v1/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: fullName,
-          address,
-          phone,
-          totalPrice,
-          method,
-          detail,
-        }),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/orders`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: user?._id,
+            items,
+            totalPrice: Math.round(totalPrice),
+            status: "pending",
+            method,
+            address,
+            phone,
+          }),
+        }
+      );
 
       const data = await res.json();
 
@@ -116,7 +112,7 @@ const Payment = (props: IProps) => {
   };
 
   return (
-    <div style={{ background: "#efefef", padding: "20px 0" }}>
+    <div style={{ background: "#efefef", padding: "50px 0" }}>
       <div style={{ maxWidth: 1440, margin: "0 auto", overflow: "hidden" }}>
         <Row gutter={[20, 20]}>
           {/* Left: list products */}
@@ -182,11 +178,6 @@ const Payment = (props: IProps) => {
                         currency: "VND",
                       }).format(currentPrice * (item?.quantity ?? 0))}
                     </div>
-                    <DeleteTwoTone
-                      style={{ cursor: "pointer" }}
-                      onClick={() => handleRemoveProduct(item._id)}
-                      twoToneColor="#eb2f96"
-                    />
                   </div>
                 </div>
               );
