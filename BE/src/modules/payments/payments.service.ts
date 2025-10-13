@@ -41,6 +41,13 @@ export class PaymentsService {
       { new: true },
     );
     if (!payment) throw new NotFoundException('Payment not found');
+
+    if (status === 'paid') {
+      await this.orderModel.findByIdAndUpdate(payment.orderId, {
+        status: 'confirmed',
+      });
+    }
+
     return payment;
   }
 }

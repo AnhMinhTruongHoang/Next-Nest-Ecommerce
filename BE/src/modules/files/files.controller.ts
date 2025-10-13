@@ -39,7 +39,7 @@ export class FilesController {
 
     return {
       fileName: file.filename,
-      url: `${protocol}://${host}/images/${folder}/${file.filename}`,
+      path: `/images/${folder}/${file.filename}`,
     };
   }
 

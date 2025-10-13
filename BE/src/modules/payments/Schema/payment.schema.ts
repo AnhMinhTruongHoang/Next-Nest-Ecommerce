@@ -3,6 +3,20 @@ import mongoose, { HydratedDocument } from 'mongoose';
 
 export type PaymentDocument = HydratedDocument<Payment>;
 
+export enum PaymentMethod {
+  CASH = 'cash',
+  CREDIT_CARD = 'credit_card',
+  PAYPAL = 'paypal',
+  BANK_TRANSFER = 'bank_transfer',
+}
+
+export enum PaymentStatus {
+  PENDING = 'pending',
+  PAID = 'paid',
+  FAILED = 'failed',
+  REFUNDED = 'refunded',
+}
+
 @Schema({ timestamps: true })
 export class Payment {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: true })
@@ -11,11 +25,20 @@ export class Payment {
   @Prop({ required: true })
   amount: number;
 
-  @Prop({ required: true })
-  method: string;
+  @Prop({ type: String, enum: Object.values(PaymentMethod), required: true })
+  method: PaymentMethod;
 
-  @Prop({ default: 'pending' })
-  status: string;
+  @Prop({
+    type: String,
+    enum: Object.values(PaymentStatus),
+    default: PaymentStatus.PENDING,
+  })
+  @Prop({
+    type: String,
+    enum: Object.values(PaymentStatus),
+    default: PaymentStatus.PENDING,
+  })
+  status: PaymentStatus;
 
   @Prop()
   transactionId: string;
