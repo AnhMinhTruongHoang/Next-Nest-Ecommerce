@@ -6,9 +6,11 @@ import {
   Param,
   Patch,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { IOrder } from 'src/types/order.interface';
+import { ResponseMessage } from 'src/health/decorator/customize';
 
 @Controller('orders')
 export class OrdersController {
@@ -20,8 +22,13 @@ export class OrdersController {
   }
 
   @Get()
-  findAll() {
-    return this.ordersService.findAll();
+  @ResponseMessage('Fetch orders with paginate')
+  findAll(
+    @Query('current') currentPage: string,
+    @Query('pageSize') limit: string,
+    @Query() qs: string,
+  ) {
+    return this.ordersService.findAll(+currentPage, +limit, qs);
   }
 
   @Get(':id')
