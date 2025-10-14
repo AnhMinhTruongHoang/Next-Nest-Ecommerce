@@ -3,6 +3,7 @@
 import { Carousel } from "antd";
 import Image from "next/image";
 
+
 type Slide = {
   id: number;
   title: string;

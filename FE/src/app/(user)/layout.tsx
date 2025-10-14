@@ -4,6 +4,9 @@ import { App, Layout } from "antd";
 import AppHeader from "@/components/header/app.header";
 import AppFooter from "@/components/footer/app.footer";
 import { AppProvider } from "@/components/context/app.context";
+import { useEffect } from "react";
+import { usePathname } from "next/navigation";
+import NProgress from "nprogress";
 
 const { Header, Content, Footer } = Layout;
 
@@ -12,6 +15,14 @@ export default function UnifiedLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+
+  useEffect(() => {
+    // Mỗi khi pathname thay đổi => chạy progress
+    NProgress.start();
+    NProgress.done();
+  }, [pathname]);
+
   return (
     <AppProvider>
       <Layout style={{ minHeight: "100vh" }}>

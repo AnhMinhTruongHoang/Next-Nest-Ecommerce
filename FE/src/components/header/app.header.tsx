@@ -204,7 +204,7 @@ export default function AppHeader() {
             }}
           >
             <button
-              onClick={() => router.push("/order")} // ✅ icon giỏ hàng -> trang order
+              onClick={() => router.push("/order")}
               style={{
                 background: "#ff4d4f",
                 color: "#fff",
