@@ -470,8 +470,7 @@ export class DatabasesService implements OnModuleInit {
               userId: user._id,
               items,
               totalPrice,
-              status:
-                paymentStatus === PaymentStatus.PAID ? 'confirmed' : 'pending',
+              status: paymentStatus === PaymentStatus.PAID ? 'PAID' : 'PENDING',
               shippingAddress: '123 Test Street, Bien Hoa, Dong Nai',
               phoneNumber: '0901234567',
             });
