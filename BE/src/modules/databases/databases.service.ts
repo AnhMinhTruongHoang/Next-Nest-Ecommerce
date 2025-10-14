@@ -472,6 +472,8 @@ export class DatabasesService implements OnModuleInit {
               totalPrice,
               status:
                 paymentStatus === PaymentStatus.PAID ? 'confirmed' : 'pending',
+              shippingAddress: '123 Test Street, Bien Hoa, Dong Nai',
+              phoneNumber: '0901234567',
             });
 
             // tạo payment gắn với order
@@ -483,6 +485,8 @@ export class DatabasesService implements OnModuleInit {
                   ? PaymentMethod.CASH
                   : PaymentMethod.CREDIT_CARD,
               status: paymentStatus,
+              shippingAddress: order.shippingAddress,
+              phoneNumber: order.phoneNumber,
             });
           }
         }
