@@ -36,6 +36,20 @@ declare global {
     updatedAt: Date;
   }
 
+  export interface IOrder {
+    _id: string;
+    userId: string;
+    items: {
+      productId: string;
+      quantity: number;
+      price: number;
+    }[];
+    status: "pending" | "confirmed" | "shipped" | "cancelled";
+    totalPrice: number;
+    createdAt: string;
+    updatedAt: string;
+  }
+
   interface ICart {
     _id: string;
     quantity: number;

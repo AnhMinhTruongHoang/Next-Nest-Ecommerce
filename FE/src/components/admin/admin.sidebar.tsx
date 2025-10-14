@@ -5,6 +5,7 @@ import {
   AppstoreOutlined,
   HomeOutlined,
   MailOutlined,
+  OrderedListOutlined,
   ProductFilled,
   SettingOutlined,
   TeamOutlined,
@@ -44,6 +45,11 @@ const AdminSideBar = () => {
           key: "products",
           label: <Link href={"/dashboard/products"}>Manage Products</Link>,
           icon: <ProductFilled />,
+        },
+        {
+          key: "orders",
+          label: <Link href={"/dashboard/orders"}>Manage Orders</Link>,
+          icon: <OrderedListOutlined />,
         },
         {
           key: "sub1",

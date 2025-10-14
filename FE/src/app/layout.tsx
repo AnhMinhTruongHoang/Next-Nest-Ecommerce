@@ -8,7 +8,7 @@ import { App } from "antd";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 
 export const metadata = {
-  title: "Base",
+  title: "Gamer Zone",
   description: "Base Next.js app",
 };
 

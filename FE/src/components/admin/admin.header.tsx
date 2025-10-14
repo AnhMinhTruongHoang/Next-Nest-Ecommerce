@@ -9,7 +9,6 @@ import { signOut } from "next-auth/react";
 
 const AdminHeader = (props: any) => {
   const { session } = props;
-
   const { Header } = Layout;
   const { collapseMenu, setCollapseMenu } = useContext(AdminContext)!;
 

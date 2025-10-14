@@ -295,7 +295,7 @@ const ProductsTable = () => {
         <Button
           type="text"
           icon={<ReloadOutlined style={{ color: "green" }} />}
-          onClick={() => getData(meta.current, meta.pageSize)}
+          onClick={() => window.location.reload()}
         >
           Refresh
         </Button>
