@@ -40,7 +40,6 @@ const ProductDetail = ({ currentProduct }: IProps) => {
   const [imageGallery, setImageGallery] = useState<any[]>([]);
   const [isOpenModalGallery, setIsOpenModalGallery] = useState(false);
   const [currentQuantity, setCurrentQuantity] = useState<number>(1);
-  const [listProduct, setListProduct] = useState<IProduct[]>([]);
   const refGallery = useRef<ReactImageGallery>(null);
   const router = useRouter();
   const { setCarts } = useCurrentApp();
@@ -130,12 +129,33 @@ const ProductDetail = ({ currentProduct }: IProps) => {
   };
 
   const handleAddBuyNow = () => {
-    if (currentQuantity > 0) {
-      handleAddToCart();
-      router.push("/order");
-    } else {
-      message.error("Hết hàng");
+    if (!currentProduct) {
+      message.error("Không tìm thấy sản phẩm");
+      return;
     }
+
+    if (currentQuantity <= 0) {
+      message.error("Số lượng không hợp lệ");
+      return;
+    }
+
+    const cartStorage = localStorage.getItem("carts");
+    let carts: ICart[] = cartStorage ? JSON.parse(cartStorage) : [];
+
+    const idx = carts.findIndex((c) => c._id === currentProduct._id);
+    if (idx > -1) {
+      carts[idx].quantity = currentQuantity;
+    } else {
+      carts.push({
+        _id: currentProduct._id,
+        quantity: currentQuantity,
+        detail: currentProduct,
+      });
+    }
+
+    localStorage.setItem("carts", JSON.stringify(carts));
+    setCarts(carts);
+    router.push("/order");
   };
 
   if (!currentProduct) return null;

@@ -6,14 +6,14 @@ import Payment from "@/components/orders/payment";
 import { Result, Button, Steps } from "antd";
 import {
   DollarCircleFilled,
-  LoadingOutlined,
-  PayCircleFilled,
   SmileOutlined,
   SolutionOutlined,
 } from "@ant-design/icons";
+import { useRouter } from "next/navigation";
 
 export default function CheckoutPage() {
   const [currentStep, setCurrentStep] = useState(0);
+  const router = useRouter();
 
   return (
     <div style={{ padding: 40 }}>
@@ -44,7 +44,7 @@ export default function CheckoutPage() {
           title="Đặt hàng thành công!"
           subTitle="Cảm ơn bạn đã mua hàng. Chúng tôi sẽ liên hệ sớm."
           extra={[
-            <Button type="primary" key="home" onClick={() => setCurrentStep(0)}>
+            <Button type="primary" key="home" onClick={() => router.push("/")}>
               Tiếp tục mua sắm
             </Button>,
           ]}
