@@ -309,7 +309,6 @@ const ProductsTable = () => {
         </Button>
       </div>
 
-      {/* 👉 Thêm Spin bao quanh Table */}
       <Spin spinning={loading} tip="Đang tải dữ liệu...">
         <Table
           columns={columns}
@@ -330,7 +329,7 @@ const ProductsTable = () => {
       {/* Modal components */}
       <ViewProductModal
         productData={viewProduct}
-        isOpen={isViewModalOpen}
+        isViewModalOpen={isViewModalOpen}
         setIsViewModalOpen={setIsViewModalOpen}
         setViewProduct={setViewProduct}
       />

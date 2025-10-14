@@ -14,7 +14,7 @@ import {
 import { v4 as uuidv4 } from "uuid";
 
 interface ViewProductModalProps {
-  isOpen: boolean;
+  isViewModalOpen: boolean;
   productData: IProduct | null;
   setViewProduct: (product: IProduct | null) => void;
   setIsViewModalOpen: (open: boolean) => void;
@@ -30,7 +30,7 @@ const getImageUrl = (url?: string) => {
 };
 
 const ViewProductModal: React.FC<ViewProductModalProps> = ({
-  isOpen,
+  isViewModalOpen,
   setViewProduct,
   setIsViewModalOpen,
   productData,
@@ -91,7 +91,7 @@ const ViewProductModal: React.FC<ViewProductModalProps> = ({
 
   return (
     <Modal
-      open={isOpen}
+      open={isViewModalOpen}
       onCancel={() => {
         setIsViewModalOpen(false);
         setViewProduct(null);

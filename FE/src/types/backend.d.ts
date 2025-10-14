@@ -36,8 +36,11 @@ declare global {
     updatedAt: Date;
   }
 
-  export interface IOrder {
+  interface IOrder {
     _id: string;
+    thumbnail: string;
+    phoneNumber: string;
+    shippingAddress: string;
     userId: string;
     items: {
       productId: string;

@@ -13,19 +13,13 @@ import {
   DatePicker,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import {
-  CheckOutlined,
-  CloseOutlined,
-  PlusOutlined,
-  ReloadOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
+import { PlusOutlined, ReloadOutlined } from "@ant-design/icons";
 import UpdateUserModal from "./update.user";
 import CreateUserModal from "./create.user";
 import { deleteUserAction } from "@/lib/user.actions";
-import ViewUserModal from "./view.User.Modal";
 import "../../styles/users.css";
 import dayjs from "dayjs";
+import ViewOrderModal from "./view.order";
 
 const OrderTable = () => {
   const [listOrder, setListOrder] = useState<IOrder[]>([]);
@@ -34,7 +28,7 @@ const OrderTable = () => {
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [dataUpdate, setDataUpdate] = useState<null | IOrder>(null);
   const access_token = localStorage.getItem("access_token") as string;
-  const [viewUser, setViewUser] = useState<IOrder | null>(null);
+  const [orderData, setOrderData] = useState<IOrder | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const { RangePicker } = DatePicker;
 
@@ -265,12 +259,13 @@ const OrderTable = () => {
       render: (_, record) => (
         <Space>
           <Button
+            style={{ backgroundColor: "lightblue" }}
             onClick={() => {
-              setDataUpdate(record);
-              setIsUpdateModalOpen(true);
+              setOrderData(record);
+              setIsViewModalOpen(true);
             }}
           >
-            Edit
+            View/Update
           </Button>
           <Popconfirm
             title="Delete the order"
@@ -287,7 +282,6 @@ const OrderTable = () => {
 
   return (
     <Spin spinning={loading}>
-      {/* 👈 Bọc bảng trong Spin */}
       <div
         style={{
           display: "flex",
@@ -326,26 +320,12 @@ const OrderTable = () => {
           showSizeChanger: true,
         }}
       />
-      {/* <ViewUserModal
-        isOpen={isViewModalOpen}
-        setViewUser={setViewUser}
+      <ViewOrderModal
+        orderData={orderData}
+        setOrderData={setOrderData}
+        isViewModalOpen={isViewModalOpen}
         setIsViewModalOpen={setIsViewModalOpen}
-        userData={viewUser}
       />
-      <CreateUserModal
-        access_token={access_token}
-        getData={getData}
-        isCreateModalOpen={isCreateModalOpen}
-        setIsCreateModalOpen={setIsCreateModalOpen}
-      />
-      <UpdateUserModal
-        access_token={access_token}
-        getData={getData}
-        isUpdateModalOpen={isUpdateModalOpen}
-        setIsUpdateModalOpen={setIsUpdateModalOpen}
-        dataUpdate={dataUpdate}
-        setDataUpdate={setDataUpdate}
-      /> */}
     </Spin>
   );
 };
