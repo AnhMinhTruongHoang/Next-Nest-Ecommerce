@@ -14,9 +14,7 @@ import {
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { PlusOutlined, ReloadOutlined } from "@ant-design/icons";
-import UpdateUserModal from "./update.user";
-import CreateUserModal from "./create.user";
-import { deleteUserAction } from "@/lib/user.actions";
+import { deleteOrderAction } from "@/lib/user.actions";
 import "../../styles/users.css";
 import dayjs from "dayjs";
 import ViewOrderModal from "./view.order";
@@ -82,9 +80,9 @@ const OrderTable = () => {
   const handleDeleteUser = async (user: any) => {
     setLoading(true);
     try {
-      const d = await deleteUserAction(user, access_token);
+      const d = await deleteOrderAction(user, access_token);
       if (d.data) {
-        notification.success({ message: "Xóa User thành công." });
+        notification.success({ message: "Xóa Order thành công." });
         getData();
       } else {
         notification.error({ message: JSON.stringify(d.message) });
