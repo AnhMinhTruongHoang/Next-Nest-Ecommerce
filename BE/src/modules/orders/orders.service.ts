@@ -83,11 +83,15 @@ export class OrdersService {
       result,
     };
   }
+
   // FIND ONE
   async findOne(id: string) {
     const order = await this.orderModel
       .findById(id)
-      .populate('items.productId', 'name -_id')
+      .populate({
+        path: 'items.productId',
+        select: '_id name price thumbnail',
+      })
       .exec();
 
     if (!order) throw new NotFoundException(`Order ${id} not found`);
