@@ -26,8 +26,9 @@ class OrderItemDto {
 }
 
 export class CreateOrderDto {
+  @IsOptional()
   @IsMongoId()
-  userId: string;
+  userId?: string;
 
   @IsArray()
   @ValidateNested({ each: true })
