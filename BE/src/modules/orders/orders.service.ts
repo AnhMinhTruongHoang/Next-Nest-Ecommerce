@@ -18,6 +18,7 @@ export class OrdersService {
     // Destructure từ data
     const {
       userId,
+      fullName,
       items,
       phoneNumber,
       shippingAddress,
@@ -38,6 +39,7 @@ export class OrdersService {
 
     const created = new this.orderModel({
       userId: new Types.ObjectId(userId),
+      fullName,
       items: formattedItems,
       totalPrice,
       phoneNumber,

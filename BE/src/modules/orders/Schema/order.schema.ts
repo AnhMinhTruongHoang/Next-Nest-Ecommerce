@@ -35,6 +35,9 @@ export class Order {
   totalPrice: number;
 
   @Prop()
+  fullName: string;
+
+  @Prop()
   shippingAddress: string;
 
   @Prop()

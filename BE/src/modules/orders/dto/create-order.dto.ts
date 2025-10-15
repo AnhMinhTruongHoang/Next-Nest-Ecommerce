@@ -47,6 +47,10 @@ export class CreateOrderDto {
 
   @IsNotEmpty()
   @IsString()
+  fullName?: string;
+
+  @IsNotEmpty()
+  @IsString()
   shippingAddress?: string;
 
   @IsNotEmpty()
