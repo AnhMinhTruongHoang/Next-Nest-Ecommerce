@@ -6,6 +6,8 @@ import {
   IsNumber,
   IsOptional,
   IsPositive,
+  IsString,
+  isString,
   Min,
   ValidateNested,
 } from 'class-validator';
@@ -43,10 +45,11 @@ export class CreateOrderDto {
   @Min(0)
   totalPrice: number;
 
-  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
   shippingAddress?: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   phoneNumber?: string;
 
   @IsEnum(['COD', 'BANK', 'MOMO'])

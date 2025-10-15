@@ -15,24 +15,36 @@ export class OrdersService {
 
   // CREATE
   async create(data: CreateOrderDto) {
-    const items = data.items.map((item) => ({
+    // Destructure từ data
+    const {
+      userId,
+      items,
+      phoneNumber,
+      shippingAddress,
+      status,
+      paymentMethod,
+      paymentStatus,
+    } = data;
+
+    const formattedItems = items.map((item) => ({
       ...item,
       productId: new Types.ObjectId(item.productId),
     }));
 
-    const totalPrice = items.reduce(
+    const totalPrice = formattedItems.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0,
     );
 
     const created = new this.orderModel({
-      ...data,
-      userId: new Types.ObjectId(data.userId),
-      items,
+      userId: new Types.ObjectId(userId),
+      items: formattedItems,
       totalPrice,
-      status: data.status ?? 'PENDING',
-      paymentMethod: data.paymentMethod ?? 'COD',
-      paymentStatus: data.paymentStatus ?? 'UNPAID',
+      phoneNumber,
+      shippingAddress,
+      status: status ?? 'PENDING',
+      paymentMethod: paymentMethod ?? 'COD',
+      paymentStatus: paymentStatus ?? 'UNPAID',
     });
 
     return created.save();
