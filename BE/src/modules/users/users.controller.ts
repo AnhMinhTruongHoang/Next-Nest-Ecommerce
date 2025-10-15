@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -14,6 +15,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Public, ResponseMessage, Users } from 'src/health/decorator/customize';
 import { IUser } from 'src/types/user.interface';
 import { ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
 
 @ApiTags('users')
 @Controller('users')
@@ -53,16 +55,14 @@ export class UsersController {
     return foundUser;
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  @ResponseMessage('Update a User')
   async update(
-    @Body() updateUserDto: UpdateUserDto,
-    @Users() users: IUser,
     @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @Users() user: IUser,
   ) {
-    let updateUser = await this.usersService.update(updateUserDto, users, id);
-
-    return updateUser;
+    return this.usersService.update(updateUserDto, user, id);
   }
 
   @Delete(':id')

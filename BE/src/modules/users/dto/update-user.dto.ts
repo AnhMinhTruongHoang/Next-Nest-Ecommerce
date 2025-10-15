@@ -1,9 +1,18 @@
-import { OmitType } from '@nestjs/mapped-types';
-import { CreateUserDto } from './create-user.dto';
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-export class UpdateUserDto extends OmitType(CreateUserDto, [
-  'password',
-] as const) {
-  // @IsNotEmpty({ message: '_id not null !' })
-  // _id: string;
+export class UpdateUserDto {
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @IsOptional()
+  @IsString()
+  address?: string;
+
+  @IsOptional()
+  @IsEmail({}, { message: 'Email must be an email' })
+  email?: string;
+
+  @IsOptional()
+  age?: number;
 }

@@ -128,6 +128,28 @@ export class UsersService {
     return { message: 'Account activated successfully' };
   }
 
+  async update(updateUserDto: UpdateUserDto, user: IUser, _id: string) {
+    if (!mongoose.Types.ObjectId.isValid(_id)) {
+      throw new BadRequestException('Invalid user ID');
+    }
+
+    await this.userModel.updateOne(
+      { _id },
+      {
+        ...updateUserDto,
+        updatedBy: {
+          _id: user._id,
+          email: user.email,
+        },
+      },
+    );
+
+    // Fetch fresh user to return
+    const updatedUser = await this.userModel.findById(_id).select('-password');
+
+    return updatedUser;
+  }
+
   // NOTE: Retry activation (resend code)
   async retryActive(email: string) {
     const user = await this.userModel.findOne({ email });
@@ -178,7 +200,7 @@ export class UsersService {
     });
     return { _id: user._id, email: user.email };
   }
-  
+
   // NOTE: change Password (resend code)
   async changePassword(data: ChangePasswordDto) {
     if (data.confirmPassword !== data.password) {
@@ -265,30 +287,6 @@ export class UsersService {
   // NOTE: Compare password with hash (login)
   isValidPassword(password: string, hash: string) {
     return compareSync(password, hash);
-  }
-
-  // NOTE: Update user data (admin only)
-  async update(updateUserDto: UpdateUserDto, user: IUser, _id: string) {
-    if (!mongoose.Types.ObjectId.isValid(_id)) {
-      throw new BadRequestException('Invalid user ID');
-    }
-
-    const updated = await this.userModel.updateOne(
-      { _id },
-      {
-        ...updateUserDto,
-        updatedBy: {
-          _id: user._id,
-          email: user.email,
-        },
-      },
-    );
-
-    if (updated.modifiedCount === 0) {
-      throw new BadRequestException('Update failed');
-    }
-
-    return { message: 'User updated', updated };
   }
 
   // NOTE: Soft delete user (admin only)
