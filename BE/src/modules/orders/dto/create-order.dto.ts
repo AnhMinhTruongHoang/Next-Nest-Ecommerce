@@ -27,7 +27,6 @@ class OrderItemDto {
 
 export class CreateOrderDto {
   @IsMongoId()
-  @IsNotEmpty()
   userId: string;
 
   @IsArray()

@@ -11,13 +11,14 @@ import {
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { ResponseMessage } from 'src/health/decorator/customize';
+import { Public, ResponseMessage } from 'src/health/decorator/customize';
 
 @Controller('orders')
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
+  @Public()
   @ResponseMessage('Create new order')
   create(@Body() data: CreateOrderDto) {
     return this.ordersService.create(data);
