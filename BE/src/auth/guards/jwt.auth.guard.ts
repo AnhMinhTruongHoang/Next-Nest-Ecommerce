@@ -43,6 +43,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       throw err || new UnauthorizedException('Invalid Token');
     }
 
+    request.user = user;
     // Tắt kiểm tra permission chi tiết nếu chưa cần
     return user;
   }

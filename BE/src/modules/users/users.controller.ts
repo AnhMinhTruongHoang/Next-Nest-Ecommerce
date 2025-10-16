@@ -23,12 +23,14 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   @ResponseMessage('Create New User')
   async create(
     @Body()
     createUserDto: CreateUserDto,
     @Users() user: IUser,
   ) {
+    console.log('>>> User from request:', user);
     let NewUser = await this.usersService.create(createUserDto, user);
     return {
       _id: NewUser?._id,
@@ -55,8 +57,8 @@ export class UsersController {
     return foundUser;
   }
 
-  @UseGuards(JwtAuthGuard)
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   async update(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
