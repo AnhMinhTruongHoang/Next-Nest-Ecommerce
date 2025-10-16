@@ -5,6 +5,7 @@ import {
   IsInt,
   isNotEmpty,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   Max,
@@ -40,6 +41,7 @@ export class CreateUserDto {
   @IsOptional()
   gender?: string;
 
+  @IsNumber()
   @IsOptional()
   phone?: number;
 

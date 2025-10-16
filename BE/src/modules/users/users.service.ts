@@ -39,6 +39,7 @@ export class UsersService {
       email,
       password,
       age,
+      phone,
       gender,
       address,
       role = 'USER',
@@ -57,6 +58,7 @@ export class UsersService {
       email,
       password: hashPassword,
       age,
+      phone,
       gender,
       address,
       role: 'USER',
@@ -272,6 +274,7 @@ export class UsersService {
   findOneByUsername(username: string) {
     return this.userModel
       .findOne({ email: username })
+      .select('-password')
       .populate({ path: 'role', select: { name: 1 } });
   }
 
@@ -281,6 +284,7 @@ export class UsersService {
 
     return this.userModel
       .findOne({ email })
+      .select('-password')
       .populate({ path: 'role', select: { name: 1, _id: 1 } });
   }
 
