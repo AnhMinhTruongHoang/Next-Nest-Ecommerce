@@ -52,7 +52,7 @@ export class UsersController {
   @Public()
   @ResponseMessage('fetch user by id')
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async (@Param('id') id: string) {
     const foundUser = this.usersService.findOne(id);
     return foundUser;
   }
