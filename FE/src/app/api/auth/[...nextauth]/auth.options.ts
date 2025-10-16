@@ -63,18 +63,18 @@ export const authOptions: AuthOptions = {
   ],
   /////////// callback
   callbacks: {
-    async jwt({ token, user, account, trigger }) {
-      //  Login bằng Credentials: access_token trả về trực tiếp trong user
-
+    async jwt({ token, user, account }) {
+      // 📌 Login bằng Credentials (Local Login) → Lấy role từ backend
       if (account?.provider === "credentials" && user) {
         token.access_token = user.access_token;
-
         token.refresh_token = user.refresh_token;
+        token.user = user.user; // { _id, email, name, role, ... }
 
-        token.user = user.user;
+        // GÁN ROLE TỪ BACKEND
+        token.role = user?.user?.role || "USER";
       }
 
-      //  Login bằng mạng xã hội: lấy access_token từ backend của bạn
+      // 📌 Login bằng Social OAuth (GitHub/Google/Facebook)
       if (account && account.provider !== "credentials") {
         const res = await sendRequest<IBackendRes<JWT>>({
           url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/social-media`,
@@ -89,6 +89,9 @@ export const authOptions: AuthOptions = {
           token.access_token = res.data.access_token;
           token.refresh_token = res.data.refresh_token;
           token.user = res.data.user;
+
+          // MẶC ĐỊNH NGƯỜI LOGIN SOCIAL LÀ USER
+          token.role = res.data.user?.role || "USER";
         }
       }
 
@@ -96,9 +99,12 @@ export const authOptions: AuthOptions = {
     },
 
     async session({ session, token }) {
-      session.access_token = token.access_token;
-      session.refresh_token = token.refresh_token;
+      session.access_token = token.access_token ?? "";
+      session.refresh_token = token.refresh_token ?? "";
       session.user = token.user;
+
+      // TRUYỀN ROLE VÀO SESSION
+      session.role = token.role;
       return session;
     },
   },

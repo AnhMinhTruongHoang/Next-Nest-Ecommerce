@@ -208,6 +208,7 @@ const UpdateProductModal = (props: IProps) => {
         });
       }
     }
+    console.log("Access token FE:", access_token);
 
     setIsSubmit(false);
   };

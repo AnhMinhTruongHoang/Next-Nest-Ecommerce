@@ -33,7 +33,7 @@ const ProductsTable = () => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [accessToken, setAccessToken] = useState<string>("");
   const { notification } = App.useApp();
-  const [loading, setLoading] = useState(false); // 👉 thêm state loading
+  const [loading, setLoading] = useState(false); 
   const [meta, setMeta] = useState({
     current: 1,
     pageSize: 20,
@@ -54,7 +54,7 @@ const ProductsTable = () => {
 
   const getData = async (current = 1, pageSize = 20) => {
     try {
-      setLoading(true); // 👉 bật loading
+      setLoading(true); 
       const res = await fetch(
         `http://localhost:8000/api/v1/products?current=${current}&pageSize=${pageSize}`,
         {

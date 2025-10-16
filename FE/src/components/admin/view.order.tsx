@@ -8,7 +8,6 @@ import {
   UploadProps,
   GetProp,
   UploadFile,
-  Upload,
   Divider,
   Table,
 } from "antd";
@@ -23,12 +22,6 @@ interface ViewOrderModalProps {
 }
 
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
-
-const getImageUrl = (url?: string) => {
-  if (!url) return "";
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  return `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`;
-};
 
 const ViewOrderModal: React.FC<ViewOrderModalProps> = ({
   orderData,
@@ -56,20 +49,11 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({
           uid: uuidv4(),
           name: "thumbnail",
           status: "done",
-          url: getImageUrl(orderData.thumbnail),
         });
       }
       setFileList(imgs);
     }
   }, [orderData]);
-
-  const handlePreview = async (file: UploadFile) => {
-    if (!file.url && !file.preview) {
-      file.preview = await getBase64(file.originFileObj as FileType);
-    }
-    setPreviewImage(file.url || (file.preview as string));
-    setPreviewOpen(true);
-  };
 
   const handleChange: UploadProps["onChange"] = ({ fileList: newFileList }) =>
     setFileList(newFileList);
@@ -85,25 +69,18 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({
       {orderData && (
         <>
           <Descriptions bordered column={1} size="small">
-            {orderData.thumbnail && (
-              <Descriptions.Item label="Thumbnail">
-                <Image
-                  src={getImageUrl(orderData.thumbnail)}
-                  alt="thumbnail"
-                  width={120}
-                />
-              </Descriptions.Item>
-            )}
             <Descriptions.Item label="Order ID">
               {orderData._id}
             </Descriptions.Item>
             <Descriptions.Item label="User ID">
               {orderData.userId}
             </Descriptions.Item>
+            <Descriptions.Item label="Full name">
+              {orderData.fullName}
+            </Descriptions.Item>
             <Descriptions.Item label="Phone">
               {orderData.phoneNumber}
             </Descriptions.Item>
-
             <Descriptions.Item label="Address">
               {orderData.shippingAddress}
             </Descriptions.Item>
@@ -131,17 +108,18 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({
               {
                 title: "Product ID",
                 dataIndex: "productId",
-                render: (productId: string) => (
+                render: (productId: any) => (
                   <a
-                    href={`/product-detail/${productId}`}
+                    href={`/product-detail/${productId?._id || productId}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{ color: "#1677ff" }}
                   >
-                    {productId}
+                    {productId?._id || productId}
                   </a>
                 ),
               },
+
               {
                 title: "Quantity",
                 dataIndex: "quantity",

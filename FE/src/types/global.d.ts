@@ -1,9 +1,6 @@
-import NextAuth, { DefaultSession, DefaultUser } from "next-auth";
-import { IUser } from "next-auth";
+// types/global.d.ts
+export {}; // Đảm bảo đây là một module
 
-export {}; // bắt buộc để biến đây thành module, tránh lỗi duplicate
-
-//  GLOBAL TYPES DÙNG CHUNG
 declare global {
   interface IRequest {
     url: string;
@@ -18,6 +15,30 @@ declare global {
   interface ICategory {
     _id?: string;
     name: string;
+  }
+
+  interface IUser {
+    _id: string;
+    email: string;
+    name: string;
+    phone?: string;
+    access_token?: string;
+    accountType?: "LOCAL" | "GOOGLE" | string;
+    role?: "USER" | "ADMIN" | string;
+    age?: number;
+    address?: string;
+    isDeleted?: boolean;
+    isActive?: boolean;
+    gender?: "male" | "female" | string;
+    codeId?: string;
+    codeExpired?: string;
+    deletedAt?: string | null;
+    createdAt?: string;
+    updatedAt?: string;
+    __v?: number;
+  }
+  interface IFetchAccount {
+    user: IUser;
   }
 
   interface IProduct {
@@ -39,6 +60,8 @@ declare global {
   interface IOrder {
     _id: string;
     thumbnail: string;
+    fullName: string;
+    productName: string;
     phoneNumber: string;
     shippingAddress: string;
     userId: string;
@@ -83,68 +106,5 @@ declare global {
       total: number;
     };
     result: T[];
-  }
-}
-
-//  NEXT-AUTH MODULE EXTEND
-declare module "next-auth" {
-  interface IUser {
-    _id: string;
-    email: string;
-    name: string;
-    phone: string;
-    accountType: "LOCAL" | "GOOGLE" | string;
-    role: "USER" | "ADMIN" | string;
-    age: number;
-    address: string;
-    isDeleted: boolean;
-    isActive: boolean;
-    gender: "male" | "female" | string;
-    codeId: string;
-    codeExpired: string;
-    deletedAt: string | null;
-    createdAt: string;
-    updatedAt: string;
-    __v: number;
-  }
-
-  interface IFetchAccount {
-    user: IUser;
-  }
-
-  interface Session {
-    user: IUser;
-    access_token: string;
-    refresh_token: string;
-    access_expire: number;
-    error?: string;
-  }
-
-  interface User extends DefaultUser {
-    access_token?: string;
-    refresh_token?: string;
-    user?: any;
-  }
-
-  type Menu = {
-    id: number;
-    title: string;
-    path?: string;
-    newTab: boolean;
-    submenu?: Menu[];
-  };
-}
-
-interface IRegister {
-  _id: string;
-  email: string;
-  fullName: string;
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    access_token?: string;
-    refresh_token?: string;
-    user?: any;
   }
 }

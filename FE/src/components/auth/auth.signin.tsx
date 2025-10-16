@@ -19,7 +19,7 @@ import {
 } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { useState } from "react";
 import ModalChangePassword from "./modal.change.password";
 import ModelReactive from "./model.reactive";
@@ -48,8 +48,16 @@ export default function AuthSignIn() {
     });
 
     if (res && !res.error) {
-      router.push("/");
+      const session = await getSession();
+      const token =
+        (session as any)?.access_token ?? (session as any)?.user?.access_token;
 
+      if (token) {
+        localStorage.setItem("access_token", token);
+        console.log("Token saved:", token);
+      }
+
+      router.push("/");
       router.refresh();
       return;
     }

@@ -5,26 +5,16 @@ export async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXT_AUTH_SECRET });
   const pathname = req.nextUrl.pathname;
 
-  const isAdminRoute = pathname.startsWith("/admin");
-  const isDashboardRoute = pathname.startsWith("/dashboard");
-
   console.log("Middleware check:", {
     pathname,
     role: token?.role,
     tokenExists: !!token,
   });
 
-  // Chặn nếu vào /admin mà không phải ADMIN
-  if (isAdminRoute) {
+  // 🔒 CHẶN /dashboard cho người không phải ADMIN
+  if (pathname.startsWith("/dashboard")) {
     if (!token || token.role !== "ADMIN") {
       return NextResponse.redirect(new URL("/", req.url));
-    }
-  }
-
-  // Chặn nếu vào /dashboard mà chưa đăng nhập
-  if (isDashboardRoute) {
-    if (!token) {
-      return NextResponse.redirect(new URL("/login", req.url));
     }
   }
 
@@ -32,5 +22,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/dashboard/:path*"],
+  matcher: ["/dashboard/:path*", "/admin/:path*"],
 };

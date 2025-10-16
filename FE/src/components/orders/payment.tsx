@@ -14,9 +14,10 @@ type UserMethod = "COD" | "BANKING";
 
 type FieldType = {
   fullName: string;
-  phone: string;
+  phoneNumber: string;
   address: string;
   method: UserMethod;
+  shippingAddress: string;
 };
 
 interface IProps {
@@ -26,21 +27,16 @@ interface IProps {
 const Payment = (props: IProps) => {
   const { carts, setCarts, user } = useCurrentApp();
   const [totalPrice, setTotalPrice] = useState(0);
-
   const [form] = Form.useForm();
   const [isSubmit, setIsSubmit] = useState(false);
   const { message, notification } = App.useApp();
   const { setCurrentStep } = props;
 
   useEffect(() => {
-    if (user) {
-      form.setFieldsValue({
-        fullName: user.name,
-        phone: user.phone,
-        method: "COD",
-      });
-    }
-  }, [user]);
+    form.setFieldsValue({
+      method: "COD",
+    });
+  }, []);
 
   useEffect(() => {
     if (carts && carts.length > 0) {
@@ -55,14 +51,17 @@ const Payment = (props: IProps) => {
   }, [carts]);
 
   const handlePlaceOrder: FormProps<FieldType>["onFinish"] = async (values) => {
-    const { address, fullName, method, phone } = values;
+    const { shippingAddress, fullName, method, phoneNumber } = values;
 
     // map carts thành items đúng schema
     const items = carts.map((item) => ({
-      productId: item._id, // backend yêu cầu productId
+      productId: item._id,
       quantity: item.quantity,
-      price: item.detail.price, // lưu giá tại thời điểm đặt hàng
+      price: item.detail.price,
+      name: item.detail.name,
     }));
+
+    console.log("USER INFO: ", user);
 
     setIsSubmit(true);
 
@@ -76,10 +75,11 @@ const Payment = (props: IProps) => {
             userId: user?._id,
             items,
             totalPrice: Math.round(totalPrice),
-            status: "pending",
+            status: "PENDING",
             method,
-            address,
-            phone,
+            fullName: fullName,
+            shippingAddress: shippingAddress,
+            phoneNumber: phoneNumber,
           }),
         }
       );
@@ -242,7 +242,7 @@ const Payment = (props: IProps) => {
 
                 <Form.Item<FieldType>
                   label="Số điện thoại"
-                  name="phone"
+                  name="phoneNumber"
                   rules={[
                     {
                       required: true,
@@ -255,7 +255,7 @@ const Payment = (props: IProps) => {
 
                 <Form.Item<FieldType>
                   label="Địa chỉ nhận hàng"
-                  name="address"
+                  name="shippingAddress"
                   rules={[
                     { required: true, message: "Địa chỉ không được để trống!" },
                   ]}

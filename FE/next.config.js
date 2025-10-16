@@ -22,7 +22,7 @@ const nextConfig = {
   },
 
   experimental: {
-    serverActions: {}, // đúng định dạng
+    serverActions: {},
   },
 };
 

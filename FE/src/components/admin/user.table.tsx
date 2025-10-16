@@ -10,7 +10,6 @@ import {
   PlusOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-import { IUser } from "next-auth";
 import UpdateUserModal from "./update.user";
 import CreateUserModal from "./create.user";
 import { deleteUserAction } from "@/lib/user.actions";
@@ -22,43 +21,66 @@ const UsersTable = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [dataUpdate, setDataUpdate] = useState<null | IUser>(null);
-  const access_token = localStorage.getItem("access_token") as string;
+  const [accessToken, setAccessToken] = useState<string>("");
   const [viewUser, setViewUser] = useState<IUser | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-
   const { notification } = App.useApp();
-
   const [meta, setMeta] = useState({
     current: 1,
-    pageSize: 5,
+    pageSize: 20,
     pages: 0,
     total: 0,
   });
 
   useEffect(() => {
-    getData();
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("access_token");
+      if (token) {
+        setAccessToken(token);
+      }
+    }
   }, []);
 
+  useEffect(() => {
+    if (accessToken) {
+      getData();
+    }
+  }, [accessToken]);
+
+  console.log("Access token:", accessToken);
+
   const getData = async () => {
-    setLoading(true); // 👈 bật loading
+    setLoading(true);
     try {
+      console.log("Current accessToken:", accessToken); // 👈 Thêm để kiểm tra token
+
+      // Tạo headers linh hoạt
+      const headers: any = {
+        "Content-Type": "application/json",
+      };
+
+      // Nếu có Access Token thì mới thêm Authorization
+      if (accessToken) {
+        headers.Authorization = `Bearer ${accessToken}`;
+      }
+
       const res = await fetch(
         `http://localhost:8000/api/v1/users?current=${meta.current}&pageSize=${meta.pageSize}`,
-        {
-          headers: {
-            Authorization: `Bearer ${access_token}`,
-            "Content-Type": "application/json",
-          },
-        }
+        { headers }
       );
 
       const d = await res.json();
-      if (!d.data) {
-        notification.error({ message: JSON.stringify(d.message) });
-      } else {
+      console.log("Full response:", d);
+
+      if (d.data && d.data.result) {
         setListUsers(d.data.result);
         setMeta(d.data.meta);
+      } else {
+        notification.error({ message: "Dữ liệu không hợp lệ hoặc Token lỗi" });
       }
+    } catch (error) {
+      console.error("Fetch error:", error);
+      notification.error({ message: "Lỗi khi gọi API" });
     } finally {
       setLoading(false);
     }
@@ -71,7 +93,7 @@ const UsersTable = () => {
         `http://localhost:8000/api/v1/users?current=${page}&pageSize=${pageSize}`,
         {
           headers: {
-            Authorization: `Bearer ${access_token}`,
+            Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
           },
         }
@@ -91,7 +113,7 @@ const UsersTable = () => {
   const handleDeleteUser = async (user: any) => {
     setLoading(true);
     try {
-      const d = await deleteUserAction(user, access_token);
+      const d = await deleteUserAction(user, accessToken);
       if (d.data) {
         notification.success({ message: "Xóa User thành công." });
         getData();
@@ -240,13 +262,13 @@ const UsersTable = () => {
         userData={viewUser}
       />
       <CreateUserModal
-        access_token={access_token}
+        access_token={accessToken}
         getData={getData}
         isCreateModalOpen={isCreateModalOpen}
         setIsCreateModalOpen={setIsCreateModalOpen}
       />
       <UpdateUserModal
-        access_token={access_token}
+        access_token={accessToken}
         getData={getData}
         isUpdateModalOpen={isUpdateModalOpen}
         setIsUpdateModalOpen={setIsUpdateModalOpen}

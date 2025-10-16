@@ -23,7 +23,6 @@ const OrderTable = () => {
   const [listOrder, setListOrder] = useState<IOrder[]>([]);
   const [loading, setLoading] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [dataUpdate, setDataUpdate] = useState<null | IOrder>(null);
   const access_token = localStorage.getItem("access_token") as string;
   const [orderData, setOrderData] = useState<IOrder | null>(null);

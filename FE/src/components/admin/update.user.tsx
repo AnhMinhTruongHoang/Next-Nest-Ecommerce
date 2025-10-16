@@ -35,6 +35,8 @@ const UpdateUserModal = (props: IProps) => {
   const [isSubmit, setIsSubmit] = useState(false);
   const { notification } = App.useApp();
 
+  console.log("Access Token:", access_token);
+
   useEffect(() => {
     if (dataUpdate) {
       //code

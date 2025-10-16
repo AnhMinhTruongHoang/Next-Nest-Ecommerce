@@ -130,8 +130,6 @@ const ProductsPage = () => {
       queryParts.push(`rating[gte]=${values.rating}`);
     }
 
-    console.log("👉 Final queryParts:", queryParts);
-
     setFilter(queryParts.join("&"));
     setCurrent(1);
   };

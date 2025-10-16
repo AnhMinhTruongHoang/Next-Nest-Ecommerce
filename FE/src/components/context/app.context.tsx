@@ -1,7 +1,6 @@
 "use client";
 
 import axios from "axios";
-import { IFetchAccount, IUser } from "next-auth";
 import { createContext, useContext, useEffect, useState } from "react";
 import PacmanLoader from "react-spinners/PacmanLoader";
 
@@ -29,7 +28,7 @@ type TProps = {
 
 // API Fetch Account
 export const fetchAccountAPI = async (): Promise<IUser | null> => {
-  const urlBackend = "/api/v1/auth/account";
+  const urlBackend = "http://localhost:8000/api/v1/auth/account";
   const token =
     typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
 
@@ -65,26 +64,23 @@ export const AppProvider = ({ children }: TProps) => {
 
   useEffect(() => {
     const initApp = async () => {
-      // Load guest carts trước để tránh nháy trống
+      // Load carts guest
       const guestCarts = localStorage.getItem("carts_guest");
-      if (guestCarts) {
-        setCarts(JSON.parse(guestCarts));
-      }
+      if (guestCarts) setCarts(JSON.parse(guestCarts));
 
-      const data = await fetchAccountAPI();
+      // Lấy access_token từ localStorage
+      const token = localStorage.getItem("access_token");
+
+      // 🔍 Chỉ fetch account nếu có token (chặn OAuth user)
+      let data = null;
+      if (token) {
+        data = await fetchAccountAPI();
+      }
 
       if (data) {
         setUser(data);
         setIsAuthenticated(true);
-        setAccessToken(localStorage.getItem("access_token"));
-
-        // Load carts theo userId
-        const storedCarts = localStorage.getItem(`carts_user_${data._id}`);
-        if (storedCarts) {
-          setCarts(JSON.parse(storedCarts));
-        } else {
-          setCarts([]);
-        }
+        setAccessToken(token);
       } else {
         setIsAuthenticated(false);
         setUser(null);

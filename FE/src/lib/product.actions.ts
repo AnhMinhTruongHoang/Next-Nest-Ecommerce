@@ -1,6 +1,5 @@
 "use server";
 
-import { IProduct } from "next-auth";
 import { revalidateTag } from "next/cache";
 
 /// Update Product

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Layout,
   Input,
@@ -24,6 +24,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useCurrentApp } from "../context/app.context";
 import "../../styles/product.scss";
 import { getImageUrl } from "@/utils/getImageUrl";
+import UserInfoModal from "../admin/user.infor";
 
 const { Header } = Layout;
 
@@ -56,13 +57,12 @@ export default function AppHeader() {
     items: [
       {
         key: "profile",
-        label: (
-          <NextLink href={`/profile/${session?.user?._id}`}>Profile</NextLink>
-        ),
+        label: "Profile",
         icon: <UserOutlined />,
+        onClick: () => setOpenManageAccount(true),
       },
 
-      ...(session?.user?.role !== "USER"
+      ...(session?.user?.role === "ADMIN"
         ? [
             {
               key: "dashboard",
@@ -70,7 +70,14 @@ export default function AppHeader() {
               icon: <DashboardFilled />,
             },
           ]
-        : []),
+        : [
+            {
+              key: "orders",
+              label: <NextLink href={`/orders`}>Lịch sử mua hàng</NextLink>,
+              icon: <ShoppingCartOutlined />,
+            },
+          ]),
+
       {
         key: "logout",
         label: (
@@ -413,6 +420,10 @@ export default function AppHeader() {
           </Popover>
         </div>
       </div>
+      <UserInfoModal
+        openManageAccount={openManageAccount}
+        setOpenManageAccount={setOpenManageAccount}
+      />
     </Header>
   );
 }

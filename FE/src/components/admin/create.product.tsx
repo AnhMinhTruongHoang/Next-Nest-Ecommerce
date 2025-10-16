@@ -108,8 +108,6 @@ const CreateProductModal = (props: IProps) => {
   };
 
   const onFinish = async (values: any) => {
-    console.log("👉 Form values:", values);
-
     // Thumbnail
     const thumbnailFile = thumbnailList.find((f) => f.status === "done");
     const thumbnailUrl =
@@ -131,9 +129,6 @@ const CreateProductModal = (props: IProps) => {
       })
       .filter((url) => !!url);
 
-    console.log("Thumbnail URL:", thumbnailUrl);
-    console.log("Slider URLs:", sliderUrls);
-
     setLoading(true);
     try {
       if (!thumbnailUrl || sliderUrls.length === 0) {
@@ -148,8 +143,6 @@ const CreateProductModal = (props: IProps) => {
         images: sliderUrls,
       };
 
-      console.log("👉 Payload gửi API:", payload);
-
       const res = await fetch("http://localhost:8000/api/v1/products", {
         method: "POST",
         headers: {
@@ -160,7 +153,6 @@ const CreateProductModal = (props: IProps) => {
       });
 
       const d = await res.json();
-      console.log("👉 Response API:", d);
 
       if (d.data) {
         await getData();
@@ -173,7 +165,6 @@ const CreateProductModal = (props: IProps) => {
         });
       }
     } catch (error) {
-      console.error("👉 Fetch error:", error);
       notification.error({
         message: "Có lỗi xảy ra",
         description: "Không thể kết nối tới server.",
