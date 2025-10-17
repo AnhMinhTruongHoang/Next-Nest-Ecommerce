@@ -225,29 +225,60 @@ const OrderTable = () => {
       dataIndex: "status",
       align: "center",
       filters: [
-        { text: "Pending", value: "pending" },
-        { text: "Confirmed", value: "confirmed" },
-        { text: "Shipped", value: "shipped" },
-        { text: "Cancelled", value: "cancelled" },
+        { text: "Pending", value: "PENDING" },
+        { text: "Paid", value: "PAID" },
+        { text: "Cancelled", value: "CANCELLED" },
       ],
       onFilter: (value, record) => record.status === value,
       render: (status: string) => {
-        let color = "default";
+        let style: React.CSSProperties = {};
+
         switch (status) {
-          case "pending":
-            color = "orange";
+          case "PENDING":
+            style = {
+              backgroundColor: "#FFF8E1",
+              color: "#B58B00",
+              border: "1px solid #FFEB3B",
+            };
             break;
-          case "confirmed":
-            color = "blue";
+          case "PAID":
+            style = {
+              backgroundColor: "#E8F5E9",
+              color: "#2E7D32",
+              border: "1px solid #66BB6A",
+            };
             break;
-          case "shipped":
-            color = "green";
+          case "CANCELLED":
+            style = {
+              backgroundColor: "#FFEBEE",
+              color: "#C62828",
+              border: "1px solid #EF5350",
+            };
             break;
-          case "cancelled":
-            color = "red";
+          default:
+            style = {
+              backgroundColor: "#ECEFF1",
+              color: "#546E7A",
+              border: "1px solid #CFD8DC",
+            };
             break;
         }
-        return <Tag color={color}>{status.toUpperCase()}</Tag>;
+
+        return (
+          <span
+            style={{
+              ...style,
+              borderRadius: "9999px",
+              padding: "4px 12px",
+              fontWeight: 600,
+              fontSize: 12,
+              textTransform: "uppercase",
+              display: "inline-block",
+            }}
+          >
+            {status}
+          </span>
+        );
       },
     },
     {
@@ -262,7 +293,7 @@ const OrderTable = () => {
               setIsViewModalOpen(true);
             }}
           >
-            View/Update
+            View
           </Button>
           <Popconfirm
             title="Delete the order"

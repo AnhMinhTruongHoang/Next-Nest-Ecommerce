@@ -52,9 +52,9 @@ export const fetchAccountAPI = async (): Promise<IUser | null> => {
 };
 
 export const AppProvider = ({ children }: TProps) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<IUser | null>(null);
-  const [isAppLoading, setIsAppLoading] = useState<boolean>(true);
+  const [isAppLoading, setIsAppLoading] = useState(true);
   const [carts, setCarts] = useState<ICart[]>([]);
   const [isCartModalOpen, setIsCartModalOpen] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -62,17 +62,17 @@ export const AppProvider = ({ children }: TProps) => {
   const openCartModal = () => setIsCartModalOpen(true);
   const closeCartModal = () => setIsCartModalOpen(false);
 
+  // 🧩 Khởi tạo app
   useEffect(() => {
     const initApp = async () => {
-      // Load carts guest
-      const guestCarts = localStorage.getItem("carts_guest");
-      if (guestCarts) setCarts(JSON.parse(guestCarts));
+      // Load carts (guest hoặc user)
+      const savedCarts = localStorage.getItem("carts");
+      if (savedCarts) setCarts(JSON.parse(savedCarts));
 
-      // Lấy access_token từ localStorage
+      // Lấy token
       const token = localStorage.getItem("access_token");
-
-      // 🔍 Chỉ fetch account nếu có token (chặn OAuth user)
       let data = null;
+
       if (token) {
         data = await fetchAccountAPI();
       }
@@ -81,6 +81,17 @@ export const AppProvider = ({ children }: TProps) => {
         setUser(data);
         setIsAuthenticated(true);
         setAccessToken(token);
+
+        // 🧠 Merge carts guest (nếu có)
+        const guestCarts = localStorage.getItem("carts");
+        if (guestCarts) {
+          const parsed = JSON.parse(guestCarts);
+          if (parsed.length > 0) {
+            // Giả sử bạn chưa lưu carts user trong DB,
+            // chỉ merge tạm trong localStorage
+            setCarts(parsed);
+          }
+        }
       } else {
         setIsAuthenticated(false);
         setUser(null);
@@ -92,16 +103,12 @@ export const AppProvider = ({ children }: TProps) => {
     initApp();
   }, []);
 
-  // Đồng bộ carts vào localStorage khi thay đổi
+  // 🧷 Lưu carts vào localStorage mỗi khi thay đổi
   useEffect(() => {
     if (!isAppLoading) {
-      if (user) {
-        localStorage.setItem(`carts_user_${user._id}`, JSON.stringify(carts));
-      } else {
-        localStorage.setItem("carts_guest", JSON.stringify(carts));
-      }
+      localStorage.setItem("carts", JSON.stringify(carts));
     }
-  }, [carts, user, isAppLoading]);
+  }, [carts, isAppLoading]);
 
   return (
     <>
