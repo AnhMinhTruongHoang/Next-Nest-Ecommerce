@@ -15,6 +15,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useCurrentApp } from "../context/app.context";
 import "../../styles/product.scss";
 import { getImageUrl } from "@/utils/getImageUrl";
+import UserInfoModal from "../admin/user.infor";
 
 const { Header } = Layout;
 
@@ -411,10 +412,10 @@ export default function AppHeader() {
           </Popover>
         </div>
       </div>
-      {/* <UserInfoModal
+      <UserInfoModal
         openManageAccount={openManageAccount}
         setOpenManageAccount={setOpenManageAccount}
-      /> */}
+      />
     </Header>
   );
 }
