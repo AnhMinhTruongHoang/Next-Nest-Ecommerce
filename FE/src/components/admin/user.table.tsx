@@ -31,12 +31,14 @@ const UsersTable = () => {
     pages: 0,
     total: 0,
   });
-
   useEffect(() => {
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("access_token");
       if (token) {
-        setAccessToken(token);
+        const formattedToken = token.startsWith("Bearer ")
+          ? token
+          : `Bearer ${token}`;
+        setAccessToken(formattedToken);
       }
     }
   }, []);

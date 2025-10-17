@@ -21,6 +21,7 @@ declare global {
     _id: string;
     email: string;
     name: string;
+    avatar: string;
     phone?: string;
     access_token?: string;
     accountType?: "LOCAL" | "GOOGLE" | string;
@@ -39,6 +40,12 @@ declare global {
   }
   interface IFetchAccount {
     user: IUser;
+  }
+
+  interface IRegister {
+    _id: string;
+    email: string;
+    name: string;
   }
 
   interface IProduct {
@@ -84,7 +91,8 @@ declare global {
 
   interface IBackendRes<T> {
     error?: string | string[];
-    message?: string;
+    fileUploaded: any;
+    message: string;
     statusCode: number | string;
     data: T;
   }

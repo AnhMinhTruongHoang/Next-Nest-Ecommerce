@@ -1,16 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import {
-  Layout,
-  Input,
-  Avatar,
-  Badge,
-  Dropdown,
-  Popover,
-  Empty,
-  Button,
-} from "antd";
+import React, { use, useState } from "react";
+import { Layout, Input, Avatar, Badge, Dropdown, Popover } from "antd";
 import {
   SearchOutlined,
   ShoppingCartOutlined,
@@ -24,7 +15,6 @@ import { useSession, signOut } from "next-auth/react";
 import { useCurrentApp } from "../context/app.context";
 import "../../styles/product.scss";
 import { getImageUrl } from "@/utils/getImageUrl";
-import UserInfoModal from "../admin/user.infor";
 
 const { Header } = Layout;
 
@@ -33,13 +23,14 @@ export default function AppHeader() {
   const router = useRouter();
   const [openDrawer, setOpenDrawer] = useState(false);
   const [openManageAccount, setOpenManageAccount] = useState<boolean>(false);
-
+  const [dataUpdate, setDataUpdate] = useState<IUser | null>(null);
+  const [accessToken, setAccessToken] = useState<string>("");
   const {
-    carts,
     isAuthenticated,
     user,
     setUser,
     setIsAuthenticated,
+    carts,
     setCarts,
   } = useCurrentApp();
 
@@ -420,10 +411,10 @@ export default function AppHeader() {
           </Popover>
         </div>
       </div>
-      <UserInfoModal
+      {/* <UserInfoModal
         openManageAccount={openManageAccount}
         setOpenManageAccount={setOpenManageAccount}
-      />
+      /> */}
     </Header>
   );
 }

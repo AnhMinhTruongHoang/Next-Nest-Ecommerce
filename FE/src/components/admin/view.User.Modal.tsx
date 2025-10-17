@@ -2,7 +2,6 @@
 
 import React from "react";
 import { Modal, Descriptions } from "antd";
-import { IUser } from "next-auth";
 
 interface ViewUserModalProps {
   isOpen: boolean;
@@ -37,6 +36,7 @@ const ViewUserModal: React.FC<ViewUserModalProps> = ({
         <Descriptions bordered column={1} size="small">
           <Descriptions.Item label="Email">{userData.email}</Descriptions.Item>
           <Descriptions.Item label="Name">{userData.name}</Descriptions.Item>
+          <Descriptions.Item label="Phone">{userData.phone}</Descriptions.Item>
           <Descriptions.Item label="Role">{userData.role}</Descriptions.Item>
           <Descriptions.Item label="Account Type">
             {userData.accountType}
@@ -48,10 +48,14 @@ const ViewUserModal: React.FC<ViewUserModalProps> = ({
             {userData.isDeleted ? "True" : "False"}
           </Descriptions.Item>
           <Descriptions.Item label="Created At">
-            {new Date(userData.createdAt).toLocaleString()}
+            {userData.createdAt
+              ? new Date(userData.createdAt).toLocaleString()
+              : "N/A"}
           </Descriptions.Item>
           <Descriptions.Item label="Updated At">
-            {new Date(userData.updatedAt).toLocaleString()}
+            {userData.updatedAt
+              ? new Date(userData.updatedAt).toLocaleString()
+              : "N/A"}
           </Descriptions.Item>
         </Descriptions>
       )}

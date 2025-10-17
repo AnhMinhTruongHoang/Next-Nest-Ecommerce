@@ -1,6 +1,5 @@
 "use server";
 
-import { IUser } from "next-auth";
 import { revalidateTag } from "next/cache";
 
 /// Update user

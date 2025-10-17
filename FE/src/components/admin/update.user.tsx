@@ -8,8 +8,6 @@ import {
   InputNumber,
   App,
 } from "antd";
-import { IUser } from "next-auth";
-import { updateUserAction } from "@/lib/user.actions";
 
 const { Option } = Select;
 interface IProps {
@@ -58,36 +56,57 @@ const UpdateUserModal = (props: IProps) => {
   };
 
   const onFinish = async (values: any) => {
-    const { name, email, age, gender, role, address, company } = values;
-    if (dataUpdate) {
-      const data = {
-        _id: dataUpdate._id,
-        name,
-        email,
-        age,
-        gender,
-        role,
-        address,
-        // company: { _id: company, name: "None" }, // disable this
-      };
+    if (!dataUpdate) return;
 
-      const d = await updateUserAction(data, access_token);
-      if (d.data) {
-        //success
-        await getData();
+    const { name, email, age, gender, role, address } = values;
+    const data = {
+      _id: dataUpdate._id,
+      name,
+      email,
+      age,
+      gender,
+      role,
+      address,
+    };
+
+    setIsSubmit(true);
+    try {
+      const res = await fetch(
+        `http://localhost:8000/api/v1/users/${data._id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: access_token.startsWith("Bearer ")
+              ? access_token
+              : `Bearer ${access_token}`,
+          },
+          body: JSON.stringify(data),
+        }
+      );
+
+      const result = await res.json();
+
+      if (res.ok && result?.data) {
         notification.success({
-          message: "Cập nhật user thành công.",
+          message: "Cập nhật user thành công!",
         });
+        await getData();
         handleCloseCreateModal();
       } else {
-        ///
         notification.error({
-          message: "Có lỗi xảy ra",
-          description: JSON.stringify(d.message),
+          message: "Cập nhật thất bại!",
+          description: result?.message || "Lỗi không xác định",
         });
       }
+    } catch (err: any) {
+      notification.error({
+        message: "Lỗi kết nối server!",
+        description: err?.message || "Không thể kết nối API",
+      });
+    } finally {
+      setIsSubmit(false);
     }
-    setIsSubmit(false);
   };
 
   return (
