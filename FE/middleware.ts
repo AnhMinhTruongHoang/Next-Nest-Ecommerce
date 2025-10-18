@@ -1,26 +1,27 @@
-import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 export async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
-  const pathname = req.nextUrl.pathname;
-
-  console.log("Middleware check:", {
-    pathname,
-    role: token?.role,
-    tokenExists: !!token,
+  console.log("🔍 Middleware check:", {
+    path: req.nextUrl.pathname,
+    hasToken: !!token,
+    role: token?.role || "none",
   });
 
-  // block dashboard cho người không phải ADMIN
-  if (pathname.startsWith("/dashboard")) {
-    if (!token || token.role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
+  if (!token) {
+    return NextResponse.redirect(new URL("/", req.url));
   }
+
+  if (req.nextUrl.pathname.startsWith("/dashboard") && token.role !== "ADMIN") {
+    return NextResponse.redirect(new URL("/", req.url));
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*"],
+  matcher: ["/dashboard/:path*"],
 };
