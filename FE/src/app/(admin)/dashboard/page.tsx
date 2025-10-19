@@ -3,12 +3,10 @@
 import AdminCard from "@/components/admin/admin.card";
 import { App } from "antd";
 
-const DashboardPage = () => {
+export default function DashboardPage({ searchParams }: { searchParams: any }) {
   return (
     <App>
-      <AdminCard />
+      <AdminCard searchParams={searchParams} />
     </App>
   );
-};
-
-export default DashboardPage;
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import axios from "axios";
+import { getSession } from "next-auth/react";
 import { createContext, useContext, useEffect, useState } from "react";
 import PacmanLoader from "react-spinners/PacmanLoader";
 
@@ -27,12 +28,8 @@ type TProps = {
 };
 
 // API Fetch Account
-export const fetchAccountAPI = async (): Promise<IUser | null> => {
+export const fetchAccountAPI = async (token: string): Promise<IUser | null> => {
   const urlBackend = "http://localhost:8000/api/v1/auth/account";
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
-
-  if (!token) return null;
 
   try {
     const res = await axios.get<IBackendRes<IFetchAccount>>(urlBackend, {
@@ -41,10 +38,7 @@ export const fetchAccountAPI = async (): Promise<IUser | null> => {
       },
     });
 
-    if (res.data?.data?.user) {
-      return res.data.data.user;
-    }
-    return null;
+    return res.data?.data?.user ?? null;
   } catch (error) {
     console.error("Fetch account failed:", error);
     return null;
@@ -62,39 +56,25 @@ export const AppProvider = ({ children }: TProps) => {
   const openCartModal = () => setIsCartModalOpen(true);
   const closeCartModal = () => setIsCartModalOpen(false);
 
-  // 🧩 Khởi tạo app
+  // Khởi tạo app
+
   useEffect(() => {
     const initApp = async () => {
-      // Load carts (guest hoặc user)
       const savedCarts = localStorage.getItem("carts");
       if (savedCarts) setCarts(JSON.parse(savedCarts));
 
-      // Lấy token
-      const token = localStorage.getItem("access_token");
-      let data = null;
-
-      if (token) {
-        data = await fetchAccountAPI();
-      }
-
-      if (data) {
-        setUser(data);
-        setIsAuthenticated(true);
-        setAccessToken(token);
-
-        // 🧠 Merge carts guest (nếu có)
-        const guestCarts = localStorage.getItem("carts");
-        if (guestCarts) {
-          const parsed = JSON.parse(guestCarts);
-          if (parsed.length > 0) {
-            // Giả sử bạn chưa lưu carts user trong DB,
-            // chỉ merge tạm trong localStorage
-            setCarts(parsed);
-          }
+      const session = await getSession();
+      if (session?.access_token) {
+        const data = await fetchAccountAPI(session.access_token);
+        if (data) {
+          setUser(data);
+          setIsAuthenticated(true);
+          setAccessToken(session.access_token);
         }
       } else {
         setIsAuthenticated(false);
         setUser(null);
+        setAccessToken(null);
       }
 
       setIsAppLoading(false);
@@ -102,13 +82,6 @@ export const AppProvider = ({ children }: TProps) => {
 
     initApp();
   }, []);
-
-  // 🧷 Lưu carts vào localStorage mỗi khi thay đổi
-  useEffect(() => {
-    if (!isAppLoading) {
-      localStorage.setItem("carts", JSON.stringify(carts));
-    }
-  }, [carts, isAppLoading]);
 
   return (
     <>
