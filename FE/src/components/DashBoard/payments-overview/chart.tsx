@@ -1,3 +1,5 @@
+"use client";
+
 import { useIsMobile } from "@/utils/use-mobile";
 import type { ApexOptions } from "apexcharts";
 import dynamic from "next/dynamic";
@@ -9,25 +11,24 @@ type PropsType = {
   };
 };
 
-const Chart = dynamic(() => import("react-apexcharts"), {
-  ssr: false,
-});
+const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 export function PaymentsOverviewChart({ data }: PropsType) {
   const isMobile = useIsMobile();
 
   const options: ApexOptions = {
     legend: {
-      show: false,
+      show: !isMobile,
+      position: "top",
+      horizontalAlign: "right",
+      fontSize: isMobile ? "10px" : "12px",
     },
     colors: ["#5750F1", "#0ABEF9"],
     chart: {
-      height: 310,
       type: "area",
-      toolbar: {
-        show: false,
-      },
+      toolbar: { show: false },
       fontFamily: "inherit",
+      zoom: { enabled: false },
     },
     fill: {
       gradient: {
@@ -37,19 +38,17 @@ export function PaymentsOverviewChart({ data }: PropsType) {
     },
     responsive: [
       {
-        breakpoint: 1024,
+        breakpoint: 768,
         options: {
-          chart: {
-            height: 300,
-          },
+          chart: { height: 220 },
+          stroke: { width: 2 },
+          grid: { padding: { left: 5, right: 5 } },
         },
       },
       {
-        breakpoint: 1366,
+        breakpoint: 1280,
         options: {
-          chart: {
-            height: 320,
-          },
+          chart: { height: 280 },
         },
       },
     ],
@@ -58,47 +57,41 @@ export function PaymentsOverviewChart({ data }: PropsType) {
       width: isMobile ? 2 : 3,
     },
     grid: {
-      strokeDashArray: 5,
-      yaxis: {
-        lines: {
-          show: true,
-        },
-      },
+      strokeDashArray: 4,
+      borderColor: "#E5E7EB",
+      yaxis: { lines: { show: true } },
     },
-    dataLabels: {
-      enabled: false,
-    },
+    dataLabels: { enabled: false },
     tooltip: {
-      marker: {
-        show: true,
-      },
+      marker: { show: true },
+      style: { fontSize: isMobile ? "11px" : "13px" },
     },
     xaxis: {
-      axisBorder: {
-        show: false,
+      labels: {
+        style: { fontSize: isMobile ? "10px" : "12px" },
       },
-      axisTicks: {
-        show: false,
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+    },
+    yaxis: {
+      labels: {
+        style: { fontSize: isMobile ? "10px" : "12px" },
       },
+      axisBorder: { show: false },
+      axisTicks: { show: false },
     },
   };
 
   return (
-    <div className="-ml-4 -mr-5 h-[310px]">
+    <div className="w-full rounded-lg border border-gray-200 bg-white p-2 shadow-sm dark:border-gray-700 dark:bg-gray-900 sm:p-4">
       <Chart
         options={options}
         series={[
-          {
-            name: "Received",
-            data: data.received,
-          },
-          {
-            name: "Due",
-            data: data.due,
-          },
+          { name: "Received", data: data.received },
+          { name: "Due", data: data.due },
         ]}
         type="area"
-        height={310}
+        height={isMobile ? 220 : 310}
       />
     </div>
   );

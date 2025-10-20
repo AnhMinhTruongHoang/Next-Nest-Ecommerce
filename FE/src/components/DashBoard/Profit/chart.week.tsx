@@ -20,14 +20,10 @@ export function WeeksProfitChart({ data }: PropsType) {
     chart: {
       type: "bar",
       stacked: true,
-      toolbar: {
-        show: false,
-      },
-      zoom: {
-        enabled: false,
-      },
+      toolbar: { show: false },
+      zoom: { enabled: false },
+      fontFamily: "inherit",
     },
-
     responsive: [
       {
         breakpoint: 1536,
@@ -50,30 +46,24 @@ export function WeeksProfitChart({ data }: PropsType) {
         borderRadiusWhenStacked: "last",
       },
     },
-    dataLabels: {
-      enabled: false,
-    },
-
+    dataLabels: { enabled: false },
     grid: {
       strokeDashArray: 5,
-      xaxis: {
-        lines: {
-          show: false,
-        },
-      },
-      yaxis: {
-        lines: {
-          show: true,
-        },
+      xaxis: { lines: { show: false } },
+      yaxis: { lines: { show: true } },
+    },
+    xaxis: {
+      axisBorder: { show: false }, // ẩn trục X
+      axisTicks: { show: false }, // ẩn tick X
+      labels: {
+        style: { fontSize: "12px" },
       },
     },
-
-    xaxis: {
-      axisBorder: {
-        show: false,
-      },
-      axisTicks: {
-        show: false,
+    yaxis: {
+      axisBorder: { show: false }, // ẩn trục Y
+      axisTicks: { show: false }, // ẩn tick Y
+      labels: {
+        style: { fontSize: "12px" },
       },
     },
     legend: {
@@ -82,15 +72,11 @@ export function WeeksProfitChart({ data }: PropsType) {
       fontFamily: "inherit",
       fontWeight: 500,
       fontSize: "14px",
-      markers: {
-        size: 9,
-        shape: "circle",
-      },
+      markers: { size: 9, shape: "circle" },
     },
-    fill: {
-      opacity: 1,
-    },
+    fill: { opacity: 1 },
   };
+
   return (
     <div className="-ml-3.5 mt-3">
       <Chart

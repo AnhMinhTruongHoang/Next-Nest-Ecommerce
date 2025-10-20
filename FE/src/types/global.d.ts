@@ -115,4 +115,18 @@ declare global {
     };
     result: T[];
   }
+
+  interface ApiResponse<T> {
+    data?: {
+      result?: T[] | T;
+      meta?: {
+        current: number;
+        pageSize: number;
+        total: number;
+      };
+    };
+    statusCode?: number;
+    message?: string;
+    error?: string;
+  }
 }

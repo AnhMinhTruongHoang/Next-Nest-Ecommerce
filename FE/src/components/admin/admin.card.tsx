@@ -3,23 +3,55 @@
 import { RegionLabels } from "../DashBoard/map/label";
 import { WeeksProfit } from "../DashBoard/Profit/Profit.week";
 import { PaymentsOverview } from "../DashBoard/payments-overview/payment.overView";
+import OVCard from "../DashBoard/overview/ov.card";
+
 export default function AdminCard() {
   return (
-    <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-9 2xl:gap-7.5">
-      {/* Tổng quan thanh toán */}
-      <PaymentsOverview
-        className="col-span-12 xl:col-span-7"
-        timeFrame="monthly"
-      />
+    <div
+      style={{
+        marginTop: "16px", // mt-4
+        display: "grid",
+        gridTemplateColumns: "repeat(12, minmax(0, 1fr))",
+        gap: "16px", // gap-4
+      }}
+    >
+      {/* TỔNG QUAN */}
+      <div
+        style={{
+          gridColumn: "span 12 / span 12",
+        }}
+      >
+        <OVCard />
+      </div>
 
-      {/* Lợi nhuận theo tuần */}
-      <WeeksProfit
-        className="col-span-12 xl:col-span-5"
-        timeFrame="this week"
-      />
+      {/* TỔNG QUAN THANH TOÁN */}
+      <div
+        style={{
+          gridColumn: "span 12 / span 12",
+        }}
+      >
+        <PaymentsOverview timeFrame="monthly" />
+      </div>
 
-      {/* Bản đồ khu vực */}
-      <RegionLabels />
+      {/* LỢI NHUẬN THEO TUẦN */}
+      <div
+        style={{
+          gridColumn: "span 12 / span 12",
+        }}
+      >
+        <WeeksProfit timeFrame="this week" />
+      </div>
+
+      {/* BẢN ĐỒ KHU VỰC */}
+      <div
+        style={{
+          gridColumn: "span 12 / span 12",
+          textAlign: "center",
+          marginTop: "15px",
+        }}
+      >
+        <RegionLabels />
+      </div>
     </div>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { cn } from "../overview/cards";
 import { WeeksProfitChart } from "./chart.week";
 import { getWeeksProfitData } from "../payments-overview/overview.data";
 import { PeriodPicker } from "./period-picker";
@@ -18,7 +17,7 @@ type PropsType = {
   className?: string;
 };
 
-export function WeeksProfit({ className, timeFrame = "this week" }: PropsType) {
+export function WeeksProfit({ timeFrame = "THIS WEEK" }: PropsType) {
   const [data, setData] = useState<WeeksProfitData | null>(null);
 
   useEffect(() => {
@@ -27,31 +26,58 @@ export function WeeksProfit({ className, timeFrame = "this week" }: PropsType) {
 
   if (!data) {
     return (
-      <div className="rounded-[10px] bg-white p-6 shadow-1 dark:bg-gray-dark">
-        <p className="text-gray-500">Loading...</p>
+      <div
+        style={{
+          borderRadius: "10px",
+          backgroundColor: "white",
+          padding: "24px",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+        }}
+      >
+        <p style={{ color: "#6b7280", textTransform: "uppercase" }}>
+          LOADING...
+        </p>
       </div>
     );
   }
 
   return (
     <div
-      className={cn(
-        "rounded-[10px] bg-white px-7.5 pt-7.5 shadow-1 dark:bg-gray-dark dark:shadow-card",
-        className
-      )}
+      style={{
+        borderRadius: "10px",
+        backgroundColor: "white",
+        padding: "30px",
+        boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+      }}
     >
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h2 className="text-body-2xlg font-bold text-dark dark:text-white">
-          Profit {timeFrame}
+      {/* HEADER */}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "12px",
+          borderBottom: "1px solid #f3f4f6",
+          paddingBottom: "12px",
+        }}
+      >
+        <h2
+          style={{
+            fontSize: "20px",
+            fontWeight: 700,
+            color: "#1f2937",
+            flex: 1,
+            textAlign: "center",
+            textTransform: "uppercase",
+          }}
+        >
+          PROFIT{timeFrame}
         </h2>
-
-        <PeriodPicker
-          items={["this week", "last week"]}
-          defaultValue={timeFrame}
-          sectionKey="weeks_profit"
-        />
+        <PeriodPicker defaultValue={timeFrame} sectionKey="payments_overview" />
       </div>
 
+      {/* CHART */}
       <WeeksProfitChart data={data} />
     </div>
   );

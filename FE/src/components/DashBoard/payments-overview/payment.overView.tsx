@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { getPaymentsOverviewData } from "./overview.data";
-import { cn } from "../overview/cards";
 import { standardFormat } from "../overview/format";
 import { PeriodPicker } from "../Profit/period-picker";
 import { PaymentsOverviewChart } from "./chart";
@@ -19,10 +18,7 @@ type PropsType = {
   className?: string;
 };
 
-export function PaymentsOverview({
-  timeFrame = "monthly",
-  className,
-}: PropsType) {
+export function PaymentsOverview({ timeFrame = "MONTHLY" }: PropsType) {
   const [data, setData] = useState<PaymentsOverviewData | null>(null);
 
   useEffect(() => {
@@ -31,8 +27,19 @@ export function PaymentsOverview({
 
   if (!data) {
     return (
-      <div className="rounded-2xl bg-white p-8 shadow-sm dark:bg-gray-dark animate-pulse">
-        <p className="text-gray-400 dark:text-gray-500">Loading...</p>
+      <div
+        style={{
+          borderRadius: "16px",
+          backgroundColor: "white",
+          padding: "24px",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+          animation: "pulse 1.5s infinite",
+          overflowY: "hidden",
+        }}
+      >
+        <p style={{ color: "#9ca3af", textTransform: "uppercase" }}>
+          LOADING...
+        </p>
       </div>
     );
   }
@@ -42,42 +49,125 @@ export function PaymentsOverview({
 
   return (
     <div
-      className={cn(
-        "rounded-2xl bg-white p-8 shadow-md ring-1 ring-gray-100 transition-all duration-300 hover:shadow-lg dark:bg-gray-dark dark:ring-gray-800",
-        className
-      )}
+      style={{
+        borderRadius: "16px",
+        backgroundColor: "white",
+        padding: "24px",
+        boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+        border: "1px solid #f3f4f6",
+        transition: "all 0.3s ease",
+      }}
     >
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 pb-4 dark:border-gray-800">
-        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
-          Payments Overview
+      {/* HEADER */}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "12px",
+          borderBottom: "1px solid #f3f4f6",
+          paddingBottom: "12px",
+        }}
+      >
+        <h2
+          style={{
+            fontSize: "20px",
+            fontWeight: 700,
+            color: "#1f2937",
+            flex: 1,
+            textAlign: "center",
+            textTransform: "uppercase",
+          }}
+        >
+          PAYMENTS OVERVIEW
         </h2>
-
         <PeriodPicker defaultValue={timeFrame} sectionKey="payments_overview" />
       </div>
 
-      {/* Chart */}
-      <div className="mt-6 min-h-[240px]">
+      {/* CHART */}
+      <div
+        style={{
+          marginTop: "20px",
+          minHeight: "240px",
+          overflowX: "auto",
+          overflow: "hidden",
+        }}
+      >
         <PaymentsOverviewChart data={data} />
       </div>
 
-      {/* Totals */}
-      <dl className="mt-6 grid grid-cols-1 divide-y divide-gray-100 dark:divide-gray-800 sm:grid-cols-2 sm:divide-y-0 sm:divide-x">
-        <div className="flex flex-col items-center justify-center gap-1 py-3">
-          <dt className="text-2xl font-semibold text-green-600 dark:text-green-400">
+      {/* TOTALS */}
+      <dl
+        style={{
+          marginTop: "24px",
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          borderTop: "1px solid #f3f4f6",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "4px",
+            padding: "12px",
+            borderRight: "1px solid #f3f4f6",
+          }}
+        >
+          <dt
+            style={{
+              fontSize: "22px",
+              fontWeight: 600,
+              color: "#16a34a",
+              textTransform: "uppercase",
+            }}
+          >
             ${standardFormat(receivedTotal)}
           </dt>
-          <dd className="text-sm font-medium text-gray-500 dark:text-gray-400">
-            Received Amount
+          <dd
+            style={{
+              fontSize: "14px",
+              fontWeight: 500,
+              color: "#6b7280",
+              textTransform: "uppercase",
+            }}
+          >
+            RECEIVED AMOUNT
           </dd>
         </div>
 
-        <div className="flex flex-col items-center justify-center gap-1 py-3">
-          <dt className="text-2xl font-semibold text-red-500 dark:text-red-400">
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "4px",
+            padding: "12px",
+          }}
+        >
+          <dt
+            style={{
+              fontSize: "22px",
+              fontWeight: 600,
+              color: "#dc2626",
+              textTransform: "uppercase",
+            }}
+          >
             ${standardFormat(dueTotal)}
           </dt>
-          <dd className="text-sm font-medium text-gray-500 dark:text-gray-400">
-            Due Amount
+          <dd
+            style={{
+              fontSize: "14px",
+              fontWeight: 500,
+              color: "#6b7280",
+              textTransform: "uppercase",
+            }}
+          >
+            DUE AMOUNT
           </dd>
         </div>
       </dl>

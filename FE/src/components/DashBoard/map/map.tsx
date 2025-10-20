@@ -2,43 +2,55 @@
 
 import { useState } from "react";
 import { ComposableMap, Geographies, Geography } from "react-simple-maps";
+import { Tooltip } from "react-tooltip";
+import "react-tooltip/dist/react-tooltip.css";
 
-const geoUrl =
-  "https://raw.githubusercontent.com/huynhdev/map-data/main/vietnam-provinces.topo.json";
+const geoUrl = "/vietnam-provinces.json";
 
 export default function Map() {
   const [hoveredProvince, setHoveredProvince] = useState<string | null>(null);
+  const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
 
   return (
-    <div className="h-[422px] w-full">
+    <div className="relative w-full max-w-[800px] mx-auto overflow-hidden aspect-[3/4] sm:aspect-[3/3] md:aspect-[3/2] border border-gray-300 rounded-md p-2">
       <ComposableMap
         projection="geoMercator"
         projectionConfig={{
-          scale: 1800,
-          center: [106, 16], // Tâm Việt Nam
+          scale: 1200,
+          center: [106, 16],
         }}
-        width={600}
-        height={500}
-        className="w-full h-full"
+        className="w-full h-auto"
       >
         <Geographies geography={geoUrl}>
           {({ geographies }) =>
             geographies.map((geo) => {
               const name = geo.properties?.NAME_1;
+              const isHovered = hoveredProvince === name;
+              const isSelected = selectedProvince === name;
+
               return (
                 <Geography
                   key={geo.rsmKey}
                   geography={geo}
-                  fill={hoveredProvince === name ? "#3056D3" : "#C8D0D8"}
+                  fill={
+                    isSelected
+                      ? "#1E40AF" // xanh đậm khi click
+                      : isHovered
+                      ? "#3056D3" // xanh khi hover
+                      : "#C8D0D8" // màu mặc định
+                  }
                   stroke="#fff"
                   strokeWidth={0.5}
+                  data-tooltip-id="province-tooltip"
+                  data-tooltip-content={name}
+                  onMouseEnter={() => setHoveredProvince(name)}
+                  onMouseLeave={() => setHoveredProvince(null)}
+                  onClick={() => setSelectedProvince(name)} // click để chọn
                   style={{
-                    default: { outline: "none" },
+                    default: { outline: "none", cursor: "pointer" },
                     hover: { outline: "none" },
                     pressed: { outline: "none" },
                   }}
-                  onMouseEnter={() => setHoveredProvince(name)}
-                  onMouseLeave={() => setHoveredProvince(null)}
                 />
               );
             })
@@ -46,13 +58,15 @@ export default function Map() {
         </Geographies>
       </ComposableMap>
 
-      <div className="mt-3 text-center text-sm text-dark dark:text-white">
-        {hoveredProvince ? (
+      <Tooltip id="province-tooltip" />
+
+      <div className="mt-2 text-center text-sm text-gray-700 dark:text-white">
+        {selectedProvince ? (
           <span>
-            🗺️ <b>{hoveredProvince}</b>
+            🗺️ <b>{selectedProvince}</b>
           </span>
         ) : (
-          <span>Di chuột vào tỉnh để xem tên</span>
+          <span>Nhấn vào tỉnh để xem tên</span>
         )}
       </div>
     </div>
