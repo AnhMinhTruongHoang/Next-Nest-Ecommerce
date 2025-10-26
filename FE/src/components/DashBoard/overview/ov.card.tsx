@@ -100,7 +100,7 @@ const OVCard = () => {
             }}
           >
             <Statistic
-              title="Tổng Books"
+              title="Tổng Sản phẩm"
               value={dataDashboard.countBook}
               formatter={formatter}
             />

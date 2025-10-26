@@ -5,7 +5,7 @@ import type { NextRequest } from "next/server";
 export async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
-  console.log("🔍 Middleware check:", {
+  console.log("Middleware check:", {
     path: req.nextUrl.pathname,
     hasToken: !!token,
     role: token?.role || "none",
