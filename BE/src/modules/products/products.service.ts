@@ -42,8 +42,6 @@ export class ProductsService {
       }
     }
 
-    console.log('Final filter:', filter);
-
     const safePage = Math.max(1, Number(currentPage) || 1);
     const safeLimit = Math.max(1, Number(limit) || 20);
     const offset = (safePage - 1) * safeLimit;
