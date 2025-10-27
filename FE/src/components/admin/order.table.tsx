@@ -152,13 +152,20 @@ const OrderTable = () => {
 
         switch (status) {
           case "PENDING":
-            style = { backgroundColor: "#FFF8E1", color: "#B58B00" };
+            style = { backgroundColor: "#FFF4E5", color: "#B76E00" };
             break;
           case "PAID":
             style = { backgroundColor: "#E8F5E9", color: "#2E7D32" };
             break;
+          case "SHIPPED":
+            style = { backgroundColor: "#E3F2FD", color: "#1565C0" };
+            break;
+          case "COMPLETED":
+            style = { backgroundColor: "#E0F7FA", color: "#00838F" };
+            break;
+          case "CANCELED":
           case "CANCELLED":
-            style = { backgroundColor: "#FFEBEE", color: "#C62828" };
+            style = { backgroundColor: "red", color: "black" };
             break;
           default:
             style = { backgroundColor: "#ECEFF1", color: "#546E7A" };
@@ -175,6 +182,7 @@ const OrderTable = () => {
               fontSize: 12,
               textTransform: "uppercase",
               display: "inline-block",
+              letterSpacing: 0.5,
             }}
           >
             {status}
@@ -182,6 +190,7 @@ const OrderTable = () => {
         );
       },
     },
+
     {
       title: "Hành động",
       align: "center",
