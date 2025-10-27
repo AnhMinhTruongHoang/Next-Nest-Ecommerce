@@ -24,6 +24,7 @@ import { CartsModule } from './modules/carts/carts.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { multerConfig } from './modules/files/multer.config';
+import { VnpayModule } from './modules/vnpay/vnpay.module';
 
 @Module({
   imports: [
@@ -91,6 +92,7 @@ import { multerConfig } from './modules/files/multer.config';
     PaymentsModule,
     CartsModule,
     ReviewsModule,
+    VnpayModule,
   ],
   controllers: [AppController],
   providers: [AppService],

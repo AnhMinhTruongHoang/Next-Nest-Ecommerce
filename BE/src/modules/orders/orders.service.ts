@@ -138,4 +138,21 @@ export class OrdersService {
     if (!deleted) throw new NotFoundException(`Order ${id} not found`);
     return deleted;
   }
+
+  // UPDATE STATUS
+  async updateStatus(orderId: string, status: 'PAID' | 'FAILED') {
+    const updated = await this.orderModel
+      .findByIdAndUpdate(
+        orderId,
+        {
+          status,
+          paymentStatus: status === 'PAID' ? 'PAID' : 'UNPAID',
+        },
+        { new: true },
+      )
+      .exec();
+
+    if (!updated) throw new NotFoundException(`Order ${orderId} not found`);
+    return updated;
+  }
 }
