@@ -72,6 +72,7 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({
             <Descriptions.Item label="Order ID">
               {orderData._id}
             </Descriptions.Item>
+
             <Descriptions.Item label="User ID">
               {orderData.userId}
             </Descriptions.Item>
@@ -87,6 +88,11 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({
             <Descriptions.Item label="Status">
               {orderData.status.toUpperCase()}
             </Descriptions.Item>
+
+            <Descriptions.Item label="Payment Method">
+              {orderData.paymentMethod || "N/A"}
+            </Descriptions.Item>
+
             <Descriptions.Item label="Total Price">
               {orderData.totalPrice.toLocaleString("vi-VN")} ₫
             </Descriptions.Item>

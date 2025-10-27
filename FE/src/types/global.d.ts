@@ -71,6 +71,7 @@ declare global {
     productName: string;
     phoneNumber: string;
     shippingAddress: string;
+    paymentMethod: any;
     userId: string;
     items: {
       productId: string;

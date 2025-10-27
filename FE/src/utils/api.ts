@@ -97,3 +97,68 @@ export const convertSlugUrl = (str: string) => {
   });
   return str;
 };
+
+export async function getVNPayUrlAPI(
+  amount: number,
+  locale: string,
+  paymentRef?: string
+): Promise<string> {
+  const response = await fetch(
+    "http://localhost:8000/api/v1/vnpay/payment-url",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount, bankCode: "NCB", locale, paymentRef }),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Không thể tạo URL thanh toán VNPay");
+  }
+
+  const result = await response.json();
+
+  // Backend trả về data.data.url
+  const url = result?.data?.data?.url;
+  if (!url) {
+    console.error("VNPay response:", result);
+    throw new Error("Không tìm thấy URL thanh toán trong phản hồi backend");
+  }
+
+  return url;
+}
+
+export async function createOrderAPI(
+  userId: string,
+  fullName: string,
+  shippingAddress: string,
+  phoneNumber: string,
+  totalPrice: number,
+  paymentMethod: string,
+  items: any[],
+  paymentRef?: string
+) {
+  const response = await fetch("http://localhost:8000/api/v1/orders", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      userId,
+      fullName,
+      shippingAddress,
+      phoneNumber,
+      totalPrice,
+      paymentMethod,
+      items,
+      paymentRef,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error?.message || "Tạo đơn hàng thất bại");
+  }
+
+  return await response.json();
+}

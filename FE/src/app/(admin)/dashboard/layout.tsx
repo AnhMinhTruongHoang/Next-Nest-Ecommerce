@@ -1,18 +1,43 @@
-import React, { Suspense } from "react";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/auth.options";
+"use client";
+
+import React, { Suspense, useEffect, useState } from "react";
+import { App, Skeleton } from "antd";
+import { AppProvider } from "@/components/context/app.context";
 import { AdminContextProvider } from "@/lib/admin.context";
 import AdminSideBar from "@/components/admin/admin.sidebar";
 import AdminHeader from "@/components/admin/admin.header";
 import AdminContent from "@/components/admin/admin.content";
 import AdminFooter from "@/components/admin/admin.footer";
-import { App, Skeleton } from "antd";
-import { AppProvider } from "@/components/context/app.context";
-import "antd/dist/reset.css";
 import NProgressWrapper from "@/lib/nprogress.wrapper";
 
-const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
-  const session = await getServerSession(authOptions);
+interface Props {
+  children: React.ReactNode;
+  session: any;
+}
+
+const AdminLayoutClient: React.FC<Props> = ({ children, session }) => {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          background: "#f5f5f5",
+        }}
+      >
+        <Skeleton active paragraph={{ rows: 8 }} />
+      </div>
+    );
+  }
 
   return (
     <App>
@@ -52,4 +77,4 @@ const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export default AdminLayout;
+export default AdminLayoutClient;

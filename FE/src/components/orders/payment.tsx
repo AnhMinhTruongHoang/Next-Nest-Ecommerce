@@ -1,59 +1,70 @@
-import { App, Button, Col, Divider, Form, Radio, Row, Space } from "antd";
+"use client";
+import {
+  App,
+  Button,
+  Col,
+  Divider,
+  Form,
+  Radio,
+  Row,
+  Space,
+  Input,
+} from "antd";
 import { LeftCircleFilled } from "@ant-design/icons";
 import { useEffect, useState } from "react";
-import { Input } from "antd";
-import { useCurrentApp } from "@/components/context/app.context";
-import type { FormProps } from "antd";
-import { isMobile } from "react-device-detect";
 import Image from "next/image";
+import { useCurrentApp } from "@/components/context/app.context";
+import { createOrderAPI, getVNPayUrlAPI } from "@/utils/api";
+import { v4 as uuidv4 } from "uuid";
 import { getImageUrl } from "@/utils/getImageUrl";
 
 const { TextArea } = Input;
 
-type UserMethod = "COD" | "BANKING";
+type UserMethod = "COD" | "VNPAY";
 
 type FieldType = {
   fullName: string;
   phoneNumber: string;
-  address: string;
-  method: UserMethod;
   shippingAddress: string;
+  method: UserMethod;
 };
 
 interface IProps {
   setCurrentStep: (v: number) => void;
 }
 
-const Payment = (props: IProps) => {
+const Payment = ({ setCurrentStep }: IProps) => {
   const { carts, setCarts, user } = useCurrentApp();
-  const [totalPrice, setTotalPrice] = useState(0);
   const [form] = Form.useForm();
+  const [totalPrice, setTotalPrice] = useState(0);
   const [isSubmit, setIsSubmit] = useState(false);
   const { message, notification } = App.useApp();
-  const { setCurrentStep } = props;
 
   useEffect(() => {
-    form.setFieldsValue({
-      method: "COD",
-    });
+    form.setFieldsValue({ method: "COD" });
   }, []);
 
   useEffect(() => {
-    if (carts && carts.length > 0) {
-      const sum = carts.reduce(
-        (acc, item) => acc + item.quantity * item.detail.price,
-        0
-      );
-      setTotalPrice(sum);
-    } else {
-      setTotalPrice(0);
-    }
+    const sum = carts.reduce(
+      (acc, item) => acc + item.quantity * item.detail.price,
+      0
+    );
+    setTotalPrice(sum);
   }, [carts]);
 
-  const handlePlaceOrder: FormProps<FieldType>["onFinish"] = async (values) => {
-    const { shippingAddress, fullName, method, phoneNumber } = values;
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
 
-    // map carts thành items đúng schema
+  /// Order logic
+  const handlePlaceOrder = async (values: FieldType) => {
+    const { fullName, phoneNumber, shippingAddress, method } = values;
+    const userId = user?._id ?? "";
+
     const items = carts.map((item) => ({
       productId: item._id,
       quantity: item.quantity,
@@ -61,45 +72,46 @@ const Payment = (props: IProps) => {
       name: item.detail.name,
     }));
 
-    console.log("USER INFO: ", user);
-
+    const paymentRef = uuidv4();
     setIsSubmit(true);
 
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/orders`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userId: user?._id,
-            items,
-            totalPrice: Math.round(totalPrice),
-            status: "PENDING",
-            method,
-            fullName: fullName,
-            shippingAddress: shippingAddress,
-            phoneNumber: phoneNumber,
-          }),
-        }
+      // 1. Tạo đơn hàng
+      const res = await createOrderAPI(
+        userId,
+        fullName,
+        shippingAddress,
+        phoneNumber,
+        totalPrice,
+        method,
+        items,
+        method === "VNPAY" ? paymentRef : undefined
       );
 
-      const data = await res.json();
+      if (!res?.data?._id) {
+        throw new Error(res?.message || "Không thể tạo đơn hàng");
+      }
 
-      if (res.ok && data) {
+      const orderId = res.data._id;
+
+      // 2. Nếu COD → hoàn tất
+      if (method === "COD") {
         localStorage.removeItem("carts");
         setCarts([]);
         message.success("Mua hàng thành công!");
         setCurrentStep(2);
-      } else {
-        notification.error({
-          message: "Có lỗi xảy ra",
-          description: Array.isArray(data?.message)
-            ? data.message[0]
-            : data.message,
-          duration: 5,
-        });
+        return;
       }
+
+      // 3. Nếu VNPAY → gọi API lấy URL thanh toán
+      const vnpUrl = await getVNPayUrlAPI(totalPrice, "vn", orderId);
+
+      if (!vnpUrl) {
+        throw new Error("Không thể tạo URL thanh toán");
+      }
+
+      // 4. Redirect sang VNPay
+      window.location.href = vnpUrl;
     } catch (error: any) {
       notification.error({
         message: "Có lỗi xảy ra",
@@ -113,15 +125,15 @@ const Payment = (props: IProps) => {
 
   return (
     <div style={{ background: "#efefef", padding: "50px 0" }}>
-      <div style={{ maxWidth: 1440, margin: "0 auto", overflow: "hidden" }}>
+      <div style={{ maxWidth: 1440, margin: "0 auto" }}>
         <Row gutter={[20, 20]}>
-          {/* Left: list products */}
+          {/* Left: Cart items */}
           <Col md={16} xs={24}>
-            {carts?.map((item, index) => {
-              const currentPrice = item?.detail?.price ?? 0;
+            {carts.map((item, index) => {
+              const price = item.detail.price;
               return (
                 <div
-                  key={`index-${index}`}
+                  key={index}
                   style={{
                     display: "flex",
                     gap: "30px",
@@ -129,110 +141,68 @@ const Payment = (props: IProps) => {
                     background: "white",
                     padding: "20px",
                     borderRadius: "5px",
-                    flexDirection: isMobile ? "column" : "row",
                     alignItems: "center",
                     justifyContent: "space-between",
                   }}
                 >
-                  {/* Product info */}
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "15px",
-                      flex: 1,
-                    }}
-                  >
+                  <div style={{ display: "flex", gap: "15px", flex: 1 }}>
                     <Image
-                      src={getImageUrl(item.detail?.thumbnail)}
+                      src={getImageUrl(item.detail.thumbnail)}
                       alt="thumbnail"
                       width={70}
                       height={70}
                     />
                     <div>
-                      <div style={{ fontWeight: 500 }}>
-                        {item?.detail?.name}
-                      </div>
+                      <div style={{ fontWeight: 500 }}>{item.detail.name}</div>
                       <div style={{ color: "#555" }}>
-                        {new Intl.NumberFormat("vi-VN", {
-                          style: "currency",
-                          currency: "VND",
-                        }).format(currentPrice)}
+                        {formatCurrency(price)}
                       </div>
                     </div>
                   </div>
-
-                  {/* Actions */}
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "15px",
-                    }}
-                  >
-                    <div>Số lượng: {item?.quantity}</div>
-                    <div>
-                      Tổng:{" "}
-                      {new Intl.NumberFormat("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                      }).format(currentPrice * (item?.quantity ?? 0))}
-                    </div>
+                  <div style={{ textAlign: "right" }}>
+                    <div>Số lượng: {item.quantity}</div>
+                    <div>Tổng: {formatCurrency(price * item.quantity)}</div>
                   </div>
                 </div>
               );
             })}
-
-            <div
-              title="tro lai"
-              style={{
-                cursor: "pointer",
-                textAlign: "center",
-                justifyContent: "center",
-              }}
-            >
+            <div style={{ textAlign: "center", cursor: "pointer" }}>
               <span onClick={() => setCurrentStep(0)}>
-                <a>
-                  <LeftCircleFilled style={{ fontSize: "25px" }} />
-                </a>
+                <LeftCircleFilled style={{ fontSize: "25px" }} />
               </span>
             </div>
           </Col>
 
-          {/* Right: form */}
+          {/* Right: Form */}
           <Col md={8} xs={24}>
             <Form
               form={form}
-              name="payment-form"
+              layout="vertical"
               onFinish={handlePlaceOrder}
               autoComplete="off"
-              layout="vertical"
             >
               <div
                 style={{
-                  display: "flex",
-                  flexDirection: "column",
                   backgroundColor: "white",
                   padding: "20px",
                   borderRadius: "5px",
+                  display: "flex",
+                  flexDirection: "column",
                   gap: "20px",
                 }}
               >
-                <Form.Item<FieldType>
-                  label="Hình thức thanh toán"
-                  name="method"
-                >
+                <Form.Item name="method" label="Hình thức thanh toán">
                   <Radio.Group>
                     <Space direction="vertical">
-                      <Radio value={"COD"}>Thanh toán khi nhận hàng</Radio>
-                      <Radio value={"BANKING"}>Chuyển khoản ngân hàng</Radio>
+                      <Radio value="COD">Thanh toán khi nhận hàng</Radio>
+                      <Radio value="VNPAY">Thanh toán ví VNPAY</Radio>
                     </Space>
                   </Radio.Group>
                 </Form.Item>
 
-                <Form.Item<FieldType>
-                  label="Họ tên"
+                <Form.Item
                   name="fullName"
+                  label="Họ tên"
                   rules={[
                     { required: true, message: "Họ tên không được để trống!" },
                   ]}
@@ -240,9 +210,9 @@ const Payment = (props: IProps) => {
                   <Input />
                 </Form.Item>
 
-                <Form.Item<FieldType>
-                  label="Số điện thoại"
+                <Form.Item
                   name="phoneNumber"
+                  label="Số điện thoại"
                   rules={[
                     {
                       required: true,
@@ -253,9 +223,9 @@ const Payment = (props: IProps) => {
                   <Input />
                 </Form.Item>
 
-                <Form.Item<FieldType>
-                  label="Địa chỉ nhận hàng"
+                <Form.Item
                   name="shippingAddress"
+                  label="Địa chỉ nhận hàng"
                   rules={[
                     { required: true, message: "Địa chỉ không được để trống!" },
                   ]}
@@ -267,14 +237,11 @@ const Payment = (props: IProps) => {
                   style={{ display: "flex", justifyContent: "space-between" }}
                 >
                   <span>Tạm tính</span>
-                  <span>
-                    {new Intl.NumberFormat("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    }).format(totalPrice || 0)}
-                  </span>
+                  <span>{formatCurrency(totalPrice)}</span>
                 </div>
-                <Divider style={{ margin: "10px 0" }} />
+
+                <Divider />
+
                 <div
                   style={{ display: "flex", justifyContent: "space-between" }}
                 >
@@ -286,22 +253,19 @@ const Payment = (props: IProps) => {
                       fontWeight: 500,
                     }}
                   >
-                    {new Intl.NumberFormat("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0,
-                    }).format(totalPrice || 0)}
+                    {formatCurrency(totalPrice)}
                   </span>
                 </div>
-                <Divider style={{ margin: "10px 0" }} />
+
+                <Divider />
+
                 <Button
                   type="primary"
                   danger
                   htmlType="submit"
                   loading={isSubmit}
                 >
-                  Đặt Hàng ({carts?.length ?? 0})
+                  Đặt Hàng ({carts.length})
                 </Button>
               </div>
             </Form>

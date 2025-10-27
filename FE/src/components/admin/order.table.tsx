@@ -1,17 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import {
-  Table,
-  Button,
-  Popconfirm,
-  Input,
-  Space,
-  Spin,
-  App,
-  Tag,
-  DatePicker,
-} from "antd";
+import { Table, Button, Popconfirm, Space, Spin, App, DatePicker } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { PlusOutlined, ReloadOutlined } from "@ant-design/icons";
 import { deleteOrderAction } from "@/lib/user.actions";
@@ -24,11 +14,13 @@ const OrderTable = () => {
   const [loading, setLoading] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [dataUpdate, setDataUpdate] = useState<null | IOrder>(null);
-  const access_token = localStorage.getItem("access_token") as string;
+  const access_token =
+    typeof window !== "undefined"
+      ? (localStorage.getItem("access_token") as string)
+      : "";
   const [orderData, setOrderData] = useState<IOrder | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const { RangePicker } = DatePicker;
-
   const { notification } = App.useApp();
 
   const [meta, setMeta] = useState({
@@ -39,11 +31,18 @@ const OrderTable = () => {
   });
 
   useEffect(() => {
+    let mounted = true;
     getData();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const getData = async (page = meta.current, pageSize = meta.pageSize) => {
     setLoading(true);
+    let mounted = true;
+
     try {
       const res = await fetch(
         `http://localhost:8000/api/v1/orders?current=${page}&pageSize=${pageSize}`,
@@ -58,12 +57,19 @@ const OrderTable = () => {
       const d = await res.json();
       if (!d.data) {
         notification.error({ message: JSON.stringify(d.message) });
-      } else {
-        setListOrder(d.data.result);
+      } else if (mounted) {
+        // sắp xếp theo ngày tạo mới nhất
+        const sorted = d.data.result.sort(
+          (a: IOrder, b: IOrder) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        setListOrder(sorted);
         setMeta(d.data.meta);
       }
+    } catch (err) {
+      console.error(err);
     } finally {
-      setLoading(false);
+      if (mounted) setLoading(false);
     }
   };
 
@@ -76,10 +82,10 @@ const OrderTable = () => {
     getData(page, pageSize || meta.pageSize);
   };
 
-  const handleDeleteUser = async (user: any) => {
+  const handleDeleteOrder = async (order: IOrder) => {
     setLoading(true);
     try {
-      const d = await deleteOrderAction(user, access_token);
+      const d = await deleteOrderAction(order, access_token);
       if (d.data) {
         notification.success({ message: "Xóa Order thành công." });
         getData();
@@ -99,117 +105,18 @@ const OrderTable = () => {
         index + 1 + (meta.current - 1) * meta.pageSize,
     },
     {
-      title: "Thời gian",
+      title: "Thời gian tạo",
       dataIndex: "createdAt",
       align: "center",
-      filterDropdown: ({
-        setSelectedKeys,
-        selectedKeys,
-        confirm,
-        clearFilters,
-      }) => {
-        const raw = (selectedKeys[0] as string) || "";
-        const [start, end] = raw.split("|");
-
-        return (
-          <div style={{ padding: 8 }}>
-            <RangePicker
-              value={start && end ? [dayjs(start), dayjs(end)] : null}
-              onChange={(dates) => {
-                if (dates) {
-                  setSelectedKeys([
-                    `${dates[0]?.startOf("day").toISOString()}|${dates[1]
-                      ?.endOf("day")
-                      .toISOString()}`,
-                  ]);
-                } else {
-                  setSelectedKeys([]);
-                }
-              }}
-            />
-            <div style={{ marginTop: 8 }}>
-              <Button type="primary" onClick={() => confirm()} size="small">
-                Lọc
-              </Button>
-              <Button onClick={() => clearFilters?.()} size="small">
-                Reset
-              </Button>
-            </div>
-          </div>
-        );
-      },
-      onFilter: (value, record) => {
-        const [start, end] = (value as string).split("|");
-        const created = dayjs(record.createdAt);
-        if (start && created.isBefore(dayjs(start))) return false;
-        if (end && created.isAfter(dayjs(end))) return false;
-        return true;
-      },
       sorter: (a, b) => dayjs(a.createdAt).unix() - dayjs(b.createdAt).unix(),
-      render: (value: string | null) => {
-        if (!value) return "---";
-        return dayjs(value).format("DD/MM/YYYY");
-      },
+      defaultSortOrder: "descend", // ✅ mới nhất lên đầu
+      render: (value: string | null) =>
+        value ? dayjs(value).format("DD/MM/YYYY HH:mm") : "---",
     },
     {
       title: "Tổng số tiền",
       dataIndex: "totalPrice",
       align: "center",
-      filterDropdown: ({
-        setSelectedKeys,
-        selectedKeys,
-        confirm,
-        clearFilters,
-      }) => {
-        const raw = (selectedKeys[0] as string) || "";
-        const [min, max] = raw
-          .split("-")
-          .map((v) => (v ? Number(v) : undefined));
-
-        return (
-          <div style={{ padding: 8 }}>
-            <Space>
-              <Input
-                placeholder="Min"
-                type="number"
-                value={min}
-                onChange={(e) => {
-                  const newMin = e.target.value || "";
-                  setSelectedKeys([`${newMin}-${max || ""}`]);
-                }}
-                style={{ width: 80 }}
-              />
-              <Input
-                placeholder="Max"
-                type="number"
-                value={max}
-                onChange={(e) => {
-                  const newMax = e.target.value || "";
-                  setSelectedKeys([`${min || ""}-${newMax}`]);
-                }}
-                style={{ width: 80 }}
-              />
-            </Space>
-            <Space style={{ marginTop: 8 }}>
-              <Button type="primary" onClick={() => confirm()} size="small">
-                Tìm
-              </Button>
-              <Button onClick={() => clearFilters?.()} size="small">
-                Reset
-              </Button>
-            </Space>
-          </div>
-        );
-      },
-      onFilter: (value, record) => {
-        const [min, max] = (value as string)
-          .split("-")
-          .map((v) => (v ? Number(v) : undefined));
-
-        if (min !== undefined && record.totalPrice < min) return false;
-        if (max !== undefined && record.totalPrice > max) return false;
-        return true;
-      },
       sorter: (a, b) => a.totalPrice - b.totalPrice,
       render: (value: number) =>
         new Intl.NumberFormat("vi-VN", {
@@ -219,48 +126,42 @@ const OrderTable = () => {
           maximumFractionDigits: 0,
         }).format(Math.round(value)),
     },
-
     {
-      title: "Trạng Thái",
+      title: "Phương thức thanh toán",
+      dataIndex: "paymentMethod",
+      align: "center",
+      render: (method: string) => {
+        switch (method) {
+          case "COD":
+            return <span style={{ color: "#fa541c" }}>COD</span>;
+          case "VNPAY":
+            return <span style={{ color: "#1890ff" }}>VNPay</span>;
+          case "MOMO":
+            return <span style={{ color: "#eb2f96" }}>Momo</span>;
+          default:
+            return <span style={{ color: "#595959" }}>{method || "N/A"}</span>;
+        }
+      },
+    },
+    {
+      title: "Trạng thái",
       dataIndex: "status",
       align: "center",
-      filters: [
-        { text: "Pending", value: "PENDING" },
-        { text: "Paid", value: "PAID" },
-        { text: "Cancelled", value: "CANCELLED" },
-      ],
-      onFilter: (value, record) => record.status === value,
       render: (status: string) => {
         let style: React.CSSProperties = {};
 
         switch (status) {
           case "PENDING":
-            style = {
-              backgroundColor: "#FFF8E1",
-              color: "#B58B00",
-              border: "1px solid #FFEB3B",
-            };
+            style = { backgroundColor: "#FFF8E1", color: "#B58B00" };
             break;
           case "PAID":
-            style = {
-              backgroundColor: "#E8F5E9",
-              color: "#2E7D32",
-              border: "1px solid #66BB6A",
-            };
+            style = { backgroundColor: "#E8F5E9", color: "#2E7D32" };
             break;
           case "CANCELLED":
-            style = {
-              backgroundColor: "#FFEBEE",
-              color: "#C62828",
-              border: "1px solid #EF5350",
-            };
+            style = { backgroundColor: "#FFEBEE", color: "#C62828" };
             break;
           default:
-            style = {
-              backgroundColor: "#ECEFF1",
-              color: "#546E7A",
-              border: "1px solid #CFD8DC",
-            };
+            style = { backgroundColor: "#ECEFF1", color: "#546E7A" };
             break;
         }
 
@@ -282,7 +183,7 @@ const OrderTable = () => {
       },
     },
     {
-      title: "Actions",
+      title: "Hành động",
       align: "center",
       render: (_, record) => (
         <Space>
@@ -293,15 +194,15 @@ const OrderTable = () => {
               setIsViewModalOpen(true);
             }}
           >
-            View
+            Xem
           </Button>
           <Popconfirm
-            title="Delete the order"
-            onConfirm={() => handleDeleteUser(record)}
+            title="Xóa đơn hàng này?"
+            onConfirm={() => handleDeleteOrder(record)}
             okText="Yes"
             cancelText="No"
           >
-            <Button danger>Delete</Button>
+            <Button danger>Xóa</Button>
           </Popconfirm>
         </Space>
       ),
@@ -318,21 +219,23 @@ const OrderTable = () => {
           marginBottom: 16,
         }}
       >
-        <h2>Table Order</h2>
-        <Button
-          type="text"
-          icon={<ReloadOutlined style={{ color: "green" }} />}
-          onClick={() => window.location.reload()}
-        >
-          Refresh
-        </Button>
-        <Button
-          icon={<PlusOutlined />}
-          type="primary"
-          onClick={() => setIsCreateModalOpen(true)}
-        >
-          Add new
-        </Button>
+        <h2>Danh sách đơn hàng</h2>
+        <Space>
+          <Button
+            type="text"
+            icon={<ReloadOutlined style={{ color: "green" }} />}
+            onClick={() => getData()}
+          >
+            Refresh
+          </Button>
+          <Button
+            icon={<PlusOutlined />}
+            type="primary"
+            onClick={() => setIsCreateModalOpen(true)}
+          >
+            Add new
+          </Button>
+        </Space>
       </div>
       <Table
         columns={columns}
@@ -343,7 +246,7 @@ const OrderTable = () => {
           pageSize: meta.pageSize,
           total: meta.total,
           showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} items`,
+            `${range[0]}-${range[1]} / ${total} items`,
           onChange: handleOnChange,
           showSizeChanger: true,
         }}

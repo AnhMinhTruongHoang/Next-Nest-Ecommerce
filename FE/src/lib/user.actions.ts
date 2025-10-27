@@ -37,8 +37,11 @@ export const deleteUserAction = async (user: IUser, access_token: string) => {
   return d;
 };
 /// Delete user
-export const deleteOrderAction = async (user: IUser, access_token: string) => {
-  const res = await fetch(`http://localhost:8000/api/v1/orders/${user._id}`, {
+export const deleteOrderAction = async (
+  order: IOrder,
+  access_token: string
+) => {
+  const res = await fetch(`http://localhost:8000/api/v1/orders/${order._id}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${access_token}`,
@@ -48,6 +51,6 @@ export const deleteOrderAction = async (user: IUser, access_token: string) => {
 
   const d = await res.json();
 
-  revalidateTag("listUsers");
+  revalidateTag("listOrders");
   return d;
 };
