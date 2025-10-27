@@ -34,6 +34,13 @@ export class OrdersController {
     return this.ordersService.findAll(+currentPage, +limit, qs);
   }
 
+  @Get('confirm-payment')
+  @Public()
+  @ResponseMessage('Confirm VNPay payment')
+  confirmPayment(@Query() query: any) {
+    return this.ordersService.confirmVNPayPayment(query);
+  }
+
   @Get(':id')
   @ResponseMessage('Fetch order detail')
   findOne(@Param('id') id: string) {

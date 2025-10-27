@@ -44,7 +44,10 @@ export class Order {
   @Prop()
   phoneNumber: string;
 
-  @Prop({ enum: ['COD', 'BANK', 'MOMO'], default: 'COD' })
+  @Prop({ unique: true, index: true })
+  paymentRef?: string;
+
+  @Prop({ enum: ['COD', 'BANK', 'MOMO', 'VNPAY'], default: 'COD' })
   paymentMethod: string;
 
   @Prop({ enum: ['UNPAID', 'PAID', 'REFUNDED'], default: 'UNPAID' })

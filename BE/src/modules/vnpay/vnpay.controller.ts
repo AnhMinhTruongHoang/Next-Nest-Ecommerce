@@ -52,14 +52,18 @@ export class VnpayController {
   @Get('return-url')
   async vnpayReturn(@Req() req: Request) {
     const result = this.vnpayService.verifyReturn(req.query);
+    console.log('VNPay Return:', result);
 
     const orderId = result.data?.vnp_TxnRef;
+    console.log('OrderID (vnp_TxnRef):', orderId);
 
     if (result.isValid && result.data.vnp_ResponseCode === '00') {
-      await this.orderService.updateStatus(orderId, 'PAID');
+      const updated = await this.orderService.updateStatus(orderId, 'PAID');
+      console.log('Update success:', updated);
       return { message: 'Thanh toán thành công', orderId };
     } else {
-      await this.orderService.updateStatus(orderId, 'FAILED');
+      const updated = await this.orderService.updateStatus(orderId, 'FAILED');
+      console.log('Update failed:', updated);
       return { message: 'Thanh toán thất bại hoặc sai chữ ký', orderId };
     }
   }

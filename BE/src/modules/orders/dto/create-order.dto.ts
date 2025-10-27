@@ -47,18 +47,30 @@ export class CreateOrderDto {
 
   @IsNotEmpty()
   @IsString()
-  fullName?: string;
+  fullName: string;
 
   @IsNotEmpty()
   @IsString()
-  shippingAddress?: string;
+  shippingAddress: string;
 
   @IsNotEmpty()
-  phoneNumber?: string;
+  @IsString()
+  phoneNumber: string;
 
-  @IsEnum(['COD', 'BANK', 'MOMO'])
   @IsOptional()
-  paymentMethod?: 'COD' | 'BANK' | 'MOMO';
+  @IsString()
+  email?: string;
+
+  @IsOptional()
+  @IsString()
+  note?: string;
+
+  @IsOptional()
+  paymentRef?: string;
+
+  @IsEnum(['COD', 'BANK', 'MOMO', 'VNPAY'])
+  @IsOptional()
+  paymentMethod?: 'COD' | 'BANK' | 'MOMO' | 'VNPAY';
 
   @IsEnum(['UNPAID', 'PAID', 'REFUNDED'])
   @IsOptional()

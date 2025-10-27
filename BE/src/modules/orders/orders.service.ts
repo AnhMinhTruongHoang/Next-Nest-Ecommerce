@@ -15,7 +15,6 @@ export class OrdersService {
 
   // CREATE
   async create(data: CreateOrderDto) {
-    // Destructure từ data
     const {
       userId,
       fullName,
@@ -25,6 +24,7 @@ export class OrdersService {
       status,
       paymentMethod,
       paymentStatus,
+      paymentRef, // ✅ thêm dòng này
     } = data;
 
     const formattedItems = items.map((item) => ({
@@ -47,6 +47,7 @@ export class OrdersService {
       status: status ?? 'PENDING',
       paymentMethod: paymentMethod ?? 'COD',
       paymentStatus: paymentStatus ?? 'UNPAID',
+      paymentRef,
     });
 
     return created.save();
@@ -140,10 +141,10 @@ export class OrdersService {
   }
 
   // UPDATE STATUS
-  async updateStatus(orderId: string, status: 'PAID' | 'FAILED') {
+  async updateStatus(paymentRef: string, status: 'PAID' | 'FAILED') {
     const updated = await this.orderModel
-      .findByIdAndUpdate(
-        orderId,
+      .findOneAndUpdate(
+        { paymentRef },
         {
           status,
           paymentStatus: status === 'PAID' ? 'PAID' : 'UNPAID',
@@ -152,7 +153,19 @@ export class OrdersService {
       )
       .exec();
 
-    if (!updated) throw new NotFoundException(`Order ${orderId} not found`);
+    if (!updated)
+      throw new NotFoundException(
+        `Order with paymentRef ${paymentRef} not found`,
+      );
     return updated;
+  }
+
+  ///
+
+  async confirmVNPayPayment(query: any) {
+    const { vnp_SecureHash, vnp_TxnRef, vnp_ResponseCode } = query;
+
+    const status = vnp_ResponseCode === '00' ? 'PAID' : 'FAILED';
+    return this.updateStatus(vnp_TxnRef, status);
   }
 }
