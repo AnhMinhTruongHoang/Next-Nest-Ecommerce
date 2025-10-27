@@ -1,3 +1,4 @@
+import axios from "axios";
 import queryString from "query-string";
 import slugify from "slugify";
 
@@ -161,4 +162,17 @@ export async function createOrderAPI(
   }
 
   return await response.json();
+}
+
+export async function updatePaymentOrderAPI(
+  paymentStatus: string,
+  paymentRef: string
+) {
+  const url = `http://localhost:8000/api/v1/orders/confirm-payment?vnp_TxnRef=${paymentRef}&vnp_ResponseCode=${
+    paymentStatus === "PAYMENT_SUCCEED" ? "00" : "99"
+  }`;
+
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Không thể cập nhật trạng thái thanh toán");
+  return await res.json();
 }

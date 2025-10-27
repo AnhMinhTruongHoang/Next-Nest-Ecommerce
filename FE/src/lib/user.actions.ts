@@ -36,7 +36,7 @@ export const deleteUserAction = async (user: IUser, access_token: string) => {
   revalidateTag("listUsers");
   return d;
 };
-/// Delete user
+/// Delete order
 export const deleteOrderAction = async (
   order: IOrder,
   access_token: string

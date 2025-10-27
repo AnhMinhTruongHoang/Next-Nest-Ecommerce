@@ -72,8 +72,8 @@ const Payment = ({ setCurrentStep }: IProps) => {
       name: item.detail.name,
     }));
 
-    const paymentRef = uuidv4();
     setIsSubmit(true);
+    const paymentRef = uuidv4();
 
     try {
       // 1. Tạo đơn hàng
@@ -104,7 +104,7 @@ const Payment = ({ setCurrentStep }: IProps) => {
       }
 
       // 3. Nếu VNPAY → gọi API lấy URL thanh toán
-      const vnpUrl = await getVNPayUrlAPI(totalPrice, "vn", orderId);
+      const vnpUrl = await getVNPayUrlAPI(totalPrice, "vn", paymentRef);
 
       if (!vnpUrl) {
         throw new Error("Không thể tạo URL thanh toán");

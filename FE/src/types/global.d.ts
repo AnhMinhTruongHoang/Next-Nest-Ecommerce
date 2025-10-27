@@ -17,6 +17,27 @@ declare global {
     name: string;
   }
 
+  interface IHistory {
+    _id: string;
+    name: string;
+    type: string;
+    email: string;
+    phone: string;
+    userId: string;
+    detail: {
+      bookName: string;
+      quantity: number;
+      _id: string;
+    }[];
+    totalPrice: number;
+    createdAt: Date;
+    updatedAt: Date;
+    paymentStatus: string;
+    paymentRef: string;
+  }
+
+  interface IOrderTable extends IHistory {}
+
   interface IUser {
     _id: string;
     email: string;
@@ -82,6 +103,7 @@ declare global {
     totalPrice: number;
     createdAt: string;
     updatedAt: string;
+    paymentRef: string;
   }
 
   interface ICart {

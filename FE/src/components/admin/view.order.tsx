@@ -4,14 +4,13 @@ import React, { useEffect, useState } from "react";
 import {
   Modal,
   Descriptions,
-  Image,
-  UploadProps,
-  GetProp,
-  UploadFile,
   Divider,
   Table,
+  Select,
+  Button,
+  App,
+  Space,
 } from "antd";
-import { v4 as uuidv4 } from "uuid";
 import dayjs from "dayjs";
 
 interface ViewOrderModalProps {
@@ -19,52 +18,64 @@ interface ViewOrderModalProps {
   isViewModalOpen: boolean;
   setOrderData: any;
   setIsViewModalOpen: (open: boolean) => void;
+  accessToken?: string;
 }
-
-type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
 const ViewOrderModal: React.FC<ViewOrderModalProps> = ({
   orderData,
   setOrderData,
   isViewModalOpen,
   setIsViewModalOpen,
+  accessToken,
 }) => {
-  const getBase64 = (file: FileType): Promise<string> =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
-    });
-
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewImage, setPreviewImage] = useState("");
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const { message, notification } = App.useApp();
+  const [status, setStatus] = useState<string>("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (orderData) {
-      const imgs: UploadFile[] = [];
-      if (orderData.thumbnail) {
-        imgs.push({
-          uid: uuidv4(),
-          name: "thumbnail",
-          status: "done",
-        });
-      }
-      setFileList(imgs);
+      setStatus(orderData.status);
     }
   }, [orderData]);
 
-  const handleChange: UploadProps["onChange"] = ({ fileList: newFileList }) =>
-    setFileList(newFileList);
+  const handleUpdateStatus = async () => {
+    if (!orderData?._id) return;
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `http://localhost:8000/api/v1/orders/${orderData._id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+          },
+          body: JSON.stringify({ status }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.message || "Update failed");
+
+      message.success("Cập nhật trạng thái đơn hàng thành công!");
+      setOrderData(data.data ?? data);
+    } catch (err: any) {
+      notification.error({
+        message: "Cập nhật thất bại",
+        description: err.message,
+      });
+    } finally {
+      setLoading(false);
+      window.location.reload();
+    }
+  };
 
   return (
     <Modal
       open={isViewModalOpen}
       onCancel={() => setIsViewModalOpen(false)}
       footer={null}
-      width={800}
-      title={<div style={{ textAlign: "center" }}>Order Details</div>}
+      width={850}
+      title={<div style={{ textAlign: "center" }}>Chi tiết đơn hàng</div>}
     >
       {orderData && (
         <>
@@ -85,14 +96,37 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({
             <Descriptions.Item label="Address">
               {orderData.shippingAddress}
             </Descriptions.Item>
+
             <Descriptions.Item label="Status">
-              {orderData.status.toUpperCase()}
+              <Space>
+                <Select
+                  value={status}
+                  style={{ width: 180 }}
+                  onChange={setStatus}
+                  options={[
+                    { value: "PENDING", label: "⏳ PENDING" },
+                    { value: "PAID", label: "💰 PAID" },
+                    { value: "SHIPPED", label: "🚚 SHIPPED" },
+                    { value: "COMPLETED", label: "✅ COMPLETED" },
+                    { value: "CANCELED", label: "❌ CANCELED" },
+                  ]}
+                />
+                <Button
+                  type="primary"
+                  loading={loading}
+                  onClick={handleUpdateStatus}
+                >
+                  Cập nhật
+                </Button>
+              </Space>
             </Descriptions.Item>
 
+            <Descriptions.Item label="Payment Ref">
+              {orderData.paymentRef}
+            </Descriptions.Item>
             <Descriptions.Item label="Payment Method">
               {orderData.paymentMethod || "N/A"}
             </Descriptions.Item>
-
             <Descriptions.Item label="Total Price">
               {orderData.totalPrice.toLocaleString("vi-VN")} ₫
             </Descriptions.Item>
@@ -104,7 +138,7 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({
             </Descriptions.Item>
           </Descriptions>
 
-          <Divider>Order Items</Divider>
+          <Divider>Danh sách sản phẩm</Divider>
           <Table
             dataSource={orderData.items}
             rowKey={(item) => item.productId}
@@ -112,7 +146,7 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({
             size="small"
             columns={[
               {
-                title: "Product ID",
+                title: "Sản phẩm",
                 dataIndex: "productId",
                 render: (productId: any) => (
                   <a
@@ -121,18 +155,17 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({
                     rel="noopener noreferrer"
                     style={{ color: "#1677ff" }}
                   >
-                    {productId?._id || productId}
+                    {productId?.name || productId?._id || productId}
                   </a>
                 ),
               },
-
               {
-                title: "Quantity",
+                title: "Số lượng",
                 dataIndex: "quantity",
                 align: "center",
               },
               {
-                title: "Price",
+                title: "Đơn giá",
                 dataIndex: "price",
                 align: "right",
                 render: (val: number) =>
@@ -143,7 +176,7 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({
                   }),
               },
               {
-                title: "Subtotal",
+                title: "Thành tiền",
                 align: "right",
                 render: (_, record) =>
                   (record.price * record.quantity).toLocaleString("vi-VN", {
