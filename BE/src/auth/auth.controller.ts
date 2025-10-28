@@ -111,4 +111,23 @@ export class AuthController {
   changePassword(@Body() data: ChangePasswordDto) {
     return this.authService.changePassword(data);
   }
+
+  @Public()
+  @ResponseMessage('Sync OAuth user')
+  @Post('/sync')
+  async syncOAuthUser(
+    @Body() body: { email: string; name: string; provider?: string },
+  ) {
+    return this.authService.syncOAuthUser(body.email, body.name, body.provider);
+  }
+
+  @Public()
+  @Post('social-media')
+  @ResponseMessage('Login/Sync user from social provider')
+  async socialMedia(
+    @Body() body: { type?: string; email?: string; name?: string },
+  ) {
+    const { email, name, type } = body;
+    return this.authService.syncOAuthUser(email, name, type);
+  }
 }

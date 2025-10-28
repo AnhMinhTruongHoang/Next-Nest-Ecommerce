@@ -325,4 +325,33 @@ export class UsersService {
       .findOne({ refreshToken })
       .populate({ path: 'role', select: { name: 1 } });
   }
+
+  // create user from OAuth provider (active ngay, không gửi email verify)
+  async createOAuthUser(data: {
+    email: string;
+    name?: string;
+    provider?: string;
+  }) {
+    const { email, name, provider } = data;
+    if (!email) throw new BadRequestException('Email is required');
+
+    // Nếu đã tồn tại thì trả về luôn
+    const exist = await this.userModel.findOne({ email });
+    if (exist) return exist;
+
+    // tạo password giả (vì cần field password), hash nó
+    const randomPassword = Math.random().toString(36).slice(-8);
+    const hashPassword = this.getHashPassword(randomPassword);
+
+    const newUser = await this.userModel.create({
+      name: name ?? email.split('@')[0],
+      email,
+      password: hashPassword,
+      role: 'USER',
+      accountType: provider ? provider.toUpperCase() : 'OAUTH',
+      isActive: true, // active ngay cho social login
+    });
+
+    return newUser;
+  }
 }

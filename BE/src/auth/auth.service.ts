@@ -178,4 +178,50 @@ export class AuthService {
     response.clearCookie('refresh_token');
     return 'ok';
   };
+
+  // ================================
+  // SYNC USER FROM OAUTH (Google / GitHub)
+  // ================================
+  async syncOAuthUser(email: string, name: string, provider?: string) {
+    // Kiểm tra có user chưa
+    let user = await this.usersService.findOneByUsername(email);
+
+    // Nếu chưa có thì tạo mới
+    if (!user) {
+      user = await this.usersService.register({
+        email,
+        name,
+        password: Math.random().toString(36).slice(-8),
+      });
+    }
+
+    // Tạo JWT
+    const payload = {
+      sub: 'oauth login',
+      iss: 'from server',
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    };
+
+    const access_token = this.jwtService.sign(payload);
+    const refresh_token = this.createRefreshToken(payload);
+
+    // Lưu refresh token vào DB
+    await this.usersService.updateUserToken(refresh_token, user._id.toString());
+
+    // FIX: return phẳng, không lồng data.data
+    return {
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        provider,
+      },
+      access_token,
+      refresh_token,
+    };
+  }
 }

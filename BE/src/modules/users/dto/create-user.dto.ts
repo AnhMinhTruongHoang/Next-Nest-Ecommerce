@@ -64,17 +64,22 @@ export class CreateUserDto {
 ///////////// register valid
 
 export class RegisterUserDto {
-  @IsNotEmpty({ message: "Name mustn't empty" })
-  name?: string;
+  @IsOptional()
+  @IsString()
+  username?: string;
 
-  @IsNotEmpty({
-    message: "Email can't be empty",
-  })
+  @IsNotEmpty({ message: "Name mustn't be empty" })
+  @IsString()
+  name: string;
+
+  @IsNotEmpty({ message: "Email can't be empty" })
   @IsEmail()
   email: string;
 
-  @IsNotEmpty({ message: 'password should not be empty' })
-  password: string;
+  // Cho phép rỗng nếu đăng nhập bằng OAuth
+  @IsOptional()
+  @IsString()
+  password?: string;
 
   @IsOptional()
   @Type(() => Number)
@@ -84,13 +89,21 @@ export class RegisterUserDto {
   age?: number;
 
   @IsOptional()
+  @IsString()
   gender?: string;
 
   @IsOptional()
+  @IsString()
   address?: string;
 
   @IsOptional()
-  phone?: number;
+  @IsString()
+  phone?: string;
+
+  // Thêm provider để lưu lại nguồn đăng nhập (VD: google, github)
+  @IsOptional()
+  @IsString()
+  provider?: string;
 }
 
 //create-user.dto
