@@ -24,7 +24,7 @@ export class OrdersService {
       status,
       paymentMethod,
       paymentStatus,
-      paymentRef, // ✅ thêm dòng này
+      paymentRef,
     } = data;
 
     const formattedItems = items.map((item) => ({
@@ -37,8 +37,7 @@ export class OrdersService {
       0,
     );
 
-    const created = new this.orderModel({
-      userId: new Types.ObjectId(userId),
+    const orderData: any = {
       fullName,
       items: formattedItems,
       totalPrice,
@@ -48,8 +47,14 @@ export class OrdersService {
       paymentMethod: paymentMethod ?? 'COD',
       paymentStatus: paymentStatus ?? 'UNPAID',
       paymentRef,
-    });
+    };
 
+    // chỉ gán userId nếu hợp lệ (đã login)
+    if (userId && Types.ObjectId.isValid(userId)) {
+      orderData.userId = new Types.ObjectId(userId);
+    }
+
+    const created = new this.orderModel(orderData);
     return created.save();
   }
 
@@ -83,6 +88,23 @@ export class OrdersService {
       },
       result,
     };
+  }
+
+  async findOrderByUserId(userId: string) {
+    const orders = await this.orderModel
+      .find({ userId: new Types.ObjectId(userId), isDeleted: false })
+      .populate({
+        path: 'items.productId',
+        select: '_id name price thumbnail',
+      })
+      .sort({ createdAt: -1 })
+      .exec();
+
+    if (!orders || orders.length === 0) {
+      throw new NotFoundException(`No orders found for user ${userId}`);
+    }
+
+    return orders;
   }
 
   // FIND ONE

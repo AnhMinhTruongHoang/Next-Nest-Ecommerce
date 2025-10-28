@@ -34,6 +34,12 @@ export class OrdersController {
     return this.ordersService.findAll(+currentPage, +limit, qs);
   }
 
+  @Get('user/:userId')
+  @ResponseMessage('Fetch orders by userId')
+  findOrderByUserId(@Param('userId') userId: string) {
+    return this.ordersService.findOrderByUserId(userId);
+  }
+
   @Get('confirm-payment')
   @Public()
   @ResponseMessage('Confirm VNPay payment')

@@ -29,7 +29,7 @@ class OrderItemDto {
 
 export class CreateOrderDto {
   @IsOptional()
-  @IsMongoId()
+  @IsString()
   userId?: string;
 
   @IsArray()
