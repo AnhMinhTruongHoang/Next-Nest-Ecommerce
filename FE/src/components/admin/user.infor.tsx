@@ -25,7 +25,6 @@ const UserInfoModal: React.FC<IUserInfoModalProps> = ({
   const [form] = Form.useForm();
   const { user, setUser } = useCurrentApp();
   const [isSubmit, setIsSubmit] = useState(false);
-  const token = localStorage.getItem("access_token");
   const { message, notification } = App.useApp();
 
   useEffect(() => {
@@ -41,41 +40,67 @@ const UserInfoModal: React.FC<IUserInfoModalProps> = ({
   }, [openManageAccount, user, form]);
 
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
-    const { name, phone, _id } = values;
+    const { name, phone, address, _id } = values;
     setIsSubmit(true);
 
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/users/${_id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token?.startsWith("Bearer ")
-            ? token
-            : `Bearer ${token}`,
-        },
-        body: JSON.stringify({ name, phone }),
-      });
+      let token = localStorage.getItem("access_token");
+
+      if (!token && user?.email) {
+        const synced = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/sync`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: user.email,
+              name: user.name,
+              provider: "OAUTH",
+            }),
+          }
+        ).then((r) => r.json());
+        token = synced?.access_token || null;
+        if (token) localStorage.setItem("access_token", token);
+      }
+
+      if (!token) {
+        notification.error({
+          message: "Không có quyền cập nhật",
+          description: "Vui lòng đăng nhập lại để lấy quyền (token).",
+        });
+        setIsSubmit(false);
+        return;
+      }
+
+      const bearer = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/users/${_id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: bearer,
+          },
+          body: JSON.stringify({ name, phone, address }),
+        }
+      );
 
       const data = await res.json();
-
       if (res.ok && data?.data) {
-        setUser({
-          ...user!,
-          name,
-          phone,
-        });
-        message.success("Cập nhật thông tin user thành công");
+        setUser({ ...user!, name, phone, address });
+        message.success("🎉 Cập nhật thông tin thành công!");
         setOpenManageAccount(false);
+        form.resetFields();
       } else {
         notification.error({
           message: "Cập nhật thất bại!",
-          description: data?.message || "Lỗi không xác định",
+          description: data?.message || "Server trả về lỗi không xác định.",
         });
       }
     } catch (err: any) {
       notification.error({
         message: "Lỗi kết nối server!",
-        description: err?.message || "Không thể kết nối API",
+        description: err?.message || "Không thể kết nối API.",
       });
     } finally {
       setIsSubmit(false);
@@ -90,75 +115,139 @@ const UserInfoModal: React.FC<IUserInfoModalProps> = ({
         form.resetFields();
       }}
       footer={null}
-    >
-      <div className="p-4">
-        <Form
-          form={form}
-          name="user-info"
-          onFinish={onFinish}
-          autoComplete="off"
-          layout="vertical"
-          className="space-y-4"
+      centered
+      width={450}
+      style={{
+        borderRadius: 12,
+        overflow: "hidden",
+      }}
+      title={
+        <h2
+          style={{
+            textAlign: "center",
+            fontWeight: 700,
+            fontSize: 20,
+            color: "#222",
+            margin: 0,
+            paddingBottom: 8,
+          }}
         >
-          <Form.Item<FieldType> name="_id" hidden>
-            <Input hidden />
-          </Form.Item>
-          <h2 style={{ textAlign: "center" }}>Cập nhật thông tin</h2>
+          👤 Cập nhật thông tin
+        </h2>
+      }
+    >
+      <Form
+        form={form}
+        name="user-info"
+        onFinish={onFinish}
+        autoComplete="off"
+        layout="vertical"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 16,
+        }}
+      >
+        <Form.Item<FieldType> name="_id" hidden>
+          <Input hidden />
+        </Form.Item>
 
-          <Form.Item<FieldType>
-            label={<span className="font-medium text-gray-700">Email</span>}
-            name="email"
-            rules={[{ required: true, message: "Email không được để trống!" }]}
-          >
-            <Input
-              disabled
-              className="rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500"
-            />
-          </Form.Item>
+        {/* Email */}
+        <Form.Item<FieldType>
+          label={<span style={{ fontWeight: 600, color: "#333" }}>Email</span>}
+          name="email"
+          rules={[{ required: true, message: "Email không được để trống!" }]}
+        >
+          <Input
+            disabled
+            style={{
+              background: "#f5f5f5",
+              borderRadius: 8,
+              height: 40,
+              borderColor: "#d9d9d9",
+            }}
+          />
+        </Form.Item>
 
-          <Form.Item<FieldType>
-            label={
-              <span className="font-medium text-gray-700">Tên hiển thị</span>
-            }
-            name="name"
-            rules={[
-              { required: true, message: "Tên hiển thị không được để trống!" },
-            ]}
-          >
-            <Input className="rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500" />
-          </Form.Item>
+        {/* Tên hiển thị */}
+        <Form.Item<FieldType>
+          label={
+            <span style={{ fontWeight: 600, color: "#333" }}>Tên hiển thị</span>
+          }
+          name="name"
+          rules={[
+            { required: true, message: "Tên hiển thị không được để trống!" },
+          ]}
+        >
+          <Input
+            placeholder="Nhập tên hiển thị..."
+            style={{
+              borderRadius: 8,
+              height: 40,
+              borderColor: "#d9d9d9",
+            }}
+          />
+        </Form.Item>
 
-          <Form.Item<FieldType>
-            label="Số điện thoại"
-            name="phone"
-            rules={[
-              { required: true, message: "Số điện thoại không được để trống!" },
-            ]}
-          >
-            <InputNumber style={{ width: "100%" }} />
-          </Form.Item>
+        {/* Số điện thoại */}
+        <Form.Item<FieldType>
+          label={
+            <span style={{ fontWeight: 600, color: "#333" }}>
+              Số điện thoại
+            </span>
+          }
+          name="phone"
+          rules={[
+            { required: true, message: "Số điện thoại không được để trống!" },
+          ]}
+        >
+          <InputNumber
+            style={{
+              width: "100%",
+              borderRadius: 8,
+              height: 40,
+              borderColor: "#d9d9d9",
+            }}
+            placeholder="Nhập số điện thoại..."
+          />
+        </Form.Item>
 
-          <Form.Item<FieldType>
-            label={<span className="font-medium text-gray-700">Địa chỉ</span>}
-            name="address"
-            rules={[
-              { required: true, message: "Địa chỉ không được để trống!" },
-            ]}
-          >
-            <Input className="rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500" />
-          </Form.Item>
+        {/* Địa chỉ */}
+        <Form.Item<FieldType>
+          label={
+            <span style={{ fontWeight: 600, color: "#333" }}>Địa chỉ</span>
+          }
+          name="address"
+          rules={[{ required: true, message: "Địa chỉ không được để trống!" }]}
+        >
+          <Input.TextArea
+            placeholder="Nhập địa chỉ của bạn..."
+            autoSize={{ minRows: 2, maxRows: 3 }}
+            style={{
+              borderRadius: 8,
+              borderColor: "#d9d9d9",
+              resize: "none",
+            }}
+          />
+        </Form.Item>
 
-          <Button
-            type="primary"
-            loading={isSubmit}
-            onClick={() => form.submit()}
-            block
-            className="!bg-blue-600 hover:!bg-blue-700 !rounded-md !h-11 font-medium"
-          >
-            Cập nhật
-          </Button>
-        </Form>
-      </div>
+        <Button
+          type="primary"
+          loading={isSubmit}
+          onClick={() => form.submit()}
+          block
+          style={{
+            height: 44,
+            borderRadius: 8,
+            background: "#1677ff",
+            fontWeight: 600,
+            fontSize: 15,
+            letterSpacing: 0.3,
+          }}
+        >
+          Lưu thay đổi
+        </Button>
+      </Form>
     </Modal>
   );
 };

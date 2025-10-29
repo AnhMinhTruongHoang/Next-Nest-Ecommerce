@@ -25,7 +25,7 @@ const CurrentAppContext = createContext<IAppContext | null>(null);
 
 type TProps = { children: React.ReactNode };
 
-// 🧩 API lấy tài khoản (token-based)
+// API lấy tài khoản (token-based)
 export const fetchAccountAPI = async (token: string): Promise<IUser | null> => {
   const urlBackend = "http://localhost:8000/api/v1/auth/account";
   try {
@@ -66,6 +66,7 @@ export const AppProvider = ({ children }: TProps) => {
   const openCartModal = () => setIsCartModalOpen(true);
   const closeCartModal = () => setIsCartModalOpen(false);
 
+  // app.context.tsx  (thay initApp)
   useEffect(() => {
     const initApp = async () => {
       const savedCarts = localStorage.getItem("carts");
@@ -73,32 +74,50 @@ export const AppProvider = ({ children }: TProps) => {
 
       const session = await getSession();
 
-      // Nếu có token (login qua credentials)
-      if (session?.access_token) {
-        const data = await fetchAccountAPI(session.access_token);
-        if (data) {
-          setUser(data);
+      // 1) Dùng JWT backend nếu đã có
+      let jwt = localStorage.getItem("access_token") || null;
+
+      // 2) Nếu có JWT thì thử gọi /auth/account
+      if (jwt) {
+        const me = await fetchAccountAPI(jwt);
+        if (me) {
+          setUser(me);
           setIsAuthenticated(true);
-          setAccessToken(session.access_token);
+          setAccessToken(jwt);
+          setIsAppLoading(false);
+          return;
+        } else {
+          // JWT cũ không còn hợp lệ
+          localStorage.removeItem("access_token");
+          jwt = null;
         }
       }
-      // Nếu là login qua Google / GitHub
-      else if (session?.user?.email) {
-        const data = await syncOAuthUserAPI(
+
+      // 3) Nếu chưa có JWT, mà là login social => đồng bộ để nhận JWT backend
+      if (!jwt && session?.user?.email) {
+        const synced = await syncOAuthUserAPI(
           session.user.email,
           session.user.name || "Unknown",
           (session as any)?.user?.provider || "OAUTH"
         );
-        if (data) {
-          setUser(data);
+        // YÊU CẦU: backend trả { access_token, user }
+        const newJwt = synced?.access_token;
+        const me = synced?.user;
+
+        if (newJwt && me) {
+          localStorage.setItem("access_token", newJwt);
+          setAccessToken(newJwt);
+          setUser(me);
           setIsAuthenticated(true);
+          setIsAppLoading(false);
+          return;
         }
-      } else {
-        setIsAuthenticated(false);
-        setUser(null);
-        setAccessToken(null);
       }
 
+      // 4) Không có gì hợp lệ → coi như chưa đăng nhập
+      setIsAuthenticated(false);
+      setUser(null);
+      setAccessToken(null);
       setIsAppLoading(false);
     };
 
