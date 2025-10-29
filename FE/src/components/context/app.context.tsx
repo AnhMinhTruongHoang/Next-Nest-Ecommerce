@@ -23,24 +23,34 @@ interface IAppContext {
 
 const CurrentAppContext = createContext<IAppContext | null>(null);
 
-type TProps = {
-  children: React.ReactNode;
-};
+type TProps = { children: React.ReactNode };
 
-// API Fetch Account
+// 🧩 API lấy tài khoản (token-based)
 export const fetchAccountAPI = async (token: string): Promise<IUser | null> => {
   const urlBackend = "http://localhost:8000/api/v1/auth/account";
-
   try {
     const res = await axios.get<IBackendRes<IFetchAccount>>(urlBackend, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
-
     return res.data?.data?.user ?? null;
   } catch (error) {
     console.error("Fetch account failed:", error);
+    return null;
+  }
+};
+
+// API sync user từ OAuth (Google / GitHub)
+export const syncOAuthUserAPI = async (
+  email: string,
+  name: string,
+  provider: string
+) => {
+  const url = "http://localhost:8000/api/v1/auth/sync";
+  try {
+    const res = await axios.post(url, { email, name, provider });
+    return res.data?.data ?? null;
+  } catch (error) {
+    console.error("Sync OAuth user failed:", error);
     return null;
   }
 };
@@ -56,20 +66,32 @@ export const AppProvider = ({ children }: TProps) => {
   const openCartModal = () => setIsCartModalOpen(true);
   const closeCartModal = () => setIsCartModalOpen(false);
 
-  // Khởi tạo app
-
   useEffect(() => {
     const initApp = async () => {
       const savedCarts = localStorage.getItem("carts");
       if (savedCarts) setCarts(JSON.parse(savedCarts));
 
       const session = await getSession();
+
+      // Nếu có token (login qua credentials)
       if (session?.access_token) {
         const data = await fetchAccountAPI(session.access_token);
         if (data) {
           setUser(data);
           setIsAuthenticated(true);
           setAccessToken(session.access_token);
+        }
+      }
+      // Nếu là login qua Google / GitHub
+      else if (session?.user?.email) {
+        const data = await syncOAuthUserAPI(
+          session.user.email,
+          session.user.name || "Unknown",
+          (session as any)?.user?.provider || "OAUTH"
+        );
+        if (data) {
+          setUser(data);
+          setIsAuthenticated(true);
         }
       } else {
         setIsAuthenticated(false);

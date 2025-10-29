@@ -16,6 +16,7 @@ import { useCurrentApp } from "../context/app.context";
 import "../../styles/product.scss";
 import { getImageUrl } from "@/utils/getImageUrl";
 import UserInfoModal from "../admin/user.infor";
+import OrderHistoryModal from "../admin/user.orders";
 
 const { Header } = Layout;
 
@@ -24,6 +25,7 @@ export default function AppHeader() {
   const router = useRouter();
   const [openDrawer, setOpenDrawer] = useState(false);
   const [openManageAccount, setOpenManageAccount] = useState<boolean>(false);
+  const [openOrderHistory, setOpenOrderHistory] = useState(false);
   const [dataUpdate, setDataUpdate] = useState<IUser | null>(null);
   const [accessToken, setAccessToken] = useState<string>("");
   const {
@@ -65,7 +67,11 @@ export default function AppHeader() {
         : [
             {
               key: "orders",
-              label: <NextLink href={`/orders`}>Lịch sử mua hàng</NextLink>,
+              label: (
+                <span onClick={() => setOpenOrderHistory(true)}>
+                  Lịch sử mua hàng
+                </span>
+              ),
               icon: <ShoppingCartOutlined />,
             },
           ]),
@@ -128,7 +134,7 @@ export default function AppHeader() {
                 }}
                 onClick={() =>
                   router.push(`/product-detail/${product.detail._id}`)
-                } // ✅ chuyển tới chi tiết sản phẩm
+                } // chuyển tới chi tiết sản phẩm
                 onMouseEnter={(e) =>
                   (e.currentTarget.style.background = "#fafafa")
                 }
@@ -415,6 +421,11 @@ export default function AppHeader() {
       <UserInfoModal
         openManageAccount={openManageAccount}
         setOpenManageAccount={setOpenManageAccount}
+      />
+      <OrderHistoryModal
+        openOrderHistory={openOrderHistory}
+        setOpenOrderHistory={setOpenOrderHistory}
+        userId={session?.user?._id}
       />
     </Header>
   );

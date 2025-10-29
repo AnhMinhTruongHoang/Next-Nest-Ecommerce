@@ -218,9 +218,25 @@ const Payment = ({ setCurrentStep }: IProps) => {
                       required: true,
                       message: "Số điện thoại không được để trống!",
                     },
+                    { pattern: /^[0-9]+$/, message: "Chỉ được nhập chữ số!" },
                   ]}
                 >
-                  <Input />
+                  <Input
+                    maxLength={11}
+                    placeholder="Nhập số điện thoại"
+                    onKeyDown={(e) => {
+                      if (
+                        !/[0-9]/.test(e.key) &&
+                        e.key !== "Backspace" &&
+                        e.key !== "Delete" &&
+                        e.key !== "ArrowLeft" &&
+                        e.key !== "ArrowRight" &&
+                        e.key !== "Tab"
+                      ) {
+                        e.preventDefault();
+                      }
+                    }}
+                  />
                 </Form.Item>
 
                 <Form.Item

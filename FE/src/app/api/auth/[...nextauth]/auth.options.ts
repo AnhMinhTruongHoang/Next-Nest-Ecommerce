@@ -4,7 +4,7 @@ import GoogleProvider from "next-auth/providers/google";
 import FacebookProvider from "next-auth/providers/facebook";
 import { AuthOptions } from "next-auth";
 import { sendRequest } from "@/utils/api";
-import { JWT } from "next-auth/jwt/types";
+import { JWT } from "next-auth/jwt";
 
 export const authOptions: AuthOptions = {
   secret: process.env.NEXT_AUTH_SECRET,
@@ -64,7 +64,7 @@ export const authOptions: AuthOptions = {
   /////////// callback
   callbacks: {
     async jwt({ token, user, account }) {
-      // 📌 Login bằng Credentials (Local Login) → Lấy role từ backend
+      // Login bằng Credentials (Local Login) → Lấy role từ backend
       if (account?.provider === "credentials" && user) {
         token.access_token = user.access_token;
         token.refresh_token = user.refresh_token;
@@ -74,14 +74,15 @@ export const authOptions: AuthOptions = {
         token.role = user?.user?.role || "USER";
       }
 
-      // 📌 Login bằng Social OAuth (GitHub/Google/Facebook)
+      // Login bằng Social OAuth (GitHub/Google/Facebook)
       if (account && account.provider !== "credentials") {
         const res = await sendRequest<IBackendRes<JWT>>({
           url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/social-media`,
           method: "POST",
           body: {
             type: account.provider.toUpperCase(),
-            username: user?.email,
+            email: user?.email,
+            name: user?.name,
           },
         });
 
