@@ -5,6 +5,7 @@ import { getSession } from "next-auth/react";
 import { createContext, useContext, useEffect, useState } from "react";
 import PacmanLoader from "react-spinners/PacmanLoader";
 
+/** ===== Context Types ===== */
 interface IAppContext {
   isAuthenticated: boolean;
   setIsAuthenticated: (v: boolean) => void;
@@ -22,39 +23,62 @@ interface IAppContext {
 }
 
 const CurrentAppContext = createContext<IAppContext | null>(null);
-
 type TProps = { children: React.ReactNode };
 
-// API lấy tài khoản (token-based)
+const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+
+/** Chuẩn hóa chuỗi Bearer */
+const asBearer = (token?: string | null) => {
+  if (!token) return null;
+  return token.startsWith("Bearer ") ? token : `Bearer ${token}`;
+};
+
+/** ===== API helpers ===== */
+
+/** Lấy thông tin tài khoản từ JWT; trả về null nếu 401/403 */
 export const fetchAccountAPI = async (token: string): Promise<IUser | null> => {
-  const urlBackend = "http://localhost:8000/api/v1/auth/account";
   try {
-    const res = await axios.get<IBackendRes<IFetchAccount>>(urlBackend, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const res = await axios.get<IBackendRes<IFetchAccount>>(
+      `${BASE_URL}/api/v1/auth/account`,
+      { headers: { Authorization: asBearer(token)! } }
+    );
     return res.data?.data?.user ?? null;
-  } catch (error) {
-    console.error("Fetch account failed:", error);
+  } catch (err: any) {
+    const status = err?.response?.status;
+    if (status === 401 || status === 403) {
+      // token không hợp lệ/hết hạn
+      return null;
+    }
+    // lỗi khác (network, 5xx) — log gọn, không ném error để tránh console stack đỏ
+    console.warn("fetchAccountAPI error:", status || err?.message);
     return null;
   }
 };
 
-// API sync user từ OAuth (Google / GitHub)
+/** Đồng bộ user từ OAuth để backend cấp JWT */
 export const syncOAuthUserAPI = async (
   email: string,
   name: string,
   provider: string
 ) => {
-  const url = "http://localhost:8000/api/v1/auth/sync";
   try {
-    const res = await axios.post(url, { email, name, provider });
+    const res = await axios.post(`${BASE_URL}/api/v1/auth/sync`, {
+      email,
+      name,
+      provider,
+    });
+    // Kỳ vọng backend trả: { data: { user, access_token } }
     return res.data?.data ?? null;
-  } catch (error) {
-    console.error("Sync OAuth user failed:", error);
+  } catch (err: any) {
+    console.warn(
+      "syncOAuthUserAPI error:",
+      err?.response?.status || err?.message
+    );
     return null;
   }
 };
 
+/** ===== Provider ===== */
 export const AppProvider = ({ children }: TProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<IUser | null>(null);
@@ -66,59 +90,73 @@ export const AppProvider = ({ children }: TProps) => {
   const openCartModal = () => setIsCartModalOpen(true);
   const closeCartModal = () => setIsCartModalOpen(false);
 
-  // app.context.tsx  (thay initApp)
   useEffect(() => {
     const initApp = async () => {
-      const savedCarts = localStorage.getItem("carts");
-      if (savedCarts) setCarts(JSON.parse(savedCarts));
+      try {
+        // restore carts
+        const savedCarts = localStorage.getItem("carts");
+        if (savedCarts) setCarts(JSON.parse(savedCarts));
+      } catch (_) {}
 
-      const session = await getSession();
+      try {
+        const session = await getSession();
 
-      // 1) Dùng JWT backend nếu đã có
-      let jwt = localStorage.getItem("access_token") || null;
+        // Thu thập các "ứng viên" token
+        const candidates: (string | null | undefined)[] = [
+          localStorage.getItem("access_token"),
+          // nếu dùng Credentials provider và bạn add access_token vào session
+          (session as any)?.access_token,
+        ].filter(Boolean);
 
-      // 2) Nếu có JWT thì thử gọi /auth/account
-      if (jwt) {
-        const me = await fetchAccountAPI(jwt);
-        if (me) {
-          setUser(me);
-          setIsAuthenticated(true);
-          setAccessToken(jwt);
-          setIsAppLoading(false);
-          return;
-        } else {
-          // JWT cũ không còn hợp lệ
-          localStorage.removeItem("access_token");
-          jwt = null;
+        // 1) Thử từng token có sẵn
+        for (const raw of candidates) {
+          const token = raw as string;
+          const me = await fetchAccountAPI(token);
+          if (me) {
+            setUser(me);
+            setIsAuthenticated(true);
+            setAccessToken(token);
+            // nếu lấy từ session thì lưu về localStorage để lần sau dùng
+            if (!localStorage.getItem("access_token")) {
+              localStorage.setItem("access_token", token);
+            }
+            setIsAppLoading(false);
+            return;
+          }
         }
-      }
 
-      // 3) Nếu chưa có JWT, mà là login social => đồng bộ để nhận JWT backend
-      if (!jwt && session?.user?.email) {
-        const synced = await syncOAuthUserAPI(
-          session.user.email,
-          session.user.name || "Unknown",
-          (session as any)?.user?.provider || "OAUTH"
-        );
-        // YÊU CẦU: backend trả { access_token, user }
-        const newJwt = synced?.access_token;
-        const me = synced?.user;
+        // 2) Nếu đang login social (có email) mà chưa có JWT → sync để lấy JWT mới
+        if (!accessToken && session?.user?.email) {
+          const synced = await syncOAuthUserAPI(
+            session.user.email,
+            session.user.name || "Unknown",
+            (session as any)?.user?.provider || "OAUTH"
+          );
+          const newJwt: string | undefined = synced?.access_token;
+          const me: IUser | undefined = synced?.user;
 
-        if (newJwt && me) {
-          localStorage.setItem("access_token", newJwt);
-          setAccessToken(newJwt);
-          setUser(me);
-          setIsAuthenticated(true);
-          setIsAppLoading(false);
-          return;
+          if (newJwt && me) {
+            localStorage.setItem("access_token", newJwt);
+            setAccessToken(newJwt);
+            setUser(me);
+            setIsAuthenticated(true);
+            setIsAppLoading(false);
+            return;
+          }
         }
-      }
 
-      // 4) Không có gì hợp lệ → coi như chưa đăng nhập
-      setIsAuthenticated(false);
-      setUser(null);
-      setAccessToken(null);
-      setIsAppLoading(false);
+        // 3) Không token hợp lệ
+        setIsAuthenticated(false);
+        setUser(null);
+        setAccessToken(null);
+      } catch (err) {
+        console.warn("initApp error:", (err as any)?.message);
+        setIsAuthenticated(false);
+        setUser(null);
+        setAccessToken(null);
+      } finally {
+        setIsAppLoading(false);
+      }
     };
 
     initApp();
@@ -130,9 +168,10 @@ export const AppProvider = ({ children }: TProps) => {
         <div
           style={{
             position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
+            inset: 0,
+            display: "grid",
+            placeItems: "center",
+            background: "transparent",
           }}
         >
           <PacmanLoader size={30} color="#36d6b4" />

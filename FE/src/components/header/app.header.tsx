@@ -1,13 +1,23 @@
 "use client";
 
-import React, { use, useState } from "react";
-import { Layout, Input, Avatar, Badge, Dropdown, Popover } from "antd";
+import { useState } from "react";
+import {
+  Layout,
+  Input,
+  Avatar,
+  Badge,
+  Dropdown,
+  Popover,
+  Button,
+  Drawer,
+} from "antd";
 import {
   SearchOutlined,
   ShoppingCartOutlined,
   UserOutlined,
   LogoutOutlined,
   DashboardFilled,
+  MenuOutlined,
 } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import NextLink from "next/link";
@@ -17,33 +27,75 @@ import "../../styles/product.scss";
 import { getImageUrl } from "@/utils/getImageUrl";
 import UserInfoModal from "../admin/user.infor";
 import OrderHistoryModal from "../admin/user.orders";
+import Image from "next/image";
+import razerLogo from "../../../public/images/logos/razer2.png";
+import edraLogo from "../../../public/images/logos/edra.png";
+import logitechLogo from "../../../public/images/logos/logitec.png";
+import havitLogo from "../../../public/images/logos/havit.png";
 
 const { Header } = Layout;
+
+const BrandLogo: React.FC<{
+  src: any;
+  alt: string;
+  title?: string;
+  width?: number;
+  height?: number;
+}> = ({ src, alt, title, width = 200, height = 60 }) => (
+  <div
+    style={{
+      width,
+      height,
+      justifyContent: "center",
+      position: "relative",
+      display: "flex",
+      alignItems: "center",
+      borderRadius: 10,
+      padding: 8,
+      background: "rgba(255,255,255,0.06)",
+      border: "1px solid rgba(255,255,255,0.12)",
+      transition: "all .25s ease",
+      cursor: "pointer",
+      margin: "0 auto",
+    }}
+    onMouseEnter={(e) => {
+      (e.currentTarget as HTMLDivElement).style.transform = "translateY(-3px)";
+      (e.currentTarget as HTMLDivElement).style.boxShadow =
+        "0 8px 20px rgba(0,0,0,.35)";
+      (e.currentTarget as HTMLDivElement).style.background =
+        "rgba(255,255,255,0.12)";
+    }}
+    onMouseLeave={(e) => {
+      (e.currentTarget as HTMLDivElement).style.transform = "none";
+      (e.currentTarget as HTMLDivElement).style.boxShadow = "none";
+      (e.currentTarget as HTMLDivElement).style.background =
+        "rgba(255,255,255,0.06)";
+    }}
+  >
+    <Image
+      src={src}
+      alt={alt}
+      title={title || alt}
+      fill
+      sizes="(max-width: 768px) 140px, 200px"
+      placeholder="blur"
+      style={{ objectFit: "contain" }}
+      draggable={false}
+    />
+  </div>
+);
 
 export default function AppHeader() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [openDrawer, setOpenDrawer] = useState(false);
-  const [openManageAccount, setOpenManageAccount] = useState<boolean>(false);
+  const [openManageAccount, setOpenManageAccount] = useState(false);
   const [openOrderHistory, setOpenOrderHistory] = useState(false);
-  const [dataUpdate, setDataUpdate] = useState<IUser | null>(null);
-  const [accessToken, setAccessToken] = useState<string>("");
-  const {
-    isAuthenticated,
-    user,
-    setUser,
-    setIsAuthenticated,
-    carts,
-    setCarts,
-  } = useCurrentApp();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { carts } = useCurrentApp();
 
   const handleLogout = () => {
-    // Xóa access_token để lần sau phải login lại
     localStorage.removeItem("access_token");
-
-    // Nếu có giỏ guest thì xóa (user thì giữ lại carts_user để login lại còn)
     localStorage.removeItem("carts_guest");
-
     signOut({ callbackUrl: "/" });
   };
 
@@ -55,7 +107,6 @@ export default function AppHeader() {
         icon: <UserOutlined />,
         onClick: () => setOpenManageAccount(true),
       },
-
       ...(session?.user?.role === "ADMIN"
         ? [
             {
@@ -75,11 +126,10 @@ export default function AppHeader() {
               icon: <ShoppingCartOutlined />,
             },
           ]),
-
       {
         key: "logout",
         label: (
-          <span style={{ cursor: "pointer" }} onClick={() => handleLogout()}>
+          <span style={{ cursor: "pointer" }} onClick={handleLogout}>
             Logout
           </span>
         ),
@@ -88,160 +138,145 @@ export default function AppHeader() {
     ],
   };
 
-  const ContentPopover = () => {
-    return (
+  const ContentPopover = () => (
+    <div
+      style={{
+        width: 260,
+        background: "#fff",
+        borderRadius: 8,
+        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+        overflow: "hidden",
+      }}
+    >
       <div
         style={{
-          width: 260,
-          background: "#fff",
-          borderRadius: 8,
-          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-          overflow: "hidden",
+          background: "#00FFE0",
+          fontSize: 13,
+          fontWeight: 600,
+          padding: "6px 8px",
+          textAlign: "center",
         }}
       >
-        {/* Header */}
-        <div
-          style={{
-            background: "#00FFE0",
-            fontSize: 13,
-            fontWeight: 600,
-            padding: "6px 8px",
-            textAlign: "center",
-          }}
-        >
-          Sản phẩm mới thêm
-        </div>
+        Sản phẩm mới thêm
+      </div>
 
-        {/* Product list */}
-        <div
-          style={{
-            maxHeight: 220,
-            overflowY: "auto",
-            borderBottom: "1px solid #f0f0f0",
-          }}
-        >
-          {carts && carts.length > 0 ? (
-            carts.map((product, index) => (
-              <div
-                key={`product-${index}`}
+      <div
+        style={{
+          maxHeight: 220,
+          overflowY: "auto",
+          borderBottom: "1px solid #f0f0f0",
+        }}
+      >
+        {carts && carts.length > 0 ? (
+          carts.map((product, index) => (
+            <div
+              key={`product-${index}`}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "6px 8px",
+                cursor: "pointer",
+                transition: "background 0.2s",
+              }}
+              onClick={() =>
+                router.push(`/product-detail/${product.detail._id}`)
+              }
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.background = "#fafafa")
+              }
+              onMouseLeave={(e) => (e.currentTarget.style.background = "#fff")}
+            >
+              <img
+                src={getImageUrl(product?.detail?.thumbnail)}
+                alt={product?.detail?.name}
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "6px 8px",
-                  cursor: "pointer",
-                  transition: "background 0.2s",
+                  width: 60,
+                  height: 55,
+                  objectFit: "cover",
+                  borderRadius: 4,
+                  border: "1px solid #eee",
                 }}
-                onClick={() =>
-                  router.push(`/product-detail/${product.detail._id}`)
-                } // chuyển tới chi tiết sản phẩm
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = "#fafafa")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "#fff")
-                }
-              >
-                <img
-                  src={getImageUrl(product?.detail?.thumbnail)}
-                  alt={product?.detail?.name}
+              />
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div
                   style={{
-                    width: 60,
-                    height: 55,
-                    objectFit: "cover",
-                    borderRadius: 4,
-                    border: "1px solid #eee",
+                    fontSize: 13,
+                    color: "#333",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    maxWidth: 160,
                   }}
-                />
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  <div
-                    style={{
-                      fontSize: 13,
-                      color: "#333",
-                      lineHeight: "1.2",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      maxWidth: 160,
-                    }}
-                  >
-                    {product?.detail?.name}
-                  </div>
-                  <div
-                    style={{
-                      color: "#d0021b",
-                      fontWeight: 500,
-                      fontSize: 13,
-                      marginTop: 2,
-                    }}
-                  >
-                    {new Intl.NumberFormat("vi-VN", {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0,
-                    }).format(product?.detail?.price ?? 0)}{" "}
-                    đ
-                  </div>
+                >
+                  {product?.detail?.name}
+                </div>
+                <div
+                  style={{
+                    color: "#d0021b",
+                    fontWeight: 500,
+                    fontSize: 13,
+                    marginTop: 2,
+                  }}
+                >
+                  {new Intl.NumberFormat("vi-VN").format(
+                    product?.detail?.price ?? 0
+                  )}{" "}
+                  đ
                 </div>
               </div>
-            ))
-          ) : (
-            <div
-              style={{
-                textAlign: "center",
-                color: "#999",
-                fontSize: 13,
-                padding: "16px 0",
-              }}
-            >
-              Không có sản phẩm trong giỏ hàng
             </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        {carts && carts.length > 0 && (
+          ))
+        ) : (
           <div
             style={{
-              padding: "8px 0",
-              display: "flex",
-              justifyContent: "center",
-              background: "#fff",
+              textAlign: "center",
+              color: "#999",
+              fontSize: 13,
+              padding: "16px 0",
             }}
           >
-            <button
-              onClick={() => router.push("/order")}
-              style={{
-                background: "#ff4d4f",
-                color: "#fff",
-                border: "none",
-                padding: "6px 12px",
-                borderRadius: 4,
-                cursor: "pointer",
-                fontSize: 13,
-                fontWeight: 500,
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.background = "#ff3333")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.background = "#ff4d4f")
-              }
-            >
-              Xem giỏ hàng
-            </button>
+            Không có sản phẩm trong giỏ hàng
           </div>
         )}
       </div>
-    );
-  };
+
+      {carts && carts.length > 0 && (
+        <div
+          style={{
+            padding: "8px 0",
+            display: "flex",
+            justifyContent: "center",
+            background: "#fff",
+          }}
+        >
+          <button
+            onClick={() => router.push("/order")}
+            style={{
+              background: "#ff4d4f",
+              color: "#fff",
+              border: "none",
+              padding: "6px 12px",
+              borderRadius: 4,
+              cursor: "pointer",
+              fontSize: 13,
+              fontWeight: 500,
+            }}
+          >
+            Xem giỏ hàng
+          </button>
+        </div>
+      )}
+    </div>
+  );
 
   const navItems = [
-    { key: "mouse", label: "Chuột Gaming" },
-    { key: "keyboard", label: "Bàn phím" },
-    { key: "headset", label: "Tai nghe" },
-    { key: "chairs", label: "Ghế gaming" },
-    { key: "monitor", label: "Màn hình" },
-    { key: "accessories", label: "Phụ kiện" },
+    "Chuột Gaming",
+    "Bàn phím",
+    "Tai nghe",
+    "Ghế gaming",
+    "Màn hình",
+    "Phụ kiện",
   ];
 
   const megaMenu = (
@@ -250,42 +285,32 @@ export default function AppHeader() {
         width: "100vw",
         background: "#111",
         color: "#fff",
-        padding: "32px 48px",
+        padding: "28px 40px",
         display: "grid",
-        gridTemplateColumns: "repeat(4, 1fr)",
+        gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+        justifyItems: "center",
+        alignItems: "center",
         gap: 32,
-        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+        textAlign: "center",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
         borderRadius: "0 0 12px 12px",
-        zIndex: 1200,
       }}
     >
       <div>
-        <h4 style={{ color: "#9b59b6" }}>Chuột</h4>
-        <a>Logitech</a>
-        <a>Razer</a>
-        <a>SteelSeries</a>
-        <a>HyperX</a>
+        <h4 style={{ color: "#9b59b6", marginBottom: 10 }}>Razer</h4>
+        <BrandLogo src={razerLogo} alt="Razer" />
       </div>
       <div>
-        <h4 style={{ color: "#9b59b6" }}>Bàn phím</h4>
-        <a>Akko</a>
-        <a>Keychron</a>
-        <a>Ducky</a>
-        <a>Leopold</a>
+        <h4 style={{ color: "#9b59b6", marginBottom: 10 }}>Logitech</h4>
+        <BrandLogo src={logitechLogo} alt="Logitech" />
       </div>
       <div>
-        <h4 style={{ color: "#9b59b6" }}>Tai nghe</h4>
-        <a>HyperX</a>
-        <a>Razer</a>
-        <a>Corsair</a>
-        <a>Asus</a>
+        <h4 style={{ color: "#9b59b6", marginBottom: 10 }}>Havit</h4>
+        <BrandLogo src={havitLogo} alt="Havit" />
       </div>
       <div>
-        <h4 style={{ color: "#9b59b6" }}>Ghế / Phụ kiện</h4>
-        <a>Ghế E-Dra</a>
-        <a>Ghế SecretLab</a>
-        <a>Miếng kê tay</a>
-        <a>Mousepad RGB</a>
+        <h4 style={{ color: "#9b59b6", marginBottom: 10 }}>E-Dra</h4>
+        <BrandLogo src={edraLogo} alt="E-Dra" />
       </div>
     </div>
   );
@@ -329,11 +354,11 @@ export default function AppHeader() {
           GamerZone
         </div>
 
-        {/* Nav */}
-        <div style={{ display: "flex", gap: 24 }}>
-          {navItems.map((item) => (
+        {/* Desktop Nav */}
+        <div className="hidden md:flex" style={{ display: "flex", gap: 24 }}>
+          {navItems.map((label, i) => (
             <Dropdown
-              key={item.key}
+              key={i}
               popupRender={() => megaMenu}
               placement="bottom"
               trigger={["hover"]}
@@ -346,20 +371,45 @@ export default function AppHeader() {
                   transition: "color 0.2s",
                 }}
               >
-                {item.label}
+                {label}
               </div>
             </Dropdown>
           ))}
         </div>
 
-        {/* Search */}
-        <div style={{ flex: 1, padding: "0 32px" }}>
+        {/* Mobile menu button */}
+        <Button
+          icon={<MenuOutlined />}
+          style={{
+            display: "none",
+            background: "#1e1e1e",
+            color: "#00ffe0",
+            border: "none",
+          }}
+          className="md:hidden"
+          onClick={() => setMobileMenuOpen(true)}
+        />
+
+        {/* Search box */}
+        <div
+          style={{
+            flex: 1,
+            padding: "0 24px",
+            maxWidth: 500,
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
           <Input
             placeholder="Tìm sản phẩm gaming..."
             prefix={<SearchOutlined />}
             allowClear
             size="middle"
-            style={{ borderRadius: 20, background: "#1e1e1e", color: "#fff" }}
+            style={{
+              borderRadius: 20,
+              background: "#1e1e1e",
+              color: "#fff",
+            }}
             onPressEnter={(e: any) => {
               const value = e?.target?.value;
               if (value) router.push(`/search?q=${value}`);
@@ -371,8 +421,7 @@ export default function AppHeader() {
         <div
           style={{
             display: "flex",
-            alignItems: "center", // căn giữa dọc
-            justifyContent: "center", // căn giữa ngang (nếu muốn)
+            alignItems: "center",
             gap: 24,
           }}
         >
@@ -382,7 +431,6 @@ export default function AppHeader() {
               placement="bottom"
               arrow
               trigger={["click"]}
-              overlayStyle={{ textAlign: "center" }} // căn giữa menu
             >
               <Avatar
                 style={{
@@ -408,7 +456,6 @@ export default function AppHeader() {
             content={<ContentPopover />}
             trigger="hover"
             placement="bottomRight"
-            classNames={{ root: "popover-carts" }}
           >
             <Badge count={carts?.length ?? 0} offset={[-2, 2]}>
               <ShoppingCartOutlined
@@ -418,6 +465,32 @@ export default function AppHeader() {
           </Popover>
         </div>
       </div>
+
+      {/* Mobile Drawer Menu */}
+      <Drawer
+        title="Danh mục sản phẩm"
+        placement="left"
+        onClose={() => setMobileMenuOpen(false)}
+        open={mobileMenuOpen}
+        bodyStyle={{ background: "#0d0d0d", color: "#fff" }}
+      >
+        {navItems.map((item, i) => (
+          <div
+            key={i}
+            style={{
+              padding: "12px 0",
+              borderBottom: "1px solid rgba(255,255,255,0.1)",
+              color: "#fff",
+              cursor: "pointer",
+              fontWeight: 500,
+            }}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            {item}
+          </div>
+        ))}
+      </Drawer>
+
       <UserInfoModal
         openManageAccount={openManageAccount}
         setOpenManageAccount={setOpenManageAccount}
