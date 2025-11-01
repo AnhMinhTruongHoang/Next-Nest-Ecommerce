@@ -497,7 +497,7 @@ export default function AppHeader() {
               menu={userMenu}
               placement="bottom"
               arrow
-              trigger={[isMobile ? "click" : "click"]} // click cả 2 để mở chắc chắn
+              trigger={[isMobile ? "click" : "click"]}
             >
               <Avatar
                 style={{

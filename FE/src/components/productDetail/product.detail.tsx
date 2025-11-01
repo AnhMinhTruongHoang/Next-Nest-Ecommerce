@@ -27,7 +27,7 @@ import "react-image-gallery/styles/css/image-gallery.css";
 import { useCurrentApp } from "@/components/context/app.context";
 import ModalGallery from "@/components/products/modal.gallery";
 import "../../styles/product.scss";
-import TextArea from "antd/es/input/TextArea";
+import UsersComment from "../ui/comment";
 
 const { Title, Text } = Typography;
 
@@ -57,22 +57,27 @@ const ProductDetail = ({ currentProduct }: IProps) => {
     if (!currentProduct) return;
 
     const images: any[] = [];
-    const buildUrl = (url: string) => {
-      if (!url) return "";
+    const buildUrl = (url?: string) => {
+      if (!url || url.trim() === "") return null;
       return url.startsWith("http")
         ? url
         : `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`;
     };
 
-    if (currentProduct.thumbnail) {
-      const thumb = buildUrl(currentProduct.thumbnail);
-      images.push({ original: thumb, thumbnail: thumb });
-    }
+    const thumb = buildUrl(currentProduct.thumbnail);
+    if (thumb) images.push({ original: thumb, thumbnail: thumb });
 
     if (Array.isArray(currentProduct.images)) {
       currentProduct.images.forEach((item) => {
         const url = buildUrl(item);
-        images.push({ original: url, thumbnail: url });
+        if (url) images.push({ original: url, thumbnail: url });
+      });
+    }
+
+    if (images.length === 0) {
+      images.push({
+        original: "/images/noimage.png",
+        thumbnail: "/images/noimage.png",
       });
     }
 
@@ -185,7 +190,7 @@ const ProductDetail = ({ currentProduct }: IProps) => {
 
     const idx = carts.findIndex((c) => c._id === currentProduct._id);
     const inCart = idx > -1 ? Number(carts[idx].quantity || 0) : 0;
-    const canSet = Math.max(0, stock); // buy now đặt = currentQuantity (không cộng dồn)
+    const canSet = Math.max(0, stock);
 
     const finalQty = Math.min(currentQuantity, canSet);
 
@@ -230,11 +235,12 @@ const ProductDetail = ({ currentProduct }: IProps) => {
           }}
         >
           <Row gutter={[32, 32]}>
-            {/*  Hình ảnh bên trái */}
             <Col xs={24} md={10}>
               <ReactImageGallery
                 ref={refGallery}
-                items={imageGallery}
+                items={imageGallery.filter(
+                  (img) => img.original && img.original.trim() !== ""
+                )}
                 showPlayButton={false}
                 showFullscreenButton={false}
                 slideOnThumbnailOver
@@ -345,6 +351,16 @@ const ProductDetail = ({ currentProduct }: IProps) => {
               </Space>
             </Col>
           </Row>
+          <br />
+          <br />
+          <UsersComment
+            productId={currentProduct._id}
+            accessToken={
+              typeof window !== "undefined"
+                ? localStorage.getItem("access_token") || undefined
+                : undefined
+            }
+          />
         </Card>
       </div>
 
