@@ -12,12 +12,14 @@ import {
   Typography,
   Rate,
   App,
+  Alert,
 } from "antd";
 import {
   LikeOutlined,
   LikeFilled,
   DislikeOutlined,
   DislikeFilled,
+  LoginOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -107,6 +109,11 @@ const UsersComment: React.FC<UsersCommentProps> = ({
 
   // ===== POST review =====
   const handleSubmit = async () => {
+    if (!accessToken) {
+      message.warning("Vui lòng đăng nhập để gửi bình luận!");
+      return;
+    }
+
     const trimmed = value.trim();
     if (!trimmed) return;
 
@@ -247,8 +254,6 @@ const UsersComment: React.FC<UsersCommentProps> = ({
                       {item.dislikes}
                     </span>
                   </Tooltip>
-
-                  <span style={{ cursor: "pointer" }}>Reply to</span>
                 </Space>
               </Space>
             </div>
@@ -272,25 +277,44 @@ const UsersComment: React.FC<UsersCommentProps> = ({
         </Avatar>
 
         <div style={{ flex: 1 }}>
-          <Form onFinish={handleSubmit}>
-            <Form.Item style={{ marginBottom: 8 }}>
-              <Space direction="vertical" style={{ width: "100%" }}>
-                <Text>Đánh giá của bạn:</Text>
-                <Rate value={rating} onChange={setRating} />
-                <TextArea
-                  rows={4}
-                  value={value}
-                  onChange={(e) => setValue(e.target.value)}
-                  placeholder={placeholder}
-                />
-              </Space>
-            </Form.Item>
-            <Form.Item style={{ marginBottom: 0, textAlign: "center" }}>
-              <Button type="primary" htmlType="submit" loading={submitting}>
-                {submitText}
-              </Button>
-            </Form.Item>
-          </Form>
+          {!accessToken ? (
+            <Alert
+              type="warning"
+              showIcon
+              message={
+                <Space>
+                  <LoginOutlined />
+                  <span>
+                    Vui lòng{" "}
+                    <a href="/auth/signin" style={{ fontWeight: 500 }}>
+                      đăng nhập
+                    </a>{" "}
+                    để gửi đánh giá.
+                  </span>
+                </Space>
+              }
+            />
+          ) : (
+            <Form onFinish={handleSubmit}>
+              <Form.Item style={{ marginBottom: 8 }}>
+                <Space direction="vertical" style={{ width: "100%" }}>
+                  <Text>Đánh giá của bạn:</Text>
+                  <Rate value={rating} onChange={setRating} />
+                  <TextArea
+                    rows={4}
+                    value={value}
+                    onChange={(e) => setValue(e.target.value)}
+                    placeholder={placeholder}
+                  />
+                </Space>
+              </Form.Item>
+              <Form.Item style={{ marginBottom: 0, textAlign: "center" }}>
+                <Button type="primary" htmlType="submit" loading={submitting}>
+                  {submitText}
+                </Button>
+              </Form.Item>
+            </Form>
+          )}
         </div>
       </div>
     </div>

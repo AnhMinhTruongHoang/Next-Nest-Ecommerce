@@ -13,6 +13,8 @@ type TProduct = {
   name: string;
   price: number;
   sold: number;
+  averageRating?: number; // ⭐ trung bình
+  totalReviews?: number; // tổng số đánh giá
 };
 
 const chunkArray = <T,>(arr: T[], size: number) => {
@@ -28,26 +30,25 @@ const currencyVN = (n?: number) =>
   );
 
 const ProductsGrid = () => {
-  // data
   const [listProduct, setListProduct] = useState<TProduct[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>("");
-
-  // responsive how many cards per slide
   const [itemsPerSlide, setItemsPerSlide] = useState<number>(5);
 
+  // responsive
   useEffect(() => {
     const updateItemsPerSlide = () => {
       const w = window.innerWidth;
-      if (w < 640) setItemsPerSlide(1); // mobile nhỏ
-      else if (w < 1024) setItemsPerSlide(3); // tablet
-      else setItemsPerSlide(5); // desktop
+      if (w < 640) setItemsPerSlide(1);
+      else if (w < 1024) setItemsPerSlide(3);
+      else setItemsPerSlide(5);
     };
     updateItemsPerSlide();
     window.addEventListener("resize", updateItemsPerSlide);
     return () => window.removeEventListener("resize", updateItemsPerSlide);
   }, []);
 
+  // fetch products + ratings
   useEffect(() => {
     const fetchProducts = async () => {
       setIsLoading(true);
@@ -59,7 +60,27 @@ const ProductsGrid = () => {
         );
         const data = await res.json();
         const result: TProduct[] = data?.data?.result ?? [];
-        setListProduct(result);
+
+        // 🟢 Gọi API summary cho từng sản phẩm
+        const enriched = await Promise.all(
+          result.map(async (p) => {
+            try {
+              const r = await fetch(
+                `http://localhost:8000/api/v1/reviews/summary/${p._id}`
+              );
+              const summary = await r.json();
+              return {
+                ...p,
+                averageRating: summary?.average ?? 0,
+                totalReviews: summary?.total ?? 0,
+              };
+            } catch {
+              return { ...p, averageRating: 0, totalReviews: 0 };
+            }
+          })
+        );
+
+        setListProduct(enriched);
       } catch (e) {
         console.error("Fetch products error:", e);
         setErrorMsg("Không tải được danh sách sản phẩm. Vui lòng thử lại.");
@@ -67,6 +88,7 @@ const ProductsGrid = () => {
         setIsLoading(false);
       }
     };
+
     fetchProducts();
   }, []);
 
@@ -88,7 +110,7 @@ const ProductsGrid = () => {
         <h1>Best Sellers</h1>
       </div>
 
-      {/* Loading skeleton */}
+      {/* Loading */}
       {isLoading && (
         <div
           style={{
@@ -128,7 +150,7 @@ const ProductsGrid = () => {
         </div>
       )}
 
-      {/* Carousel cards */}
+      {/* Carousel */}
       {!isLoading && !errorMsg && listProduct.length > 0 && (
         <Carousel arrows dots>
           {slides.map((group, index) => (
@@ -144,7 +166,7 @@ const ProductsGrid = () => {
                 }}
               >
                 {group.map((p) => {
-                  const imgSrc = getImageUrl(p.thumbnail); // chuyển path -> URL đầy đủ
+                  const imgSrc = getImageUrl(p.thumbnail);
                   return (
                     <Card
                       key={p._id}
@@ -159,7 +181,6 @@ const ProductsGrid = () => {
                           className="group overflow-hidden"
                           style={{ position: "relative", height: 200 }}
                         >
-                          {/* Dùng Image để tối ưu, fallback sang <img> nếu domain chưa allow */}
                           <Image
                             alt={p.name}
                             src={imgSrc}
@@ -196,13 +217,23 @@ const ProductsGrid = () => {
                                 textAlign: "center",
                               }}
                             >
-                              <Rate allowHalf defaultValue={2.5} />
+                              <Rate
+                                disabled
+                                allowHalf
+                                value={p.averageRating ?? 0}
+                                style={{ color: "#faad14" }}
+                              />
+                              <div style={{ fontSize: 12, color: "#888" }}>
+                                ({p.totalReviews ?? 0} đánh giá)
+                              </div>
                             </div>
+
                             <div
                               style={{
                                 textAlign: "center",
                                 fontWeight: 700,
                                 color: "#d0021b",
+                                marginTop: 4,
                               }}
                             >
                               {currencyVN(p.price)}
