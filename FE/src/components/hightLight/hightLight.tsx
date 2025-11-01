@@ -1,68 +1,27 @@
+"use client";
+
 import { Card, Button } from "antd";
 import Image from "next/image";
 
-const HightLight = () => {
+const Highlight = () => {
   return (
-    <div
-      style={{
-        display: "flex",
-        gap: 25,
-        justifyContent: "center",
-        marginTop: 16,
-        marginBottom: 50,
-        flexWrap: "wrap", // responsive
-      }}
-    >
+    <div className="highlight-wrapper">
       {/* Card 1 */}
       <Card
         hoverable
-        style={{
-          width: 882,
-          height: 600,
-          borderRadius: 16,
-          overflow: "hidden",
-          position: "relative",
-        }}
+        className="highlight-card"
         cover={
-          <div style={{ position: "relative", width: "100%", height: "600px" }}>
+          <div className="highlight-cover">
             <Image
               alt="Men Wear"
               src="/images/cards/gitwar2.png"
               fill
-              style={{
-                objectFit: "cover",
-                transition: "transform 0.5s ease",
-              }}
               className="highlight-img"
+              style={{ objectFit: "cover" }}
             />
-            {/* Overlay */}
-            <div
-              style={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                width: "100%",
-                padding: "30px",
-                background:
-                  "linear-gradient(to top, rgba(0,0,0,0.6), transparent)",
-                color: "#fff",
-              }}
-            >
-              <h2
-                style={{ fontSize: 36, fontWeight: "bold", marginBottom: 10 }}
-              >
-                MEN WEAR
-              </h2>
-              <Button
-                type="primary"
-                size="large"
-                style={{
-                  backgroundColor: "#fff",
-                  color: "#000",
-                  fontWeight: "bold",
-                  border: "none",
-                }}
-              >
+            <div className="highlight-overlay">
+              <h2>MEN WEAR</h2>
+              <Button type="primary" size="large" className="highlight-btn">
                 KHÁM PHÁ
               </Button>
             </div>
@@ -73,53 +32,19 @@ const HightLight = () => {
       {/* Card 2 */}
       <Card
         hoverable
-        style={{
-          width: 882,
-          height: 600,
-          borderRadius: 16,
-          overflow: "hidden",
-          position: "relative",
-        }}
+        className="highlight-card"
         cover={
-          <div style={{ position: "relative", width: "100%", height: "600px" }}>
+          <div className="highlight-cover">
             <Image
               alt="Women Active"
               src="/images/cards/gitwar2.png"
               fill
-              style={{
-                objectFit: "cover",
-                transition: "transform 0.5s ease",
-              }}
               className="highlight-img"
+              style={{ objectFit: "cover" }}
             />
-            {/* Overlay */}
-            <div
-              style={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                width: "100%",
-                padding: "30px",
-                background:
-                  "linear-gradient(to top, rgba(0,0,0,0.6), transparent)",
-                color: "#fff",
-              }}
-            >
-              <h2
-                style={{ fontSize: 36, fontWeight: "bold", marginBottom: 10 }}
-              >
-                WOMEN ACTIVE
-              </h2>
-              <Button
-                type="primary"
-                size="large"
-                style={{
-                  backgroundColor: "#fff",
-                  color: "#000",
-                  fontWeight: "bold",
-                  border: "none",
-                }}
-              >
+            <div className="highlight-overlay">
+              <h2>WOMEN ACTIVE</h2>
+              <Button type="primary" size="large" className="highlight-btn">
                 KHÁM PHÁ
               </Button>
             </div>
@@ -127,14 +52,111 @@ const HightLight = () => {
         }
       />
 
-      {/* CSS hover zoom */}
-      <style jsx>{`
-        .highlight-img:hover {
+      {/* CSS */}
+      <style jsx global>{`
+        .highlight-wrapper {
+          display: flex;
+          gap: 24px;
+          justify-content: center;
+          margin-top: 24px;
+          margin-bottom: 50px;
+          flex-wrap: wrap;
+          padding: 0 16px;
+        }
+
+        .highlight-card {
+          width: 880px;
+          height: 600px;
+          border-radius: 16px;
+          overflow: hidden;
+          position: relative;
+          transition: all 0.3s ease;
+        }
+
+        .highlight-cover {
+          position: relative;
+          width: 100%;
+          height: 600px;
+        }
+
+        .highlight-img {
+          transition: transform 0.6s ease;
+        }
+
+        .highlight-card:hover .highlight-img {
           transform: scale(1.05);
+        }
+
+        .highlight-overlay {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          padding: 32px;
+          background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+          color: #fff;
+        }
+
+        .highlight-overlay h2 {
+          font-size: 36px;
+          font-weight: 700;
+          margin-bottom: 12px;
+        }
+
+        .highlight-btn {
+          background: #fff !important;
+          color: #000 !important;
+          border: none !important;
+          font-weight: 600;
+          border-radius: 8px;
+          height: 44px;
+        }
+
+        /* Tablet */
+        @media (max-width: 1024px) {
+          .highlight-card {
+            width: 90%;
+            height: 480px;
+          }
+
+          .highlight-cover {
+            height: 480px;
+          }
+
+          .highlight-overlay h2 {
+            font-size: 28px;
+          }
+        }
+
+        /* Mobile */
+        @media (max-width: 600px) {
+          .highlight-card {
+            width: 100%;
+            height: 360px;
+          }
+
+          .highlight-cover {
+            height: 360px;
+          }
+
+          .highlight-overlay {
+            padding: 20px;
+          }
+
+          .highlight-overlay h2 {
+            font-size: 22px;
+            margin-bottom: 8px;
+          }
+
+          .highlight-btn {
+            height: 38px;
+            font-size: 14px;
+            padding: 0 16px;
+          }
         }
       `}</style>
     </div>
   );
 };
 
-export default HightLight;
+export default Highlight;

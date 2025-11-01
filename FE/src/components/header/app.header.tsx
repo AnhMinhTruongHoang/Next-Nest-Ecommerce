@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Layout,
   Input,
@@ -10,15 +10,17 @@ import {
   Popover,
   Button,
   Drawer,
+  Tooltip,
 } from "antd";
 import {
-  SearchOutlined,
-  ShoppingCartOutlined,
-  UserOutlined,
-  LogoutOutlined,
-  DashboardFilled,
-  MenuOutlined,
-} from "@ant-design/icons";
+  Mouse,
+  Keyboard,
+  Headphones,
+  Monitor,
+  PlugZap,
+  User as UserIcon,
+  Table,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import NextLink from "next/link";
 import { useSession, signOut } from "next-auth/react";
@@ -32,6 +34,13 @@ import razerLogo from "../../../public/images/logos/razer2.png";
 import edraLogo from "../../../public/images/logos/edra.png";
 import logitechLogo from "../../../public/images/logos/logitec.png";
 import havitLogo from "../../../public/images/logos/havit.png";
+import {
+  DashboardFilled,
+  LogoutOutlined,
+  MenuOutlined,
+  SearchOutlined,
+  ShoppingCartOutlined,
+} from "@ant-design/icons";
 
 const { Header } = Layout;
 
@@ -91,7 +100,15 @@ export default function AppHeader() {
   const [openManageAccount, setOpenManageAccount] = useState(false);
   const [openOrderHistory, setOpenOrderHistory] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const { carts } = useCurrentApp();
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 992); // ~ md/lg
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("access_token");
@@ -104,7 +121,7 @@ export default function AppHeader() {
       {
         key: "profile",
         label: "Profile",
-        icon: <UserOutlined />,
+        icon: <UserIcon size={16} />,
         onClick: () => setOpenManageAccount(true),
       },
       ...(session?.user?.role === "ADMIN"
@@ -271,12 +288,12 @@ export default function AppHeader() {
   );
 
   const navItems = [
-    "Chuột Gaming",
-    "Bàn phím",
-    "Tai nghe",
-    "Ghế gaming",
-    "Màn hình",
-    "Phụ kiện",
+    { key: "mouse", label: "Chuột", icon: <Mouse size={18} /> },
+    { key: "keyboard", label: "Bàn phím", icon: <Keyboard size={18} /> },
+    { key: "headset", label: "Tai nghe", icon: <Headphones size={18} /> },
+    { key: "chairs", label: "Ghế", icon: <Table size={18} /> },
+    { key: "monitor", label: "Màn hình", icon: <Monitor size={18} /> },
+    { key: "accessories", label: "Phụ kiện", icon: <PlugZap size={18} /> },
   ];
 
   const megaMenu = (
@@ -326,53 +343,115 @@ export default function AppHeader() {
         zIndex: 1000,
       }}
     >
-      <div
-        style={{
-          maxWidth: 1480,
-          margin: "0 auto",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "0 24px",
-          height: 72,
-        }}
-      >
+      {/* Responsive CSS */}
+      <style jsx global>{`
+        .wrap {
+          max-width: 1480px;
+          margin: 0 auto;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 16px;
+          height: 64px;
+        }
+        .brand {
+          color: #00ffe0;
+          font-weight: 700;
+          font-size: 22px;
+          cursor: pointer;
+          margin-right: 16px;
+          font-family: Orbitron, sans-serif;
+          letter-spacing: 1px;
+          white-space: nowrap;
+        }
+        .nav-wrap {
+          display: flex;
+          gap: 20px;
+          align-items: center;
+        }
+        .nav-item {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          color: #fff;
+          font-weight: 500;
+          cursor: pointer;
+          padding: 6px 8px;
+          border-radius: 8px;
+          transition: color 0.2s ease, background 0.2s ease;
+        }
+        .nav-item:hover {
+          color: #00ffe0;
+          background: rgba(255, 255, 255, 0.06);
+        }
+        .nav-label {
+          display: inline-block;
+        }
+        .search-wrap {
+          flex: 1;
+          padding: 0 16px;
+          max-width: 520px;
+          display: flex;
+          align-items: center;
+        }
+        .acct {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+        /* Tablet */
+        @media (max-width: 1280px) {
+          .nav-wrap {
+            gap: 12px;
+          }
+          .nav-label {
+            display: none;
+          }
+        }
+        /* Mobile */
+        @media (max-width: 991px) {
+          .wrap {
+            height: 56px;
+            padding: 0 12px;
+          }
+          .brand {
+            font-size: 18px;
+            margin-right: 8px;
+          }
+          .nav-wrap {
+            display: none;
+          }
+          .menu-btn {
+            display: inline-flex !important;
+          }
+          .search-wrap {
+            padding: 0 8px;
+            max-width: none;
+          }
+        }
+      `}</style>
+
+      <div className="wrap">
         {/* Logo */}
-        <div
-          onClick={() => router.push("/")}
-          style={{
-            color: "#00ffe0",
-            fontWeight: 700,
-            fontSize: 24,
-            cursor: "pointer",
-            marginRight: 32,
-            fontFamily: "Orbitron, sans-serif",
-            textTransform: "uppercase",
-            letterSpacing: 1,
-          }}
-        >
+        <div className="brand" onClick={() => router.push("/")}>
           GamerZone
         </div>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex" style={{ display: "flex", gap: 24 }}>
-          {navItems.map((label, i) => (
+        <div className="nav-wrap">
+          {navItems.map((item) => (
             <Dropdown
-              key={i}
+              key={item.key}
               popupRender={() => megaMenu}
               placement="bottom"
-              trigger={["hover"]}
+              trigger={[isMobile ? "click" : "hover"]}
             >
-              <div
-                style={{
-                  color: "#fff",
-                  cursor: "pointer",
-                  fontWeight: 500,
-                  transition: "color 0.2s",
-                }}
-              >
-                {label}
-              </div>
+              <Tooltip title={item.label} placement="bottom">
+                <div className="nav-item">
+                  {item.icon}
+                  <span className="nav-label">{item.label}</span>
+                </div>
+              </Tooltip>
             </Dropdown>
           ))}
         </div>
@@ -380,26 +459,20 @@ export default function AppHeader() {
         {/* Mobile menu button */}
         <Button
           icon={<MenuOutlined />}
+          className="menu-btn"
           style={{
             display: "none",
             background: "#1e1e1e",
             color: "#00ffe0",
             border: "none",
+            alignItems: "center",
+            justifyContent: "center",
           }}
-          className="md:hidden"
           onClick={() => setMobileMenuOpen(true)}
         />
 
-        {/* Search box */}
-        <div
-          style={{
-            flex: 1,
-            padding: "0 24px",
-            maxWidth: 500,
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
+        {/* Search */}
+        <div className="search-wrap">
           <Input
             placeholder="Tìm sản phẩm gaming..."
             prefix={<SearchOutlined />}
@@ -418,19 +491,13 @@ export default function AppHeader() {
         </div>
 
         {/* Account + Cart */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 24,
-          }}
-        >
+        <div className="acct">
           {status === "loading" ? null : session ? (
             <Dropdown
               menu={userMenu}
               placement="bottom"
               arrow
-              trigger={["click"]}
+              trigger={[isMobile ? "click" : "click"]} // click cả 2 để mở chắc chắn
             >
               <Avatar
                 style={{
@@ -454,7 +521,7 @@ export default function AppHeader() {
 
           <Popover
             content={<ContentPopover />}
-            trigger="hover"
+            trigger={isMobile ? "click" : "hover"}
             placement="bottomRight"
           >
             <Badge count={carts?.length ?? 0} offset={[-2, 2]}>
@@ -472,25 +539,30 @@ export default function AppHeader() {
         placement="left"
         onClose={() => setMobileMenuOpen(false)}
         open={mobileMenuOpen}
-        bodyStyle={{ background: "#0d0d0d", color: "#fff" }}
+        styles={{ body: { background: "#0d0d0d", color: "#fff" } }}
       >
-        {navItems.map((item, i) => (
+        {navItems.map((item) => (
           <div
-            key={i}
+            key={item.key}
             style={{
               padding: "12px 0",
               borderBottom: "1px solid rgba(255,255,255,0.1)",
               color: "#fff",
               cursor: "pointer",
               fontWeight: 500,
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
             }}
             onClick={() => setMobileMenuOpen(false)}
           >
-            {item}
+            {item.icon}
+            <span>{item.label}</span>
           </div>
         ))}
       </Drawer>
 
+      {/* Modals */}
       <UserInfoModal
         openManageAccount={openManageAccount}
         setOpenManageAccount={setOpenManageAccount}

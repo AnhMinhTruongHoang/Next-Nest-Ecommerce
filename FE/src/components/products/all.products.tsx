@@ -1,3 +1,5 @@
+"use client";
+
 import { FilterTwoTone, ReloadOutlined } from "@ant-design/icons";
 import {
   Row,
@@ -12,6 +14,7 @@ import {
   Pagination,
   Spin,
   Drawer,
+  FloatButton,
 } from "antd";
 import type { FormProps } from "antd";
 import { useRouter } from "next/navigation";
@@ -30,10 +33,7 @@ type IProduct = {
   sold: number;
   quantity: number;
   category: string[];
-  range: {
-    from: number;
-    to: number;
-  };
+  range: { from: number; to: number };
 };
 
 const ProductsPage = () => {
@@ -52,13 +52,13 @@ const ProductsPage = () => {
 
   const [form] = Form.useForm();
 
-  // Lấy danh mục
+  // categories
   useEffect(() => {
     const initCategory = async () => {
       try {
         const res = await fetch("http://localhost:8000/api/v1/categories");
         const data = await res.json();
-        if (data && data.data) {
+        if (data?.data) {
           const d = data.data.map((item: any) => ({
             label: item.name,
             value: item._id,
@@ -72,9 +72,10 @@ const ProductsPage = () => {
     initCategory();
   }, []);
 
-  // Lấy sản phẩm
+  // products
   useEffect(() => {
     fetchProduct();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current, pageSize, filter, sortQuery]);
 
   const fetchProduct = async () => {
@@ -82,11 +83,10 @@ const ProductsPage = () => {
     let query = `current=${current}&pageSize=${pageSize}`;
     if (filter) query += `&${filter}`;
     if (sortQuery) query += `&${sortQuery}`;
-
     try {
       const res = await fetch(`http://localhost:8000/api/v1/products?${query}`);
       const data = await res.json();
-      if (data && data.data) {
+      if (data?.data) {
         setListProduct(data.data.result);
         setTotal(data.data.meta.total);
       }
@@ -97,7 +97,7 @@ const ProductsPage = () => {
     }
   };
 
-  // Xử lý phân trang
+  // pagination
   const handleOnchangePage = (pagination: {
     current: number;
     pageSize: number;
@@ -109,40 +109,23 @@ const ProductsPage = () => {
     }
   };
 
-  const handleChangeFilter = (changedValues: any, values: any) => {
-    let queryParts: string[] = [];
-
-    // category=id1,id2
-    if (values.category?.length > 0) {
-      queryParts.push(`category=${values.category.join(",")}`);
-    }
-
-    // price range
-    if (values.range?.from) {
-      queryParts.push(`price[gte]=${values.range.from}`);
-    }
-    if (values.range?.to) {
-      queryParts.push(`price[lte]=${values.range.to}`);
-    }
-
-    // rating (nếu cần)
-    if (values.rating) {
-      queryParts.push(`rating[gte]=${values.rating}`);
-    }
-
-    setFilter(queryParts.join("&"));
+  // filters
+  const handleChangeFilter = (_: any, values: any) => {
+    const q: string[] = [];
+    if (values.category?.length > 0)
+      q.push(`category=${values.category.join(",")}`);
+    if (values.range?.from) q.push(`price[gte]=${values.range.from}`);
+    if (values.range?.to) q.push(`price[lte]=${values.range.to}`);
+    if (values.rating) q.push(`rating[gte]=${values.rating}`);
+    setFilter(q.join("&"));
     setCurrent(1);
   };
 
   const onFinish: FormProps<IProduct>["onFinish"] = async (values) => {
     if (values?.range?.from >= 0 && values?.range?.to >= 0) {
-      // Tạo query lọc theo khoảng giá
-      let f = `price>=${values?.range?.from}&price<=${values?.range?.to}`;
-      // Nếu có chọn thêm category thì gắn thêm
-      if (values?.category?.length) {
-        const cate = values?.category?.join(",");
-        f += `&category=${cate}`;
-      }
+      let f = `price>=${values.range.from}&price<=${values.range.to}`;
+      if (values?.category?.length)
+        f += `&category=${values.category.join(",")}`;
       setFilter(f);
     }
   };
@@ -150,18 +133,45 @@ const ProductsPage = () => {
   const items = [
     { key: "sort=-sold", label: `Phổ biến`, children: <></> },
     { key: "sort=-createdAt", label: `Hàng Mới`, children: <></> },
-    { key: "sort=price", label: `Giá Thấp Đến Cao`, children: <></> },
-    { key: "sort=-price", label: `Giá Cao Đến Thấp`, children: <></> },
+    { key: "sort=price", label: `Giá Thấp → Cao`, children: <></> },
+    { key: "sort=-price", label: `Giá Cao → Thấp`, children: <></> },
   ];
 
   return (
     <div style={{ background: "#efefef", padding: "20px 0" }}>
+      {/* CSS nhỏ để hiện FAB filter trên mobile */}
+      <style jsx>{`
+        .mobile-filter-fab {
+          display: none;
+        }
+        @media (max-width: 768px) {
+          .mobile-filter-fab {
+            display: block;
+          }
+        }
+        /* Tabs cuộn ngang trên mobile */
+        @media (max-width: 768px) {
+          .mobile-tabs {
+            overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: thin;
+          }
+          :global(.mobile-tabs .ant-tabs-nav-list) {
+            flex-wrap: nowrap !important;
+          }
+          :global(.mobile-tabs .ant-tabs-tab) {
+            padding-inline: 8px !important;
+            font-size: 13px;
+          }
+        }
+      `}</style>
+
       <div
         className="homepage-container"
         style={{ maxWidth: 1440, margin: "0 auto" }}
       >
         <Row gutter={[20, 20]}>
-          {/* Sidebar bộ lọc */}
+          {/* Sidebar filter (ẩn trên mobile) */}
           <Col md={4} sm={0} xs={0}>
             <div
               style={{ padding: "20px", background: "#fff", borderRadius: 5 }}
@@ -184,9 +194,7 @@ const ProductsPage = () => {
               <Form
                 onFinish={onFinish}
                 form={form}
-                onValuesChange={(changedValues, values) =>
-                  handleChangeFilter(changedValues, values)
-                }
+                onValuesChange={handleChangeFilter}
               >
                 <Form.Item
                   name="category"
@@ -207,18 +215,6 @@ const ProductsPage = () => {
                     </Row>
                   </Checkbox.Group>
                 </Form.Item>
-                <div
-                  className="mobile-filter-btn"
-                  style={{ display: "none", marginBottom: 10 }}
-                >
-                  <Button
-                    icon={<FilterTwoTone />}
-                    onClick={() => setShowMobileFilter(true)}
-                    type="primary"
-                  >
-                    Bộ lọc
-                  </Button>
-                </div>
 
                 <Divider />
                 <Form.Item label="Khoảng giá" labelCol={{ span: 24 }}>
@@ -226,9 +222,7 @@ const ProductsPage = () => {
                     <Col xl={11} md={24}>
                       <Form.Item name={["range", "from"]} noStyle>
                         <InputNumber
-                          name="from"
                           min={0}
-                          formatter={(value) => `${value}`}
                           placeholder="đ TỪ"
                           style={{ width: "100%" }}
                         />
@@ -240,8 +234,6 @@ const ProductsPage = () => {
                     <Col xl={11} md={24}>
                       <Form.Item name={["range", "to"]} noStyle>
                         <InputNumber
-                          name="to"
-                          formatter={(value) => `${value}`}
                           min={0}
                           placeholder="đ ĐẾN"
                           style={{ width: "100%" }}
@@ -277,24 +269,44 @@ const ProductsPage = () => {
             </div>
           </Col>
 
-          {/* Danh sách sản phẩm */}
+          {/* Product list */}
           <Col md={20} xs={24}>
             <Spin spinning={isLoading} tip="Loading...">
               <div
                 style={{ padding: "20px", background: "#fff", borderRadius: 5 }}
               >
-                <Tabs
-                  defaultActiveKey="sort=-sold"
-                  items={items}
-                  onChange={(value) => setSortQuery(value)}
-                  style={{ overflowX: "auto" }}
-                />
+                {/* Top row (mobile: có icon filter) */}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    marginBottom: 8,
+                  }}
+                >
+                  {/* Icon filter chỉ hiện trên mobile */}
+                  <Button
+                    className="md-hidden"
+                    icon={<FilterTwoTone />}
+                    type="text"
+                    style={{ display: "none" }}
+                    onClick={() => setShowMobileFilter(true)}
+                  />
+                  <Tabs
+                    className="mobile-tabs"
+                    size="small"
+                    defaultActiveKey="sort=-sold"
+                    items={items}
+                    onChange={(value) => setSortQuery(value)}
+                  />
+                </div>
+
                 <Row className="customize-row">
                   {listProduct?.map((item, index) => (
                     <div
                       className="column"
                       key={`products-${index}`}
-                      onClick={() => router.push(`/product-detail/${item._id}`)} /// go to detail
+                      onClick={() => router.push(`/product-detail/${item._id}`)}
                       style={{ cursor: "pointer" }}
                     >
                       <div className="wrapper">
@@ -347,12 +359,14 @@ const ProductsPage = () => {
                   }}
                 >
                   <Pagination
+                    responsive
+                    size="small"
                     current={current}
                     pageSize={pageSize}
                     total={total}
                     showSizeChanger
-                    onChange={(page, pageSize) =>
-                      handleOnchangePage({ current: page, pageSize })
+                    onChange={(page, ps) =>
+                      handleOnchangePage({ current: page, pageSize: ps })
                     }
                   />
                 </Row>
@@ -361,22 +375,31 @@ const ProductsPage = () => {
           </Col>
         </Row>
       </div>
+
+      {/* FAB filter icon (mobile only) */}
+      <FloatButton
+        className="mobile-filter-fab"
+        icon={<FilterTwoTone twoToneColor="#52c41a" />}
+        type="primary"
+        style={{ right: 20, bottom: 20 }}
+        onClick={() => setShowMobileFilter(true)}
+        tooltip="Bộ lọc"
+      />
+
+      {/* Drawer filter (mobile) */}
       <Drawer
         title="Bộ lọc tìm kiếm"
         placement="left"
         open={showMobileFilter}
         onClose={() => setShowMobileFilter(false)}
         width={"80%"}
+        styles={{ body: { paddingBottom: 24 } }}
       >
         <Form
           onFinish={onFinish}
           form={form}
-          onValuesChange={(changedValues, values) =>
-            handleChangeFilter(changedValues, values)
-          }
+          onValuesChange={handleChangeFilter}
         >
-          {/* copy toàn bộ nội dung trong sidebar cũ (Checkbox, Range, Rate) vào đây */}
-          {/* Category */}
           <Form.Item
             name="category"
             label="Danh mục sản phẩm"
@@ -396,9 +419,8 @@ const ProductsPage = () => {
               </Row>
             </Checkbox.Group>
           </Form.Item>
-          <Divider />
 
-          {/* Khoảng giá */}
+          <Divider />
           <Form.Item label="Khoảng giá" labelCol={{ span: 24 }}>
             <Row gutter={[10, 10]} style={{ width: "100%" }}>
               <Col span={11}>
@@ -431,9 +453,8 @@ const ProductsPage = () => {
               Áp dụng
             </Button>
           </Form.Item>
-          <Divider />
 
-          {/* Rating */}
+          <Divider />
           <Form.Item label="Đánh giá" labelCol={{ span: 24 }}>
             {[5, 4, 3, 2, 1].map((val) => (
               <div key={val}>

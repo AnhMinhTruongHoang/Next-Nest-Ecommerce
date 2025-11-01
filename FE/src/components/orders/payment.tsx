@@ -62,21 +62,26 @@ const Payment = ({ setCurrentStep }: IProps) => {
 
   /// Order logic
   const handlePlaceOrder = async (values: FieldType) => {
+    if (!carts.length) {
+      message.warning("Giỏ hàng trống");
+      return;
+    }
+
     const { fullName, phoneNumber, shippingAddress, method } = values;
     const userId = user?._id ?? "";
 
     const items = carts.map((item) => ({
-      productId: item._id,
+      productId: item.detail._id, // ✅
       quantity: item.quantity,
       price: item.detail.price,
       name: item.detail.name,
     }));
 
-    setIsSubmit(true);
-    const paymentRef = uuidv4();
+    const paymentRef = method === "VNPAY" ? uuidv4() : undefined;
 
+    setIsSubmit(true);
     try {
-      // 1. Tạo đơn hàng
+      // 1) Tạo order
       const res = await createOrderAPI(
         userId,
         fullName,
@@ -85,16 +90,13 @@ const Payment = ({ setCurrentStep }: IProps) => {
         totalPrice,
         method,
         items,
-        method === "VNPAY" ? paymentRef : undefined
+        paymentRef
       );
 
-      if (!res?.data?._id) {
-        throw new Error(res?.message || "Không thể tạo đơn hàng");
-      }
+      const orderId = res?.data?._id;
+      if (!orderId) throw new Error(res?.message || "Không thể tạo đơn hàng");
 
-      const orderId = res.data._id;
-
-      // 2. Nếu COD → hoàn tất
+      // 2) COD → xong
       if (method === "COD") {
         localStorage.removeItem("carts");
         setCarts([]);
@@ -103,14 +105,10 @@ const Payment = ({ setCurrentStep }: IProps) => {
         return;
       }
 
-      // 3. Nếu VNPAY → gọi API lấy URL thanh toán
+      // 3) VNPAY → xin URL & redirect
       const vnpUrl = await getVNPayUrlAPI(totalPrice, "vn", paymentRef);
+      if (!vnpUrl) throw new Error("Không thể tạo URL thanh toán");
 
-      if (!vnpUrl) {
-        throw new Error("Không thể tạo URL thanh toán");
-      }
-
-      // 4. Redirect sang VNPay
       window.location.href = vnpUrl;
     } catch (error: any) {
       notification.error({
@@ -118,9 +116,9 @@ const Payment = ({ setCurrentStep }: IProps) => {
         description: error.message || "Không thể kết nối tới server",
         duration: 5,
       });
+    } finally {
+      setIsSubmit(false);
     }
-
-    setIsSubmit(false);
   };
 
   return (

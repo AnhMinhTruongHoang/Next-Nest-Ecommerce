@@ -1,142 +1,234 @@
-import { useState, useEffect } from "react";
-import { Card, Carousel } from "antd";
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { Card, Carousel, Skeleton, Empty, Tag, Rate } from "antd";
 import Image from "next/image";
+import { getImageUrl } from "@/utils/getImageUrl";
 
 const { Meta } = Card;
 
-const cardList = [
-  { id: 1, title: "Tai nghe HAVIT", image: "/images/banners/banner6.png" },
-  { id: 2, title: "Bàn phím Pop Keys", image: "/images/banners/banner7.png" },
-  { id: 3, title: "Chuột Logitech", image: "/images/banners/banner5.jpg" },
-  { id: 4, title: "Chuột Logitech", image: "/images/banners/banner5.jpg" },
-  { id: 5, title: "Chuột Logitech", image: "/images/banners/banner5.jpg" },
-  { id: 6, title: "Tai nghe Razer", image: "/images/banners/banner8.png" },
-  { id: 7, title: "Bàn phím Cơ", image: "/images/banners/banner6.png" },
-  { id: 8, title: "Chuột Gaming", image: "/images/banners/banner7.png" },
-];
+type TProduct = {
+  _id: string;
+  thumbnail: string;
+  name: string;
+  price: number;
+  sold: number;
+};
 
-const chunkArray = (arr: any[], size: number) => {
-  const result = [];
-  for (let i = 0; i < arr.length; i += size) {
+const chunkArray = <T,>(arr: T[], size: number) => {
+  const result: T[][] = [];
+  for (let i = 0; i < arr.length; i += size)
     result.push(arr.slice(i, i + size));
-  }
   return result;
 };
 
-const ProductsGrid = () => {
-  const [itemsPerSlide, setItemsPerSlide] = useState(5);
+const currencyVN = (n?: number) =>
+  new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(
+    n ?? 0
+  );
 
-  // Xác định số sản phẩm mỗi slide theo kích thước màn hình
+const ProductsGrid = () => {
+  // data
+  const [listProduct, setListProduct] = useState<TProduct[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [errorMsg, setErrorMsg] = useState<string>("");
+
+  // responsive how many cards per slide
+  const [itemsPerSlide, setItemsPerSlide] = useState<number>(5);
+
   useEffect(() => {
     const updateItemsPerSlide = () => {
-      if (window.innerWidth < 640) {
-        setItemsPerSlide(1); // Mobile nhỏ
-      } else if (window.innerWidth < 1024) {
-        setItemsPerSlide(3); // Tablet
-      } else {
-        setItemsPerSlide(5); // Desktop
-      }
+      const w = window.innerWidth;
+      if (w < 640) setItemsPerSlide(1); // mobile nhỏ
+      else if (w < 1024) setItemsPerSlide(3); // tablet
+      else setItemsPerSlide(5); // desktop
     };
-
     updateItemsPerSlide();
     window.addEventListener("resize", updateItemsPerSlide);
     return () => window.removeEventListener("resize", updateItemsPerSlide);
   }, []);
 
-  const slides = chunkArray(cardList, itemsPerSlide);
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setIsLoading(true);
+      setErrorMsg("");
+      try {
+        const query = `current=1&pageSize=20&sort=-sold`;
+        const res = await fetch(
+          `http://localhost:8000/api/v1/products?${query}`
+        );
+        const data = await res.json();
+        const result: TProduct[] = data?.data?.result ?? [];
+        setListProduct(result);
+      } catch (e) {
+        console.error("Fetch products error:", e);
+        setErrorMsg("Không tải được danh sách sản phẩm. Vui lòng thử lại.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  const slides = useMemo(
+    () => chunkArray(listProduct, itemsPerSlide),
+    [listProduct, itemsPerSlide]
+  );
 
   return (
-    <>
-      <Carousel arrows dots>
-        {slides.map((group, index) => (
-          <div key={index}>
-            <div
-              style={{
-                textAlign: "center",
-                padding: "8px",
-                fontWeight: "bold",
-                marginTop: 30,
-              }}
-            >
-              <h1>Razer Exclusive</h1>
-            </div>
+    <div>
+      <div
+        style={{
+          textAlign: "center",
+          padding: "8px",
+          fontWeight: "bold",
+          marginTop: 30,
+        }}
+      >
+        <h1>Razer Exclusive</h1>
+      </div>
 
-            <div
-              style={{
-                display: "flex",
-                gap: "36px",
-                flexWrap: "wrap",
-                justifyContent: "center",
-                marginTop: 16,
-                marginBottom: 30,
-              }}
-            >
-              {group.map((card) => (
-                <Card
-                  key={card.id}
-                  hoverable
-                  style={{
-                    width: 300,
-                    borderRadius: 12,
-                    overflow: "hidden",
-                  }}
-                  cover={
-                    <div className="group overflow-hidden">
-                      <Image
-                        alt={card.title}
-                        src={card.image}
-                        width={350}
-                        height={300}
-                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+      {/* Loading skeleton */}
+      {isLoading && (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+            gap: 24,
+            maxWidth: 1400,
+            margin: "16px auto 40px",
+            padding: "0 16px",
+          }}
+        >
+          {Array.from({ length: itemsPerSlide }).map((_, i) => (
+            <Card key={`sk-${i}`} hoverable style={{ borderRadius: 12 }}>
+              <Skeleton.Image
+                style={{ width: "100%", height: 180, borderRadius: 8 }}
+                active
+              />
+              <div style={{ marginTop: 12 }}>
+                <Skeleton active paragraph={{ rows: 2 }} />
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Error */}
+      {!isLoading && errorMsg && (
+        <div style={{ textAlign: "center", margin: "16px 0 40px" }}>
+          {errorMsg}
+        </div>
+      )}
+
+      {/* Empty */}
+      {!isLoading && !errorMsg && listProduct.length === 0 && (
+        <div style={{ textAlign: "center", margin: "16px 0 40px" }}>
+          <Empty description="Chưa có sản phẩm phù hợp" />
+        </div>
+      )}
+
+      {/* Carousel cards */}
+      {!isLoading && !errorMsg && listProduct.length > 0 && (
+        <Carousel arrows dots>
+          {slides.map((group, index) => (
+            <div key={index}>
+              <div
+                style={{
+                  display: "flex",
+                  gap: 24,
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  marginTop: 16,
+                  marginBottom: 30,
+                }}
+              >
+                {group.map((p) => {
+                  const imgSrc = getImageUrl(p.thumbnail); // chuyển path -> URL đầy đủ
+                  return (
+                    <Card
+                      key={p._id}
+                      hoverable
+                      style={{
+                        width: 300,
+                        borderRadius: 12,
+                        overflow: "hidden",
+                      }}
+                      cover={
+                        <div
+                          className="group overflow-hidden"
+                          style={{ position: "relative", height: 200 }}
+                        >
+                          {/* Dùng Image để tối ưu, fallback sang <img> nếu domain chưa allow */}
+                          <Image
+                            alt={p.name}
+                            src={imgSrc}
+                            fill
+                            sizes="(max-width: 768px) 100vw, 300px"
+                            style={{ objectFit: "cover" }}
+                          />
+                        </div>
+                      }
+                      onClick={() =>
+                        (window.location.href = `/product-detail/${p._id}`)
+                      }
+                    >
+                      <Meta
+                        title={
+                          <div
+                            title={p.name}
+                            style={{
+                              textAlign: "center",
+                              fontWeight: 600,
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            {p.name}
+                          </div>
+                        }
+                        description={
+                          <div style={{ marginTop: 8 }}>
+                            <div
+                              style={{
+                                justifyContent: "center",
+                                textAlign: "center",
+                              }}
+                            >
+                              <Rate allowHalf defaultValue={2.5} />
+                            </div>
+                            <div
+                              style={{
+                                textAlign: "center",
+                                fontWeight: 700,
+                                color: "#d0021b",
+                              }}
+                            >
+                              {currencyVN(p.price)}
+                            </div>
+
+                            <div style={{ textAlign: "center", marginTop: 6 }}>
+                              <Tag color="green">{p.sold ?? 0} đã bán</Tag>
+                            </div>
+                          </div>
+                        }
                       />
-                    </div>
-                  }
-                >
-                  <Meta
-                    title={card.title}
-                    style={{ textAlign: "center", fontWeight: "bold" }}
-                  />
-                </Card>
-              ))}
+                    </Card>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
-      </Carousel>
+          ))}
+        </Carousel>
+      )}
 
-      {/* CSS hiển thị arrow đẹp */}
       <style jsx global>{`
-        .ant-carousel .slick-prev,
-        .ant-carousel .slick-next {
-          display: flex !important;
-          align-items: center;
-          justify-content: center;
-          background: rgba(0, 0, 0, 0.5);
-          border-radius: 50%;
-          width: 40px;
-          height: 40px;
-          z-index: 10;
-          transition: background 0.3s ease;
-        }
-
-        .ant-carousel .slick-prev:hover,
-        .ant-carousel .slick-next:hover {
-          background: rgba(0, 0, 0, 0.8);
-        }
-
-        .ant-carousel .slick-prev {
-          left: 10px;
-        }
-
-        .ant-carousel .slick-next {
-          right: 10px;
-        }
-
-        .ant-carousel .slick-prev::before,
-        .ant-carousel .slick-next::before {
-          display: none;
+        .ant-card-hoverable:hover {
+          box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
         }
       `}</style>
-    </>
+    </div>
   );
 };
 

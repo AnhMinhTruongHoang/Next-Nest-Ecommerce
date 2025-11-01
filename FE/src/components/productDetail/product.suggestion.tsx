@@ -3,7 +3,7 @@
 import { Button } from "antd";
 import Image from "next/image";
 
-const ExclusiveBanner1 = () => {
+const SuggestionBanner = () => {
   return (
     <div className="banner-container">
       <Image
@@ -149,4 +149,4 @@ const ExclusiveBanner1 = () => {
   );
 };
 
-export default ExclusiveBanner1;
+export default SuggestionBanner;

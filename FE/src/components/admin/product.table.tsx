@@ -33,13 +33,8 @@ const ProductsTable = () => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [accessToken, setAccessToken] = useState<string>("");
   const { notification } = App.useApp();
-  const [loading, setLoading] = useState(false); 
-  const [meta, setMeta] = useState({
-    current: 1,
-    pageSize: 20,
-    pages: 0,
-    total: 0,
-  });
+  const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState<any>(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -49,14 +44,16 @@ const ProductsTable = () => {
   }, []);
 
   useEffect(() => {
-    getData(meta.current, meta.pageSize);
-  }, []);
+    if (accessToken) {
+      getData(1, 999999); // load all khi mở
+    }
+  }, [accessToken]);
 
-  const getData = async (current = 1, pageSize = 20) => {
+  const getData = async (page = 1, pageSize = 20) => {
     try {
-      setLoading(true); 
+      setLoading(true);
       const res = await fetch(
-        `http://localhost:8000/api/v1/products?current=${current}&pageSize=${pageSize}`,
+        `http://localhost:8000/api/v1/products?current=${page}&pageSize=${pageSize}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -71,7 +68,18 @@ const ProductsTable = () => {
         return;
       }
       setListProducts(d.data.result);
-      setMeta(d.data.meta);
+
+      setPagination({
+        current: d.data.meta.current,
+        pageSize: d.data.meta.pageSize,
+        total: pageSize === 999999 ? d.data.result.length : d.data.meta.total,
+        showSizeChanger: true,
+        pageSizeOptions: ["10", "20", "50", "100", "0"], // 0 = ∞
+        showTotal: (total: number, range: [number, number]) =>
+          `${range[0]}-${range[1]} / ${total} items`,
+        onChange: handleOnChange,
+        onShowSizeChange: handleOnChange,
+      });
     } catch (error) {
       notification.error({ message: "Lỗi tải dữ liệu!" });
     } finally {
@@ -79,15 +87,21 @@ const ProductsTable = () => {
     }
   };
 
-  const handleOnChange = async (page: number, pageSize: number) => {
-    getData(page, pageSize);
+  const handleOnChange = (page: number, pageSize?: number) => {
+    const realPageSize = pageSize === 0 ? 999999 : pageSize;
+    setPagination((prev: any) => ({
+      ...prev,
+      current: page,
+      pageSize: realPageSize,
+    }));
+    getData(page, realPageSize || 20);
   };
 
   const handleDeleteProduct = async (product: IProduct) => {
     const d = await deleteProductAction(product, accessToken);
     if (d.data) {
       notification.success({ message: "Xóa sản phẩm thành công." });
-      getData(meta.current, meta.pageSize);
+      getData(1, pagination?.pageSize || 999999);
     } else {
       notification.error({ message: JSON.stringify(d.message) });
     }
@@ -98,7 +112,6 @@ const ProductsTable = () => {
       title: "Name",
       dataIndex: "name",
       align: "center",
-      responsive: ["xs", "sm", "md", "lg"],
       render: (value, record) => (
         <Button
           type="link"
@@ -148,38 +161,14 @@ const ProductsTable = () => {
       title: "Brand",
       dataIndex: "brand",
       align: "center",
-      responsive: ["xs", "sm", "md", "lg"],
-      filterDropdown: ({
-        setSelectedKeys,
-        selectedKeys,
-        confirm,
-        clearFilters,
-      }) => (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search brand"
-            value={selectedKeys[0]}
-            onChange={(e) =>
-              setSelectedKeys(e.target.value ? [e.target.value] : [])
-            }
-            onPressEnter={() => confirm()}
-            style={{ width: 188, marginBottom: 8, display: "block" }}
-          />
-          <Space>
-            <Button type="primary" onClick={() => confirm()} size="small">
-              Search
-            </Button>
-            <Button onClick={() => clearFilters && clearFilters()} size="small">
-              Reset
-            </Button>
-          </Space>
-        </div>
-      ),
-      filterIcon: (filtered) => (
-        <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
-      ),
+      filters: [
+        { text: "Logitech", value: "Logitech" },
+        { text: "Razer", value: "Razer" },
+        { text: "Asus", value: "Asus" },
+        { text: "MSI", value: "MSI" },
+      ],
       onFilter: (value, record) =>
-        record.brand?.toLowerCase().includes((value as string).toLowerCase()),
+        record.brand?.toLowerCase() === (value as string).toLowerCase(),
     },
     {
       title: "Category",
@@ -210,8 +199,8 @@ const ProductsTable = () => {
       title: "Thumbnail",
       dataIndex: "thumbnail",
       align: "center",
-      render: (thumbnail: string) => {
-        return thumbnail ? (
+      render: (thumbnail: string) =>
+        thumbnail ? (
           <Image
             src={getImageUrl(thumbnail)}
             alt="thumbnail"
@@ -221,15 +210,12 @@ const ProductsTable = () => {
           />
         ) : (
           <span>No image</span>
-        );
-      },
+        ),
     },
-
     {
       title: "Price",
       dataIndex: "price",
       align: "center",
-      responsive: ["xs", "sm", "md", "lg"],
       sorter: (a, b) => a.price - b.price,
       render: (price: number) =>
         new Intl.NumberFormat("vi-VN", {
@@ -238,25 +224,30 @@ const ProductsTable = () => {
           minimumFractionDigits: 0,
         }).format(price),
     },
-
     {
       title: "Stock",
       dataIndex: "stock",
       align: "center",
-      responsive: ["xs", "sm", "md", "lg"],
       sorter: (a, b) => a.stock - b.stock,
+      filters: [
+        { text: "Còn hàng", value: "in" },
+        { text: "Hết hàng", value: "out" },
+      ],
+      onFilter: (value, record) => {
+        if (value === "in") return record.stock > 0;
+        if (value === "out") return record.stock === 0;
+        return true;
+      },
     },
     {
       title: "Sold",
       dataIndex: "sold",
       align: "center",
-      responsive: ["xs", "sm", "md", "lg"],
       sorter: (a, b) => a.sold - b.sold,
     },
     {
       title: "Actions",
       align: "center",
-      responsive: ["xs", "sm", "md", "lg"],
       render: (_, record) => (
         <Space>
           <Button
@@ -292,21 +283,22 @@ const ProductsTable = () => {
         }}
       >
         <h2>Table products</h2>
-        <Button
-          type="text"
-          icon={<ReloadOutlined style={{ color: "green" }} />}
-          onClick={() => window.location.reload()}
-        >
-          Refresh
-        </Button>
-
-        <Button
-          icon={<PlusOutlined />}
-          type="primary"
-          onClick={() => setIsCreateModalOpen(true)}
-        >
-          Add new
-        </Button>
+        <Space>
+          <Button
+            type="text"
+            icon={<ReloadOutlined style={{ color: "green" }} />}
+            onClick={() => getData(1, pagination?.pageSize || 999999)}
+          >
+            Refresh
+          </Button>
+          <Button
+            icon={<PlusOutlined />}
+            type="primary"
+            onClick={() => setIsCreateModalOpen(true)}
+          >
+            Add new
+          </Button>
+        </Space>
       </div>
 
       <Spin spinning={loading} tip="Đang tải dữ liệu...">
@@ -314,15 +306,7 @@ const ProductsTable = () => {
           columns={columns}
           dataSource={listProducts}
           rowKey="_id"
-          pagination={{
-            current: meta.current,
-            pageSize: meta.pageSize,
-            total: meta.total,
-            showTotal: (total, range) =>
-              `${range[0]}-${range[1]} of ${total} items`,
-            onChange: handleOnChange,
-            showSizeChanger: true,
-          }}
+          pagination={pagination}
         />
       </Spin>
 
@@ -335,13 +319,13 @@ const ProductsTable = () => {
       />
       <CreateProductModal
         access_token={accessToken}
-        getData={() => getData(meta.current, meta.pageSize)}
+        getData={() => getData(1, pagination?.pageSize || 999999)}
         isCreateModalOpen={isCreateModalOpen}
         setIsCreateModalOpen={setIsCreateModalOpen}
       />
       <UpdateProductModal
         access_token={accessToken}
-        getData={() => getData(meta.current, meta.pageSize)}
+        getData={() => getData(1, pagination?.pageSize || 999999)}
         isUpdateModalOpen={isUpdateModalOpen}
         setIsUpdateModalOpen={setIsUpdateModalOpen}
         dataUpdate={dataUpdate}

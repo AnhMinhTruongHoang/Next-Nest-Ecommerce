@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Table, Button, Popconfirm, Space, Spin, App, DatePicker } from "antd";
+import { Table, Button, Popconfirm, Space, Spin, App } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { PlusOutlined, ReloadOutlined } from "@ant-design/icons";
 import { deleteOrderAction } from "@/lib/user.actions";
@@ -13,36 +13,25 @@ const OrderTable = () => {
   const [listOrder, setListOrder] = useState<IOrder[]>([]);
   const [loading, setLoading] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [dataUpdate, setDataUpdate] = useState<null | IOrder>(null);
+  const [orderData, setOrderData] = useState<IOrder | null>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const { notification } = App.useApp();
+
   const access_token =
     typeof window !== "undefined"
       ? (localStorage.getItem("access_token") as string)
       : "";
-  const [orderData, setOrderData] = useState<IOrder | null>(null);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const { RangePicker } = DatePicker;
-  const { notification } = App.useApp();
 
-  const [meta, setMeta] = useState({
-    current: 1,
-    pageSize: 50,
-    pages: 0,
-    total: 0,
-  });
+  // pagination state: mặc định false (không phân trang)
+  const [pagination, setPagination] = useState<any>(false);
 
   useEffect(() => {
-    let mounted = true;
-    getData();
-
-    return () => {
-      mounted = false;
-    };
+    getData(1, 999999);
   }, []);
 
-  const getData = async (page = meta.current, pageSize = meta.pageSize) => {
+  // sửa định nghĩa
+  const getData = async (page = 1, pageSize = 50) => {
     setLoading(true);
-    let mounted = true;
-
     try {
       const res = await fetch(
         `http://localhost:8000/api/v1/orders?current=${page}&pageSize=${pageSize}`,
@@ -53,33 +42,41 @@ const OrderTable = () => {
           },
         }
       );
-
       const d = await res.json();
       if (!d.data) {
         notification.error({ message: JSON.stringify(d.message) });
-      } else if (mounted) {
-        // sắp xếp theo ngày tạo mới nhất
+      } else {
         const sorted = d.data.result.sort(
           (a: IOrder, b: IOrder) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
         setListOrder(sorted);
-        setMeta(d.data.meta);
+
+        setPagination({
+          current: d.data.meta.current,
+          pageSize: d.data.meta.pageSize,
+          total: pageSize === 999999 ? sorted.length : d.data.meta.total,
+          showSizeChanger: true,
+          pageSizeOptions: ["10", "20", "50", "100", "0"], // 0 = ∞
+          showTotal: (total: number, range: [number, number]) =>
+            `${range[0]}-${range[1]} / ${total} items`,
+          onChange: handleOnChange,
+          onShowSizeChange: handleOnChange,
+        });
       }
-    } catch (err) {
-      console.error(err);
     } finally {
-      if (mounted) setLoading(false);
+      setLoading(false);
     }
   };
 
   const handleOnChange = (page: number, pageSize?: number) => {
-    setMeta((prev) => ({
+    const realPageSize = pageSize === 0 ? 999999 : pageSize;
+    setPagination((prev: any) => ({
       ...prev,
       current: page,
-      pageSize: pageSize || prev.pageSize,
+      pageSize: realPageSize,
     }));
-    getData(page, pageSize || meta.pageSize);
+    getData(page, realPageSize || 50);
   };
 
   const handleDeleteOrder = async (order: IOrder) => {
@@ -88,7 +85,7 @@ const OrderTable = () => {
       const d = await deleteOrderAction(order, access_token);
       if (d.data) {
         notification.success({ message: "Xóa Order thành công." });
-        getData();
+        getData(1, pagination?.pageSize || 999999);
       } else {
         notification.error({ message: JSON.stringify(d.message) });
       }
@@ -101,15 +98,14 @@ const OrderTable = () => {
     {
       title: "STT",
       align: "center",
-      render: (_: any, __: any, index: number) =>
-        index + 1 + (meta.current - 1) * meta.pageSize,
+      render: (_: any, __: any, index: number) => index + 1,
     },
     {
       title: "Thời gian tạo",
       dataIndex: "createdAt",
       align: "center",
       sorter: (a, b) => dayjs(a.createdAt).unix() - dayjs(b.createdAt).unix(),
-      defaultSortOrder: "descend", // ✅ mới nhất lên đầu
+      defaultSortOrder: "descend",
       render: (value: string | null) =>
         value ? dayjs(value).format("DD/MM/YYYY HH:mm") : "---",
     },
@@ -130,6 +126,12 @@ const OrderTable = () => {
       title: "Phương thức thanh toán",
       dataIndex: "paymentMethod",
       align: "center",
+      filters: [
+        { text: "COD", value: "COD" },
+        { text: "VNPay", value: "VNPAY" },
+        { text: "Momo", value: "MOMO" },
+      ],
+      onFilter: (value, record) => record.paymentMethod === value,
       render: (method: string) => {
         switch (method) {
           case "COD":
@@ -147,9 +149,16 @@ const OrderTable = () => {
       title: "Trạng thái",
       dataIndex: "status",
       align: "center",
+      filters: [
+        { text: "PENDING", value: "PENDING" },
+        { text: "PAID", value: "PAID" },
+        { text: "SHIPPED", value: "SHIPPED" },
+        { text: "COMPLETED", value: "COMPLETED" },
+        { text: "CANCELED", value: "CANCELED" },
+      ],
+      onFilter: (value, record) => record.status === value,
       render: (status: string) => {
         let style: React.CSSProperties = {};
-
         switch (status) {
           case "PENDING":
             style = { backgroundColor: "#FFF4E5", color: "#B76E00" };
@@ -171,7 +180,6 @@ const OrderTable = () => {
             style = { backgroundColor: "#ECEFF1", color: "#546E7A" };
             break;
         }
-
         return (
           <span
             style={{
@@ -190,7 +198,6 @@ const OrderTable = () => {
         );
       },
     },
-
     {
       title: "Hành động",
       align: "center",
@@ -233,7 +240,7 @@ const OrderTable = () => {
           <Button
             type="text"
             icon={<ReloadOutlined style={{ color: "green" }} />}
-            onClick={() => getData()}
+            onClick={() => getData(1, pagination?.pageSize || 999999)}
           >
             Refresh
           </Button>
@@ -250,15 +257,7 @@ const OrderTable = () => {
         columns={columns}
         dataSource={listOrder}
         rowKey={"_id"}
-        pagination={{
-          current: meta.current,
-          pageSize: meta.pageSize,
-          total: meta.total,
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} / ${total} items`,
-          onChange: handleOnChange,
-          showSizeChanger: true,
-        }}
+        pagination={pagination}
       />
       <ViewOrderModal
         orderData={orderData}

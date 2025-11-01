@@ -28,7 +28,7 @@ const ModalGallery = ({
   const [activeIndex, setActiveIndex] = useState<number>(currentIndex || 0);
   const refGallery = useRef<ImageGallery>(null);
 
-  // 👉 Khi modal mở, nhảy đến đúng hình đang xem ở trang chi tiết
+  // Khi modal mở, nhảy đến đúng hình đang xem ở trang chi tiết
   useEffect(() => {
     if (isOpen && items.length > 0) {
       setActiveIndex(currentIndex);
@@ -52,35 +52,31 @@ const ModalGallery = ({
           : "70vw" // Desktop
       }
       destroyOnHidden
-      // 👉 styles: thay thế cho bodyStyle/contentStyle (Ant Design v5+)
       styles={{
         body: {
-          // 👉 Điều chỉnh chiều cao hiển thị modal
-          // Ví dụ: tăng lên "80vh" nếu muốn modal cao hơn
           height: window.innerWidth < 768 ? "75vh" : "65vh",
           overflow: "hidden",
           padding: "10px 20px",
         },
         content: {
-          borderRadius: 16, // 👉 Bo góc modal
-          maxHeight: "90vh", // 👉 Giới hạn max chiều cao modal
+          borderRadius: 16,
+          maxHeight: "90vh",
         },
       }}
     >
       <Row gutter={[20, 20]} align="middle" justify="center">
-        {/* 🖼 Khu vực hiển thị ảnh chính */}
         <Col xs={24} md={16}>
           {items?.length > 0 && (
             <div className="modal-gallery__main">
               <ImageGallery
                 ref={refGallery}
                 items={items}
-                showPlayButton={false} // 👉 Ẩn nút play slideshow
-                showFullscreenButton={false} // 👉 Ẩn nút fullscreen
-                showThumbnails={false} // 👉 Ẩn dải ảnh nhỏ bên dưới
+                showPlayButton={false}
+                showFullscreenButton={false}
+                showThumbnails={false}
                 startIndex={currentIndex}
                 onSlide={(i) => setActiveIndex(i)} // 👉 Lưu chỉ số ảnh hiện tại
-                slideDuration={0} // 👉 Không hiệu ứng trượt
+                slideDuration={0}
               />
             </div>
           )}

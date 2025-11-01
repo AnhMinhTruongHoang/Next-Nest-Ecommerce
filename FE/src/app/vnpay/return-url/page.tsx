@@ -2,21 +2,34 @@
 
 import { updatePaymentOrderAPI } from "@/utils/api";
 import { App, Button, Result, Skeleton, Card } from "antd";
-import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { useCurrentApp } from "@/components/context/app.context";
 
 const VNPayReturnPage = () => {
   const searchParams = useSearchParams();
-  const { notification } = App.useApp();
+  const router = useRouter();
+  const { notification, message } = App.useApp();
+  const { setCarts } = useCurrentApp();
+
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<"success" | "error">("error");
+  const didCallRef = useRef(false);
 
   const paymentRef = searchParams.get("vnp_TxnRef") ?? "";
   const responseCode = searchParams.get("vnp_ResponseCode") ?? "";
 
   useEffect(() => {
-    if (!paymentRef) return;
+    // Thiếu param → hiển thị lỗi gọn gàng
+    if (!paymentRef || !responseCode) {
+      setStatus("error");
+      setLoading(false);
+      return;
+    }
+
+    if (didCallRef.current) return;
+    didCallRef.current = true;
 
     const verifyPayment = async () => {
       setLoading(true);
@@ -26,15 +39,24 @@ const VNPayReturnPage = () => {
           paymentRef
         );
 
-        if (result?.data) {
-          setStatus(responseCode === "00" ? "success" : "error");
+        // BE đã confirm & trừ kho thành công khi "00"
+        if (responseCode === "00") {
+          // ✅ Clear giỏ hàng phía FE sau khi BE đã cập nhật stock/sold
+          localStorage.removeItem("carts");
+          setCarts([]);
+          setStatus("success");
+          message.success("Thanh toán thành công!");
         } else {
-          throw new Error(result?.message || "Không thể xác thực thanh toán");
+          setStatus("error");
+          message.error("Thanh toán thất bại hoặc đã huỷ.");
         }
+
+        // Có thể inspect result để hiển thị thêm thông tin đơn hàng nếu muốn
+        // console.log("confirm result:", result);
       } catch (err: any) {
         notification.error({
           message: "Lỗi kết nối",
-          description: err.message || "Không thể kết nối tới server",
+          description: err?.message || "Không thể kết nối tới server",
         });
         setStatus("error");
       } finally {
@@ -43,7 +65,7 @@ const VNPayReturnPage = () => {
     };
 
     verifyPayment();
-  }, [paymentRef, responseCode, notification]);
+  }, [paymentRef, responseCode, notification, message, setCarts]);
 
   if (loading) {
     return (
@@ -68,8 +90,8 @@ const VNPayReturnPage = () => {
       style={{
         minHeight: "100vh",
         background: isSuccess
-          ? "linear-gradient(135deg, #d4fc79, #96e6a1)" // xanh lá nhẹ khi thành công
-          : "linear-gradient(135deg, #f85032, #e73827)", // đỏ cam khi lỗi
+          ? "linear-gradient(135deg, #d4fc79, #96e6a1)"
+          : "linear-gradient(135deg, #f85032, #e73827)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -122,7 +144,7 @@ const VNPayReturnPage = () => {
               </div>
             }
             extra={[
-              <Link href="/" key="home">
+              <Link href="/cart" key="cart">
                 <Button
                   type="primary"
                   size="large"
@@ -133,8 +155,11 @@ const VNPayReturnPage = () => {
                     fontWeight: 600,
                   }}
                 >
-                  Quay lại trang chủ
+                  Quay lại giỏ hàng
                 </Button>
+              </Link>,
+              <Link href="/" key="home">
+                <Button size="large">Trang chủ</Button>
               </Link>,
             ]}
           />
