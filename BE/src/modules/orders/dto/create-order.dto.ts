@@ -37,9 +37,15 @@ export class CreateOrderDto {
   @Type(() => OrderItemDto)
   items: OrderItemDto[];
 
-  @IsEnum(['PENDING', 'PAID', 'SHIPPED', 'COMPLETED', 'CANCELED'])
+  @IsEnum(['PENDING', 'PAID', 'SHIPPED', 'COMPLETED', 'CANCELED', 'REFUNDED'])
   @IsOptional()
-  status?: 'PENDING' | 'PAID' | 'SHIPPED' | 'COMPLETED' | 'CANCELED';
+  status?:
+    | 'PENDING'
+    | 'PAID'
+    | 'SHIPPED'
+    | 'COMPLETED'
+    | 'CANCELED'
+    | 'REFUNDED';
 
   @IsNumber()
   @Min(0)

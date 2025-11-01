@@ -3,9 +3,15 @@ import { CreateOrderDto } from './create-order.dto';
 import { IsEnum, IsOptional } from 'class-validator';
 
 export class UpdateOrderDto extends PartialType(CreateOrderDto) {
-  @IsEnum(['PENDING', 'PAID', 'SHIPPED', 'COMPLETED', 'CANCELED'])
+  @IsEnum(['PENDING', 'PAID', 'SHIPPED', 'COMPLETED', 'CANCELED', 'REFUNDED'])
   @IsOptional()
-  status?: 'PENDING' | 'PAID' | 'SHIPPED' | 'COMPLETED' | 'CANCELED';
+  status?:
+    | 'PENDING'
+    | 'PAID'
+    | 'SHIPPED'
+    | 'COMPLETED'
+    | 'CANCELED'
+    | 'REFUNDED';
 
   @IsEnum(['UNPAID', 'PAID', 'REFUNDED'])
   @IsOptional()

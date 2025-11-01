@@ -7,6 +7,7 @@ import {
   Patch,
   Delete,
   Query,
+  NotFoundException,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -34,10 +35,14 @@ export class OrdersController {
     return this.ordersService.findAll(+currentPage, +limit, qs);
   }
 
-  @Get('user/:userId')
-  @ResponseMessage('Fetch orders by userId')
-  findOrderByUserId(@Param('userId') userId: string) {
-    return this.ordersService.findOrderByUserId(userId);
+  @Get('/user/:userId')
+  async getOrdersByUser(@Param('userId') userId: string) {
+    const orders = await this.ordersService.findOrderByUserId(userId);
+    return {
+      statusCode: 200,
+      message: 'Fetched user orders successfully',
+      data: orders ?? [],
+    };
   }
 
   @Get('confirm-payment')

@@ -28,7 +28,7 @@ export class Order {
 
   @Prop({
     default: 'PENDING',
-    enum: ['PENDING', 'PAID', 'SHIPPED', 'COMPLETED', 'CANCELED'],
+    enum: ['PENDING', 'PAID', 'SHIPPED', 'COMPLETED', 'CANCELED', 'REFUNDED'],
   })
   status: string;
 
@@ -46,6 +46,9 @@ export class Order {
 
   @Prop({ unique: true, index: true })
   paymentRef?: string;
+
+  @Prop({ type: Boolean, default: false })
+  inventoryAdjusted: boolean;
 
   @Prop({ enum: ['COD', 'BANK', 'MOMO', 'VNPAY'], default: 'COD' })
   paymentMethod: string;

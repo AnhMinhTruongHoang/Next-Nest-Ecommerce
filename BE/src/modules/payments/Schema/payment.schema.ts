@@ -7,6 +7,7 @@ export enum PaymentMethod {
   CASH = 'cash',
   CREDIT_CARD = 'credit_card',
   PAYPAL = 'paypal',
+  VNPAY = 'vnpay',
   BANK_TRANSFER = 'bank_transfer',
 }
 
@@ -33,12 +34,7 @@ export class Payment {
     enum: Object.values(PaymentStatus),
     default: PaymentStatus.PENDING,
   })
-  @Prop({
-    type: String,
-    enum: Object.values(PaymentStatus),
-    default: PaymentStatus.PENDING,
-  })
-  status: PaymentStatus;
+  status: PaymentStatus; // 👈 giữ một @Prop duy nhất
 
   @Prop()
   transactionId: string;
