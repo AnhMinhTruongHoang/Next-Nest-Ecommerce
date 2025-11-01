@@ -85,7 +85,7 @@ const ProductsGrid = () => {
           marginTop: 30,
         }}
       >
-        <h1>Razer Exclusive</h1>
+        <h1>Best Sellers</h1>
       </div>
 
       {/* Loading skeleton */}

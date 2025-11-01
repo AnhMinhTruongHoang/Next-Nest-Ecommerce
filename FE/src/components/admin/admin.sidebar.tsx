@@ -53,26 +53,27 @@ const AdminSideBar = () => {
         },
         {
           key: "sub1",
-          label: "Navigation One",
+          label: "Feedback",
           icon: <MailOutlined />,
           children: [
             {
               key: "g1",
-              label: "Item 1",
+              label: "Comments",
               type: "group",
               children: [
-                { key: "1", label: "Option 1" },
-                { key: "2", label: "Option 2" },
+                {
+                  key: "1",
+                  label: (
+                    <Link href={"/dashboard/comments"}>Manage Reviews</Link>
+                  ),
+                },
               ],
             },
             {
               key: "g2",
-              label: "Item 2",
+              label: "Rating",
               type: "group",
-              children: [
-                { key: "3", label: "Option 3" },
-                { key: "4", label: "Option 4" },
-              ],
+              children: [{ key: "2", label: "Manage Rating" }],
             },
           ],
         },

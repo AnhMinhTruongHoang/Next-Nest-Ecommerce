@@ -27,6 +27,7 @@ import "react-image-gallery/styles/css/image-gallery.css";
 import { useCurrentApp } from "@/components/context/app.context";
 import ModalGallery from "@/components/products/modal.gallery";
 import "../../styles/product.scss";
+import TextArea from "antd/es/input/TextArea";
 
 const { Title, Text } = Typography;
 
@@ -238,6 +239,7 @@ const ProductDetail = ({ currentProduct }: IProps) => {
                 showFullscreenButton={false}
                 slideOnThumbnailOver
                 lazyLoad
+                additionalClass="product-gallery"
                 onClick={() => setIsOpenModalGallery(true)}
               />
             </Col>
@@ -249,13 +251,13 @@ const ProductDetail = ({ currentProduct }: IProps) => {
                 size="middle"
                 style={{ width: "100%" }}
               >
-                {currentProduct.brand ? (
-                  <Tag color="blue">{currentProduct.brand}</Tag>
-                ) : null}
-
                 <Title level={3} style={{ margin: 0 }}>
                   {currentProduct.name}
                 </Title>
+
+                {currentProduct.brand ? (
+                  <Tag color="blue">{currentProduct.brand}</Tag>
+                ) : null}
 
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <Rate disabled defaultValue={5} style={{ fontSize: 14 }} />

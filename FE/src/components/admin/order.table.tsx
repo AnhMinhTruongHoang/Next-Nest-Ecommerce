@@ -57,7 +57,7 @@ const OrderTable = () => {
           pageSize: d.data.meta.pageSize,
           total: pageSize === 999999 ? sorted.length : d.data.meta.total,
           showSizeChanger: true,
-          pageSizeOptions: ["10", "20", "50", "100", "0"], // 0 = ∞
+          pageSizeOptions: ["10", "20", "50", "100", "0"],
           showTotal: (total: number, range: [number, number]) =>
             `${range[0]}-${range[1]} / ${total} items`,
           onChange: handleOnChange,
@@ -155,6 +155,7 @@ const OrderTable = () => {
         { text: "SHIPPED", value: "SHIPPED" },
         { text: "COMPLETED", value: "COMPLETED" },
         { text: "CANCELED", value: "CANCELED" },
+        { text: "REFUNDED", value: "REFUNDED" },
       ],
       onFilter: (value, record) => record.status === value,
       render: (status: string) => {
@@ -171,6 +172,9 @@ const OrderTable = () => {
             break;
           case "COMPLETED":
             style = { backgroundColor: "#E0F7FA", color: "#00838F" };
+            break;
+          case "REFUNDED":
+            style = { backgroundColor: "gray", color: "black" };
             break;
           case "CANCELED":
           case "CANCELLED":

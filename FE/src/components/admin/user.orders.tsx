@@ -40,7 +40,7 @@ const OrderHistoryModal: React.FC<Props> = ({
 }) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [refreshKey, setRefreshKey] = useState(0); // bấm refresh / event sẽ tăng
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const getImageUrl = (url?: string) => {
     if (!url) return "";

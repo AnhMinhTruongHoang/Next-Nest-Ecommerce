@@ -42,6 +42,12 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({
     if (!orderData?._id) return;
     setLoading(true);
     try {
+      // Map status -> paymentStatus hợp lệ
+      const body: any = { status };
+      if (status === "PAID") body.paymentStatus = "PAID";
+      if (status === "REFUNDED") body.paymentStatus = "REFUNDED";
+      if (status === "CANCELED") body.paymentStatus = "UNPAID";
+
       const res = await fetch(
         `http://localhost:8000/api/v1/orders/${orderData._id}`,
         {
@@ -50,7 +56,7 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({
             "Content-Type": "application/json",
             ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
           },
-          body: JSON.stringify({ status }),
+          body: JSON.stringify(body),
         }
       );
       const data = await res.json();
@@ -58,6 +64,7 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({
 
       message.success("Cập nhật trạng thái đơn hàng thành công!");
       setOrderData(data.data ?? data);
+      window.location.reload();
     } catch (err: any) {
       notification.error({
         message: "Cập nhật thất bại",
@@ -65,7 +72,6 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({
       });
     } finally {
       setLoading(false);
-      window.location.reload();
     }
   };
 
@@ -109,6 +115,7 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({
                     { value: "SHIPPED", label: "🚚 SHIPPED" },
                     { value: "COMPLETED", label: "✅ COMPLETED" },
                     { value: "CANCELED", label: "❌ CANCELED" },
+                    { value: "REFUNDED", label: "=> REFUNDED" },
                   ]}
                 />
                 <Button
