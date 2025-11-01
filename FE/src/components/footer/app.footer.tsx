@@ -1,19 +1,22 @@
 "use client";
 
 import React from "react";
-import { Layout, Typography, Row, Col, Space, Divider } from "antd";
+import { Layout, Typography, Row, Col, Space, Divider, Grid } from "antd";
 import {
   FacebookFilled,
   TwitterSquareFilled,
   GoogleSquareFilled,
   InstagramFilled,
   LinkedinFilled,
-  GithubFilled,
 } from "@ant-design/icons";
 
 const { Footer } = Layout;
+const { useBreakpoint } = Grid;
 
 const AppFooter = () => {
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
+
   const aboutLinks = ["About Us", "Careers", "Blog", "Contact"];
   const supportLinks = [
     "Help Center",
@@ -28,107 +31,138 @@ const AppFooter = () => {
     "Warranty Policy",
   ];
 
+  const linkStyle: React.CSSProperties = {
+    display: "block",
+    color: "#ccc",
+    textDecoration: "none",
+    padding: isMobile ? "10px 0" : "6px 0",
+    lineHeight: 1.35,
+  };
+
+  const sectionTitleStyle: React.CSSProperties = {
+    color: "#fff",
+    marginBottom: isMobile ? 8 : 12,
+    fontSize: isMobile ? 14 : 16,
+    letterSpacing: 0.4,
+  };
+
+  const footerPadding = isMobile ? "28px 16px 0" : "60px 40px 0";
+  const iconSize = isMobile ? 22 : 24;
+  const iconStyle: React.CSSProperties = {
+    fontSize: iconSize,
+    color: "#fff",
+    cursor: "pointer",
+  };
+
   return (
     <Footer
+      role="contentinfo"
       style={{
         backgroundColor: "#1f1f1f",
         color: "#fff",
-        padding: "60px 40px 0",
+        padding: footerPadding,
         marginTop: "auto",
       }}
     >
       {/* Links Grid */}
-      <Row gutter={[32, 32]} justify="center" style={{ marginBottom: 48 }}>
+      <Row
+        gutter={[isMobile ? 12 : 32, isMobile ? 12 : 32]}
+        justify={isMobile ? "start" : "center"}
+        style={{ marginBottom: isMobile ? 24 : 48 }}
+      >
+        {/* ABOUT */}
         <Col xs={24} sm={12} md={6}>
-          <Typography.Title level={5} style={{ color: "#fff" }}>
+          <Typography.Title level={5} style={sectionTitleStyle}>
             ABOUT
           </Typography.Title>
-          {aboutLinks.map((link, idx) => (
-            <a
-              key={idx}
-              href="#"
-              style={{
-                display: "block",
-                color: "#ccc",
-                marginBottom: 8,
-                textDecoration: "none",
-              }}
-            >
-              {link}
-            </a>
-          ))}
+          <nav aria-label="About">
+            {aboutLinks.map((link, idx) => (
+              <a key={idx} href="#" style={linkStyle}>
+                {link}
+              </a>
+            ))}
+          </nav>
         </Col>
 
+        {/* SUPPORT */}
         <Col xs={24} sm={12} md={6}>
-          <Typography.Title level={5} style={{ color: "#fff" }}>
+          <Typography.Title level={5} style={sectionTitleStyle}>
             SUPPORT
           </Typography.Title>
-          {supportLinks.map((link, idx) => (
-            <a
-              key={idx}
-              href="#"
-              style={{
-                display: "block",
-                color: "#ccc",
-                marginBottom: 8,
-                textDecoration: "none",
-              }}
-            >
-              {link}
-            </a>
-          ))}
+          <nav aria-label="Support">
+            {supportLinks.map((link, idx) => (
+              <a key={idx} href="#" style={linkStyle}>
+                {link}
+              </a>
+            ))}
+          </nav>
         </Col>
 
+        {/* POLICIES */}
         <Col xs={24} sm={12} md={6}>
-          <Typography.Title level={5} style={{ color: "#fff" }}>
+          <Typography.Title level={5} style={sectionTitleStyle}>
             POLICIES
           </Typography.Title>
-          {policyLinks.map((link, idx) => (
-            <a
-              key={idx}
-              href="#"
-              style={{
-                display: "block",
-                color: "#ccc",
-                marginBottom: 8,
-                textDecoration: "none",
-              }}
-            >
-              {link}
-            </a>
-          ))}
+          <nav aria-label="Policies">
+            {policyLinks.map((link, idx) => (
+              <a key={idx} href="#" style={linkStyle}>
+                {link}
+              </a>
+            ))}
+          </nav>
         </Col>
 
-        <Col xs={24} sm={12} md={6}>
-          <Typography.Title level={5} style={{ color: "#fff" }}>
+        {/* CONNECT & CONTACT */}
+        <Col
+          xs={24}
+          sm={12}
+          md={6}
+          style={{ textAlign: isMobile ? "left" : "left" }}
+        >
+          <Typography.Title level={5} style={sectionTitleStyle}>
             CONNECT WITH US
           </Typography.Title>
-          <Space size="middle" style={{ marginTop: 8 }}>
-            <FacebookFilled
-              style={{ fontSize: 24, color: "#fff", cursor: "pointer" }}
-            />
-            <TwitterSquareFilled
-              style={{ fontSize: 24, color: "#fff", cursor: "pointer" }}
-            />
-            <GoogleSquareFilled
-              style={{ fontSize: 24, color: "#fff", cursor: "pointer" }}
-            />
-            <InstagramFilled
-              style={{ fontSize: 24, color: "#fff", cursor: "pointer" }}
-            />
-            <LinkedinFilled
-              style={{ fontSize: 24, color: "#fff", cursor: "pointer" }}
-            />
+          <Space size={isMobile ? 12 : "middle"} wrap>
+            <a aria-label="Facebook" href="#">
+              <FacebookFilled style={iconStyle} />
+            </a>
+            <a aria-label="Twitter" href="#">
+              <TwitterSquareFilled style={iconStyle} />
+            </a>
+            <a aria-label="Google" href="#">
+              <GoogleSquareFilled style={iconStyle} />
+            </a>
+            <a aria-label="Instagram" href="#">
+              <InstagramFilled style={iconStyle} />
+            </a>
+            <a aria-label="LinkedIn" href="#">
+              <LinkedinFilled style={iconStyle} />
+            </a>
           </Space>
-          <Typography.Title
-            level={5}
-            style={{ color: "#fff", marginTop: "25px" }}
-          >
-            <div>
-              <p>Hotline: 0721123213</p>
-              <p>Address: 123/6, Thu Đuc City, Ho Chi Minh City</p>
-            </div>
-          </Typography.Title>
+
+          <div style={{ marginTop: isMobile ? 16 : 24 }}>
+            <Typography.Paragraph
+              style={{
+                color: "#ddd",
+                marginBottom: 4,
+                fontSize: isMobile ? 13 : 14,
+              }}
+            >
+              <strong>Hotline:</strong>{" "}
+              <a href="tel:0721123213" style={{ color: "#ddd" }}>
+                0721123213
+              </a>
+            </Typography.Paragraph>
+            <Typography.Paragraph
+              style={{
+                color: "#ddd",
+                marginBottom: 0,
+                fontSize: isMobile ? 13 : 14,
+              }}
+            >
+              <strong>Address:</strong> 123/6, Thu Duc City, Ho Chi Minh City
+            </Typography.Paragraph>
+          </div>
         </Col>
       </Row>
 
@@ -138,8 +172,8 @@ const AppFooter = () => {
       <div
         style={{
           textAlign: "center",
-          padding: "22px 0",
-          fontSize: 14,
+          padding: isMobile ? "16px 8px" : "22px 0",
+          fontSize: isMobile ? 12 : 14,
           color: "#aaa",
         }}
       >

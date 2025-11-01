@@ -144,20 +144,6 @@ const VNPayReturnPage = () => {
               </div>
             }
             extra={[
-              <Link href="/cart" key="cart">
-                <Button
-                  type="primary"
-                  size="large"
-                  style={{
-                    background: "#ff1744",
-                    border: "none",
-                    borderRadius: 8,
-                    fontWeight: 600,
-                  }}
-                >
-                  Quay lại giỏ hàng
-                </Button>
-              </Link>,
               <Link href="/" key="home">
                 <Button size="large">Trang chủ</Button>
               </Link>,
