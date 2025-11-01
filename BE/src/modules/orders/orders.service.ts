@@ -126,7 +126,6 @@ export class OrdersService {
   }
 
   // UPDATE
-  // UPDATE
   async update(id: string, data: UpdateOrderDto) {
     const current = await this.orderModel.findById(id).exec();
     if (!current) throw new NotFoundException('Order not found');
