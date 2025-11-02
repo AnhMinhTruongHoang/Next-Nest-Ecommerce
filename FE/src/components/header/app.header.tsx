@@ -117,11 +117,13 @@ const BrandLogo: React.FC<BrandLogoProps> = ({
   );
 };
 
-const CATEGORY_ID_BY_KEY: Record<string, string> = {
-  mouse: "68f1583f209579e29f938f22",
-  keyboard: "68f1583f209579e29f938f23",
-  monitor: "68f1583f209579e29f938f24",
-  chairs: "68f1583f209579e29f938f25",
+const KEY_TO_CATEGORY_NAME: Record<string, string> = {
+  mouse: "Mouse",
+  keyboard: "Keyboard",
+  monitor: "Monitor",
+  chairs: "Chairs",
+  accessories: "Accessories",
+  headset: "Headset",
 };
 
 type SuggestItem = {
@@ -135,26 +137,47 @@ export default function AppHeader() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { carts } = useCurrentApp();
-
   const [openManageAccount, setOpenManageAccount] = useState(false);
   const [openOrderHistory, setOpenOrderHistory] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-
   const [openDropdown, setOpenDropdown] = useState(false);
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<SuggestItem[]>([]);
   const [loading, setLoading] = useState(false);
-
+  const [catMapByName, setCatMapByName] = useState<Record<string, string>>({});
   const backendURL =
     process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 992);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
+    const cached = localStorage.getItem("catMapByName");
+    if (cached) {
+      try {
+        const { at, map } = JSON.parse(cached);
+        if (Date.now() - at < 24 * 60 * 60 * 1000) {
+          setCatMapByName(map);
+          return;
+        }
+      } catch {}
+    }
+
+    (async () => {
+      try {
+        const res = await fetch(`${backendURL}/api/v1/categories`);
+        const json = await res.json();
+        const arr: Array<{ _id: string; name: string }> = json?.data ?? [];
+        const map: Record<string, string> = {};
+        for (const c of arr) map[c.name.toLowerCase()] = c._id;
+        setCatMapByName(map);
+        localStorage.setItem(
+          "catMapByName",
+          JSON.stringify({ at: Date.now(), map })
+        );
+      } catch (e) {
+        console.error("Load categories failed", e);
+      }
+    })();
+  }, [backendURL]);
 
   const handleLogout = () => {
     localStorage.removeItem("access_token");
@@ -353,13 +376,15 @@ export default function AppHeader() {
   };
 
   const goCategory = (key: string) => {
-    const id = CATEGORY_ID_BY_KEY[key];
-    if (!id) {
+    const catName = KEY_TO_CATEGORY_NAME[key];
+    if (!catName) {
       router.push("/productsList");
       return;
     }
+    const id = catMapByName[catName.toLowerCase()];
     const sp = new URLSearchParams();
-    sp.set("category", id);
+    if (id) sp.set("category", id);
+    else sp.set("categoryName", catName);
     sp.set("sort", "-sold");
     router.push(`/productsList?${sp.toString()}`);
   };

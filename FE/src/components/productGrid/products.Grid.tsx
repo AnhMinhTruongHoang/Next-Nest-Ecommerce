@@ -151,7 +151,7 @@ const ProductsGrid = () => {
 
       {/* Carousel */}
       {!isLoading && !errorMsg && listProduct.length > 0 && (
-        <Carousel arrows dots>
+        <Carousel arrows dots autoplay>
           {slides.map((group, index) => (
             <div key={index}>
               <div
