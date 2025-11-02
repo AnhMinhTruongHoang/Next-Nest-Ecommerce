@@ -1,5 +1,4 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { name } from 'ejs';
 import mongoose, { HydratedDocument } from 'mongoose';
 
 export type OrderDocument = HydratedDocument<Order>;
@@ -44,7 +43,8 @@ export class Order {
   @Prop()
   phoneNumber: string;
 
-  @Prop({ unique: true, index: true })
+  // ✅ chỉ unique nếu paymentRef là string (VNPay, Momo, v.v.)
+  @Prop({ type: String, default: null })
   paymentRef?: string;
 
   @Prop({ type: Boolean, default: false })
@@ -64,3 +64,11 @@ export class Order {
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
+
+OrderSchema.index(
+  { paymentRef: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { paymentRef: { $type: 'string' } },
+  },
+);
