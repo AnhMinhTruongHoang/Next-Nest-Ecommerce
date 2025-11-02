@@ -141,7 +141,9 @@ export class DatabasesService implements OnModuleInit {
         { name: 'Mouse' },
         { name: 'Keyboard' },
         { name: 'Monitor' },
+        { name: 'Headset' },
         { name: 'Chairs' },
+        { name: 'Accessories' },
       ]);
       this.logger.log('>>> INIT CATEGORIES DONE...');
     }
@@ -235,6 +237,123 @@ export class DatabasesService implements OnModuleInit {
                 images: [
                   '/images/slider/mouse.razer.zzz2.jpg',
                   '/images/slider/razer.zzz.jpg',
+                ],
+              },
+            ];
+            break;
+
+          case 'Headset':
+            productsToInsert = [
+              {
+                name: 'Edra H1s',
+                description: 'Tai nghe Gaming cho game thủ việt',
+                price: 100 * rate,
+                stock: 52,
+                sold: 0,
+                brand: 'E-dra',
+                category: category._id,
+                thumbnail: '/images/thumbnails/EdraEh414w.png',
+                images: [
+                  '/images/slider/eh414wS1.jpg',
+                  '/images/slider/eh414ws2.jpg',
+                ],
+              },
+              {
+                name: 'Havit Camo',
+                description: 'Tai nghe Gaming quốc dân !',
+                price: 100 * rate,
+                stock: 52,
+                sold: 0,
+                brand: 'Havit',
+                category: category._id,
+                thumbnail: '/images/thumbnails/havitC1.jpg',
+                images: [
+                  '/images/slider/havitc1s1.webp',
+                  '/images/slider/havitc1s2.jpg',
+                ],
+              },
+              {
+                name: 'Havit H1a',
+                description: 'Headset thế hệ mới !',
+                price: 500 * rate,
+                stock: 652,
+                sold: 0,
+                brand: 'Havit',
+                category: category._id,
+                thumbnail: '/images/thumbnails/havitH1.jpg',
+                images: [
+                  '/images/slider/havith1s1.jpg',
+                  '/images/slider/havith1s2.jpg',
+                ],
+              },
+              {
+                name: 'Havit TW980',
+                description: 'earbuds hằng ngày của bạn',
+                price: 90 * rate,
+                stock: 32,
+                sold: 0,
+                brand: 'Havit',
+                category: category._id,
+                thumbnail: '/images/thumbnails/havitTW9s2.webp',
+                images: [
+                  '/images/slider/havitTW9.webp',
+                  '/images/slider/havitTW9s1.webp',
+                ],
+              },
+            ];
+
+            break;
+
+          case 'Accessories':
+            productsToInsert = [
+              {
+                name: 'Edra snow White',
+                description: 'Case pc cá tính',
+                price: 60 * rate,
+                stock: 10,
+                sold: 0,
+                brand: 'E-dra',
+                category: category._id,
+                thumbnail: '/images/thumbnails/EdraCaseW.jpg',
+                images: ['/images/thumbnails/EdraCaseW.jpg'],
+              },
+              {
+                name: 'Edra Pad',
+                description: 'Pad chuột thuần việt, cá tính',
+                price: 60 * rate,
+                stock: 10,
+                sold: 0,
+                brand: 'E-dra',
+                category: category._id,
+                thumbnail: '/images/thumbnails/EdraPad.jpg',
+                images: [
+                  '/images/slider/EdraPads1.jpg',
+                  '/images/slider/EdraPads2.jpg',
+                ],
+              },
+              {
+                name: 'Edra Arms',
+                description: 'Edra Arms pc',
+                price: 160 * rate,
+                stock: 10,
+                sold: 0,
+                brand: 'E-dra',
+                category: category._id,
+                thumbnail: '/images/thumbnails/EdraArms.jpg',
+                images: ['/images/thumbnails/EdraArms.jpg'],
+              },
+              {
+                name: 'havit Bass',
+                description: 'Pad chuột thuần việt, cá tính',
+                price: 60 * rate,
+                stock: 10,
+                sold: 0,
+                brand: 'Havit',
+                category: category._id,
+                thumbnail: '/images/thumbnails/havitBass.jpg',
+                images: [
+                  '/images/slider/havitBasss1.webp',
+                  '/images/slider/havitBasss2.webp',
                 ],
               },
             ];
