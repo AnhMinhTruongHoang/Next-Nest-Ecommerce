@@ -18,9 +18,30 @@ import { Public, ResponseMessage } from 'src/health/decorator/customize';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from '../files/multer.config';
 
+@Public()
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
+
+  @Get('suggest')
+  async suggest(@Query('q') keyword: string) {
+    return this.productsService.suggest(keyword);
+  }
+
+  @Get()
+  @ResponseMessage('Fetch product with paginate')
+  findAll(
+    @Query('current') currentPage: string,
+    @Query('pageSize') limit: string,
+    @Query() qs: any,
+  ) {
+    return this.productsService.findAll(+currentPage, +limit, qs);
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.productsService.findOne(id);
+  }
 
   @Post()
   create(@Body() dto: CreateProductDto) {
@@ -52,25 +73,6 @@ export class ProductsController {
       files: files.map((f) => '/images/slider/' + f.filename),
       body,
     };
-  }
-
-  ///
-
-  @Public()
-  @Get()
-  @ResponseMessage('Fetch product with paginate')
-  findAll(
-    @Query('current') currentPage: string,
-    @Query('pageSize') limit: string,
-    @Query() qs: any,
-  ) {
-    return this.productsService.findAll(+currentPage, +limit, qs);
-  }
-
-  @Public()
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productsService.findOne(id);
   }
 
   @Patch(':id')

@@ -26,6 +26,7 @@ export class ReviewsController {
     const user = req.user; // do JwtAuthGuard inject
     return this.reviewsService.create(user._id, dto, {
       _id: user._id,
+
       email: user.email,
     });
   }
