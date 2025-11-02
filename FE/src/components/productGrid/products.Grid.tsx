@@ -13,8 +13,8 @@ type TProduct = {
   name: string;
   price: number;
   sold: number;
-  averageRating?: number; // ⭐ trung bình
-  totalReviews?: number; // tổng số đánh giá
+  averageRating?: number;
+  totalReviews?: number;
 };
 
 const chunkArray = <T,>(arr: T[], size: number) => {
@@ -61,7 +61,6 @@ const ProductsGrid = () => {
         const data = await res.json();
         const result: TProduct[] = data?.data?.result ?? [];
 
-        // 🟢 Gọi API summary cho từng sản phẩm
         const enriched = await Promise.all(
           result.map(async (p) => {
             try {

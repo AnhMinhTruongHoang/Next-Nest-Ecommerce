@@ -11,6 +11,7 @@ import {
   Button,
   Drawer,
   Tooltip,
+  Spin,
 } from "antd";
 import {
   Mouse,
@@ -102,6 +103,56 @@ export default function AppHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { carts } = useCurrentApp();
+  const [openDropdown, setOpenDropdown] = useState(false);
+  const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchSuggestions = async (keyword: string) => {
+    const q = keyword.trim();
+    if (!q) {
+      setSuggestions([]);
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_BACKEND_URL
+        }/api/v1/products/suggest?q=${encodeURIComponent(q)}`
+      );
+      const json = await res.json();
+
+      const items = Array.isArray(json)
+        ? json
+        : Array.isArray(json?.data)
+        ? json.data
+        : [];
+
+      setSuggestions(items.slice(0, 8));
+    } catch {
+      setSuggestions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (query.length > 1) {
+      fetchSuggestions(query);
+    } else {
+      setSuggestions([]);
+    }
+  }, [query]);
+
+  const handleSelect = (value: any) => {
+    setOpenDropdown(false);
+    if (value?._id) {
+      router.push(`/product-detail/${value._id}`);
+    } else if (typeof value === "string") {
+      router.push(`/search?q=${encodeURIComponent(value)}`);
+    }
+  };
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 992); // ~ md/lg
@@ -473,21 +524,118 @@ export default function AppHeader() {
 
         {/* Search */}
         <div className="search-wrap">
-          <Input
-            placeholder="Tìm sản phẩm gaming..."
-            prefix={<SearchOutlined />}
-            allowClear
-            size="middle"
-            style={{
-              borderRadius: 20,
-              background: "#1e1e1e",
-              color: "#fff",
-            }}
-            onPressEnter={(e: any) => {
-              const value = e?.target?.value;
-              if (value) router.push(`/search?q=${value}`);
-            }}
-          />
+          <Dropdown
+            open={openDropdown && (loading || suggestions.length > 0)}
+            placement="bottom"
+            popupRender={() => (
+              <div
+                style={{
+                  background: "#fff",
+                  borderRadius: 12,
+                  boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+                  width: 420,
+                  maxHeight: 320,
+                  overflowY: "auto",
+                  padding: 6,
+                }}
+              >
+                {loading ? (
+                  <div style={{ textAlign: "center", padding: 16 }}>
+                    <Spin size="small" />
+                  </div>
+                ) : suggestions.length > 0 ? (
+                  suggestions.map((p) => (
+                    <div
+                      key={p._id}
+                      onClick={() => handleSelect(p)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                        padding: "6px 8px",
+                        cursor: "pointer",
+                        borderRadius: 6,
+                      }}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.background = "#fafafa")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.background = "transparent")
+                      }
+                    >
+                      <img
+                        src={getImageUrl(p.thumbnail)}
+                        alt={p.name}
+                        style={{
+                          width: 48,
+                          height: 48,
+                          objectFit: "cover",
+                          borderRadius: 4,
+                          border: "1px solid #eee",
+                        }}
+                      />
+                      <div style={{ flex: 1 }}>
+                        <div
+                          style={{
+                            fontWeight: 500,
+                            color: "#333",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {p.name}
+                        </div>
+                        <div
+                          style={{
+                            color: "#d0021b",
+                            fontWeight: 600,
+                            fontSize: 13,
+                          }}
+                        >
+                          {new Intl.NumberFormat("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(p.price)}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div
+                    style={{
+                      textAlign: "center",
+                      color: "#999",
+                      fontSize: 13,
+                      padding: "10px 0",
+                    }}
+                  >
+                    Không có gợi ý nào
+                  </div>
+                )}
+              </div>
+            )}
+          >
+            <Input
+              placeholder="Tìm sản phẩm gaming..."
+              prefix={<SearchOutlined />}
+              allowClear
+              size="middle"
+              style={{
+                borderRadius: 20,
+                color: "black",
+              }}
+              value={query}
+              onFocus={() => setOpenDropdown(true)}
+              onBlur={() => setTimeout(() => setOpenDropdown(false), 200)}
+              onChange={(e) => setQuery(e.target.value)}
+              onPressEnter={(e: any) => {
+                const value = e?.target?.value;
+                if (value) handleSelect(value);
+              }}
+            />
+          </Dropdown>
         </div>
 
         {/* Account + Cart */}
