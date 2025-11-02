@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Layout,
   Input,
@@ -20,7 +20,7 @@ import {
   Monitor,
   PlugZap,
   User as UserIcon,
-  Table,
+  Table as TableIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import NextLink from "next/link";
@@ -30,11 +30,12 @@ import "../../styles/product.scss";
 import { getImageUrl } from "@/utils/getImageUrl";
 import UserInfoModal from "../admin/user.infor";
 import OrderHistoryModal from "../admin/user.orders";
-import Image from "next/image";
 import razerLogo from "../../../public/images/logos/razer2.png";
 import edraLogo from "../../../public/images/logos/edra.png";
 import logitechLogo from "../../../public/images/logos/logitec.png";
 import havitLogo from "../../../public/images/logos/havit.png";
+import React, { KeyboardEvent, MouseEvent } from "react";
+import Image, { StaticImageData } from "next/image";
 import {
   DashboardFilled,
   LogoutOutlined,
@@ -44,118 +45,112 @@ import {
 } from "@ant-design/icons";
 
 const { Header } = Layout;
-
-const BrandLogo: React.FC<{
-  src: any;
+type BrandLogoProps = {
+  src: StaticImageData | string;
   alt: string;
   title?: string;
   width?: number;
   height?: number;
-}> = ({ src, alt, title, width = 200, height = 60 }) => (
-  <div
-    style={{
-      width,
-      height,
-      justifyContent: "center",
-      position: "relative",
-      display: "flex",
-      alignItems: "center",
-      borderRadius: 10,
-      padding: 8,
-      background: "rgba(255,255,255,0.06)",
-      border: "1px solid rgba(255,255,255,0.12)",
-      transition: "all .25s ease",
-      cursor: "pointer",
-      margin: "0 auto",
-    }}
-    onMouseEnter={(e) => {
-      (e.currentTarget as HTMLDivElement).style.transform = "translateY(-3px)";
-      (e.currentTarget as HTMLDivElement).style.boxShadow =
-        "0 8px 20px rgba(0,0,0,.35)";
-      (e.currentTarget as HTMLDivElement).style.background =
-        "rgba(255,255,255,0.12)";
-    }}
-    onMouseLeave={(e) => {
-      (e.currentTarget as HTMLDivElement).style.transform = "none";
-      (e.currentTarget as HTMLDivElement).style.boxShadow = "none";
-      (e.currentTarget as HTMLDivElement).style.background =
-        "rgba(255,255,255,0.06)";
-    }}
-  >
-    <Image
-      src={src}
-      alt={alt}
-      title={title || alt}
-      fill
-      sizes="(max-width: 768px) 140px, 200px"
-      placeholder="blur"
-      style={{ objectFit: "contain" }}
-      draggable={false}
-    />
-  </div>
-);
+  onClick?: React.MouseEventHandler<HTMLDivElement>;
+};
+
+const BrandLogo: React.FC<BrandLogoProps> = ({
+  src,
+  alt,
+  title,
+  width = 200,
+  height = 60,
+  onClick,
+}) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (!onClick) return;
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onClick(e as unknown as React.MouseEvent<HTMLDivElement>);
+    }
+  };
+
+  return (
+    <div
+      role={onClick ? "button" : undefined}
+      aria-label={title || alt}
+      tabIndex={onClick ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={handleKeyDown}
+      style={{
+        width,
+        height,
+        justifyContent: "center",
+        position: "relative",
+        display: "flex",
+        alignItems: "center",
+        borderRadius: 10,
+        padding: 8,
+        background: "rgba(255,255,255,0.06)",
+        border: "1px solid rgba(255,255,255,0.12)",
+        transition: "all .25s ease",
+        cursor: onClick ? "pointer" : "default",
+        margin: "0 auto",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "translateY(-3px)";
+        e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,.35)";
+        e.currentTarget.style.background = "rgba(255,255,255,0.12)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "none";
+        e.currentTarget.style.boxShadow = "none";
+        e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+      }}
+    >
+      <Image
+        src={src}
+        alt={alt}
+        title={title || alt}
+        fill
+        sizes="(max-width: 768px) 140px, 200px"
+        placeholder="blur"
+        style={{ objectFit: "contain" }}
+        draggable={false}
+      />
+    </div>
+  );
+};
+
+const CATEGORY_ID_BY_KEY: Record<string, string> = {
+  mouse: "68f1583f209579e29f938f22",
+  keyboard: "68f1583f209579e29f938f23",
+  monitor: "68f1583f209579e29f938f24",
+  chairs: "68f1583f209579e29f938f25",
+};
+
+type SuggestItem = {
+  _id: string;
+  name: string;
+  thumbnail: string;
+  price: number;
+};
 
 export default function AppHeader() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { carts } = useCurrentApp();
+
   const [openManageAccount, setOpenManageAccount] = useState(false);
   const [openOrderHistory, setOpenOrderHistory] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const { carts } = useCurrentApp();
+
   const [openDropdown, setOpenDropdown] = useState(false);
   const [query, setQuery] = useState("");
-  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<SuggestItem[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchSuggestions = async (keyword: string) => {
-    const q = keyword.trim();
-    if (!q) {
-      setSuggestions([]);
-      return;
-    }
-    setLoading(true);
-    try {
-      const res = await fetch(
-        `${
-          process.env.NEXT_PUBLIC_BACKEND_URL
-        }/api/v1/products/suggest?q=${encodeURIComponent(q)}`
-      );
-      const json = await res.json();
-
-      const items = Array.isArray(json)
-        ? json
-        : Array.isArray(json?.data)
-        ? json.data
-        : [];
-
-      setSuggestions(items.slice(0, 8));
-    } catch {
-      setSuggestions([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const backendURL =
+    process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 
   useEffect(() => {
-    if (query.length > 1) {
-      fetchSuggestions(query);
-    } else {
-      setSuggestions([]);
-    }
-  }, [query]);
-
-  const handleSelect = (value: any) => {
-    setOpenDropdown(false);
-    if (value?._id) {
-      router.push(`/product-detail/${value._id}`);
-    } else if (typeof value === "string") {
-      router.push(`/search?q=${encodeURIComponent(value)}`);
-    }
-  };
-
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 992); // ~ md/lg
+    const check = () => setIsMobile(window.innerWidth < 992);
     check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
@@ -206,6 +201,7 @@ export default function AppHeader() {
     ],
   };
 
+  // --- Cart popover
   const ContentPopover = () => (
     <div
       style={{
@@ -338,14 +334,35 @@ export default function AppHeader() {
     </div>
   );
 
-  const navItems = [
-    { key: "mouse", label: "Chuột", icon: <Mouse size={18} /> },
-    { key: "keyboard", label: "Bàn phím", icon: <Keyboard size={18} /> },
-    { key: "headset", label: "Tai nghe", icon: <Headphones size={18} /> },
-    { key: "chairs", label: "Ghế", icon: <Table size={18} /> },
-    { key: "monitor", label: "Màn hình", icon: <Monitor size={18} /> },
-    { key: "accessories", label: "Phụ kiện", icon: <PlugZap size={18} /> },
-  ];
+  // --- Nav meta
+  const navItems = useMemo(
+    () => [
+      { key: "mouse", label: "Chuột", icon: <Mouse size={18} /> },
+      { key: "keyboard", label: "Bàn phím", icon: <Keyboard size={18} /> },
+      { key: "headset", label: "Tai nghe", icon: <Headphones size={18} /> },
+      { key: "chairs", label: "Ghế", icon: <TableIcon size={18} /> },
+      { key: "monitor", label: "Màn hình", icon: <Monitor size={18} /> },
+      { key: "accessories", label: "Phụ kiện", icon: <PlugZap size={18} /> },
+    ],
+    []
+  );
+
+  /// Brand filter
+  const goBrand = (name: string) => {
+    router.push(`/productsList?brand=${encodeURIComponent(name)}&sort=-sold`);
+  };
+
+  const goCategory = (key: string) => {
+    const id = CATEGORY_ID_BY_KEY[key];
+    if (!id) {
+      router.push("/productsList");
+      return;
+    }
+    const sp = new URLSearchParams();
+    sp.set("category", id);
+    sp.set("sort", "-sold");
+    router.push(`/productsList?${sp.toString()}`);
+  };
 
   const megaMenu = (
     <div
@@ -366,22 +383,95 @@ export default function AppHeader() {
     >
       <div>
         <h4 style={{ color: "#9b59b6", marginBottom: 10 }}>Razer</h4>
-        <BrandLogo src={razerLogo} alt="Razer" />
+        <BrandLogo
+          src={razerLogo}
+          alt="Razer"
+          title="Razer"
+          onClick={() => goBrand("Razer")}
+        />
       </div>
       <div>
         <h4 style={{ color: "#9b59b6", marginBottom: 10 }}>Logitech</h4>
-        <BrandLogo src={logitechLogo} alt="Logitech" />
+        <BrandLogo
+          src={logitechLogo}
+          alt="Logitech"
+          title="Logitech"
+          onClick={() => goBrand("Logitech")}
+        />
       </div>
       <div>
         <h4 style={{ color: "#9b59b6", marginBottom: 10 }}>Havit</h4>
-        <BrandLogo src={havitLogo} alt="Havit" />
+        <BrandLogo
+          src={havitLogo}
+          alt="Havit"
+          title="Havit"
+          onClick={() => goBrand("Havit")}
+        />
       </div>
       <div>
         <h4 style={{ color: "#9b59b6", marginBottom: 10 }}>E-Dra</h4>
-        <BrandLogo src={edraLogo} alt="E-Dra" />
+        <BrandLogo
+          src={edraLogo}
+          alt="E-Dra"
+          title="E-Dra"
+          onClick={() => goBrand("E-Dra")}
+        />
       </div>
     </div>
   );
+
+  // --- Search suggestions with tiny debounce
+  const debounceRef = useRef<number | null>(null);
+
+  const fetchSuggestions = async (keyword: string) => {
+    const q = keyword.trim();
+    if (!q) {
+      setSuggestions([]);
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `${backendURL}/api/v1/products/suggest?q=${encodeURIComponent(q)}`
+      );
+      const json = await res.json();
+      const items: SuggestItem[] = Array.isArray(json)
+        ? json
+        : Array.isArray(json?.data)
+        ? json.data
+        : [];
+      setSuggestions(items.slice(0, 8));
+    } catch {
+      setSuggestions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (debounceRef.current) window.clearTimeout(debounceRef.current);
+    if (!query || query.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+    debounceRef.current = window.setTimeout(() => {
+      fetchSuggestions(query);
+    }, 200);
+    return () => {
+      if (debounceRef.current) window.clearTimeout(debounceRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
+
+  const handleSelect = (value: SuggestItem | string) => {
+    setOpenDropdown(false);
+    if (typeof value !== "string" && value?._id) {
+      router.push(`/product-detail/${value._id}`);
+    } else {
+      const v = typeof value === "string" ? value : query;
+      if (v) router.push(`/search?q=${encodeURIComponent(v)}`);
+    }
+  };
 
   return (
     <Header
@@ -498,7 +588,7 @@ export default function AppHeader() {
               trigger={[isMobile ? "click" : "hover"]}
             >
               <Tooltip title={item.label} placement="bottom">
-                <div className="nav-item">
+                <div className="nav-item" onClick={() => goCategory(item.key)}>
                   {item.icon}
                   <span className="nav-label">{item.label}</span>
                 </div>
@@ -702,7 +792,10 @@ export default function AppHeader() {
               alignItems: "center",
               gap: 10,
             }}
-            onClick={() => setMobileMenuOpen(false)}
+            onClick={() => {
+              setMobileMenuOpen(false);
+              goCategory(item.key);
+            }}
           >
             {item.icon}
             <span>{item.label}</span>
