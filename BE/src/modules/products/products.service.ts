@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
-import { isValidObjectId } from 'mongoose';
+import { isValidObjectId, Types } from 'mongoose';
 import aqp from 'api-query-params';
 import { Product, ProductDocument } from './schema/product.schema';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -35,39 +35,91 @@ export class ProductsService {
     return created.save();
   }
 
+  //// find + fillter
+
   async findAll(currentPage: number, limit: number, qs: any) {
     const { filter, sort } = aqp(qs);
+    // dọn các param phân trang FE gửi
+    delete (filter as any).current;
+    delete (filter as any).pageSize;
 
-    // sạch các tham số phân trang do FE gửi
-    delete filter.current;
-    delete filter.pageSize;
-
-    // luôn bỏ record đã xóa mềm
+    // luôn chỉ lấy record chưa xoá mềm
     (filter as any).isDeleted = false;
 
-    // chuẩn hóa bộ lọc giá
-    if (filter.price) {
-      const f: any = filter.price;
+    // ----- KEYWORD: q -> tìm theo tên
+    if (qs?.q && String(qs.q).trim()) {
+      const kw = String(qs.q).trim();
+      // chứa từ khóa, không phân biệt hoa thường
+      (filter as any).name = {
+        $regex: new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'),
+      };
+    }
 
-      // trường hợp aqp parse thành object {$gte: { '': '100000' }}
-      if (f.$gte && typeof f.$gte === 'object') {
+    // ----- CATEGORY: category=<id1,id2,...>
+    if (qs?.category) {
+      const catIds = String(qs.category)
+        .split(',')
+        .map((s) => s.trim())
+        .filter((s) => isValidObjectId(s))
+        .map((s) => new Types.ObjectId(s));
+      if (catIds.length > 0) {
+        // nếu schema là 1 ObjectId: dùng $in; nếu là mảng ObjectId cũng OK
+        (filter as any).category = { $in: catIds };
+      } else {
+        delete (filter as any).category;
+      }
+    }
+
+    // ----- BRAND theo tên (string): brand=Razer,Logitech
+    if (qs?.brand) {
+      const names = String(qs.brand)
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .map(
+          (n) =>
+            new RegExp(`^${n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i'),
+        );
+      if (names.length > 0) {
+        (filter as any).brand = { $in: names };
+      } else {
+        delete (filter as any).brand;
+      }
+    }
+
+    /// brand
+    if (qs?.brandId) {
+      const brandIds = String(qs.brandId)
+        .split(',')
+        .map((s) => s.trim())
+        .filter(isValidObjectId)
+        .map((id) => new Types.ObjectId(id));
+      if (brandIds.length > 0) {
+        (filter as any).brandId = { $in: brandIds };
+      } else {
+        delete (filter as any).brandId;
+      }
+    }
+
+    // ----- PRICE: chuẩn hoá gte/lte
+    if ((filter as any).price) {
+      const f: any = (filter as any).price;
+      if (f.$gte && typeof f.$gte === 'object')
         f.$gte = Number(Object.values(f.$gte)[0]);
-      }
-      if (f.$lte && typeof f.$lte === 'object') {
+      if (f.$lte && typeof f.$lte === 'object')
         f.$lte = Number(Object.values(f.$lte)[0]);
-      }
-      // hỗ trợ alias gte/lte
-      if (f.gte) {
+      if (f.gte != null) {
         f.$gte = Number(f.gte);
         delete f.gte;
       }
-      if (f.lte) {
+      if (f.lte != null) {
         f.$lte = Number(f.lte);
         delete f.lte;
       }
-      filter.price = f;
+      (filter as any).price = f;
     }
 
+    // ----- phân trang & sort an toàn
     const safePage = Math.max(
       1,
       Number.isFinite(+currentPage) ? +currentPage : 1,
@@ -79,7 +131,7 @@ export class ProductsService {
       this.productModel.countDocuments(filter as any),
       this.productModel
         .find(filter as any)
-        .sort(sort as any)
+        .sort((sort as any) || { sold: -1, createdAt: -1 }) // default sort
         .skip(skip)
         .limit(safeLimit)
         .populate('category', 'name')
@@ -98,6 +150,7 @@ export class ProductsService {
     };
   }
 
+  /////
   async findOne(id: string) {
     if (!isValidObjectId(id)) {
       throw new BadRequestException('Invalid product id');
