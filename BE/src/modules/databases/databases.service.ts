@@ -22,6 +22,7 @@ import {
   PaymentStatus,
 } from '../payments/schema/payment.schema';
 import { UsersService } from '../users/users.service';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class DatabasesService implements OnModuleInit {
@@ -552,63 +553,160 @@ export class DatabasesService implements OnModuleInit {
 
     /** ---------------- Seed Orders + Payments ---------------- */
 
+    // import { PaymentMethod, PaymentStatus } đã có ở đầu file
+
+    // (Tuỳ chọn) Dọn index cũ nếu từng tồn tại sai cấu hình
+    try {
+      await this.orderModel.collection.dropIndex('paymentRef_1');
+    } catch (e) {
+      // ignore nếu chưa tồn tại
+    }
+
+    // (Tuỳ chọn) Đảm bảo index partial unique chuẩn cho paymentRef
+    try {
+      await this.orderModel.collection.createIndex(
+        { paymentRef: 1 },
+        {
+          unique: true,
+          partialFilterExpression: {
+            paymentRef: { $type: 'string', $ne: null },
+          },
+        },
+      );
+    } catch (e) {
+      // ignore nếu đã tồn tại đúng
+    }
+
     const countOrders = await this.orderModel.countDocuments();
     if (countOrders === 0) {
-      const users = await this.userModel.find({ role: 'USER' });
-      const products = await this.productModel.find();
+      const users = await this.userModel.find({ role: 'USER' }).lean();
+      const products = await this.productModel
+        .find({ isDeleted: { $ne: true } })
+        .select('_id price stock sold')
+        .lean();
 
       if (users.length === 0 || products.length === 0) {
         this.logger.warn(
           '⚠️ Missing users or products, skip seeding orders/payments.',
         );
       } else {
+        const productBulkOps: any[] = [];
+        const orderDocs: any[] = [];
+        const paymentDocs: any[] = [];
+
         for (const user of users) {
           const orderCount = Math.floor(Math.random() * 3) + 3; // 3–5 orders
 
           for (let i = 0; i < orderCount; i++) {
             // chọn ngẫu nhiên 1–3 sản phẩm
-            const selectedProducts = products
+            const selected = [...products]
               .sort(() => 0.5 - Math.random())
               .slice(0, Math.floor(Math.random() * 3) + 1);
 
-            const items = selectedProducts.map((p) => ({
+            const items = selected.map((p) => ({
               productId: p._id,
               quantity: Math.floor(Math.random() * 3) + 1,
-              price: p.price,
+              price: p.price ?? 0,
             }));
 
             const totalPrice = items.reduce(
-              (sum, item) => sum + item.price * item.quantity,
+              (sum, it) => sum + it.price * it.quantity,
               0,
             );
 
-            // random trạng thái payment
-            const paymentStatus =
-              Math.random() > 0.3 ? PaymentStatus.PAID : PaymentStatus.PENDING;
+            // random phương thức & trạng thái
+            const methodPool: PaymentMethod[] = [
+              PaymentMethod.CASH,
+              PaymentMethod.CREDIT_CARD,
+              PaymentMethod.VNPAY,
+            ];
+            const method =
+              methodPool[Math.floor(Math.random() * methodPool.length)];
 
-            // tạo order
-            const order = await this.orderModel.create({
+            // nếu CASH, xác suất paid thấp hơn
+            const willBePaid =
+              method === PaymentMethod.CASH
+                ? Math.random() > 0.8
+                : Math.random() > 0.5;
+            const paymentStatus: PaymentStatus = willBePaid
+              ? PaymentStatus.PAID
+              : PaymentStatus.PENDING;
+
+            // paymentRef chỉ khi PAID và phương thức online (không phải CASH)
+            const paymentRef =
+              paymentStatus === PaymentStatus.PAID &&
+              method !== PaymentMethod.CASH
+                ? randomUUID()
+                : null;
+
+            // map phương thức payment sang order.paymentMethod
+            const orderPaymentMethod =
+              method === PaymentMethod.CASH
+                ? 'COD'
+                : method === PaymentMethod.CREDIT_CARD
+                ? 'BANK'
+                : (method as any); // MOMO / VNPAY
+
+            // order statuses
+            const orderStatus = willBePaid ? 'PAID' : 'PENDING';
+            const orderPaymentStatus = willBePaid ? 'PAID' : 'UNPAID';
+
+            orderDocs.push({
               userId: user._id,
               items,
               totalPrice,
-              status: paymentStatus === PaymentStatus.PAID ? 'PAID' : 'PENDING',
+              status: orderStatus,
+              paymentStatus: orderPaymentStatus,
+              paymentMethod: orderPaymentMethod,
+              paymentRef,
               shippingAddress: '123 Test Street, Bien Hoa, Dong Nai',
               phoneNumber: '0901234567',
+              inventoryAdjusted: willBePaid, // đã thanh toán -> xem như đã trừ kho
             });
 
-            // tạo payment gắn với order
-            await this.paymentModel.create({
-              orderId: order._id,
-              amount: order.totalPrice,
-              method:
-                Math.random() > 0.5
-                  ? PaymentMethod.CASH
-                  : PaymentMethod.CREDIT_CARD,
+            // nếu đã PAID -> chuẩn bị bulk trừ kho/cộng sold
+            if (willBePaid) {
+              for (const it of items) {
+                productBulkOps.push({
+                  updateOne: {
+                    filter: { _id: it.productId, isDeleted: { $ne: true } },
+                    update: {
+                      $inc: { stock: -it.quantity, sold: +it.quantity },
+                    },
+                  },
+                });
+              }
+            }
+
+            paymentDocs.push({
+              orderId: null, // sẽ gán sau khi insertMany orders
+              amount: totalPrice,
+              method,
               status: paymentStatus,
-              shippingAddress: order.shippingAddress,
-              phoneNumber: order.phoneNumber,
+              shippingAddress: '123 Test Street, Bien Hoa, Dong Nai',
+              phoneNumber: '0901234567',
+              // Nếu schema Payment có trường ref, bạn có thể lưu:
+              ref: paymentRef,
             });
           }
+        }
+
+        // 1) insert orders trước
+        const insertedOrders = await this.orderModel.insertMany(orderDocs, {
+          ordered: false,
+        });
+
+        // 2) map orderId vào paymentDocs theo thứ tự
+        for (let i = 0; i < paymentDocs.length; i++) {
+          paymentDocs[i].orderId = insertedOrders[i]._id;
+        }
+
+        // 3) insert payments
+        await this.paymentModel.insertMany(paymentDocs, { ordered: false });
+
+        // 4) bulk update tồn kho cho các đơn đã PAID
+        if (productBulkOps.length > 0) {
+          await this.productModel.bulkWrite(productBulkOps, { ordered: false });
         }
 
         this.logger.log('>>> INIT ORDERS & PAYMENTS DONE...');
