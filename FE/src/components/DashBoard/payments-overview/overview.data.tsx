@@ -1,27 +1,26 @@
 export async function getDevicesUsedData(
   timeFrame?: "monthly" | "yearly" | (string & {})
 ) {
-  // Fake delay
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
   const data = [
     {
-      name: "Desktop",
+      name: "Máy tính để bàn",
       percentage: 0.65,
       amount: 1625,
     },
     {
-      name: "Tablet",
+      name: "Máy tính bảng",
       percentage: 0.1,
       amount: 250,
     },
     {
-      name: "Mobile",
+      name: "Điện thoại",
       percentage: 0.2,
       amount: 500,
     },
     {
-      name: "Unknown",
+      name: "Không xác định",
       percentage: 0.05,
       amount: 125,
     },
@@ -37,10 +36,10 @@ export async function getDevicesUsedData(
   return data;
 }
 
+// Giả lập API lấy dữ liệu tổng quan thanh toán
 export async function getPaymentsOverviewData(
   timeFrame?: "monthly" | "yearly" | (string & {})
 ) {
-  // Fake delay
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
   if (timeFrame === "yearly") {
@@ -64,114 +63,115 @@ export async function getPaymentsOverviewData(
 
   return {
     received: [
-      { x: "Jan", y: 0 },
-      { x: "Feb", y: 20 },
-      { x: "Mar", y: 35 },
-      { x: "Apr", y: 45 },
-      { x: "May", y: 35 },
-      { x: "Jun", y: 55 },
-      { x: "Jul", y: 65 },
-      { x: "Aug", y: 50 },
-      { x: "Sep", y: 65 },
-      { x: "Oct", y: 75 },
-      { x: "Nov", y: 60 },
-      { x: "Dec", y: 75 },
+      { x: "Th1", y: 0 },
+      { x: "Th2", y: 20 },
+      { x: "Th3", y: 35 },
+      { x: "Th4", y: 45 },
+      { x: "Th5", y: 35 },
+      { x: "Th6", y: 55 },
+      { x: "Th7", y: 65 },
+      { x: "Th8", y: 50 },
+      { x: "Th9", y: 65 },
+      { x: "Th10", y: 75 },
+      { x: "Th11", y: 60 },
+      { x: "Th12", y: 75 },
     ],
     due: [
-      { x: "Jan", y: 15 },
-      { x: "Feb", y: 9 },
-      { x: "Mar", y: 17 },
-      { x: "Apr", y: 32 },
-      { x: "May", y: 25 },
-      { x: "Jun", y: 68 },
-      { x: "Jul", y: 80 },
-      { x: "Aug", y: 68 },
-      { x: "Sep", y: 84 },
-      { x: "Oct", y: 94 },
-      { x: "Nov", y: 74 },
-      { x: "Dec", y: 62 },
+      { x: "Th1", y: 15 },
+      { x: "Th2", y: 9 },
+      { x: "Th3", y: 17 },
+      { x: "Th4", y: 32 },
+      { x: "Th5", y: 25 },
+      { x: "Th6", y: 68 },
+      { x: "Th7", y: 80 },
+      { x: "Th8", y: 68 },
+      { x: "Th9", y: 84 },
+      { x: "Th10", y: 94 },
+      { x: "Th11", y: 74 },
+      { x: "Th12", y: 62 },
     ],
   };
 }
 
+// Giả lập API lợi nhuận theo tuần
 export async function getWeeksProfitData(timeFrame?: string) {
-  // Fake delay
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
   if (timeFrame === "last week") {
     return {
       sales: [
-        { x: "Sat", y: 33 },
-        { x: "Sun", y: 44 },
-        { x: "Mon", y: 31 },
-        { x: "Tue", y: 57 },
-        { x: "Wed", y: 12 },
-        { x: "Thu", y: 33 },
-        { x: "Fri", y: 55 },
+        { x: "T7", y: 33 },
+        { x: "CN", y: 44 },
+        { x: "T2", y: 31 },
+        { x: "T3", y: 57 },
+        { x: "T4", y: 12 },
+        { x: "T5", y: 33 },
+        { x: "T6", y: 55 },
       ],
       revenue: [
-        { x: "Sat", y: 10 },
-        { x: "Sun", y: 20 },
-        { x: "Mon", y: 17 },
-        { x: "Tue", y: 7 },
-        { x: "Wed", y: 10 },
-        { x: "Thu", y: 23 },
-        { x: "Fri", y: 13 },
+        { x: "T7", y: 10 },
+        { x: "CN", y: 20 },
+        { x: "T2", y: 17 },
+        { x: "T3", y: 7 },
+        { x: "T4", y: 10 },
+        { x: "T5", y: 23 },
+        { x: "T6", y: 13 },
       ],
     };
   }
 
   return {
     sales: [
-      { x: "Sat", y: 44 },
-      { x: "Sun", y: 55 },
-      { x: "Mon", y: 41 },
-      { x: "Tue", y: 67 },
-      { x: "Wed", y: 22 },
-      { x: "Thu", y: 43 },
-      { x: "Fri", y: 65 },
+      { x: "T7", y: 44 },
+      { x: "CN", y: 55 },
+      { x: "T2", y: 41 },
+      { x: "T3", y: 67 },
+      { x: "T4", y: 22 },
+      { x: "T5", y: 43 },
+      { x: "T6", y: 65 },
     ],
     revenue: [
-      { x: "Sat", y: 13 },
-      { x: "Sun", y: 23 },
-      { x: "Mon", y: 20 },
-      { x: "Tue", y: 8 },
-      { x: "Wed", y: 13 },
-      { x: "Thu", y: 27 },
-      { x: "Fri", y: 15 },
+      { x: "T7", y: 13 },
+      { x: "CN", y: 23 },
+      { x: "T2", y: 20 },
+      { x: "T3", y: 8 },
+      { x: "T4", y: 13 },
+      { x: "T5", y: 27 },
+      { x: "T6", y: 15 },
     ],
   };
 }
 
+// Giả lập API dữ liệu khách truy cập từ chiến dịch
 export async function getCampaignVisitorsData() {
-  // Fake delay
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
   return {
     total_visitors: 784_000,
     performance: -1.5,
     chart: [
-      { x: "S", y: 168 },
-      { x: "S", y: 385 },
-      { x: "M", y: 201 },
-      { x: "T", y: 298 },
-      { x: "W", y: 187 },
-      { x: "T", y: 195 },
-      { x: "F", y: 291 },
+      { x: "T7", y: 168 },
+      { x: "CN", y: 385 },
+      { x: "T2", y: 201 },
+      { x: "T3", y: 298 },
+      { x: "T4", y: 187 },
+      { x: "T5", y: 195 },
+      { x: "T6", y: 291 },
     ],
   };
 }
 
+// Giả lập API phân tích khách truy cập
 export async function getVisitorsAnalyticsData() {
-  // Fake delay
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
   return [
     168, 385, 201, 298, 187, 195, 291, 110, 215, 390, 280, 112, 123, 212, 270,
     190, 310, 115, 90, 380, 112, 223, 292, 170, 290, 110, 115, 290, 380, 312,
-  ].map((value, index) => ({ x: index + 1 + "", y: value }));
+  ].map((value, index) => ({ x: (index + 1).toString(), y: value }));
 }
 
+// Giả lập API chi phí trung bình mỗi lượt tương tác
 export async function getCostsPerInteractionData() {
   return {
     avg_cost: 560.93,
@@ -180,35 +180,35 @@ export async function getCostsPerInteractionData() {
       {
         name: "Google Ads",
         data: [
-          { x: "Sep", y: 15 },
-          { x: "Oct", y: 12 },
-          { x: "Nov", y: 61 },
-          { x: "Dec", y: 118 },
-          { x: "Jan", y: 78 },
-          { x: "Feb", y: 125 },
-          { x: "Mar", y: 165 },
-          { x: "Apr", y: 61 },
-          { x: "May", y: 183 },
-          { x: "Jun", y: 238 },
-          { x: "Jul", y: 237 },
-          { x: "Aug", y: 235 },
+          { x: "Th9", y: 15 },
+          { x: "Th10", y: 12 },
+          { x: "Th11", y: 61 },
+          { x: "Th12", y: 118 },
+          { x: "Th1", y: 78 },
+          { x: "Th2", y: 125 },
+          { x: "Th3", y: 165 },
+          { x: "Th4", y: 61 },
+          { x: "Th5", y: 183 },
+          { x: "Th6", y: 238 },
+          { x: "Th7", y: 237 },
+          { x: "Th8", y: 235 },
         ],
       },
       {
         name: "Facebook Ads",
         data: [
-          { x: "Sep", y: 75 },
-          { x: "Oct", y: 77 },
-          { x: "Nov", y: 151 },
-          { x: "Dec", y: 72 },
-          { x: "Jan", y: 7 },
-          { x: "Feb", y: 58 },
-          { x: "Mar", y: 60 },
-          { x: "Apr", y: 185 },
-          { x: "May", y: 239 },
-          { x: "Jun", y: 135 },
-          { x: "Jul", y: 119 },
-          { x: "Aug", y: 124 },
+          { x: "Th9", y: 75 },
+          { x: "Th10", y: 77 },
+          { x: "Th11", y: 151 },
+          { x: "Th12", y: 72 },
+          { x: "Th1", y: 7 },
+          { x: "Th2", y: 58 },
+          { x: "Th3", y: 60 },
+          { x: "Th4", y: 185 },
+          { x: "Th5", y: 239 },
+          { x: "Th6", y: 135 },
+          { x: "Th7", y: 119 },
+          { x: "Th8", y: 124 },
         ],
       },
     ],

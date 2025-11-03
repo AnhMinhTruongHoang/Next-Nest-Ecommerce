@@ -23,7 +23,7 @@ export const sendRequest = async <T>(props: IRequest) => {
   };
   if (useCredentials) options.credentials = "include";
 
-  if (queryParams) {
+  if (queryParams && Object.keys(queryParams).length > 0) {
     url = `${url}?${queryString.stringify(queryParams)}`;
   }
 
@@ -64,7 +64,7 @@ export const sendRequestFile = async <T>(props: IRequest) => {
   };
   if (useCredentials) options.credentials = "include";
 
-  if (queryParams) {
+  if (queryParams && Object.keys(queryParams).length > 0) {
     url = `${url}?${queryString.stringify(queryParams)}`;
   }
 
@@ -137,7 +137,8 @@ export async function createOrderAPI(
   totalPrice: number,
   paymentMethod: string,
   items: any[],
-  paymentRef?: string
+  paymentRef?: string,
+  voucherCode?: string
 ) {
   const response = await fetch("http://localhost:8000/api/v1/orders", {
     method: "POST",
@@ -153,6 +154,7 @@ export async function createOrderAPI(
       paymentMethod,
       items,
       paymentRef,
+      voucherCode,
     }),
   });
 

@@ -49,7 +49,6 @@ const UpdateProductModal = (props: IProps) => {
   const { Option } = Select;
   const [isSubmit, setIsSubmit] = useState(false);
   const [categories, setCategories] = useState<ICategory[]>([]);
-  // Upload states
   const [thumbnailList, setThumbnailList] = useState<UploadFile[]>([]);
   const [sliderList, setSliderList] = useState<UploadFile[]>([]);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -57,7 +56,7 @@ const UpdateProductModal = (props: IProps) => {
   const [loading, setLoading] = useState(false);
   const { notification } = App.useApp();
 
-  // Lấy danh sách category khi modal mở
+  // Lấy danh sách danh mục khi modal mở
   useEffect(() => {
     if (isUpdateModalOpen) {
       fetch("http://localhost:8000/api/v1/categories", {
@@ -70,13 +69,14 @@ const UpdateProductModal = (props: IProps) => {
     }
   }, [isUpdateModalOpen]);
 
-  // Set giá trị form + load sẵn ảnh khi có dataUpdate
+  // Hàm build URL đầy đủ
   const getFullUrl = (url: string) => {
     if (!url) return "";
     if (url.startsWith("http")) return url;
     return `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`;
   };
 
+  // Set giá trị form + load ảnh khi có dataUpdate
   useEffect(() => {
     if (dataUpdate) {
       form.setFieldsValue({
@@ -90,7 +90,6 @@ const UpdateProductModal = (props: IProps) => {
             : dataUpdate.category,
       });
 
-      // Thumbnail
       if (dataUpdate.thumbnail) {
         setThumbnailList([
           {
@@ -104,7 +103,6 @@ const UpdateProductModal = (props: IProps) => {
         setThumbnailList([]);
       }
 
-      // Slider images
       if (Array.isArray(dataUpdate.images)) {
         setSliderList(
           dataUpdate.images.map((url, idx) => ({
@@ -120,7 +118,7 @@ const UpdateProductModal = (props: IProps) => {
     }
   }, [dataUpdate]);
 
-  /// img func
+  // Xử lý preview ảnh
   const getBase64 = (file: FileType): Promise<string> =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -143,11 +141,11 @@ const UpdateProductModal = (props: IProps) => {
       file.type === "image/png" ||
       file.type === "image/webp";
     if (!isValid) {
-      message.error("You can only upload JPG/PNG/WEBP file!");
+      message.error("Chỉ được phép tải lên file JPG/PNG/WEBP!");
     }
     const isLt5M = file.size / 1024 / 1024 < 5;
     if (!isLt5M) {
-      message.error("Image must smaller than 5MB!");
+      message.error("Ảnh phải nhỏ hơn 5MB!");
     }
     return isValid && isLt5M;
   };
@@ -155,7 +153,7 @@ const UpdateProductModal = (props: IProps) => {
   const uploadButton = (
     <button style={{ border: 0, background: "none" }} type="button">
       {loading ? <LoadingOutlined /> : <PlusOutlined />}
-      <div style={{ marginTop: 8 }}>Upload</div>
+      <div style={{ marginTop: 8 }}>Tải lên</div>
     </button>
   );
 
@@ -198,7 +196,7 @@ const UpdateProductModal = (props: IProps) => {
       if (d.data) {
         await getData();
         notification.success({
-          message: "Cập nhật product thành công.",
+          message: "Cập nhật sản phẩm thành công.",
         });
         handleCloseModal();
       } else {
@@ -208,14 +206,12 @@ const UpdateProductModal = (props: IProps) => {
         });
       }
     }
-    console.log("Access token FE:", access_token);
-
     setIsSubmit(false);
   };
 
   return (
     <Modal
-      title={<div style={{ textAlign: "center" }}>Update product</div>}
+      title={<div style={{ textAlign: "center" }}>Cập nhật sản phẩm</div>}
       open={isUpdateModalOpen}
       onOk={() => form.submit()}
       onCancel={handleCloseModal}
@@ -230,7 +226,7 @@ const UpdateProductModal = (props: IProps) => {
         layout="vertical"
         form={form}
       >
-        <Divider>Thumbnail</Divider>
+        <Divider>Ảnh đại diện</Divider>
         <div style={{ display: "flex", justifyContent: "center" }}>
           <Upload
             name="thumbnail"
@@ -258,43 +254,43 @@ const UpdateProductModal = (props: IProps) => {
 
         <Divider />
         <Form.Item
-          label="Name"
+          label="Tên sản phẩm"
           name="name"
-          rules={[{ required: true, message: "Please input product name!" }]}
+          rules={[{ required: true, message: "Vui lòng nhập tên sản phẩm!" }]}
         >
           <Input />
         </Form.Item>
 
         <Form.Item
-          label="Brand"
+          label="Thương hiệu"
           name="brand"
-          rules={[{ required: true, message: "Please input brand!" }]}
+          rules={[{ required: true, message: "Vui lòng nhập thương hiệu!" }]}
         >
           <Input />
         </Form.Item>
 
         <Form.Item
-          label="Price"
+          label="Giá"
           name="price"
-          rules={[{ required: true, message: "Please input price!" }]}
+          rules={[{ required: true, message: "Vui lòng nhập giá!" }]}
         >
           <InputNumber style={{ width: "100%" }} min={0} />
         </Form.Item>
 
         <Form.Item
-          label="Stock"
+          label="Tồn kho"
           name="stock"
-          rules={[{ required: true, message: "Please input stock quantity!" }]}
+          rules={[{ required: true, message: "Vui lòng nhập số lượng tồn!" }]}
         >
           <InputNumber style={{ width: "100%" }} min={0} />
         </Form.Item>
 
         <Form.Item
-          label="Category"
+          label="Danh mục"
           name="category"
-          rules={[{ required: true, message: "Please select category!" }]}
+          rules={[{ required: true, message: "Vui lòng chọn danh mục!" }]}
         >
-          <Select placeholder="Select category">
+          <Select placeholder="Chọn danh mục">
             {categories.map((cat) => (
               <Option key={cat._id} value={cat._id}>
                 {cat.name}
@@ -304,7 +300,7 @@ const UpdateProductModal = (props: IProps) => {
         </Form.Item>
       </Form>
 
-      <Divider>Images</Divider>
+      <Divider>Hình ảnh chi tiết</Divider>
 
       {previewImage && (
         <Image
@@ -333,7 +329,6 @@ const UpdateProductModal = (props: IProps) => {
             const urls = file.response?.data?.files;
             if (Array.isArray(urls) && urls.length > 0) {
               file.url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/images/slider/${urls[0]}`;
-              console.log("Slider URL:", file.url);
             }
           }
           setSliderList(fileList);

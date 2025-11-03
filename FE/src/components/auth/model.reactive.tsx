@@ -1,6 +1,10 @@
 "use client";
+
+import { useEffect, useState } from "react";
 import { useHasMounted } from "@/utils/customHook";
+import { sendRequest } from "@/utils/api";
 import {
+  App,
   Button,
   Divider,
   Form,
@@ -8,16 +12,14 @@ import {
   Modal,
   Steps,
   Typography,
-  notification,
+  Alert,
 } from "antd";
 import {
-  ExclamationCircleOutlined,
   CheckCircleOutlined,
-  LoadingOutlined,
+  ExclamationCircleOutlined,
   MailOutlined,
+  LoadingOutlined,
 } from "@ant-design/icons";
-import { useEffect, useState } from "react";
-import { sendRequest } from "@/utils/api";
 
 interface Props {
   isModalOpen: boolean;
@@ -31,11 +33,11 @@ interface Props {
 
 const iconMap = {
   error: (
-    <ExclamationCircleOutlined style={{ color: "#ff4d4f", fontSize: 32 }} />
+    <ExclamationCircleOutlined style={{ color: "#ff4d4f", fontSize: 28 }} />
   ),
-  success: <CheckCircleOutlined style={{ color: "#52c41a", fontSize: 32 }} />,
+  success: <CheckCircleOutlined style={{ color: "#52c41a", fontSize: 28 }} />,
   info: (
-    <ExclamationCircleOutlined style={{ color: "#1890ff", fontSize: 32 }} />
+    <ExclamationCircleOutlined style={{ color: "#1677ff", fontSize: 28 }} />
   ),
 };
 
@@ -43,207 +45,266 @@ const ModelReactive = ({
   isModalOpen,
   setIsModalOpen,
   userEmail,
-  title = "Notification",
-  content = <p>...</p>,
+  title = "Tài khoản của bạn chưa được kích hoạt",
+  content = (
+    <p>
+      Vui lòng xác minh email để kích hoạt tài khoản. Nếu bạn chưa nhận được
+      email, hãy bấm <b>Gửi lại email</b>.
+    </p>
+  ),
   type = "info",
-  showSteps = false,
+  showSteps = true,
 }: Props) => {
   const hasMounted = useHasMounted();
+  const { notification } = App.useApp();
+
   const [currentStep, setCurrentStep] = useState(0);
   const [form] = Form.useForm();
-  const [userId, setUserId] = useState();
-  const [api, contextHolder] = notification.useNotification();
+  const [userId, setUserId] = useState<string | undefined>(undefined);
 
-  /// set form value
+  const [loadingStep1, setLoadingStep1] = useState(false);
+  const [loadingStep2, setLoadingStep2] = useState(false);
+  const [inlineError, setInlineError] = useState<string | null>(null);
+
+  // Điền sẵn email lên form
   useEffect(() => {
-    if (userEmail) {
-      form.setFieldValue("email", userEmail);
-    }
-  }, [userEmail]);
+    if (userEmail) form.setFieldValue("email", userEmail);
+  }, [userEmail, form]);
 
-  ///
-
+  // Chưa mount thì không render để tránh lệch hydration
   if (!hasMounted) return null;
 
-  ///step 1
-  const handleResend1 = async (values: any) => {
-    const { email } = values;
-    const res = await sendRequest<IBackendRes<any>>({
-      url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/retry-active`,
-      method: "POST",
-      body: {
-        email,
-      },
-    });
-    /// nest step
-    if (res?.data) {
-      setUserId(res?.data?._id);
-      setCurrentStep(1); // go to Verification
-    } else {
-      notification.error({
-        message: "Failed to call APIs ...",
-        description: res?.message,
-      });
-    }
-  };
-  ///
+  // Step 1: Gửi lại email kích hoạt
+  const handleResendEmail = async (values: any) => {
+    setInlineError(null);
+    setLoadingStep1(true);
 
-  const handleResend2 = async (values: any) => {
-    const { code } = values;
-    const res = await sendRequest<IBackendRes<any>>({
-      url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/check-code`,
-      method: "POST",
-      body: {
-        _id: userId,
-        code,
-      },
-    });
+    try {
+      const { email } = values;
 
-    if (res?.data) {
-      setUserId(res?.data?._id);
-      setCurrentStep(2);
-
-      api.success({
-        message: "Account Activated",
-        description: "Your account has been successfully activated!",
+      const res = await sendRequest<IBackendRes<any>>({
+        url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/retry-active`,
+        method: "POST",
+        body: { email },
       });
 
-      setIsModalOpen(false);
-    } else {
-      notification.error({
-        message: "Failed to call APIs ...",
-        description: res?.message,
-      });
+      if (res?.data?._id) {
+        setUserId(res.data._id);
+        setCurrentStep(1);
+        notification.success({
+          message: "Đã gửi lại email xác minh",
+          description: "Vui lòng kiểm tra hộp thư (hoặc mục Spam).",
+        });
+      } else {
+        const msg =
+          res?.message ||
+          (Array.isArray(res?.error) ? res.error[0] : res?.error) ||
+          "Không thể gửi email xác minh.";
+        setInlineError(msg);
+        notification.error({ message: "Thất bại", description: msg });
+      }
+    } catch (e: any) {
+      const msg = e?.message || "Không thể kết nối máy chủ.";
+      setInlineError(msg);
+      notification.error({ message: "Thất bại", description: msg });
+    } finally {
+      setLoadingStep1(false);
     }
   };
 
-  ///
+  // Step 2: Nhập mã xác minh
+  const handleVerifyCode = async (values: any) => {
+    setInlineError(null);
+    setLoadingStep2(true);
 
-  return (
-    <>
-      {contextHolder}
-      <Modal
-        title={
-          <div style={{ textAlign: "center", width: "100%", fontSize: "20px" }}>
-            Account is InActive
-          </div>
-        }
-        open={isModalOpen}
-        onCancel={() => {
+    try {
+      const { code } = values;
+
+      const res = await sendRequest<IBackendRes<any>>({
+        url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/check-code`,
+        method: "POST",
+        body: {
+          _id: userId,
+          code,
+        },
+      });
+
+      if (res?.data?._id) {
+        setCurrentStep(2);
+        notification.success({
+          message: "Kích hoạt thành công",
+          description: "Tài khoản của bạn đã được kích hoạt.",
+        });
+        // Đóng modal sau 1.2s
+        setTimeout(() => {
           setCurrentStep(0);
           setIsModalOpen(false);
-        }}
-        footer={null}
-        centered
-        styles={{
-          body: {
-            textAlign: "center",
-            padding: 32,
-            borderRadius: 8,
-          },
-        }}
-      >
-        <div style={{ marginBottom: 16 }}>{iconMap[type]}</div>
+        }, 1200);
+      } else {
+        const msg =
+          res?.message ||
+          (Array.isArray(res?.error) ? res.error[0] : res?.error) ||
+          "Mã xác minh không hợp lệ.";
+        setInlineError(msg);
+        notification.error({ message: "Thất bại", description: msg });
+      }
+    } catch (e: any) {
+      const msg = e?.message || "Không thể kết nối máy chủ.";
+      setInlineError(msg);
+      notification.error({ message: "Thất bại", description: msg });
+    } finally {
+      setLoadingStep2(false);
+    }
+  };
 
-        <Typography.Title level={4} style={{ color: "#fff" }}>
-          {title}
-        </Typography.Title>
+  const handleClose = () => {
+    setCurrentStep(0);
+    setInlineError(null);
+    setUserId(undefined);
+    setIsModalOpen(false);
+    form.resetFields();
+  };
 
-        <Typography.Paragraph style={{ color: "#d9d9d9" }}>
-          {content}
-        </Typography.Paragraph>
+  return (
+    <Modal
+      open={isModalOpen}
+      onCancel={handleClose}
+      footer={null}
+      centered
+      title={
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {iconMap[type]}
+          <span>{title}</span>
+        </div>
+      }
+      styles={{
+        body: { paddingTop: 16, paddingBottom: 16 },
+      }}
+    >
+      <Typography.Paragraph style={{ marginBottom: 8 }}>
+        {content}
+      </Typography.Paragraph>
 
-        {showSteps && (
-          <>
-            <Steps
-              size="small"
-              current={currentStep}
-              style={{ marginBottom: 20 }}
-              items={[
-                {
-                  title: "Email",
-                  icon: <LoadingOutlined />,
-                },
-                {
-                  title: "Verification",
-                  icon: <MailOutlined />,
-                },
-                {
-                  title: "Done",
-                  icon: <CheckCircleOutlined />,
-                },
-              ]}
-            />
-            <Divider>
-              <i>Account is InActive?</i>
-            </Divider>
-            {/* Step content */}
-            {currentStep === 0 && (
-              <Form
-                name="verify1"
-                layout="vertical"
-                onFinish={handleResend1}
-                style={{ marginTop: 20 }}
-                form={form}
+      {inlineError ? (
+        <Alert
+          type="error"
+          message="Có lỗi xảy ra"
+          description={inlineError}
+          showIcon
+          style={{ marginBottom: 12 }}
+        />
+      ) : null}
+
+      {showSteps && (
+        <>
+          <Steps
+            size="small"
+            current={currentStep}
+            style={{ margin: "8px 0 16px" }}
+            items={[
+              {
+                title: "Email",
+                icon:
+                  currentStep === 0 ? <LoadingOutlined /> : <MailOutlined />,
+              },
+              { title: "Xác minh", icon: <MailOutlined /> },
+              { title: "Hoàn tất", icon: <CheckCircleOutlined /> },
+            ]}
+          />
+
+          <Divider plain>
+            <i>Tài khoản chưa kích hoạt?</i>
+          </Divider>
+
+          {/* Bước 0: Nhập email (đã khóa, chỉ nhấn gửi lại) */}
+          {currentStep === 0 && (
+            <Form
+              form={form}
+              name="resend-email"
+              layout="vertical"
+              onFinish={handleResendEmail}
+              style={{ marginTop: 8 }}
+              initialValues={{ email: userEmail }}
+            >
+              <Form.Item
+                name="email"
+                label="Email"
+                rules={[{ required: true, message: "Vui lòng nhập email" }]}
               >
-                <Form.Item
-                  name="email"
-                  label=""
-                  rules={[
-                    { required: true, message: "Please enter your email" },
-                  ]}
+                <Input placeholder="Nhập email" disabled />
+              </Form.Item>
+
+              <Form.Item>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  block
+                  loading={loadingStep1}
                 >
-                  <Input
-                    placeholder="Enter your email"
-                    disabled
-                    value={userEmail}
-                  />
-                </Form.Item>
+                  Gửi lại email xác minh
+                </Button>
+              </Form.Item>
+            </Form>
+          )}
 
-                <Form.Item>
-                  <Button type="primary" htmlType="submit" block>
-                    Resend Verification Email
-                  </Button>
-                </Form.Item>
-              </Form>
-            )}
-
-            {currentStep === 1 && (
-              <Form
-                name="verify2"
-                layout="vertical"
-                autoComplete="off"
-                onFinish={handleResend2}
-                style={{ marginTop: 20 }}
+          {/* Bước 1: Nhập mã xác minh */}
+          {currentStep === 1 && (
+            <Form
+              name="verify-code"
+              layout="vertical"
+              onFinish={handleVerifyCode}
+              autoComplete="off"
+              style={{ marginTop: 8 }}
+            >
+              <Form.Item
+                label="Mã xác minh"
+                name="code"
+                rules={[
+                  { required: true, message: "Vui lòng nhập mã xác minh" },
+                ]}
               >
-                <Form.Item
-                  name="code"
-                  label="Code"
-                  rules={[
-                    { required: true, message: "Please enter your code" },
-                  ]}
-                >
-                  <Input placeholder="Enter your verify code" />
-                </Form.Item>
+                <Input placeholder="Nhập mã gồm 6 ký tự"/>
+              </Form.Item>
 
-                <Form.Item>
-                  <Button type="primary" htmlType="submit" block>
-                    Active
-                  </Button>
-                </Form.Item>
-              </Form>
-            )}
-            {currentStep === 2 && (
-              <div>
-                <div style={{ margin: "20px 0" }}>
-                  <p>Your account is active !</p>
-                </div>
-              </div>
-            )}
-          </>
-        )}
-      </Modal>
-    </>
+              <Form.Item>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  block
+                  loading={loadingStep2}
+                >
+                  Kích hoạt tài khoản
+                </Button>
+              </Form.Item>
+
+              <Button
+                type="link"
+                onClick={() => setCurrentStep(0)}
+                style={{ padding: 0 }}
+              >
+                ← Gửi lại email khác
+              </Button>
+            </Form>
+          )}
+
+          {/* Bước 2: Hoàn tất */}
+          {currentStep === 2 && (
+            <div style={{ textAlign: "center", marginTop: 8 }}>
+              <CheckCircleOutlined style={{ color: "#52c41a", fontSize: 40 }} />
+              <Typography.Title level={5} style={{ marginTop: 12 }}>
+                Tài khoản đã được kích hoạt
+              </Typography.Title>
+              <Typography.Paragraph>
+                Bạn có thể đóng cửa sổ này và đăng nhập ngay bây giờ.
+              </Typography.Paragraph>
+              <Button type="primary" onClick={handleClose}>
+                Đóng
+              </Button>
+            </div>
+          )}
+        </>
+      )}
+    </Modal>
   );
 };
 

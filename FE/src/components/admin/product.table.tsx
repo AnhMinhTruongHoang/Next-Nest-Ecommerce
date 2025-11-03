@@ -45,7 +45,7 @@ const ProductsTable = () => {
 
   useEffect(() => {
     if (accessToken) {
-      getData(1, 999999); // load all khi mở
+      getData(1, 999999); // load tất cả khi mở
     }
   }, [accessToken]);
 
@@ -76,7 +76,7 @@ const ProductsTable = () => {
         showSizeChanger: true,
         pageSizeOptions: ["10", "20", "50", "100", "0"], // 0 = ∞
         showTotal: (total: number, range: [number, number]) =>
-          `${range[0]}-${range[1]} / ${total} items`,
+          `${range[0]}-${range[1]} / ${total} sản phẩm`,
         onChange: handleOnChange,
         onShowSizeChange: handleOnChange,
       });
@@ -109,7 +109,7 @@ const ProductsTable = () => {
 
   const columns: ColumnsType<IProduct> = [
     {
-      title: "Name",
+      title: "Tên sản phẩm",
       dataIndex: "name",
       align: "center",
       render: (value, record) => (
@@ -131,7 +131,7 @@ const ProductsTable = () => {
       }) => (
         <div style={{ padding: 8 }}>
           <Input
-            placeholder="Search name"
+            placeholder="Tìm theo tên"
             value={selectedKeys[0]}
             onChange={(e) =>
               setSelectedKeys(e.target.value ? [e.target.value] : [])
@@ -141,10 +141,10 @@ const ProductsTable = () => {
           />
           <Space>
             <Button type="primary" onClick={() => confirm()} size="small">
-              Search
+              Tìm kiếm
             </Button>
             <Button onClick={() => clearFilters && clearFilters()} size="small">
-              Reset
+              Đặt lại
             </Button>
           </Space>
         </div>
@@ -158,7 +158,7 @@ const ProductsTable = () => {
           .includes((value as string).toLowerCase()),
     },
     {
-      title: "Brand",
+      title: "Thương hiệu",
       dataIndex: "brand",
       align: "center",
       filters: [
@@ -171,14 +171,14 @@ const ProductsTable = () => {
         record.brand?.toLowerCase() === (value as string).toLowerCase(),
     },
     {
-      title: "Category",
+      title: "Danh mục",
       dataIndex: ["category", "name"],
       align: "center",
       filters: [
-        { text: "Mouse", value: "Mouse" },
-        { text: "Keyboard", value: "Keyboard" },
-        { text: "Monitor", value: "Monitor" },
-        { text: "Chairs", value: "Chairs" },
+        { text: "Chuột", value: "Mouse" },
+        { text: "Bàn phím", value: "Keyboard" },
+        { text: "Màn hình", value: "Monitor" },
+        { text: "Ghế", value: "Chairs" },
       ],
       onFilter: (value, record) => {
         const categoryName =
@@ -192,11 +192,11 @@ const ProductsTable = () => {
           typeof record.category === "string"
             ? record.category
             : record.category?.name;
-        return categoryName || "N/A";
+        return categoryName || "Không xác định";
       },
     },
     {
-      title: "Thumbnail",
+      title: "Ảnh",
       dataIndex: "thumbnail",
       align: "center",
       render: (thumbnail: string) =>
@@ -209,11 +209,11 @@ const ProductsTable = () => {
             style={{ objectFit: "cover", borderRadius: 4 }}
           />
         ) : (
-          <span>No image</span>
+          <span>Không có ảnh</span>
         ),
     },
     {
-      title: "Price",
+      title: "Giá",
       dataIndex: "price",
       align: "center",
       sorter: (a, b) => a.price - b.price,
@@ -225,7 +225,7 @@ const ProductsTable = () => {
         }).format(price),
     },
     {
-      title: "Stock",
+      title: "Tồn kho",
       dataIndex: "stock",
       align: "center",
       sorter: (a, b) => a.stock - b.stock,
@@ -240,13 +240,13 @@ const ProductsTable = () => {
       },
     },
     {
-      title: "Sold",
+      title: "Đã bán",
       dataIndex: "sold",
       align: "center",
       sorter: (a, b) => a.sold - b.sold,
     },
     {
-      title: "Actions",
+      title: "Hành động",
       align: "center",
       render: (_, record) => (
         <Space>
@@ -256,16 +256,16 @@ const ProductsTable = () => {
               setIsUpdateModalOpen(true);
             }}
           >
-            Edit
+            Sửa
           </Button>
           <Popconfirm
-            title="Delete the product"
-            description={`Are you sure to delete ${record.name}?`}
+            title="Xóa sản phẩm"
+            description={`Bạn có chắc muốn xóa ${record.name}?`}
             onConfirm={() => handleDeleteProduct(record)}
-            okText="Yes"
-            cancelText="No"
+            okText="Có"
+            cancelText="Không"
           >
-            <Button danger>Delete</Button>
+            <Button danger>Xóa</Button>
           </Popconfirm>
         </Space>
       ),
@@ -282,21 +282,21 @@ const ProductsTable = () => {
           marginBottom: 16,
         }}
       >
-        <h2>Table products</h2>
+        <h2>Bảng sản phẩm</h2>
         <Space>
           <Button
             type="text"
             icon={<ReloadOutlined style={{ color: "green" }} />}
             onClick={() => getData(1, pagination?.pageSize || 999999)}
           >
-            Refresh
+            Làm mới
           </Button>
           <Button
             icon={<PlusOutlined />}
             type="primary"
             onClick={() => setIsCreateModalOpen(true)}
           >
-            Add new
+            Thêm mới
           </Button>
         </Space>
       </div>
@@ -310,19 +310,23 @@ const ProductsTable = () => {
         />
       </Spin>
 
-      {/* Modal components */}
+      {/* Modal xem chi tiết */}
       <ViewProductModal
         productData={viewProduct}
         isViewModalOpen={isViewModalOpen}
         setIsViewModalOpen={setIsViewModalOpen}
         setViewProduct={setViewProduct}
       />
+
+      {/* Modal tạo mới */}
       <CreateProductModal
         access_token={accessToken}
         getData={() => getData(1, pagination?.pageSize || 999999)}
         isCreateModalOpen={isCreateModalOpen}
         setIsCreateModalOpen={setIsCreateModalOpen}
       />
+
+      {/* Modal cập nhật */}
       <UpdateProductModal
         access_token={accessToken}
         getData={() => getData(1, pagination?.pageSize || 999999)}

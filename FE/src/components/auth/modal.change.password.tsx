@@ -43,8 +43,8 @@ const ModalChangePassword = ({ isModalOpen, setIsModalOpen }: any) => {
       setCurrent(1);
     } else {
       notification.error({
-        message: "Error",
-        description: res?.message || "Something went wrong!",
+        message: "Lỗi",
+        description: res?.message || "Có lỗi xảy ra, vui lòng thử lại!",
       });
     }
   };
@@ -54,8 +54,8 @@ const ModalChangePassword = ({ isModalOpen, setIsModalOpen }: any) => {
 
     if (password !== confirmPassword) {
       notification.error({
-        message: "Validation Error",
-        description: "Passwords do not match.",
+        message: "Lỗi xác thực",
+        description: "Mật khẩu nhập lại không khớp.",
       });
       return;
     }
@@ -75,15 +75,16 @@ const ModalChangePassword = ({ isModalOpen, setIsModalOpen }: any) => {
       setCurrent(2);
     } else {
       notification.error({
-        message: "Error",
-        description: res?.message || "Invalid code or expired.",
+        message: "Lỗi",
+        description: res?.message || "Mã không hợp lệ hoặc đã hết hạn.",
       });
     }
   };
 
   // reset modal
   const resetModal = () => {
-    setIsModalOpen(false), setCurrent(0);
+    setIsModalOpen(false);
+    setCurrent(0);
     setUserEmail("");
     form.resetFields();
   };
@@ -94,7 +95,7 @@ const ModalChangePassword = ({ isModalOpen, setIsModalOpen }: any) => {
         <div
           style={{ textAlign: "center", width: "100%", marginBottom: "15px" }}
         >
-          <b> Reset Your Password</b>
+          <b>Đặt lại mật khẩu</b>
         </div>
       }
       onOk={resetModal}
@@ -102,6 +103,7 @@ const ModalChangePassword = ({ isModalOpen, setIsModalOpen }: any) => {
       onCancel={resetModal}
       footer={null}
       maskClosable={false}
+      style={{ top: 40 }}
     >
       <Steps
         current={current}
@@ -111,11 +113,11 @@ const ModalChangePassword = ({ isModalOpen, setIsModalOpen }: any) => {
             icon: <UserOutlined />,
           },
           {
-            title: "Verification",
+            title: "Xác minh",
             icon: <SolutionOutlined />,
           },
           {
-            title: "Done",
+            title: "Hoàn tất",
             icon: <SmileOutlined />,
           },
         ]}
@@ -124,10 +126,10 @@ const ModalChangePassword = ({ isModalOpen, setIsModalOpen }: any) => {
       <div style={{ marginTop: 24 }}>
         {current === 0 && (
           <>
-            <Title level={5}>Step 1: Enter your email</Title>
+            <Title level={5}>Bước 1: Nhập email của bạn</Title>
             <Paragraph>
-              To reset your password, please provide the email associated with
-              your account.
+              Vui lòng nhập địa chỉ email đã đăng ký để nhận mã xác minh đặt lại
+              mật khẩu.
             </Paragraph>
 
             <Form
@@ -139,16 +141,14 @@ const ModalChangePassword = ({ isModalOpen, setIsModalOpen }: any) => {
               <Form.Item
                 label="Email"
                 name="email"
-                rules={[
-                  { required: true, message: "Please input your email!" },
-                ]}
+                rules={[{ required: true, message: "Vui lòng nhập email!" }]}
               >
-                <Input placeholder="your@email.com" />
+                <Input placeholder="nhapemail@domain.com" />
               </Form.Item>
 
               <Form.Item>
                 <Button type="primary" htmlType="submit" block>
-                  Send Verification Code
+                  Gửi mã xác minh
                 </Button>
               </Form.Item>
             </Form>
@@ -157,41 +157,38 @@ const ModalChangePassword = ({ isModalOpen, setIsModalOpen }: any) => {
 
         {current === 1 && (
           <>
-            <Title level={5}>
-              Step 2: Enter verification code & new password
-            </Title>
+            <Title level={5}>Bước 2: Nhập mã xác minh & mật khẩu mới</Title>
             <Paragraph>
-              We’ve sent a code to your email. Enter it here along with your new
-              password.
+              Chúng tôi đã gửi mã xác minh đến email của bạn. Vui lòng nhập mã
+              và mật khẩu mới.
             </Paragraph>
 
             <Form layout="vertical" onFinish={onFinishStep1}>
               <Form.Item
-                label="Verification Code"
+                label="Mã xác minh"
                 name="code"
-                rules={[{ required: true, message: "Please input the code!" }]}
+                rules={[
+                  { required: true, message: "Vui lòng nhập mã xác minh!" },
+                ]}
               >
-                <Input placeholder="Enter code" />
+                <Input placeholder="Nhập mã" />
               </Form.Item>
 
               <Form.Item
-                label="New Password"
+                label="Mật khẩu mới"
                 name="password"
                 rules={[
-                  {
-                    required: true,
-                    message: "Please input your new password!",
-                  },
+                  { required: true, message: "Vui lòng nhập mật khẩu mới!" },
                 ]}
               >
                 <Input.Password prefix={<LockOutlined />} />
               </Form.Item>
 
               <Form.Item
-                label="Confirm Password"
+                label="Xác nhận mật khẩu"
                 name="confirmPassword"
                 rules={[
-                  { required: true, message: "Please confirm your password!" },
+                  { required: true, message: "Vui lòng nhập lại mật khẩu!" },
                 ]}
               >
                 <Input.Password prefix={<LockOutlined />} />
@@ -199,7 +196,7 @@ const ModalChangePassword = ({ isModalOpen, setIsModalOpen }: any) => {
 
               <Form.Item>
                 <Button type="primary" htmlType="submit" block>
-                  Reset Password
+                  Đặt lại mật khẩu
                 </Button>
               </Form.Item>
             </Form>
@@ -210,14 +207,12 @@ const ModalChangePassword = ({ isModalOpen, setIsModalOpen }: any) => {
           <div style={{ textAlign: "center", marginTop: 32 }}>
             <CheckCircleOutlined style={{ fontSize: 48, color: "#52c41a" }} />
             <Title level={4} style={{ marginTop: 16 }}>
-              Password changed successfully!
+              Đổi mật khẩu thành công!
             </Title>
-            <Paragraph>
-              Please go back and login with your new password.
-            </Paragraph>
+            <Paragraph>Bạn có thể đăng nhập bằng mật khẩu mới.</Paragraph>
 
             <Button type="primary" onClick={() => setIsModalOpen(false)}>
-              Close
+              Đóng
             </Button>
           </div>
         )}

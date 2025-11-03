@@ -17,7 +17,7 @@ type PropsType = {
   className?: string;
 };
 
-export function WeeksProfit({ timeFrame = "THIS WEEK" }: PropsType) {
+export function WeeksProfit({ timeFrame = "TUẦN NÀY" }: PropsType) {
   const [data, setData] = useState<WeeksProfitData | null>(null);
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export function WeeksProfit({ timeFrame = "THIS WEEK" }: PropsType) {
         }}
       >
         <p style={{ color: "#6b7280", textTransform: "uppercase" }}>
-          LOADING...
+          ĐANG TẢI...
         </p>
       </div>
     );
@@ -50,7 +50,7 @@ export function WeeksProfit({ timeFrame = "THIS WEEK" }: PropsType) {
         boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
       }}
     >
-      {/* HEADER */}
+      {/* TIÊU ĐỀ */}
       <div
         style={{
           display: "flex",
@@ -72,12 +72,12 @@ export function WeeksProfit({ timeFrame = "THIS WEEK" }: PropsType) {
             textTransform: "uppercase",
           }}
         >
-          PROFIT{timeFrame}
+          LỢI NHUẬN
         </h2>
-        <PeriodPicker defaultValue={timeFrame} sectionKey="payments_overview" />
+        <PeriodPicker defaultValue={timeFrame} sectionKey="weeks_profit" />
       </div>
 
-      {/* CHART */}
+      {/* BIỂU ĐỒ */}
       <WeeksProfitChart data={data} />
     </div>
   );

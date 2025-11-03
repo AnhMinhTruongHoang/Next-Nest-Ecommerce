@@ -1,152 +1,415 @@
 "use client";
 
-import { Button } from "antd";
+import { useEffect, useMemo, useState } from "react";
+import { Card, Carousel, Skeleton, Empty, Rate, Tag } from "antd";
+import { LeftOutlined, RightOutlined, FireOutlined } from "@ant-design/icons";
 import Image from "next/image";
+import Link from "next/link";
+import { getImageUrl } from "@/utils/getImageUrl";
 
-const SuggestionBanner = () => {
+type TProduct = {
+  _id: string;
+  thumbnail: string;
+  name: string;
+  price: number;
+  sold: number;
+  originalPrice?: number;
+  averageRating?: number;
+  totalReviews?: number;
+  category?: string[] | string;
+  hz?: number;
+  sizeInch?: number;
+  panel?: string;
+  resolution?: string;
+};
+
+const currencyVN = (n?: number) =>
+  new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(
+    n ?? 0
+  );
+
+interface SuggestionListProps {
+  currentProduct: TProduct;
+}
+
+const chunk = <T,>(arr: T[], size: number) =>
+  arr.reduce<T[][]>(
+    (acc, _, i) => (i % size ? acc : [...acc, arr.slice(i, i + size)]),
+    []
+  );
+
+const Arrow = ({
+  className,
+  onClick,
+  left,
+}: {
+  className?: string;
+  onClick?: () => void;
+  left?: boolean;
+}) => (
+  <div
+    className={className}
+    onClick={onClick}
+    style={{
+      width: 36,
+      height: 36,
+      borderRadius: "50%",
+      background: "#fff",
+      boxShadow: "0 4px 12px rgba(0,0,0,.12)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      border: "1px solid #eee",
+      zIndex: 2,
+    }}
+  >
+    {left ? <LeftOutlined /> : <RightOutlined />}
+  </div>
+);
+
+const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
+  const [listProduct, setListProduct] = useState<TProduct[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [errorMsg, setErrorMsg] = useState<string>("");
+
+  const [cols, setCols] = useState(4);
+  useEffect(() => {
+    const sync = () => {
+      const w = window.innerWidth;
+      if (w < 640) setCols(1);
+      else if (w < 1024) setCols(2);
+      else setCols(4);
+    };
+    sync();
+    window.addEventListener("resize", sync);
+    return () => window.removeEventListener("resize", sync);
+  }, []);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const cat = Array.isArray(currentProduct?.category)
+        ? currentProduct.category?.[0]
+        : (currentProduct?.category as string);
+
+      if (!cat) return;
+
+      setIsLoading(true);
+      setErrorMsg("");
+      try {
+        const query = `current=1&pageSize=10&category=${cat}&sort=-sold`;
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/products?${query}`
+        );
+        const data = await res.json();
+        let result: TProduct[] = data?.data?.result ?? [];
+
+        result = result.filter((p) => p._id !== currentProduct._id);
+
+        // enrich rating
+        const enriched = await Promise.all(
+          result.map(async (p) => {
+            try {
+              const r = await fetch(
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/reviews/summary/${p._id}`
+              );
+              const summary = await r.json();
+              return {
+                ...p,
+                averageRating: summary?.average ?? 0,
+                totalReviews: summary?.total ?? 0,
+              };
+            } catch {
+              return { ...p, averageRating: 0, totalReviews: 0 };
+            }
+          })
+        );
+
+        // Chỉ lấy tối đa 4 cho UI gọn như yêu cầu
+        setListProduct(enriched.slice(0, 4));
+      } catch (e) {
+        console.error("Fetch related products error:", e);
+        setErrorMsg("Không tải được sản phẩm gợi ý.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [currentProduct]);
+
+  const slides = useMemo(() => chunk(listProduct, cols), [listProduct, cols]);
+
   return (
-    <div className="banner-container">
-      <Image
-        src="/images/banners/razerBanner.jpg"
-        alt="Razer Exclusive Banner"
-        fill
-        priority
-        style={{ objectFit: "inherit", objectPosition: "left center" }}
-        sizes="100vw"
-      />
+    <div style={{ marginTop: 24 }}>
+      <h2
+        style={{
+          fontWeight: 800,
+          marginBottom: 15,
+          letterSpacing: 0.2,
+          textAlign: "center",
+        }}
+      >
+        Sản phẩm tương tự
+      </h2>
 
-      <div className="banner-overlay">
-        <h2 className="razer-text fade-in">Razer Exclusive</h2>
-        <Button
-          type="primary"
-          size="large"
-          className="banner-btn fade-in"
+      {/* Loading */}
+      {isLoading && (
+        <div
           style={{
-            backgroundColor: "greenyellow",
-            borderColor: "#66B933",
-            color: "#000",
-            fontWeight: "bold",
+            display: "grid",
+            gridTemplateColumns: `repeat(${cols}, 1fr)`,
+            gap: 16,
           }}
         >
-          KHÁM PHÁ
-        </Button>
-      </div>
+          {Array.from({ length: cols }).map((_, i) => (
+            <Card key={i} style={{ borderRadius: 12 }}>
+              <Skeleton.Image
+                style={{ width: "100%", height: 180, borderRadius: 10 }}
+                active
+              />
+              <Skeleton
+                active
+                title
+                paragraph={{ rows: 2 }}
+                style={{ marginTop: 12 }}
+              />
+            </Card>
+          ))}
+        </div>
+      )}
 
-      <style jsx>{`
-        /* Banner container */
-        .banner-container {
-          width: 100%;
-          height: 700px;
-          position: relative;
-          background-color: #000;
-          overflow: hidden;
-        }
+      {/* Error / Empty */}
+      {!isLoading && errorMsg && (
+        <div style={{ textAlign: "center", color: "#ff4d4f" }}>{errorMsg}</div>
+      )}
+      {!isLoading && !errorMsg && listProduct.length === 0 && (
+        <Empty description="Không có sản phẩm liên quan" />
+      )}
 
-        /* Overlay */
-        .banner-overlay {
-          margin-bottom: 200px;
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          width: 100%;
-          padding: 120px;
-          color: #fff;
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          justify-content: flex-end;
-          background: linear-gradient(
-            to top,
-            rgba(0, 0, 0, 0.6),
-            rgba(0, 0, 0, 0.1),
-            transparent
-          );
-          z-index: 2;
-        }
+      {/* List */}
+      {!isLoading && !errorMsg && listProduct.length > 0 && (
+        <Carousel
+          arrows
+          prevArrow={<Arrow left />}
+          nextArrow={<Arrow />}
+          dots={false}
+          draggable
+        >
+          {slides.map((group, idx) => (
+            <div key={idx}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: `repeat(${cols}, 1fr)`,
+                  gap: 16,
+                }}
+              >
+                {group.map((p) => {
+                  const imgSrc = getImageUrl(p.thumbnail);
+                  const original =
+                    p.originalPrice && p.originalPrice > p.price
+                      ? p.originalPrice
+                      : undefined;
+                  const discountAmount = original
+                    ? Math.max(original - p.price, 0)
+                    : 0;
+                  const discountPercent = original
+                    ? Math.round((discountAmount / original) * 100)
+                    : 0;
+                  const hotDeal = discountPercent >= 15; // tuỳ chỉnh ngưỡng
 
-        /* Text */
-        .razer-text {
-          color: black;
-          -webkit-text-stroke: 2px #66b933;
-          font-weight: 800;
-          font-size: 56px;
-          letter-spacing: 1px;
-          margin-bottom: 20px;
-          text-transform: uppercase;
-        }
+                  // dải chip specs (nếu có)
+                  const chips: string[] = [];
+                  if (p.hz) chips.push(`${p.hz} Hz`);
+                  if (p.sizeInch) chips.push(`${p.sizeInch} inch`);
+                  if (p.panel) chips.push(p.panel.toUpperCase());
+                  if (p.resolution)
+                    chips.push(p.resolution.replace("x", " × "));
 
-        /* Button */
-        .banner-btn {
-          height: 50px;
-          font-size: 18px;
-          border-radius: 8px;
-          transition: all 0.3s ease;
-        }
+                  return (
+                    <Link
+                      key={p._id}
+                      href={`/product-detail/${p._id}`}
+                      style={{ textDecoration: "none" }}
+                    >
+                      <Card
+                        hoverable
+                        style={{
+                          borderRadius: 12,
+                          overflow: "hidden",
+                          height: "100%",
+                          border: "1px solid #eee",
+                        }}
+                        bodyStyle={{ padding: 12 }}
+                        cover={
+                          <div
+                            style={{
+                              position: "relative",
+                              height: 180,
+                              background: "#fff",
+                            }}
+                          >
+                            <Image
+                              alt={p.name}
+                              src={imgSrc}
+                              fill
+                              sizes="280px"
+                              style={{ objectFit: "contain" }}
+                            />
+                            {hotDeal && (
+                              <div
+                                style={{
+                                  position: "absolute",
+                                  top: 10,
+                                  left: 10,
+                                  background: "#ff4d4f",
+                                  color: "#fff",
+                                  fontSize: 12,
+                                  fontWeight: 700,
+                                  padding: "4px 8px",
+                                  borderRadius: 999,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 6,
+                                  boxShadow: "0 2px 8px rgba(0,0,0,.12)",
+                                }}
+                              >
+                                <FireOutlined /> HOT DEAL
+                              </div>
+                            )}
+                          </div>
+                        }
+                      >
+                        <div
+                          style={{
+                            fontWeight: 700,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            marginBottom: 4,
+                            minHeight: 22,
+                            textAlign: "center",
+                          }}
+                          title={p.name}
+                        >
+                          {p.name}
+                        </div>
 
-        .banner-btn:hover {
-          background-color: #66b933 !important;
-          color: #000 !important;
-          transform: translateY(-2px);
-        }
+                        {/* Chip specs */}
+                        {chips.length > 0 && (
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: 8,
+                              flexWrap: "wrap",
+                              background: "#f5f5f5",
+                              padding: 8,
+                              borderRadius: 8,
+                              margin: "6px 0 10px",
+                            }}
+                          >
+                            {chips.slice(0, 4).map((c, i) => (
+                              <span
+                                key={i}
+                                style={{
+                                  background: "#fff",
+                                  border: "1px solid #eaeaea",
+                                  padding: "2px 8px",
+                                  borderRadius: 6,
+                                  fontSize: 12,
+                                  color: "#666",
+                                }}
+                              >
+                                {c}
+                              </span>
+                            ))}
+                          </div>
+                        )}
 
-        /* Animation */
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
+                        {/* Rating + sold */}
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                            marginBottom: 6,
+                            textAlign: "center",
+                          }}
+                        >
+                          <Rate
+                            disabled
+                            allowHalf
+                            value={p.averageRating ?? 0}
+                          />
+                          <span style={{ fontSize: 12, color: "#888" }}>
+                            ({p.totalReviews ?? 0})
+                          </span>
+                          <Tag color="green" style={{ marginLeft: "auto" }}>
+                            {p.sold ?? 0} đã bán
+                          </Tag>
+                        </div>
 
-        .fade-in {
-          animation: fadeInUp 1s ease both;
-        }
+                        {/* Price block */}
+                        <div>
+                          {original && (
+                            <div
+                              style={{
+                                color: "#999",
+                                textDecoration: "line-through",
+                                fontSize: 13,
+                                marginBottom: 2,
+                                textAlign: "center",
+                              }}
+                            >
+                              {currencyVN(original)}{" "}
+                              {discountPercent ? (
+                                <span
+                                  style={{
+                                    color: "#ff4d4f",
+                                    textAlign: "center",
+                                  }}
+                                >
+                                  -{discountPercent}%
+                                </span>
+                              ) : null}
+                            </div>
+                          )}
 
-        /* Tablet */
-        @media (max-width: 1024px) {
-          .banner-container {
-            height: 520px;
-          }
-          .banner-overlay {
-            padding: 80px 50px;
-          }
-          .razer-text {
-            font-size: 40px;
-            -webkit-text-stroke: 1.5px #66b933;
-          }
-          .banner-btn {
-            font-size: 16px;
-            height: 44px;
-          }
-        }
+                          <div
+                            style={{
+                              color: "#d0021b",
+                              fontWeight: 800,
+                              fontSize: 18,
+                              textAlign: "center",
+                            }}
+                          >
+                            {currencyVN(p.price)}
+                          </div>
 
-        /* Mobile */
-        @media (max-width: 768px) {
-          .banner-container {
-            height: 400px;
-          }
-          .banner-overlay {
-            padding: 40px 20px;
-            align-items: center;
-            text-align: center;
-          }
-          .razer-text {
-            font-size: 28px;
-            margin-bottom: 12px;
-            -webkit-text-stroke: 1px #66b933;
-          }
-          .banner-btn {
-            font-size: 14px;
-            height: 38px;
-            padding: 0 18px;
-          }
-        }
-      `}</style>
+                          {discountAmount > 0 && (
+                            <div
+                              style={{
+                                color: "#00a76f",
+                                fontWeight: 600,
+                                marginTop: 2,
+                                fontSize: 13,
+                              }}
+                            >
+                              Giảm {currencyVN(discountAmount)}
+                            </div>
+                          )}
+                        </div>
+                      </Card>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </Carousel>
+      )}
     </div>
   );
 };
 
-export default SuggestionBanner;
+export default SuggestionList;

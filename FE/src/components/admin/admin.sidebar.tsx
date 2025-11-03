@@ -10,102 +10,109 @@ import {
   SettingOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
-import React, { useContext } from "react";
+import React, { useContext, useMemo } from "react";
 import { AdminContext } from "@/lib/admin.context";
 import type { MenuProps } from "antd";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { TicketCheckIcon } from "lucide-react";
 
 type MenuItem = Required<MenuProps>["items"][number];
+
 const AdminSideBar = () => {
   const { Sider } = Layout;
   const { collapseMenu } = useContext(AdminContext)!;
+  const pathname = usePathname();
+
+  const selectedKey = useMemo(() => {
+    if (pathname?.startsWith("/dashboard/users")) return "users";
+    if (pathname?.startsWith("/dashboard/products")) return "products";
+    if (pathname?.startsWith("/dashboard/orders")) return "orders";
+    if (pathname?.startsWith("/dashboard/comments")) return "comments";
+    if (pathname?.startsWith("/dashboard/vouchers")) return "vouchers";
+    if (pathname === "/dashboard") return "dashboard";
+    return "home";
+  }, [pathname]);
 
   const items: MenuItem[] = [
     {
       key: "grp",
-
       type: "group",
       children: [
         {
           key: "home",
           icon: <HomeOutlined />,
-          label: <Link href="/">HomePage</Link>,
+          label: <Link href="/">Trang chủ</Link>,
         },
         {
           key: "dashboard",
-          label: <Link href={"/dashboard"}>Dashboard</Link>,
           icon: <AppstoreOutlined />,
+          label: <Link href="/dashboard">Bảng điều khiển</Link>,
         },
         {
           key: "users",
-          label: <Link href={"/dashboard/users"}>Manage Users</Link>,
           icon: <TeamOutlined />,
+          label: <Link href="/dashboard/users">Quản lý người dùng</Link>,
         },
         {
           key: "products",
-          label: <Link href={"/dashboard/products"}>Manage Products</Link>,
           icon: <ProductFilled />,
+          label: <Link href="/dashboard/products">Quản lý sản phẩm</Link>,
         },
         {
           key: "orders",
-          label: <Link href={"/dashboard/orders"}>Manage Orders</Link>,
           icon: <OrderedListOutlined />,
+          label: <Link href="/dashboard/orders">Quản lý đơn hàng</Link>,
         },
+
+        // Nhóm Feedback
         {
-          key: "sub1",
-          label: "Feedback",
+          key: "feedback",
+          label: "Phản hồi",
           icon: <MailOutlined />,
           children: [
             {
-              key: "g1",
-              label: "Comments",
-              type: "group",
-              children: [
-                {
-                  key: "1",
-                  label: (
-                    <Link href={"/dashboard/comments"}>Manage Reviews</Link>
-                  ),
-                },
-              ],
-            },
-            {
-              key: "g2",
-              label: "Rating",
-              type: "group",
-              children: [{ key: "2", label: "Manage Rating" }],
+              key: "comments",
+              label: <Link href="/dashboard/comments">Quản lý đánh giá</Link>,
             },
           ],
         },
+
         {
-          key: "sub2",
-          label: "Navigation Two",
-          icon: <AppstoreOutlined />,
-          children: [
-            { key: "5", label: "Option 5" },
-            { key: "6", label: "Option 6" },
-            {
-              key: "sub3",
-              label: "Submenu",
-              children: [
-                { key: "7", label: "Option 7" },
-                { key: "8", label: "Option 8" },
-              ],
-            },
-          ],
+          key: "vouchers",
+          icon: <TicketCheckIcon />,
+          label: <Link href="/dashboard/vouchers">Quản lý voucher</Link>,
         },
+
         {
           type: "divider",
         },
         {
-          key: "sub4",
-          label: "Navigation Three",
+          key: "nav2",
+          label: "Điều hướng 2",
+          icon: <AppstoreOutlined />,
+          children: [
+            { key: "opt5", label: "Tùy chọn 5" },
+            { key: "opt6", label: "Tùy chọn 6" },
+            {
+              key: "sub3",
+              label: "Menu con",
+              children: [
+                { key: "opt7", label: "Tùy chọn 7" },
+                { key: "opt8", label: "Tùy chọn 8" },
+              ],
+            },
+          ],
+        },
+        {
+          key: "nav3",
+          label: "Điều hướng 3",
           icon: <SettingOutlined />,
           children: [
-            { key: "9", label: "Option 9" },
-            { key: "10", label: "Option 10" },
-            { key: "11", label: "Option 11" },
-            { key: "12", label: "Option 12" },
+            { key: "opt9", label: "Tùy chọn 9" },
+            { key: "opt10", label: "Tùy chọn 10" },
+            { key: "opt11", label: "Tùy chọn 11" },
+            { key: "opt12", label: "Tùy chọn 12" },
           ],
         },
       ],
@@ -116,7 +123,8 @@ const AdminSideBar = () => {
     <Sider collapsed={collapseMenu}>
       <Menu
         mode="inline"
-        defaultSelectedKeys={["dashboard"]}
+        selectedKeys={[selectedKey]}
+        defaultOpenKeys={["feedback", "nav2", "nav3"]}
         items={items}
         style={{ height: "100vh" }}
       />

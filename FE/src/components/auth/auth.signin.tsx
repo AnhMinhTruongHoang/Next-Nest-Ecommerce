@@ -7,6 +7,7 @@ import {
   ArrowLeftOutlined,
   EyeInvisibleOutlined,
   EyeTwoTone,
+  MailOutlined,
 } from "@ant-design/icons";
 import {
   Avatar,
@@ -16,180 +17,285 @@ import {
   Typography,
   Form,
   notification,
+  App,
+  Checkbox,
+  Alert,
 } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn, getSession } from "next-auth/react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import ModalChangePassword from "./modal.change.password";
 import ModelReactive from "./model.reactive";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
+
+type SignInValues = {
+  username: string;
+  password: string;
+  remember?: boolean;
+};
 
 export default function AuthSignIn() {
   const router = useRouter();
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<SignInValues>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [changePassword, setChangePassword] = useState(false);
   const [api, contextHolder] = notification.useNotification();
+  const [submitting, setSubmitting] = useState(false);
+  const [errorInline, setErrorInline] = useState<string | null>(null);
 
-  const handleSubmit = async (values: {
-    username: string;
-    password: string;
-  }) => {
-    setUserEmail("");
+  const handleSubmit = useCallback(
+    async (values: SignInValues) => {
+      setErrorInline(null);
+      setUserEmail("");
+      setSubmitting(true);
 
-    const res = await signIn("credentials", {
-      username: values.username,
-      password: values.password,
-      redirect: false,
-    });
+      const res = await signIn("credentials", {
+        username: values.username,
+        password: values.password,
+        redirect: false,
+      });
 
-    if (res && !res.error) {
-      const session = await getSession();
-      const token =
-        (session as any)?.access_token ?? (session as any)?.user?.access_token;
+      if (res && !res.error) {
+        const session = await getSession();
+        const token =
+          (session as any)?.access_token ??
+          (session as any)?.user?.access_token;
 
-      if (token) {
-        localStorage.setItem("access_token", token);
-        console.log("Token saved:", token);
+        if (token) {
+          localStorage.setItem("access_token", token);
+        }
+
+        router.push("/");
+        router.refresh();
+        setSubmitting(false);
+        return;
       }
 
-      router.push("/");
-      router.refresh();
-      return;
-    }
+      setSubmitting(false);
 
-    if (res?.error) {
-      if (res.error.toLowerCase().includes("not active")) {
-        setModalContent(
-          "Your account is not activated. Please check your email."
-        );
-        setUserEmail(values.username);
-        setIsModalOpen(true);
-      } else {
-        api.error({
-          message: "Sign In Failed",
-          description: res.error || "Invalid username or password",
-          placement: "topRight",
-        });
+      if (res?.error) {
+        const msg = res.error.toLowerCase();
+        if (msg.includes("not active")) {
+          setModalContent(
+            "Tài khoản của bạn chưa được kích hoạt. Vui lòng kiểm tra email."
+          );
+          setUserEmail(values.username);
+          setIsModalOpen(true);
+        } else {
+          setErrorInline(res.error || "Sai tài khoản hoặc mật khẩu");
+          api.error({
+            message: "Đăng nhập thất bại",
+            description: res.error || "Sai tài khoản hoặc mật khẩu",
+            placement: "topRight",
+          });
+        }
       }
-    }
-  };
+    },
+    [api, router]
+  );
 
   return (
     <div
       style={{
-        backgroundColor: "#f9f9f9",
         minHeight: "100vh",
-        padding: "48px 16px",
+        background:
+          "radial-gradient(1200px 600px at 80% -10%, #ffe6e6, transparent 60%), radial-gradient(900px 500px at -10% 20%, #e6f7ff, transparent 60%), linear-gradient(180deg, #fafafa, #f5f5f5)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 24,
       }}
     >
       {contextHolder}
-      <div style={{ maxWidth: 400, margin: "0 auto", position: "relative" }}>
-        <Link href="/" style={{ position: "absolute", top: 0, left: 0 }}>
-          <Button icon={<ArrowLeftOutlined />} type="link">
-            Back
-          </Button>
-        </Link>
 
-        <div style={{ textAlign: "center", marginBottom: 24 }}>
-          <Avatar
-            size={64}
-            style={{ backgroundColor: "#ff4d4f", marginBottom: 12 }}
-          >
-            <LockOutlined />
-          </Avatar>
-          <Title level={3}>Sign In</Title>
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 440,
+          background: "#fff",
+          borderRadius: 16,
+          boxShadow: "0 20px 60px rgba(0,0,0,.06)",
+          padding: 28,
+          position: "relative",
+        }}
+      >
+        {/* Back */}
+        <div style={{ position: "absolute", top: 12, left: 12 }}>
+          <Link href="/" aria-label="Quay lại trang chủ">
+            <Button icon={<ArrowLeftOutlined />} type="text">
+              Quay lại
+            </Button>
+          </Link>
         </div>
 
-        <Form form={form} layout="vertical" onFinish={handleSubmit}>
+        {/* Header */}
+        <div style={{ textAlign: "center", marginTop: 8, marginBottom: 10 }}>
+          <Avatar
+            size={72}
+            style={{
+              background:
+                "conic-gradient(from 180deg at 50% 50%, #ff7875, #ff4d4f, #ff9c6e)",
+              marginBottom: 12,
+              boxShadow: "0 8px 18px rgba(255,77,79,.25)",
+            }}
+          >
+            <LockOutlined style={{ fontSize: 28, color: "#fff" }} />
+          </Avatar>
+          <Title level={3} style={{ margin: 0 }}>
+            Đăng nhập
+          </Title>
+          <Text type="secondary">Chào mừng bạn quay lại 👋</Text>
+        </div>
+
+        {/* Error inline */}
+        {errorInline && (
+          <Alert
+            type="error"
+            message="Không thể đăng nhập"
+            description={errorInline}
+            showIcon
+            style={{ marginBottom: 16 }}
+          />
+        )}
+
+        {/* Form */}
+        <Form<SignInValues>
+          form={form}
+          layout="vertical"
+          onFinish={handleSubmit}
+          requiredMark={false}
+          initialValues={{ remember: true }}
+        >
           <Form.Item
             name="username"
-            rules={[{ required: true, message: "Please enter your username" }]}
+            label="Email / Tên đăng nhập"
+            rules={[
+              {
+                required: true,
+                message: "Vui lòng nhập email hoặc tên đăng nhập",
+              },
+              { min: 3, message: "Tối thiểu 3 ký tự" },
+            ]}
           >
-            <Input placeholder="Username" />
+            <Input
+              size="large"
+              prefix={<MailOutlined style={{ color: "#999" }} />}
+              placeholder="Nhập email hoặc tên đăng nhập"
+              autoComplete="username"
+              allowClear
+            />
           </Form.Item>
 
           <Form.Item
             name="password"
-            rules={[{ required: true, message: "Please enter your password" }]}
+            label="Mật khẩu"
+            rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}
           >
             <Input.Password
-              placeholder="Password"
+              size="large"
+              placeholder="Nhập mật khẩu"
+              prefix={<LockOutlined style={{ color: "#999" }} />}
               iconRender={(visible) =>
                 visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
               }
+              autoComplete="current-password"
             />
           </Form.Item>
 
-          <Form.Item>
-            <Button type="primary" htmlType="submit" block>
-              Sign In
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: 12,
+            }}
+          >
+            <Form.Item name="remember" valuePropName="checked" noStyle>
+              <Checkbox>Ghi nhớ đăng nhập</Checkbox>
+            </Form.Item>
+
+            <Typography.Link onClick={() => setChangePassword(true)}>
+              Quên mật khẩu?
+            </Typography.Link>
+          </div>
+
+          <Form.Item style={{ marginBottom: 8 }}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              size="large"
+              block
+              loading={submitting}
+            >
+              Đăng nhập
             </Button>
           </Form.Item>
+
+          <div style={{ textAlign: "center", marginBottom: 8 }}>
+            <Text>Chưa có tài khoản? </Text>
+            <Link
+              href="/auth/signup"
+              style={{ color: "#1677ff", fontWeight: 500 }}
+            >
+              Đăng ký ngay
+            </Link>
+          </div>
         </Form>
 
-        <div style={{ textAlign: "center", marginTop: 16 }}>
-          <Typography.Text>
-            Don't have an account?{" "}
-            <Link href="/auth/signup">
-              <Button type="link" style={{ padding: 0 }}>
-                Sign Up
-              </Button>
-            </Link>
-          </Typography.Text>
-        </div>
+        <Divider plain>
+          <Text type="secondary" style={{ fontSize: 13 }}>
+            Hoặc đăng nhập với
+          </Text>
+        </Divider>
 
-        <div style={{ textAlign: "center", marginTop: 16 }}>
-          <Typography.Text>
-            <Button
-              onClick={() => setChangePassword(true)}
-              type="link"
-              style={{ padding: 0 }}
-            >
-              Forgot Password?
-            </Button>
-          </Typography.Text>
-        </div>
-
-        <Divider>Or sign in with</Divider>
-
+        {/* Social buttons */}
         <div
           style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: 16,
-            marginTop: 24,
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 12,
           }}
         >
-          <Avatar
-            style={{ backgroundColor: "#000", cursor: "pointer" }}
+          <Button
+            size="large"
             icon={<GithubOutlined />}
             onClick={() => signIn("github", { callbackUrl: "/" })}
-          />
-          <Avatar
-            style={{ backgroundColor: "#db4437", cursor: "pointer" }}
+            style={{
+              borderRadius: 10,
+              borderColor: "#000",
+            }}
+          >
+            GitHub
+          </Button>
+          <Button
+            size="large"
             icon={<GoogleOutlined />}
             onClick={() => signIn("google", { callbackUrl: "/" })}
-          />
+            style={{
+              borderRadius: 10,
+              borderColor: "#db4437",
+              color: "#db4437",
+            }}
+          >
+            Google
+          </Button>
         </div>
       </div>
 
-      {/* Modal Error */}
       <ModelReactive
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
-        title="Sign In Error"
+        title="Lỗi đăng nhập"
         content={<p>{modalContent}</p>}
         type="error"
         userEmail={userEmail}
         showSteps
       />
 
-      {/* Modal Forgot Password */}
       <ModalChangePassword
         isModalOpen={changePassword}
         setIsModalOpen={setChangePassword}

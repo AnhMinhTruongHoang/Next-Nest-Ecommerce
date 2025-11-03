@@ -1,14 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import {
-  Modal,
-  Input,
-  notification,
-  Select,
-  Form,
-  InputNumber,
-  App,
-} from "antd";
+import { Modal, Input, Select, Form, InputNumber, App } from "antd";
 
 const { Option } = Select;
 interface IProps {
@@ -34,11 +26,8 @@ const UpdateUserModal = (props: IProps) => {
   const [isSubmit, setIsSubmit] = useState(false);
   const { notification } = App.useApp();
 
-  console.log("Access Token:", access_token);
-
   useEffect(() => {
     if (dataUpdate) {
-      //code
       form.setFieldsValue({
         name: dataUpdate.name,
         email: dataUpdate.email,
@@ -50,7 +39,7 @@ const UpdateUserModal = (props: IProps) => {
     }
   }, [dataUpdate]);
 
-  const handleCloseCreateModal = () => {
+  const handleCloseUpdateModal = () => {
     setIsUpdateModalOpen(false);
     form.resetFields();
     setDataUpdate(null);
@@ -90,10 +79,10 @@ const UpdateUserModal = (props: IProps) => {
 
       if (res.ok && result?.data) {
         notification.success({
-          message: "Cập nhật user thành công!",
+          message: "Cập nhật người dùng thành công!",
         });
         await getData();
-        handleCloseCreateModal();
+        handleCloseUpdateModal();
       } else {
         notification.error({
           message: "Cập nhật thất bại!",
@@ -102,7 +91,7 @@ const UpdateUserModal = (props: IProps) => {
       }
     } catch (err: any) {
       notification.error({
-        message: "Lỗi kết nối server!",
+        message: "Lỗi kết nối máy chủ!",
         description: err?.message || "Không thể kết nối API",
       });
     } finally {
@@ -112,19 +101,19 @@ const UpdateUserModal = (props: IProps) => {
 
   return (
     <Modal
-      title={<div style={{ textAlign: "center" }}>Update user</div>}
+      title={<div style={{ textAlign: "center" }}>Cập nhật người dùng</div>}
       open={isUpdateModalOpen}
       onOk={() => form.submit()}
-      onCancel={() => handleCloseCreateModal()}
+      onCancel={() => handleCloseUpdateModal()}
       maskClosable={false}
       confirmLoading={isSubmit}
     >
       <Form name="basic" onFinish={onFinish} layout="vertical" form={form}>
         <Form.Item
           style={{ marginBottom: 5 }}
-          label="Name"
+          label="Họ và tên"
           name="name"
-          rules={[{ required: true, message: "Please input your name!" }]}
+          rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}
         >
           <Input />
         </Form.Item>
@@ -133,38 +122,39 @@ const UpdateUserModal = (props: IProps) => {
           style={{ marginBottom: 5 }}
           label="Email"
           name="email"
-          rules={[{ required: true, message: "Please input your email!" }]}
+          rules={[{ required: true, message: "Vui lòng nhập email!" }]}
         >
           <Input type="email" />
         </Form.Item>
 
         <Form.Item
           style={{ marginBottom: 5 }}
-          label="Password"
+          label="Mật khẩu"
           name="password"
           rules={[
             {
               required: dataUpdate ? false : true,
-              message: "Please input your password!",
+              message: "Vui lòng nhập mật khẩu!",
             },
           ]}
         >
           <Input.Password disabled={dataUpdate ? true : false} />
         </Form.Item>
+
         <Form.Item
           style={{ marginBottom: 5 }}
-          label="Age"
+          label="Tuổi"
           name="age"
-          rules={[{ required: true, message: "Please input your age!" }]}
+          rules={[{ required: true, message: "Vui lòng nhập tuổi!" }]}
         >
           <InputNumber style={{ width: "100%" }} />
         </Form.Item>
 
         <Form.Item
           style={{ marginBottom: 5 }}
-          label="Address"
+          label="Địa chỉ"
           name="address"
-          rules={[{ required: true, message: "Please input your address!" }]}
+          rules={[{ required: true, message: "Vui lòng nhập địa chỉ!" }]}
         >
           <Input />
         </Form.Item>
@@ -172,17 +162,13 @@ const UpdateUserModal = (props: IProps) => {
         <Form.Item
           style={{ marginBottom: 5 }}
           name="gender"
-          label="Gender"
-          rules={[{ required: true }]}
+          label="Giới tính"
+          rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
         >
-          <Select
-            placeholder="Select a option and change input text above"
-            // onChange={onGenderChange}
-            allowClear
-          >
-            <Option value="MALE">male</Option>
-            <Option value="FEMALE">female</Option>
-            <Option value="OTHER">other</Option>
+          <Select placeholder="Chọn giới tính" allowClear>
+            <Option value="MALE">Nam</Option>
+            <Option value="FEMALE">Nữ</Option>
+            <Option value="OTHER">Khác</Option>
           </Select>
         </Form.Item>
       </Form>

@@ -28,6 +28,8 @@ import { useCurrentApp } from "@/components/context/app.context";
 import ModalGallery from "@/components/products/modal.gallery";
 import "../../styles/product.scss";
 import UsersComment from "../ui/comment";
+import SuggestionBanner from "./product.suggestion";
+import SuggestionList from "./product.suggestion";
 
 const { Title, Text } = Typography;
 
@@ -351,6 +353,7 @@ const ProductDetail = ({ currentProduct }: IProps) => {
               </Space>
             </Col>
           </Row>
+
           <br />
           <br />
           <UsersComment
@@ -361,6 +364,9 @@ const ProductDetail = ({ currentProduct }: IProps) => {
                 : undefined
             }
           />
+
+          <Divider />
+          <SuggestionList currentProduct={currentProduct} />
         </Card>
       </div>
 

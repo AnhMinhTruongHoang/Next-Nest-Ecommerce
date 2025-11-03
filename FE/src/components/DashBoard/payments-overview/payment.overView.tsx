@@ -38,7 +38,7 @@ export function PaymentsOverview({ timeFrame = "MONTHLY" }: PropsType) {
         }}
       >
         <p style={{ color: "#9ca3af", textTransform: "uppercase" }}>
-          LOADING...
+          ĐANG TẢI...
         </p>
       </div>
     );
@@ -80,7 +80,7 @@ export function PaymentsOverview({ timeFrame = "MONTHLY" }: PropsType) {
             textTransform: "uppercase",
           }}
         >
-          PAYMENTS OVERVIEW
+          TỔNG QUAN THANH TOÁN
         </h2>
         <PeriodPicker defaultValue={timeFrame} sectionKey="payments_overview" />
       </div>
@@ -125,7 +125,7 @@ export function PaymentsOverview({ timeFrame = "MONTHLY" }: PropsType) {
               textTransform: "uppercase",
             }}
           >
-            ${standardFormat(receivedTotal)}
+            {standardFormat(receivedTotal)} ₫
           </dt>
           <dd
             style={{
@@ -135,7 +135,7 @@ export function PaymentsOverview({ timeFrame = "MONTHLY" }: PropsType) {
               textTransform: "uppercase",
             }}
           >
-            RECEIVED AMOUNT
+            ĐÃ NHẬN
           </dd>
         </div>
 
@@ -157,7 +157,7 @@ export function PaymentsOverview({ timeFrame = "MONTHLY" }: PropsType) {
               textTransform: "uppercase",
             }}
           >
-            ${standardFormat(dueTotal)}
+            {standardFormat(dueTotal)} ₫
           </dt>
           <dd
             style={{
@@ -167,7 +167,7 @@ export function PaymentsOverview({ timeFrame = "MONTHLY" }: PropsType) {
               textTransform: "uppercase",
             }}
           >
-            DUE AMOUNT
+            CÒN NỢ
           </dd>
         </div>
       </dl>

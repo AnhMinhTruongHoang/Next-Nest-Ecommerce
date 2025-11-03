@@ -43,7 +43,7 @@ const CreateProductModal = (props: IProps) => {
     []
   );
 
-  // Fetch categories khi mở modal
+  // Lấy danh sách danh mục khi mở modal
   useEffect(() => {
     if (isCreateModalOpen) {
       fetch("http://localhost:8000/api/v1/categories", {
@@ -55,7 +55,7 @@ const CreateProductModal = (props: IProps) => {
         })
         .catch(() => {
           notification.error({
-            message: "Không thể tải danh sách category",
+            message: "Không thể tải danh sách danh mục",
           });
         });
     }
@@ -84,11 +84,11 @@ const CreateProductModal = (props: IProps) => {
       file.type === "image/png" ||
       file.type === "image/webp";
     if (!isValid) {
-      message.error("You can only upload JPG/PNG/WEBP file!");
+      message.error("Chỉ được phép tải lên file JPG/PNG/WEBP!");
     }
     const isLt5M = file.size / 1024 / 1024 < 5;
     if (!isLt5M) {
-      message.error("Image must smaller than 5MB!");
+      message.error("Ảnh phải nhỏ hơn 5MB!");
     }
     return isValid && isLt5M;
   };
@@ -96,7 +96,7 @@ const CreateProductModal = (props: IProps) => {
   const uploadButton = (
     <button style={{ border: 0, background: "none" }} type="button">
       {loading ? <LoadingOutlined /> : <PlusOutlined />}
-      <div style={{ marginTop: 8 }}>Upload</div>
+      <div style={{ marginTop: 8 }}>Tải lên</div>
     </button>
   );
 
@@ -111,16 +111,14 @@ const CreateProductModal = (props: IProps) => {
     // Thumbnail
     const thumbnailFile = thumbnailList.find((f) => f.status === "done");
     const thumbnailUrl =
-      thumbnailFile?.response?.data?.file || // BE trả về { data: { file: "..." } }
-      thumbnailFile?.url ||
-      "";
+      thumbnailFile?.response?.data?.file || thumbnailFile?.url || "";
 
     // Slider
     const sliderUrls = sliderList
       .filter((f) => f.status === "done")
       .flatMap((f) => {
         if (Array.isArray(f.response?.data?.files)) {
-          return f.response.data.files; // BE trả về { data: { files: [...] } }
+          return f.response.data.files;
         }
         if (typeof f.url === "string") {
           return [f.url];
@@ -156,7 +154,7 @@ const CreateProductModal = (props: IProps) => {
 
       if (d.data) {
         await getData();
-        notification.success({ message: "Tạo mới product thành công." });
+        notification.success({ message: "Tạo mới sản phẩm thành công." });
         handleCloseCreateModal();
       } else {
         notification.error({
@@ -167,7 +165,7 @@ const CreateProductModal = (props: IProps) => {
     } catch (error) {
       notification.error({
         message: "Có lỗi xảy ra",
-        description: "Không thể kết nối tới server.",
+        description: "Không thể kết nối tới máy chủ.",
       });
     } finally {
       setLoading(false);
@@ -176,7 +174,7 @@ const CreateProductModal = (props: IProps) => {
 
   return (
     <Modal
-      title={<div style={{ textAlign: "center" }}>Add new product</div>}
+      title={<div style={{ textAlign: "center" }}>Thêm sản phẩm mới</div>}
       open={isCreateModalOpen}
       onOk={() => form.submit()}
       onCancel={handleCloseCreateModal}
@@ -191,7 +189,7 @@ const CreateProductModal = (props: IProps) => {
         onFinish={onFinish}
         layout="vertical"
       >
-        <Divider>Thumbnail</Divider>
+        <Divider>Ảnh đại diện</Divider>
         <div style={{ display: "flex", justifyContent: "center" }}>
           <Upload
             name="thumbnail"
@@ -220,27 +218,27 @@ const CreateProductModal = (props: IProps) => {
         <Divider />
 
         <Form.Item
-          label="Name"
+          label="Tên sản phẩm"
           name="name"
-          rules={[{ required: true, message: "Please input product name!" }]}
+          rules={[{ required: true, message: "Vui lòng nhập tên sản phẩm!" }]}
         >
           <Input />
         </Form.Item>
 
         <Form.Item
-          label="Brand"
+          label="Thương hiệu"
           name="brand"
-          rules={[{ required: true, message: "Please input brand!" }]}
+          rules={[{ required: true, message: "Vui lòng nhập thương hiệu!" }]}
         >
           <Input />
         </Form.Item>
 
         <Form.Item
-          label="Category"
+          label="Danh mục"
           name="category"
-          rules={[{ required: true, message: "Please select category!" }]}
+          rules={[{ required: true, message: "Vui lòng chọn danh mục!" }]}
         >
-          <Select placeholder="Select category">
+          <Select placeholder="Chọn danh mục">
             {categories.map((cat) => (
               <Select.Option key={cat._id} value={cat._id}>
                 {cat.name}
@@ -252,9 +250,9 @@ const CreateProductModal = (props: IProps) => {
         <Row gutter={[16, 8]}>
           <Col xs={24} md={12}>
             <Form.Item
-              label="Price"
+              label="Giá"
               name="price"
-              rules={[{ required: true, message: "Please input price!" }]}
+              rules={[{ required: true, message: "Vui lòng nhập giá!" }]}
             >
               <InputNumber<number>
                 style={{ width: "100%" }}
@@ -270,21 +268,23 @@ const CreateProductModal = (props: IProps) => {
           </Col>
           <Col xs={24} md={12}>
             <Form.Item
-              label="Stock"
+              label="Tồn kho"
               name="stock"
-              rules={[{ required: true, message: "Please input stock!" }]}
+              rules={[
+                { required: true, message: "Vui lòng nhập số lượng tồn!" },
+              ]}
             >
               <InputNumber style={{ width: "100%" }} min={0} />
             </Form.Item>
           </Col>
         </Row>
 
-        <Form.Item label="Sold" name="sold">
+        <Form.Item label="Đã bán" name="sold">
           <InputNumber style={{ width: "100%" }} min={0} />
         </Form.Item>
       </Form>
 
-      <Divider>Images</Divider>
+      <Divider>Hình ảnh chi tiết</Divider>
 
       {previewImage && (
         <Image

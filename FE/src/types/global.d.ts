@@ -87,19 +87,20 @@ declare global {
 
   interface IOrder {
     _id: string;
-    thumbnail: string;
     fullName: string;
-    productName: string;
     phoneNumber: string;
     shippingAddress: string;
-    paymentMethod: any;
+    paymentMethod: string;
     userId: string;
+    voucherCode?: string;
+    discount?: number;
+    finalTotal?: number;
     items: {
-      productId: string;
+      productId: any;
       quantity: number;
       price: number;
     }[];
-    status: "pending" | "confirmed" | "shipped" | "cancelled";
+    status: string;
     totalPrice: number;
     createdAt: string;
     updatedAt: string;

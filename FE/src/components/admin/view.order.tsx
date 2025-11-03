@@ -10,6 +10,7 @@ import {
   Button,
   App,
   Space,
+  Tag,
 } from "antd";
 import dayjs from "dayjs";
 
@@ -33,16 +34,13 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (orderData) {
-      setStatus(orderData.status);
-    }
+    if (orderData) setStatus(orderData.status);
   }, [orderData]);
 
   const handleUpdateStatus = async () => {
     if (!orderData?._id) return;
     setLoading(true);
     try {
-      // Map status -> paymentStatus hợp lệ
       const body: any = { status };
       if (status === "PAID") body.paymentStatus = "PAID";
       if (status === "REFUNDED") body.paymentStatus = "REFUNDED";
@@ -59,6 +57,7 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({
           body: JSON.stringify(body),
         }
       );
+
       const data = await res.json();
       if (!res.ok) throw new Error(data?.message || "Update failed");
 
@@ -80,30 +79,42 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({
       open={isViewModalOpen}
       onCancel={() => setIsViewModalOpen(false)}
       footer={null}
-      width={850}
-      title={<div style={{ textAlign: "center" }}>Chi tiết đơn hàng</div>}
+      width={900}
+      title={
+        <div style={{ textAlign: "center", fontWeight: 600, fontSize: 18 }}>
+          CHI TIẾT ĐƠN HÀNG
+        </div>
+      }
     >
       {orderData && (
         <>
-          <Descriptions bordered column={1} size="small">
-            <Descriptions.Item label="Order ID">
-              {orderData._id}
+          <Descriptions
+            bordered
+            column={1}
+            size="small"
+            styles={{ label: { width: "30%" } }}
+          >
+            <Descriptions.Item label="Mã Đơn Hàng">
+              <strong>{orderData._id}</strong>
             </Descriptions.Item>
 
-            <Descriptions.Item label="User ID">
-              {orderData.userId}
+            <Descriptions.Item label="Người Dùng">
+              {orderData.userId || "Không xác định"}
             </Descriptions.Item>
-            <Descriptions.Item label="Full name">
+
+            <Descriptions.Item label="Họ Và Tên">
               {orderData.fullName}
             </Descriptions.Item>
-            <Descriptions.Item label="Phone">
+
+            <Descriptions.Item label="Số Điện Thoại">
               {orderData.phoneNumber}
             </Descriptions.Item>
-            <Descriptions.Item label="Address">
+
+            <Descriptions.Item label="Địa Chỉ Giao Hàng">
               {orderData.shippingAddress}
             </Descriptions.Item>
 
-            <Descriptions.Item label="Status">
+            <Descriptions.Item label="Trạng Thái">
               <Space>
                 <Select
                   value={status}
@@ -115,7 +126,7 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({
                     { value: "SHIPPED", label: "🚚 SHIPPED" },
                     { value: "COMPLETED", label: "✅ COMPLETED" },
                     { value: "CANCELED", label: "❌ CANCELED" },
-                    { value: "REFUNDED", label: "=> REFUNDED" },
+                    { value: "REFUNDED", label: "↩ REFUNDED" },
                   ]}
                 />
                 <Button
@@ -123,29 +134,57 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({
                   loading={loading}
                   onClick={handleUpdateStatus}
                 >
-                  Cập nhật
+                  Cập Nhật
                 </Button>
               </Space>
             </Descriptions.Item>
 
-            <Descriptions.Item label="Payment Ref">
-              {orderData.paymentRef}
+            <Descriptions.Item label="Mã Thanh Toán">
+              {orderData.paymentRef || "—"}
             </Descriptions.Item>
-            <Descriptions.Item label="Payment Method">
-              {orderData.paymentMethod || "N/A"}
+
+            <Descriptions.Item label="Phương Thức Thanh Toán">
+              {orderData.paymentMethod || "Không xác định"}
             </Descriptions.Item>
-            <Descriptions.Item label="Total Price">
+
+            <Descriptions.Item label="Mã Giảm Giá">
+              {orderData.voucherCode ? (
+                <Tag color="blue">{orderData.voucherCode}</Tag>
+              ) : (
+                "—"
+              )}
+            </Descriptions.Item>
+
+            <Descriptions.Item label="Giảm Giá">
+              {orderData.discount
+                ? `-${orderData.discount.toLocaleString("vi-VN")} ₫`
+                : "0 ₫"}
+            </Descriptions.Item>
+
+            <Descriptions.Item label="Tổng Sau Giảm">
+              <strong style={{ color: "#52c41a" }}>
+                {(orderData.finalTotal ?? orderData.totalPrice).toLocaleString(
+                  "vi-VN"
+                )}{" "}
+                ₫
+              </strong>
+            </Descriptions.Item>
+
+            <Descriptions.Item label="Tổng Gốc">
               {orderData.totalPrice.toLocaleString("vi-VN")} ₫
             </Descriptions.Item>
-            <Descriptions.Item label="Created At">
+
+            <Descriptions.Item label="Ngày Tạo">
               {dayjs(orderData.createdAt).format("DD/MM/YYYY HH:mm")}
             </Descriptions.Item>
-            <Descriptions.Item label="Updated At">
+
+            <Descriptions.Item label="Cập Nhật Lúc">
               {dayjs(orderData.updatedAt).format("DD/MM/YYYY HH:mm")}
             </Descriptions.Item>
           </Descriptions>
 
-          <Divider>Danh sách sản phẩm</Divider>
+          <Divider style={{ fontWeight: 600 }}>DANH SÁCH SẢN PHẨM</Divider>
+
           <Table
             dataSource={orderData.items}
             rowKey={(item) => item.productId}
@@ -153,26 +192,26 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({
             size="small"
             columns={[
               {
-                title: "Sản phẩm",
+                title: "SẢN PHẨM",
                 dataIndex: "productId",
                 render: (productId: any) => (
                   <a
                     href={`/product-detail/${productId?._id || productId}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{ color: "#1677ff" }}
+                    style={{ color: "#1677ff", fontWeight: 500 }}
                   >
                     {productId?.name || productId?._id || productId}
                   </a>
                 ),
               },
               {
-                title: "Số lượng",
+                title: "SỐ LƯỢNG",
                 dataIndex: "quantity",
                 align: "center",
               },
               {
-                title: "Đơn giá",
+                title: "ĐƠN GIÁ",
                 dataIndex: "price",
                 align: "right",
                 render: (val: number) =>
@@ -183,7 +222,7 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({
                   }),
               },
               {
-                title: "Thành tiền",
+                title: "THÀNH TIỀN",
                 align: "right",
                 render: (_, record) =>
                   (record.price * record.quantity).toLocaleString("vi-VN", {

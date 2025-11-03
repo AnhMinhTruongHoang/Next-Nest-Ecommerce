@@ -98,12 +98,12 @@ const ViewProductModal: React.FC<ViewProductModalProps> = ({
       }}
       footer={null}
       width={700}
-      title={<div style={{ textAlign: "center" }}>Product Details</div>}
+      title={<div style={{ textAlign: "center" }}>Chi tiết sản phẩm</div>}
     >
       {productData && (
         <Descriptions bordered column={1} size="small">
           {productData.thumbnail && (
-            <Descriptions.Item label="Thumbnail">
+            <Descriptions.Item label="Ảnh đại diện">
               <Image
                 src={getImageUrl(productData.thumbnail)}
                 alt="thumbnail"
@@ -111,32 +111,34 @@ const ViewProductModal: React.FC<ViewProductModalProps> = ({
               />
             </Descriptions.Item>
           )}
-          <Descriptions.Item label="Name">
+          <Descriptions.Item label="Tên sản phẩm">
             {safeText(productData.name)}
           </Descriptions.Item>
-          <Descriptions.Item label="Brand">
+          <Descriptions.Item label="Thương hiệu">
             {safeText(productData.brand)}
           </Descriptions.Item>
-          <Descriptions.Item label="Category">
+          <Descriptions.Item label="Danh mục">
             {safeText(productData.category)}
           </Descriptions.Item>
-          <Descriptions.Item label="Price">
+          <Descriptions.Item label="Giá">
             {productData.price.toLocaleString("vi-VN")} ₫
           </Descriptions.Item>
-          <Descriptions.Item label="Stock">
+          <Descriptions.Item label="Tồn kho">
             {productData.stock}
           </Descriptions.Item>
-          <Descriptions.Item label="Sold">{productData.sold}</Descriptions.Item>
-          <Descriptions.Item label="Created At">
+          <Descriptions.Item label="Đã bán">
+            {productData.sold}
+          </Descriptions.Item>
+          <Descriptions.Item label="Ngày tạo">
             {new Date(productData.createdAt).toLocaleString()}
           </Descriptions.Item>
-          <Descriptions.Item label="Updated At">
+          <Descriptions.Item label="Ngày cập nhật">
             {new Date(productData.updatedAt).toLocaleString()}
           </Descriptions.Item>
         </Descriptions>
       )}
 
-      <Divider>Images Preview</Divider>
+      <Divider>Xem trước hình ảnh</Divider>
       <div style={{ display: "flex", justifyContent: "center" }}>
         <Upload
           action="#"

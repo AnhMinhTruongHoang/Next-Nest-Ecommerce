@@ -1,9 +1,22 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Table, Button, Popconfirm, Space, Spin, App } from "antd";
+import {
+  Table,
+  Button,
+  Popconfirm,
+  Space,
+  Spin,
+  App,
+  Input,
+  Typography,
+} from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { PlusOutlined, ReloadOutlined } from "@ant-design/icons";
+import {
+  PlusOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { deleteOrderAction } from "@/lib/user.actions";
 import "../../styles/users.css";
 import dayjs from "dayjs";
@@ -11,6 +24,7 @@ import ViewOrderModal from "./view.order";
 
 const OrderTable = () => {
   const [listOrder, setListOrder] = useState<IOrder[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<IOrder[]>([]);
   const [loading, setLoading] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [orderData, setOrderData] = useState<IOrder | null>(null);
@@ -22,14 +36,14 @@ const OrderTable = () => {
       ? (localStorage.getItem("access_token") as string)
       : "";
 
-  // pagination state: mặc định false (không phân trang)
   const [pagination, setPagination] = useState<any>(false);
+  const [searchText, setSearchText] = useState("");
+  const { Text } = Typography;
 
   useEffect(() => {
     getData(1, 999999);
   }, []);
 
-  // sửa định nghĩa
   const getData = async (page = 1, pageSize = 50) => {
     setLoading(true);
     try {
@@ -51,6 +65,7 @@ const OrderTable = () => {
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
         setListOrder(sorted);
+        setFilteredOrders(sorted);
 
         setPagination({
           current: d.data.meta.current,
@@ -94,11 +109,35 @@ const OrderTable = () => {
     }
   };
 
+  const handleSearch = (value: string) => {
+    setSearchText(value);
+    if (!value) {
+      setFilteredOrders(listOrder);
+    } else {
+      const lower = value.toLowerCase();
+      setFilteredOrders(
+        listOrder.filter(
+          (order) =>
+            order._id?.toLowerCase().includes(lower) ||
+            order.fullName?.toLowerCase().includes(lower) ||
+            order.phoneNumber?.toLowerCase().includes(lower)
+        )
+      );
+    }
+  };
+
   const columns: ColumnsType<IOrder> = [
     {
       title: "STT",
       align: "center",
       render: (_: any, __: any, index: number) => index + 1,
+    },
+    {
+      title: "ID",
+      dataIndex: "_id",
+      align: "center",
+      render: (value: string | null) =>
+        value ? <Text copyable>{value}</Text> : "—",
     },
     {
       title: "Thời gian tạo",
@@ -177,8 +216,7 @@ const OrderTable = () => {
             style = { backgroundColor: "gray", color: "black" };
             break;
           case "CANCELED":
-          case "CANCELLED":
-            style = { backgroundColor: "red", color: "black" };
+            style = { backgroundColor: "red", color: "white" };
             break;
           default:
             style = { backgroundColor: "#ECEFF1", color: "#546E7A" };
@@ -214,7 +252,7 @@ const OrderTable = () => {
               setIsViewModalOpen(true);
             }}
           >
-            Xem
+            Duyệt đơn
           </Button>
           <Popconfirm
             title="Xóa đơn hàng này?"
@@ -241,6 +279,13 @@ const OrderTable = () => {
       >
         <h2>Danh sách đơn hàng</h2>
         <Space>
+          <Input.Search
+            placeholder="Nhập ID / tên / số điện thoại để tìm..."
+            allowClear
+            enterButton={<SearchOutlined />}
+            onSearch={handleSearch}
+            style={{ width: 300 }}
+          />
           <Button
             type="text"
             icon={<ReloadOutlined style={{ color: "green" }} />}
@@ -259,7 +304,7 @@ const OrderTable = () => {
       </div>
       <Table
         columns={columns}
-        dataSource={listOrder}
+        dataSource={filteredOrders}
         rowKey={"_id"}
         pagination={pagination}
       />

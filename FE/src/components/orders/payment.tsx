@@ -1,4 +1,5 @@
 "use client";
+
 import {
   App,
   Button,
@@ -9,9 +10,14 @@ import {
   Row,
   Space,
   Input,
+  Tooltip,
 } from "antd";
-import { LeftCircleFilled } from "@ant-design/icons";
-import { useEffect, useState } from "react";
+import {
+  LeftCircleFilled,
+  TagOutlined,
+  LoadingOutlined,
+} from "@ant-design/icons";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useCurrentApp } from "@/components/context/app.context";
 import { createOrderAPI, getVNPayUrlAPI } from "@/utils/api";
@@ -36,21 +42,36 @@ interface IProps {
 const Payment = ({ setCurrentStep }: IProps) => {
   const { carts, setCarts, user } = useCurrentApp();
   const [form] = Form.useForm();
-  const [totalPrice, setTotalPrice] = useState(0);
+  const [subtotal, setSubtotal] = useState(0);
   const [isSubmit, setIsSubmit] = useState(false);
   const { message, notification } = App.useApp();
 
+  // --- Voucher state ---
+  const [voucherInput, setVoucherInput] = useState("");
+  const [voucherApplying, setVoucherApplying] = useState(false);
+  const [voucherCodeApplied, setVoucherCodeApplied] = useState<string | null>(
+    null
+  );
+  const [voucherDiscount, setVoucherDiscount] = useState<number>(0);
+  const [voucherMsg, setVoucherMsg] = useState<string | null>(null);
+
   useEffect(() => {
-    form.setFieldsValue({ method: "COD" });
-  }, []);
+    form.setFieldsValue({ method: "COD" as UserMethod });
+  }, []); // eslint-disable-line
 
   useEffect(() => {
     const sum = carts.reduce(
       (acc, item) => acc + item.quantity * item.detail.price,
       0
     );
-    setTotalPrice(sum);
+    setSubtotal(sum);
   }, [carts]);
+
+  // Tính final total
+  const finalTotal = useMemo(
+    () => Math.max(subtotal - voucherDiscount, 0),
+    [subtotal, voucherDiscount]
+  );
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("vi-VN", {
@@ -60,7 +81,98 @@ const Payment = ({ setCurrentStep }: IProps) => {
       maximumFractionDigits: 0,
     }).format(value);
 
-  /// Order logic
+  // Chuẩn hoá dữ liệu preview voucher từ carts
+  const buildPreviewPayload = () => {
+    const productIds = carts.map((c) => c.detail._id);
+    const categoryIds = Array.from(
+      new Set(
+        carts
+          .map((c) => c.detail.category)
+          .filter(Boolean)
+          .map((x: any) => (typeof x === "string" ? x : x?._id || ""))
+      )
+    ).filter(Boolean) as string[];
+
+    const brands = Array.from(
+      new Set(
+        carts
+          .map((c) => c.detail.brand)
+          .filter(Boolean)
+          .map((b: any) => String(b))
+      )
+    ) as string[];
+
+    return { productIds, categoryIds, brands };
+  };
+
+  // Gọi preview voucher
+  const applyVoucher = async () => {
+    const code = voucherInput.trim();
+    if (!code) {
+      setVoucherDiscount(0);
+      setVoucherMsg("Vui lòng nhập mã voucher");
+      setVoucherCodeApplied(null);
+      return;
+    }
+    if (!carts.length) {
+      setVoucherDiscount(0);
+      setVoucherMsg("Giỏ hàng trống");
+      setVoucherCodeApplied(null);
+      return;
+    }
+
+    setVoucherApplying(true);
+    setVoucherMsg(null);
+
+    try {
+      const { productIds, categoryIds, brands } = buildPreviewPayload();
+      const res = await fetch("http://localhost:8000/api/v1/vouchers/preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }, // preview có thể public
+        body: JSON.stringify({
+          code,
+          orderSubtotal: subtotal,
+          productIds,
+          categoryIds,
+          brands,
+        }),
+      });
+      const d = await res.json();
+
+      // API của bạn trả { data: {...} } hay trả trực tiếp? – xử lý linh hoạt:
+      const payload = d?.data ?? d;
+
+      if (payload?.valid) {
+        const discount = Number(payload.discount || 0);
+        setVoucherDiscount(discount);
+        setVoucherCodeApplied(code);
+        setVoucherMsg(`Áp dụng mã thành công: -${formatCurrency(discount)}`);
+        message.success("Áp dụng voucher thành công");
+      } else {
+        const reason = payload?.reason || "Mã không hợp lệ";
+        setVoucherDiscount(0);
+        setVoucherCodeApplied(null);
+        setVoucherMsg(reason);
+        message.warning(reason);
+      }
+    } catch (e: any) {
+      setVoucherDiscount(0);
+      setVoucherCodeApplied(null);
+      setVoucherMsg("Không thể kiểm tra voucher");
+      notification.error({ message: "Lỗi khi kiểm tra voucher" });
+    } finally {
+      setVoucherApplying(false);
+    }
+  };
+
+  const clearVoucher = () => {
+    setVoucherInput("");
+    setVoucherDiscount(0);
+    setVoucherCodeApplied(null);
+    setVoucherMsg(null);
+  };
+
+  /// Đặt hàng
   const handlePlaceOrder = async (values: FieldType) => {
     if (!carts.length) {
       message.warning("Giỏ hàng trống");
@@ -71,32 +183,34 @@ const Payment = ({ setCurrentStep }: IProps) => {
     const userId = user?._id ?? "";
 
     const items = carts.map((item) => ({
-      productId: item.detail._id, // ✅
+      productId: item.detail._id,
       quantity: item.quantity,
       price: item.detail.price,
       name: item.detail.name,
     }));
 
+    // paymentRef chỉ khi VNPAY
     const paymentRef = method === "VNPAY" ? uuidv4() : undefined;
 
     setIsSubmit(true);
     try {
-      // 1) Tạo order
+      // 1) Tạo order (gửi kèm voucherCode nếu đã áp)
       const res = await createOrderAPI(
         userId,
         fullName,
         shippingAddress,
         phoneNumber,
-        totalPrice,
+        finalTotal,
         method,
         items,
-        paymentRef
+        paymentRef,
+        voucherCodeApplied ?? undefined
       );
 
       const orderId = res?.data?._id;
       if (!orderId) throw new Error(res?.message || "Không thể tạo đơn hàng");
 
-      // 2) COD → xong
+      // 2) COD
       if (method === "COD") {
         localStorage.removeItem("carts");
         setCarts([]);
@@ -105,10 +219,9 @@ const Payment = ({ setCurrentStep }: IProps) => {
         return;
       }
 
-      // 3) VNPAY → xin URL & redirect
-      const vnpUrl = await getVNPayUrlAPI(totalPrice, "vn", paymentRef);
+      // 3) VNPAY: tạo URL với finalTotal
+      const vnpUrl = await getVNPayUrlAPI(finalTotal, "vn", paymentRef);
       if (!vnpUrl) throw new Error("Không thể tạo URL thanh toán");
-
       window.location.href = vnpUrl;
     } catch (error: any) {
       notification.error({
@@ -247,11 +360,72 @@ const Payment = ({ setCurrentStep }: IProps) => {
                   <TextArea rows={4} />
                 </Form.Item>
 
+                {/* Voucher box */}
+                <div
+                  style={{
+                    background: "#fafafa",
+                    padding: 12,
+                    borderRadius: 8,
+                    border: "1px dashed #ddd",
+                    display: "flex",
+                    gap: 8,
+                    alignItems: "center",
+                  }}
+                >
+                  <TagOutlined />
+                  <Input
+                    placeholder="Nhập mã voucher (ví dụ: GamerZone)"
+                    value={voucherInput}
+                    onChange={(e) => setVoucherInput(e.target.value)}
+                    onPressEnter={applyVoucher}
+                  />
+                  <Space>
+                    <Button
+                      onClick={clearVoucher}
+                      disabled={!voucherInput && !voucherCodeApplied}
+                    >
+                      Xóa
+                    </Button>
+                    <Button
+                      type="primary"
+                      onClick={applyVoucher}
+                      disabled={!voucherInput}
+                      loading={voucherApplying}
+                    >
+                      Áp dụng
+                    </Button>
+                  </Space>
+                </div>
+                {voucherMsg && (
+                  <div style={{ marginTop: -8 }}>
+                    <small
+                      style={{
+                        color: voucherCodeApplied ? "#52c41a" : "#ff4d4f",
+                      }}
+                    >
+                      {voucherApplying ? <LoadingOutlined /> : null}{" "}
+                      {voucherMsg}
+                    </small>
+                  </div>
+                )}
+
+                {/* Tạm tính & tổng */}
                 <div
                   style={{ display: "flex", justifyContent: "space-between" }}
                 >
                   <span>Tạm tính</span>
-                  <span>{formatCurrency(totalPrice)}</span>
+                  <span>{formatCurrency(subtotal)}</span>
+                </div>
+
+                <div
+                  style={{ display: "flex", justifyContent: "space-between" }}
+                >
+                  <span>Giảm giá</span>
+                  <span
+                    style={{ color: voucherDiscount > 0 ? "#52c41a" : "#999" }}
+                  >
+                    - {formatCurrency(voucherDiscount)}
+                  </span>
                 </div>
 
                 <Divider />
@@ -260,15 +434,23 @@ const Payment = ({ setCurrentStep }: IProps) => {
                   style={{ display: "flex", justifyContent: "space-between" }}
                 >
                   <span>Tổng tiền</span>
-                  <span
-                    style={{
-                      color: "#fe3834",
-                      fontSize: "22px",
-                      fontWeight: 500,
-                    }}
+                  <Tooltip
+                    title={
+                      voucherCodeApplied
+                        ? `Đã áp mã: ${voucherCodeApplied}`
+                        : undefined
+                    }
                   >
-                    {formatCurrency(totalPrice)}
-                  </span>
+                    <span
+                      style={{
+                        color: "#fe3834",
+                        fontSize: "22px",
+                        fontWeight: 500,
+                      }}
+                    >
+                      {formatCurrency(finalTotal)}
+                    </span>
+                  </Tooltip>
                 </div>
 
                 <Divider />

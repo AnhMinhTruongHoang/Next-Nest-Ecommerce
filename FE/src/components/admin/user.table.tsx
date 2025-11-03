@@ -31,6 +31,7 @@ const UsersTable = () => {
     pages: 0,
     total: 0,
   });
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("access_token");
@@ -49,30 +50,17 @@ const UsersTable = () => {
     }
   }, [accessToken]);
 
-  console.log("Access token:", accessToken);
-
   const getData = async () => {
     setLoading(true);
     try {
-      console.log("Current accessToken:", accessToken); // 👈 Thêm để kiểm tra token
-
-      // Tạo headers linh hoạt
-      const headers: any = {
-        "Content-Type": "application/json",
-      };
-
-      // Nếu có Access Token thì mới thêm Authorization
-      if (accessToken) {
-        headers.Authorization = `Bearer ${accessToken}`;
-      }
+      const headers: any = { "Content-Type": "application/json" };
+      if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
 
       const res = await fetch(
         `http://localhost:8000/api/v1/users?current=${meta.current}&pageSize=${meta.pageSize}`,
         { headers }
       );
-
       const d = await res.json();
-      console.log("Full response:", d);
 
       if (d.data && d.data.result) {
         setListUsers(d.data.result);
@@ -81,7 +69,6 @@ const UsersTable = () => {
         notification.error({ message: "Dữ liệu không hợp lệ hoặc Token lỗi" });
       }
     } catch (error) {
-      console.error("Fetch error:", error);
       notification.error({ message: "Lỗi khi gọi API" });
     } finally {
       setLoading(false);
@@ -112,12 +99,12 @@ const UsersTable = () => {
     }
   };
 
-  const handleDeleteUser = async (user: any) => {
+  const handleDeleteUser = async (user: IUser) => {
     setLoading(true);
     try {
       const d = await deleteUserAction(user, accessToken);
       if (d.data) {
-        notification.success({ message: "Xóa User thành công." });
+        notification.success({ message: "Xóa người dùng thành công." });
         getData();
       } else {
         notification.error({ message: JSON.stringify(d.message) });
@@ -145,7 +132,7 @@ const UsersTable = () => {
       ),
     },
     {
-      title: "Name",
+      title: "Họ và tên",
       dataIndex: "name",
       align: "center",
       filterDropdown: ({
@@ -156,7 +143,7 @@ const UsersTable = () => {
       }) => (
         <div style={{ padding: 8 }}>
           <Input
-            placeholder="Search name"
+            placeholder="Tìm theo tên"
             value={selectedKeys[0]}
             onChange={(e) =>
               setSelectedKeys(e.target.value ? [e.target.value] : [])
@@ -166,10 +153,10 @@ const UsersTable = () => {
           />
           <Space>
             <Button type="primary" onClick={() => confirm()} size="small">
-              Search
+              Tìm kiếm
             </Button>
             <Button onClick={() => clearFilters && clearFilters()} size="small">
-              Reset
+              Đặt lại
             </Button>
           </Space>
         </div>
@@ -181,12 +168,12 @@ const UsersTable = () => {
         record.name.toLowerCase().includes((value as string).toLowerCase()),
     },
     {
-      title: "Role",
+      title: "Vai trò",
       dataIndex: "role",
       align: "center",
     },
     {
-      title: "Active",
+      title: "Trạng thái",
       dataIndex: "isActive",
       align: "center",
       render: (isActive: boolean) =>
@@ -197,7 +184,7 @@ const UsersTable = () => {
         ),
     },
     {
-      title: "Actions",
+      title: "Hành động",
       align: "center",
       render: (_, record) => (
         <Space>
@@ -207,15 +194,16 @@ const UsersTable = () => {
               setIsUpdateModalOpen(true);
             }}
           >
-            Edit
+            Sửa
           </Button>
           <Popconfirm
-            title="Delete the user"
+            title="Xóa người dùng"
+            description={`Bạn có chắc muốn xóa ${record.name}?`}
             onConfirm={() => handleDeleteUser(record)}
-            okText="Yes"
-            cancelText="No"
+            okText="Có"
+            cancelText="Không"
           >
-            <Button danger>Delete</Button>
+            <Button danger>Xóa</Button>
           </Popconfirm>
         </Space>
       ),
@@ -224,8 +212,6 @@ const UsersTable = () => {
 
   return (
     <Spin spinning={loading}>
-      {" "}
-      {/* 👈 Bọc bảng trong Spin */}
       <div
         style={{
           display: "flex",
@@ -234,13 +220,13 @@ const UsersTable = () => {
           marginBottom: 16,
         }}
       >
-        <h2>Table Users</h2>
+        <h2>Danh sách người dùng</h2>
         <Button
           icon={<PlusOutlined />}
           type="primary"
           onClick={() => setIsCreateModalOpen(true)}
         >
-          Add new
+          Thêm mới
         </Button>
       </div>
       <Table
@@ -252,7 +238,7 @@ const UsersTable = () => {
           pageSize: meta.pageSize,
           total: meta.total,
           showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} items`,
+            `${range[0]}-${range[1]} trên tổng ${total} người dùng`,
           onChange: handleOnChange,
           showSizeChanger: true,
         }}

@@ -55,6 +55,16 @@ const ProductsPage = () => {
   const [form] = Form.useForm();
 
   // --- Lấy danh mục
+  // Bảng ánh xạ EN -> VI
+  const categoryMap: Record<string, string> = {
+    Mouse: "Chuột",
+    Keyboard: "Bàn phím",
+    Monitor: "Màn hình",
+    Headset: "Tai nghe",
+    Chairs: "Ghế",
+    Accessories: "Phụ kiện",
+  };
+
   useEffect(() => {
     const initCategory = async () => {
       try {
@@ -63,10 +73,16 @@ const ProductsPage = () => {
         );
         const data = await res.json();
         if (data?.data) {
-          const d = data.data.map((item: any) => ({
-            label: item.name,
-            value: item._id,
-          }));
+          const d = data.data.map((item: any) => {
+            const viName = categoryMap[item.name] || item.name;
+
+            const label =
+              viName.charAt(0).toUpperCase() + viName.slice(1).toLowerCase();
+            return {
+              label,
+              value: item._id,
+            };
+          });
           setListCategory(d);
         }
       } catch (e) {

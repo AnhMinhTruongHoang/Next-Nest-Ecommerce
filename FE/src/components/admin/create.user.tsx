@@ -1,15 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  Form,
-  Input,
-  Modal,
-  notification,
-  Select,
-  InputNumber,
-  App,
-} from "antd";
+import { Form, Input, Modal, Select, InputNumber, App } from "antd";
 
 const { Option } = Select;
 
@@ -38,15 +30,7 @@ const CreateUserModal = (props: IProps) => {
     try {
       const { name, email, password, age, gender, role, address } = values;
 
-      const data = {
-        name,
-        email,
-        password,
-        age,
-        gender,
-        role,
-        address,
-      };
+      const data = { name, email, password, age, gender, role, address };
 
       const res = await fetch("http://localhost:8000/api/v1/users", {
         method: "POST",
@@ -62,7 +46,7 @@ const CreateUserModal = (props: IProps) => {
       if (d.data) {
         await getData();
         notification.success({
-          message: "Tạo mới user thành công.",
+          message: "Tạo mới người dùng thành công.",
         });
         handleCloseCreateModal();
       } else {
@@ -74,7 +58,7 @@ const CreateUserModal = (props: IProps) => {
     } catch (error) {
       notification.error({
         message: "Có lỗi xảy ra",
-        description: "Không thể kết nối tới server.",
+        description: "Không thể kết nối tới máy chủ.",
       });
     } finally {
       setLoading(false);
@@ -83,7 +67,7 @@ const CreateUserModal = (props: IProps) => {
 
   return (
     <Modal
-      title={<div style={{ textAlign: "center" }}>Add new user</div>}
+      title={<div style={{ textAlign: "center" }}>Thêm người dùng mới</div>}
       open={isCreateModalOpen}
       onOk={() => form.submit()}
       onCancel={handleCloseCreateModal}
@@ -92,9 +76,9 @@ const CreateUserModal = (props: IProps) => {
     >
       <Form form={form} name="basic" onFinish={onFinish} layout="vertical">
         <Form.Item
-          label="Name"
+          label="Họ và tên"
           name="name"
-          rules={[{ required: true, message: "Please input your name!" }]}
+          rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}
           style={{ marginBottom: 5 }}
         >
           <Input />
@@ -102,24 +86,24 @@ const CreateUserModal = (props: IProps) => {
         <Form.Item
           label="Email"
           name="email"
-          rules={[{ required: true, message: "Please input your email!" }]}
+          rules={[{ required: true, message: "Vui lòng nhập email!" }]}
           style={{ marginBottom: 5 }}
         >
           <Input type="email" />
         </Form.Item>
         <Form.Item
-          label="Password"
+          label="Mật khẩu"
           name="password"
-          rules={[{ required: true, message: "Please input your password!" }]}
+          rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
           style={{ marginBottom: 5 }}
         >
           <Input.Password />
         </Form.Item>
 
         <Form.Item
-          label="Age"
+          label="Tuổi"
           name="age"
-          rules={[{ required: true, message: "Please input your age!" }]}
+          rules={[{ required: true, message: "Vui lòng nhập tuổi!" }]}
           style={{ marginBottom: 5 }}
         >
           <InputNumber
@@ -131,33 +115,33 @@ const CreateUserModal = (props: IProps) => {
         </Form.Item>
 
         <Form.Item
-          label="Address"
+          label="Địa chỉ"
           name="address"
-          rules={[{ required: true, message: "Please input your address!" }]}
+          rules={[{ required: true, message: "Vui lòng nhập địa chỉ!" }]}
           style={{ marginBottom: 5 }}
         >
           <Input />
         </Form.Item>
         <Form.Item
-          label="Gender"
+          label="Giới tính"
           name="gender"
-          rules={[{ required: true, message: "Please select your gender!" }]}
+          rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
           style={{ marginBottom: 5 }}
         >
-          <Select placeholder="Select a gender">
-            <Option value="MALE">male</Option>
-            <Option value="FEMALE">female</Option>
+          <Select placeholder="Chọn giới tính">
+            <Option value="MALE">Nam</Option>
+            <Option value="FEMALE">Nữ</Option>
           </Select>
         </Form.Item>
         <Form.Item
-          label="Role"
+          label="Vai trò"
           name="role"
-          rules={[{ required: true, message: "Please select a role!" }]}
+          rules={[{ required: true, message: "Vui lòng chọn vai trò!" }]}
           style={{ marginBottom: 5 }}
         >
-          <Select placeholder="Select a role">
-            <Option value="USER">USER</Option>
-            <Option value="ADMIN">ADMIN</Option>
+          <Select placeholder="Chọn vai trò">
+            <Option value="USER">Người dùng</Option>
+            <Option value="ADMIN">Quản trị viên</Option>
           </Select>
         </Form.Item>
       </Form>

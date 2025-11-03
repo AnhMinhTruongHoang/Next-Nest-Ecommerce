@@ -1,60 +1,58 @@
+// src/app/auth/verify/[id]/page.tsx (hoặc component Verify)
 "use client";
-
+import { useParams, useRouter } from "next/navigation";
 import {
+  App,
+  Avatar,
+  Button,
+  Col,
   Form,
   Input,
-  Button,
-  Typography,
-  Avatar,
   Row,
-  Col,
   Space,
-  message,
-  App,
+  Typography,
 } from "antd";
-import { LockOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, LockOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import { useState } from "react";
 import { sendRequest } from "@/utils/api";
-import { useRouter } from "next/navigation";
 
-const AuthVerify = (props: any) => {
-  const { id } = props;
+export default function AuthVerify() {
+  const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { Title } = Typography;
   const { notification } = App.useApp();
+  const { Title } = Typography;
+  const [submitting, setSubmitting] = useState(false);
 
-  const [formValues, setFormValues] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    age: "",
-    gender: "",
-    address: "",
-    phone: "",
-    avatarUrl: "",
-  });
-
-  const handleFinish = async (values: any) => {
-    const { _id, code } = values;
-
-    const res = await sendRequest<IBackendRes<any>>({
-      url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/check-code`, /// goi api back end update is active = 1
-      method: "POST",
-      body: {
-        _id,
-        code,
-      },
-    });
-
-    if (res?.data) {
-      message.info("Active Success !");
-      router.push(`/auth/signin`); // da ve trang dang nhap
-      notification.error({
-        message: "Register error",
-        description: res?.message,
+  const handleFinish = async (values: { code: string }) => {
+    setSubmitting(true);
+    try {
+      const res = await sendRequest<IBackendRes<any>>({
+        url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/check-code`,
+        method: "POST",
+        body: { _id: String(id), code: values.code.trim() },
       });
+
+      if (res?.data || res?.message) {
+        notification.success({
+          message: "Kích hoạt thành công",
+          description: "Tài khoản đã được kích hoạt. Vui lòng đăng nhập.",
+        });
+        router.push("/auth/signin");
+        return;
+      }
+      throw new Error(
+        res?.message ||
+          (Array.isArray(res?.error) ? res.error[0] : res?.error) ||
+          "Mã kích hoạt không hợp lệ"
+      );
+    } catch (e: any) {
+      notification.error({
+        message: "Kích hoạt thất bại",
+        description: e?.message || "Vui lòng thử lại.",
+      });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -66,7 +64,10 @@ const AuthVerify = (props: any) => {
         padding: "48px 16px",
       }}
     >
-      <Link href="signin" style={{ position: "absolute", top: 16, left: 16 }}>
+      <Link
+        href="/auth/signin"
+        style={{ position: "absolute", top: 16, left: 16 }}
+      >
         <Button
           type="text"
           icon={<ArrowLeftOutlined />}
@@ -83,31 +84,29 @@ const AuthVerify = (props: any) => {
                 icon={<LockOutlined />}
                 style={{ backgroundColor: "#1890ff", marginBottom: 8 }}
               />
-              <Title level={3}>Verify</Title>
+              <Title level={3}>Xác minh tài khoản</Title>
             </div>
 
-            <Form
-              layout="vertical"
-              onFinish={handleFinish}
-              initialValues={formValues}
-              onValuesChange={(changed, all) => setFormValues(all)}
-            >
-              <Form.Item name="_id" label="ID" initialValue={id} hidden>
-                <Input disabled />
-              </Form.Item>
-
+            <Form layout="vertical" onFinish={handleFinish}>
               <Form.Item
                 name="code"
-                label=" Active Code"
-                rules={[{ required: true }]}
+                label="Mã kích hoạt"
+                rules={[
+                  { required: true, message: "Vui lòng nhập mã kích hoạt" },
+                ]}
                 hasFeedback
               >
-                <Input />
+                <Input placeholder="Nhập mã từ email" maxLength={64} />
               </Form.Item>
 
               <Form.Item>
-                <Button type="primary" htmlType="submit" block>
-                  Submit
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  block
+                  loading={submitting}
+                >
+                  Xác minh
                 </Button>
               </Form.Item>
             </Form>
@@ -116,6 +115,4 @@ const AuthVerify = (props: any) => {
       </Row>
     </div>
   );
-};
-
-export default AuthVerify;
+}

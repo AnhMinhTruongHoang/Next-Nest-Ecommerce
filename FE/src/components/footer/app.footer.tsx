@@ -17,18 +17,18 @@ const AppFooter = () => {
   const screens = useBreakpoint();
   const isMobile = !screens.md;
 
-  const aboutLinks = ["About Us", "Careers", "Blog", "Contact"];
+  const aboutLinks = ["Về chúng tôi", "Tuyển dụng", "Blog", "Liên hệ"];
   const supportLinks = [
-    "Help Center",
-    "How to Buy",
-    "Shipping",
-    "Returns & Refunds",
+    "Trung tâm trợ giúp",
+    "Hướng dẫn mua hàng",
+    "Vận chuyển",
+    "Đổi trả & Hoàn tiền",
   ];
   const policyLinks = [
-    "Privacy Policy",
-    "Terms of Service",
-    "Consumer Protection",
-    "Warranty Policy",
+    "Chính sách bảo mật",
+    "Điều khoản dịch vụ",
+    "Bảo vệ người tiêu dùng",
+    "Chính sách bảo hành",
   ];
 
   const linkStyle: React.CSSProperties = {
@@ -64,7 +64,6 @@ const AppFooter = () => {
         marginTop: "auto",
       }}
     >
-      {/* Links Grid */}
       <Row
         gutter={[isMobile ? 12 : 32, isMobile ? 12 : 32]}
         justify={isMobile ? "start" : "center"}
@@ -73,7 +72,7 @@ const AppFooter = () => {
         {/* ABOUT */}
         <Col xs={24} sm={12} md={6}>
           <Typography.Title level={5} style={sectionTitleStyle}>
-            ABOUT
+            VỀ CHÚNG TÔI
           </Typography.Title>
           <nav aria-label="About">
             {aboutLinks.map((link, idx) => (
@@ -87,7 +86,7 @@ const AppFooter = () => {
         {/* SUPPORT */}
         <Col xs={24} sm={12} md={6}>
           <Typography.Title level={5} style={sectionTitleStyle}>
-            SUPPORT
+            HỖ TRỢ
           </Typography.Title>
           <nav aria-label="Support">
             {supportLinks.map((link, idx) => (
@@ -101,7 +100,7 @@ const AppFooter = () => {
         {/* POLICIES */}
         <Col xs={24} sm={12} md={6}>
           <Typography.Title level={5} style={sectionTitleStyle}>
-            POLICIES
+            CHÍNH SÁCH
           </Typography.Title>
           <nav aria-label="Policies">
             {policyLinks.map((link, idx) => (
@@ -120,7 +119,7 @@ const AppFooter = () => {
           style={{ textAlign: isMobile ? "left" : "left" }}
         >
           <Typography.Title level={5} style={sectionTitleStyle}>
-            CONNECT WITH US
+            KẾT NỐI VỚI CHÚNG TÔI
           </Typography.Title>
           <Space size={isMobile ? 12 : "middle"} wrap>
             <a aria-label="Facebook" href="#">
@@ -160,7 +159,7 @@ const AppFooter = () => {
                 fontSize: isMobile ? 13 : 14,
               }}
             >
-              <strong>Address:</strong> 123/6, Thu Duc City, Ho Chi Minh City
+              <strong>Địa chỉ:</strong> 123/6, TP Thủ Đức, TP Hồ Chí Minh
             </Typography.Paragraph>
           </div>
         </Col>
@@ -168,7 +167,6 @@ const AppFooter = () => {
 
       <Divider style={{ backgroundColor: "#333", margin: 0 }} />
 
-      {/* Bottom Text */}
       <div
         style={{
           textAlign: "center",
@@ -177,10 +175,7 @@ const AppFooter = () => {
           color: "#aaa",
         }}
       >
-        © 2025 All rights reserved by{" "}
-        <a href="#" style={{ color: "#aaa" }}>
-          Company
-        </a>
+        © 2025 Bản quyền thuộc về M1nh
       </div>
     </Footer>
   );

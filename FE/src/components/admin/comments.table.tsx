@@ -16,7 +16,7 @@ import type { ColumnsType } from "antd/es/table";
 import type { TablePaginationConfig } from "antd/es/table/interface";
 import { ReloadOutlined, SearchOutlined, StarFilled } from "@ant-design/icons";
 
-// ===== Types =====
+// ===== Kiểu dữ liệu =====
 interface IUserRef {
   _id: string;
   email: string;
@@ -46,7 +46,7 @@ const ReviewsTable: React.FC = () => {
   );
   const { notification } = App.useApp();
 
-  // get token
+  // Lấy token
   useEffect(() => {
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("access_token");
@@ -73,7 +73,7 @@ const ReviewsTable: React.FC = () => {
       );
       const d = await res.json();
 
-      // normalize items (ALWAYS array)
+      // Chuẩn hoá dữ liệu (luôn là mảng)
       const items: IReview[] =
         (Array.isArray(d?.items) && d.items) ||
         (Array.isArray(d?.data?.items) && d.data.items) ||
@@ -81,7 +81,7 @@ const ReviewsTable: React.FC = () => {
         (Array.isArray(d?.data) && d.data) ||
         [];
 
-      // normalize meta
+      // Chuẩn hoá meta
       const meta = d?.pagination ||
         d?.data?.pagination ||
         d?.data?.meta || {
@@ -98,13 +98,13 @@ const ReviewsTable: React.FC = () => {
         total: Number(meta.total) || items.length,
         showSizeChanger: true,
         showTotal: (total: number, range: [number, number]) =>
-          `${range[0]}-${range[1]} / ${total} items`,
+          `${range[0]}-${range[1]} / ${total} đánh giá`,
         onChange: handleOnChange,
         onShowSizeChange: handleOnChange,
       };
       setPagination(nextPagination);
     } catch (e) {
-      notification.error({ message: "Lỗi tải dữ liệu reviews!" });
+      notification.error({ message: "Lỗi tải dữ liệu đánh giá!" });
     } finally {
       setLoading(false);
     }
@@ -131,7 +131,7 @@ const ReviewsTable: React.FC = () => {
       });
       const d = await res.json();
       if (res.ok || d?.ok) {
-        notification.success({ message: "Xoá review thành công!" });
+        notification.success({ message: "Xoá đánh giá thành công!" });
         const cur = (pagination && pagination.current) || DEFAULT_PAGE;
         const size = (pagination && pagination.pageSize) || DEFAULT_LIMIT;
         getData(Number(cur), Number(size));
@@ -139,14 +139,14 @@ const ReviewsTable: React.FC = () => {
         notification.error({ message: "Xoá thất bại!" });
       }
     } catch {
-      notification.error({ message: "Không thể xoá review!" });
+      notification.error({ message: "Không thể xoá đánh giá!" });
     }
   };
 
-  // ===== Columns =====
+  // ===== Cột bảng =====
   const columns: ColumnsType<IReview> = [
     {
-      title: "User",
+      title: "Người dùng",
       dataIndex: ["userId", "email"],
       align: "center",
       render: (_v, record) =>
@@ -155,7 +155,7 @@ const ReviewsTable: React.FC = () => {
           : String(record.userId),
     },
     {
-      title: "Product",
+      title: "Sản phẩm",
       dataIndex: ["productId", "name"],
       align: "center",
       render: (_v, record) =>
@@ -170,7 +170,7 @@ const ReviewsTable: React.FC = () => {
       }) => (
         <div style={{ padding: 8 }}>
           <Input
-            placeholder="Search product"
+            placeholder="Tìm sản phẩm"
             value={selectedKeys[0]}
             onChange={(e) =>
               setSelectedKeys(e.target.value ? [e.target.value] : [])
@@ -180,10 +180,10 @@ const ReviewsTable: React.FC = () => {
           />
           <Space>
             <Button type="primary" onClick={() => confirm()} size="small">
-              Search
+              Tìm kiếm
             </Button>
             <Button onClick={() => clearFilters?.()} size="small">
-              Reset
+              Đặt lại
             </Button>
           </Space>
         </div>
@@ -200,7 +200,7 @@ const ReviewsTable: React.FC = () => {
       },
     },
     {
-      title: "Rating",
+      title: "Đánh giá",
       dataIndex: "rating",
       align: "center",
       filters: [5, 4, 3, 2, 1].map((v) => ({ text: `${v}⭐`, value: v })),
@@ -215,7 +215,7 @@ const ReviewsTable: React.FC = () => {
       sorter: (a, b) => a.rating - b.rating,
     },
     {
-      title: "Comment",
+      title: "Bình luận",
       dataIndex: "comment",
       align: "center",
       render: (comment?: string) =>
@@ -233,11 +233,11 @@ const ReviewsTable: React.FC = () => {
             {comment}
           </span>
         ) : (
-          <Tag color="default">No comment</Tag>
+          <Tag color="default">Không có bình luận</Tag>
         ),
     },
     {
-      title: "Created At",
+      title: "Ngày tạo",
       dataIndex: "createdAt",
       align: "center",
       sorter: (a, b) =>
@@ -247,18 +247,18 @@ const ReviewsTable: React.FC = () => {
         value ? new Date(value).toLocaleString("vi-VN") : "-",
     },
     {
-      title: "Actions",
+      title: "Hành động",
       align: "center",
       render: (_, record) => (
         <Popconfirm
           title="Xoá đánh giá"
           description="Bạn có chắc muốn xoá đánh giá này?"
           onConfirm={() => handleDelete(record._id)}
-          okText="Yes"
-          cancelText="No"
+          okText="Có"
+          cancelText="Không"
         >
           <Button danger size="small">
-            Delete
+            Xoá
           </Button>
         </Popconfirm>
       ),
@@ -275,7 +275,7 @@ const ReviewsTable: React.FC = () => {
           marginBottom: 16,
         }}
       >
-        <h2>Table Reviews</h2>
+        <h2>Bảng đánh giá</h2>
         <Space>
           <Button
             type="text"
@@ -286,7 +286,7 @@ const ReviewsTable: React.FC = () => {
               getData(Number(cur), Number(size));
             }}
           >
-            Refresh
+            Làm mới
           </Button>
         </Space>
       </div>

@@ -28,34 +28,38 @@ const ViewUserModal: React.FC<ViewUserModalProps> = ({
         <div
           style={{ textAlign: "center", width: "100%", marginBottom: "15px" }}
         >
-          User Details
+          Thông tin người dùng
         </div>
       }
     >
       {userData && (
         <Descriptions bordered column={1} size="small">
           <Descriptions.Item label="Email">{userData.email}</Descriptions.Item>
-          <Descriptions.Item label="Name">{userData.name}</Descriptions.Item>
-          <Descriptions.Item label="Phone">{userData.phone}</Descriptions.Item>
-          <Descriptions.Item label="Role">{userData.role}</Descriptions.Item>
-          <Descriptions.Item label="Account Type">
+          <Descriptions.Item label="Họ và tên">
+            {userData.name}
+          </Descriptions.Item>
+          <Descriptions.Item label="Số điện thoại">
+            {userData.phone}
+          </Descriptions.Item>
+          <Descriptions.Item label="Vai trò">{userData.role}</Descriptions.Item>
+          <Descriptions.Item label="Loại tài khoản">
             {userData.accountType}
           </Descriptions.Item>
-          <Descriptions.Item label="Active">
-            {userData.isActive ? "True" : "False"}
+          <Descriptions.Item label="Trạng thái">
+            {userData.isActive ? "Hoạt động" : "Ngưng hoạt động"}
           </Descriptions.Item>
-          <Descriptions.Item label="Deleted">
-            {userData.isDeleted ? "True" : "False"}
+          <Descriptions.Item label="Đã xóa">
+            {userData.isDeleted ? "Có" : "Không"}
           </Descriptions.Item>
-          <Descriptions.Item label="Created At">
+          <Descriptions.Item label="Ngày tạo">
             {userData.createdAt
               ? new Date(userData.createdAt).toLocaleString()
-              : "N/A"}
+              : "Không có"}
           </Descriptions.Item>
-          <Descriptions.Item label="Updated At">
+          <Descriptions.Item label="Ngày cập nhật">
             {userData.updatedAt
               ? new Date(userData.updatedAt).toLocaleString()
-              : "N/A"}
+              : "Không có"}
           </Descriptions.Item>
         </Descriptions>
       )}
