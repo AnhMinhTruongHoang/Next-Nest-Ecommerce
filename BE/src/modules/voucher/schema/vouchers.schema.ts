@@ -29,19 +29,15 @@ export class Voucher {
   @Prop({ default: true })
   isActive: boolean;
 
-  // đếm lượt dùng, tăng khi order PAID (không tăng ở preview)
   @Prop({ default: 0, min: 0 })
   usedCount: number;
 
-  // 0 = không giới hạn
   @Prop({ default: 0, min: 0 })
   totalUses: number;
 
-  // 0 = không giới hạn/1 user (chưa dùng ở bản đơn giản này)
   @Prop({ default: 0, min: 0 })
   userUsageLimit: number;
 
-  // ----- PHẠM VI CHO PHÉP -----
   @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'Product', default: [] })
   allowedProductIds: mongoose.Types.ObjectId[];
 
@@ -55,7 +51,6 @@ export class Voucher {
   @Prop({ type: [String], default: [] })
   allowedBrands: string[];
 
-  // ----- PHẠM VI CẤM -----
   @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'Product', default: [] })
   bannedProductIds: mongoose.Types.ObjectId[];
 
@@ -69,13 +64,11 @@ export class Voucher {
   @Prop({ type: [String], default: [] })
   bannedBrands: string[];
 
-  // ----- SOFT DELETE -----
   @Prop({ type: Boolean, default: false })
   isDeleted: boolean;
 
   @Prop({ type: Date, default: null })
   deletedAt?: Date | null;
 }
-
 export const VoucherSchema = SchemaFactory.createForClass(Voucher);
 VoucherSchema.index({ code: 1 }, { unique: true });
