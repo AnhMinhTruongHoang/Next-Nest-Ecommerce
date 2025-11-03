@@ -240,7 +240,9 @@ const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
                           height: "100%",
                           border: "1px solid #eee",
                         }}
-                        bodyStyle={{ padding: 12 }}
+                        styles={{
+                          body: { padding: 12 },
+                        }}
                         cover={
                           <div
                             style={{
