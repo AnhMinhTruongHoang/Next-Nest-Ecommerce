@@ -34,7 +34,7 @@ export class Payment {
     enum: Object.values(PaymentStatus),
     default: PaymentStatus.PENDING,
   })
-  status: PaymentStatus; // 👈 giữ một @Prop duy nhất
+  status: PaymentStatus;
 
   @Prop()
   transactionId: string;

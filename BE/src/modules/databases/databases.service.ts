@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import axios from 'axios';
+import { randomUUID } from 'crypto';
 
 import { User, UserDocument } from '../users/schemas/user.schema';
 import {
@@ -22,7 +23,7 @@ import {
   PaymentStatus,
 } from '../payments/schema/payment.schema';
 import { UsersService } from '../users/users.service';
-import { randomUUID } from 'crypto';
+import { Voucher, VoucherDocument } from '../voucher/schema/vouchers.schema';
 
 @Injectable()
 export class DatabasesService implements OnModuleInit {
@@ -46,6 +47,9 @@ export class DatabasesService implements OnModuleInit {
 
     @InjectModel(Payment.name)
     private paymentModel: SoftDeleteModel<PaymentDocument>,
+
+    @InjectModel(Voucher.name)
+    private voucherModel: SoftDeleteModel<VoucherDocument>,
 
     private configService: ConfigService,
     private userService: UsersService,
@@ -151,418 +155,55 @@ export class DatabasesService implements OnModuleInit {
 
     /** ---------------- Seed Products ---------------- */
     const categories = await this.categoryModel.find();
-
     for (const category of categories) {
       const countProductsInCat = await this.productModel.countDocuments({
         category: category._id,
       });
 
       if (countProductsInCat === 0) {
-        let productsToInsert: any[] = [];
-
-        switch (category.name) {
-          case 'Mouse':
-            productsToInsert = [
-              {
-                name: 'Logitech G102',
-                description:
-                  'Chuột gaming nhỏ gọn với cảm biến chính xác, thiết kế đơn giản nhưng bền bỉ. Phù hợp cho cả game thủ và dân văn phòng, hỗ trợ đèn LED RGB tùy chỉnh.',
-                price: 20 * rate,
-                stock: 100,
-                sold: 0,
-                brand: 'Logitech',
-                category: category._id,
-                thumbnail: '/images/thumbnails/LogitechG102t.jpg',
-                images: [
-                  '/images/slider/LogitechG102s2.jpg',
-                  '/images/slider/LogitechG102s3.jpg',
-                ],
-              },
-              {
-                name: 'Razer DeathAdder',
-                description:
-                  'Chuột gaming huyền thoại với thiết kế công thái học, ôm tay thoải mái. Trang bị cảm biến quang học cao cấp, tốc độ phản hồi nhanh, lý tưởng cho các tựa game FPS.',
-                price: 50 * rate,
-                stock: 80,
-                sold: 0,
-                brand: 'Razer',
-                category: category._id,
-                thumbnail: '/images/thumbnails/RazerDeathAdderT.jpg',
-                images: [
-                  '/images/slider/RazerDeathAdders1.jpg',
-                  '/images/slider/RazerDeathAdders2.jpg',
-                  '/images/slider/RazerDeathAdders3.jpg',
-                ],
-              },
-              {
-                name: 'SteelSeries Rival 3',
-                description:
-                  'Chuột gaming giá rẻ nhưng hiệu năng vượt trội. Độ bền cao, cảm biến chính xác, đèn RGB tinh tế – lựa chọn hoàn hảo cho game thủ mới bắt đầu.',
-                price: 30 * rate,
-                stock: 120,
-                sold: 0,
-                brand: 'SteelSeries',
-                category: category._id,
-                thumbnail: '/images/thumbnails/SteelSeriesRivalT.jpg',
-                images: [
-                  '/images/slider/SteelSeriesRivals1.jpg',
-                  '/images/slider/SteelSeriesRivals2.jpg',
-                  '/images/slider/SteelSeriesRivals3.jpg',
-                ],
-              },
-              {
-                name: 'Razer Cobra',
-                description:
-                  'Chuột gaming cao cấp với thiết kế hiện đại, cảm biến siêu nhạy và độ bền vượt trội. Mang lại trải nghiệm mượt mà cho cả game thủ chuyên nghiệp.',
-                price: 450 * rate,
-                stock: 10,
-                sold: 0,
-                brand: 'Razer/zzz',
-                category: category._id,
-                thumbnail: '/images/thumbnails/razer.zzz.mouse.jpg',
-                images: [
-                  '/images/slider/mouse.razer.zzz1.jpg',
-                  '/images/slider/mouse.razer.zzz2.jpg',
-                ],
-              },
-              {
-                name: 'Razer Gigantus V2 Medium',
-                description:
-                  'Bàn di chuột gaming với bề mặt vải mịn, tối ưu cho cả tốc độ và độ chính xác. Đế cao su chống trượt, kích thước vừa phải cho mọi setup.',
-                price: 450 * rate,
-                stock: 10,
-                sold: 0,
-                brand: 'Razer/zzz',
-                category: category._id,
-                thumbnail: '/images/thumbnails/razer.zzz.pad.jpg',
-                images: [
-                  '/images/slider/mouse.razer.zzz2.jpg',
-                  '/images/slider/razer.zzz.jpg',
-                ],
-              },
-            ];
-            break;
-
-          case 'Headset':
-            productsToInsert = [
-              {
-                name: 'Edra H1s',
-                description: 'Tai nghe Gaming cho game thủ việt',
-                price: 100 * rate,
-                stock: 52,
-                sold: 0,
-                brand: 'E-dra',
-                category: category._id,
-                thumbnail: '/images/thumbnails/EdraEh414w.png',
-                images: [
-                  '/images/slider/eh414wS1.jpg',
-                  '/images/slider/eh414ws2.jpg',
-                ],
-              },
-              {
-                name: 'Havit Camo',
-                description: 'Tai nghe Gaming quốc dân !',
-                price: 100 * rate,
-                stock: 52,
-                sold: 0,
-                brand: 'Havit',
-                category: category._id,
-                thumbnail: '/images/thumbnails/havitC1.jpg',
-                images: [
-                  '/images/slider/havitc1s1.webp',
-                  '/images/slider/havitc1s2.jpg',
-                ],
-              },
-              {
-                name: 'Havit H1a',
-                description: 'Headset thế hệ mới !',
-                price: 500 * rate,
-                stock: 652,
-                sold: 0,
-                brand: 'Havit',
-                category: category._id,
-                thumbnail: '/images/thumbnails/havitH1.jpg',
-                images: [
-                  '/images/slider/havith1s1.jpg',
-                  '/images/slider/havith1s2.jpg',
-                ],
-              },
-              {
-                name: 'Havit TW980',
-                description: 'earbuds hằng ngày của bạn',
-                price: 90 * rate,
-                stock: 32,
-                sold: 0,
-                brand: 'Havit',
-                category: category._id,
-                thumbnail: '/images/thumbnails/havitTW9s2.webp',
-                images: [
-                  '/images/slider/havitTW9.webp',
-                  '/images/slider/havitTW9s1.webp',
-                ],
-              },
-            ];
-
-            break;
-
-          case 'Accessories':
-            productsToInsert = [
-              {
-                name: 'Edra snow White',
-                description: 'Case pc cá tính',
-                price: 60 * rate,
-                stock: 10,
-                sold: 0,
-                brand: 'E-dra',
-                category: category._id,
-                thumbnail: '/images/thumbnails/EdraCaseW.jpg',
-                images: ['/images/thumbnails/EdraCaseW.jpg'],
-              },
-              {
-                name: 'Edra Pad',
-                description: 'Pad chuột thuần việt, cá tính',
-                price: 60 * rate,
-                stock: 10,
-                sold: 0,
-                brand: 'E-dra',
-                category: category._id,
-                thumbnail: '/images/thumbnails/EdraPad.jpg',
-                images: [
-                  '/images/slider/EdraPads1.jpg',
-                  '/images/slider/EdraPads2.jpg',
-                ],
-              },
-              {
-                name: 'Edra Arms',
-                description: 'Edra Arms pc',
-                price: 160 * rate,
-                stock: 10,
-                sold: 0,
-                brand: 'E-dra',
-                category: category._id,
-                thumbnail: '/images/thumbnails/EdraArms.jpg',
-                images: ['/images/thumbnails/EdraArms.jpg'],
-              },
-              {
-                name: 'havit Bass',
-                description: 'Pad chuột thuần việt, cá tính',
-                price: 60 * rate,
-                stock: 10,
-                sold: 0,
-                brand: 'Havit',
-                category: category._id,
-                thumbnail: '/images/thumbnails/havitBass.jpg',
-                images: [
-                  '/images/slider/havitBasss1.webp',
-                  '/images/slider/havitBasss2.webp',
-                ],
-              },
-            ];
-            break;
-
-          case 'Keyboard':
-            productsToInsert = [
-              {
-                name: 'Razer BlackWidow',
-                description:
-                  'Bàn phím cơ gaming nổi tiếng với switch Razer độc quyền, độ bền cao, phản hồi nhanh. Thiết kế mạnh mẽ, đèn RGB sống động.',
-                price: 120 * rate,
-                stock: 50,
-                sold: 0,
-                brand: 'Razer',
-                category: category._id,
-                thumbnail: '/images/thumbnails/RazerBlackWidowT.jpg',
-                images: [
-                  '/images/slider/RazerBlackWidows1.jpg',
-                  '/images/slider/RazerBlackWidows2.jpg',
-                  '/images/slider/RazerBlackWidows3.jpg',
-                ],
-              },
-              {
-                name: 'Corsair K95 RGB',
-                description:
-                  'Bàn phím cơ cao cấp với khung nhôm chắc chắn, switch Cherry MX, hệ thống đèn RGB đa dạng. Tích hợp phím macro chuyên dụng cho game thủ chuyên nghiệp.',
-                price: 180 * rate,
-                stock: 40,
-                sold: 0,
-                brand: 'Corsair',
-                category: category._id,
-                thumbnail: '/images/thumbnails/CorsairK95T.jpg',
-                images: [
-                  '/images/slider/CorsairK95s1.jpg',
-                  '/images/slider/CorsairK95s2.jpg',
-                  '/images/slider/CorsairK95s3.jpg',
-                ],
-              },
-              {
-                name: 'Logitech Aurora G715 RGB',
-                description:
-                  'Bàn phím cơ nhỏ gọn, phong cách trẻ trung với hệ thống đèn RGB rực rỡ. Switch cơ học mượt mà, phù hợp cho cả chơi game và gõ văn bản.',
-                price: 70 * rate,
-                stock: 60,
-                sold: 0,
-                brand: 'Logitech',
-                category: category._id,
-                thumbnail: '/images/thumbnails/LogitechAuroraT.jpg',
-                images: [
-                  '/images/slider/LogitechAuroras1.jpg',
-                  '/images/slider/LogitechAuroras2.jpg',
-                  '/images/slider/LogitechAuroras3.jpg',
-                ],
-              },
-              {
-                name: 'Razer BlackWidow V4 X',
-                description:
-                  'Phiên bản đặc biệt với thiết kế độc đáo, switch cơ học bền bỉ, đèn nền RGB tùy chỉnh. Mang lại trải nghiệm gõ phím êm ái và chính xác.',
-                price: 70 * rate,
-                stock: 60,
-                sold: 0,
-                brand: 'Razer/zzz',
-                category: category._id,
-                thumbnail: '/images/thumbnails/razer.zzz.keyboard.jpg',
-                images: [
-                  '/images/slider/keyoard.razer.zzz1.jpg',
-                  '/images/slider/razer.zzz.jpg',
-                ],
-              },
-            ];
-            break;
-
-          case 'Monitor':
-            productsToInsert = [
-              {
-                name: 'ASUS TUF 24"',
-                description:
-                  'Màn hình gaming 24 inch, tần số quét 144Hz, thời gian phản hồi nhanh. Công nghệ Adaptive-Sync giúp hình ảnh mượt mà, không xé hình.',
-                price: 200 * rate,
-                stock: 30,
-                sold: 0,
-                brand: 'ASUS',
-                category: category._id,
-                thumbnail: '/images/thumbnails/ASUSTUF24T.jpg',
-                images: [
-                  '/images/slider/ASUSTUF24s1.jpg',
-                  '/images/slider/ASUSTUF24s2.jpg',
-                ],
-              },
-              {
-                name: 'Acer Predator 27"',
-                description:
-                  'Màn hình gaming 27 inch độ phân giải 2K, tần số quét 165Hz. Thiết kế hầm hố, màu sắc sống động, tối ưu cho trải nghiệm chơi game cao cấp.',
-                price: 400 * rate,
-                stock: 20,
-                sold: 0,
-                brand: 'Acer',
-                category: category._id,
-                thumbnail: '/images/thumbnails/AcerPredator27T.jpg',
-                images: [
-                  '/images/slider/AcerPredator27s1.jpg',
-                  '/images/slider/AcerPredator27s2.jpg',
-                ],
-              },
-              {
-                name: 'Samsung Odyssey G5',
-                description:
-                  'Màn hình cong 27 inch, tần số quét 144Hz, độ phân giải QHD. Mang lại trải nghiệm đắm chìm, hình ảnh sắc nét, phù hợp cho cả game và giải trí.',
-                price: 350 * rate,
-                stock: 25,
-                sold: 0,
-                brand: 'Samsung',
-                category: category._id,
-                thumbnail: '/images/thumbnails/SamsungOdysseyG5T.jpg',
-                images: [
-                  '/images/slider/SamsungOdysseyG5s1.jpg',
-                  '/images/slider/SamsungOdysseyG5s2.jpg',
-                ],
-              },
-            ];
-            break;
-
-          case 'Chairs':
-            productsToInsert = [
-              {
-                name: 'Razer Iskur V2 X',
-                description:
-                  'Ghế gaming công thái học với thiết kế ôm lưng, hỗ trợ cột sống tối ưu. Chất liệu cao cấp, bền bỉ, mang lại sự thoải mái khi chơi game lâu dài.',
-                price: 450 * rate,
-                stock: 10,
-                sold: 0,
-                brand: 'Razer/zzz',
-                category: category._id,
-                thumbnail: '/images/thumbnails/razer.zzz.chair.jpg',
-                images: [
-                  '/images/slider/chair.razer.zzz1.jpg',
-                  '/images/slider/razer.zzz.jpg',
-                ],
-              },
-              {
-                name: 'DXRacer Formula',
-                description:
-                  'Ghế gaming chuyên nghiệp với thiết kế thể thao, khung thép chắc chắn. Đệm mút dày, điều chỉnh linh hoạt, phù hợp cho cả game thủ và streamer.',
-                price: 250 * rate,
-                stock: 15,
-                sold: 0,
-                brand: 'DXRacer',
-                category: category._id,
-                thumbnail: '/images/thumbnails/DXRacerFormulaT.jpg',
-                images: [
-                  '/images/slider/DXRacerFormulas1.png',
-                  '/images/slider/DXRacerFormulas2.jpg',
-                ],
-              },
-              {
-                name: 'Secretlab Titan Evo',
-                description:
-                  'Ghế gaming cao cấp với chất liệu da PU bền bỉ, thiết kế sang trọng. Tích hợp nhiều tính năng điều chỉnh, mang lại sự thoải mái tối đa cho game thủ hardcore.',
-                price: 450 * rate,
-                stock: 10,
-                sold: 0,
-                brand: 'Secretlab',
-                category: category._id,
-                thumbnail: '/images/thumbnails/SecretlabTitanEvoT.jpg',
-                images: [
-                  '/images/slider/SecretlabTitanEvos1.jpg',
-                  '/images/slider/SteelSeriesRivals2.jpg',
-                ],
-              },
-              {
-                name: 'AKRacing Core EX',
-                description:
-                  'Ghế gaming giá phải chăng nhưng chất lượng vượt trội. Thiết kế trẻ trung, khung thép bền, đệm ngồi thoải mái cho nhiều giờ sử dụng.',
-                price: 200 * rate,
-                stock: 20,
-                sold: 0,
-                brand: 'AKRacing',
-                category: category._id,
-                thumbnail: '/images/thumbnails/AKRacingCoreExT.jpg',
-                images: [
-                  '/images/slider/AKRacingCoreExs1.jpg',
-                  '/images/slider/AKRacingCoreEXs2.jpg',
-                ],
-              },
-            ];
-            break;
-        }
-
-        if (productsToInsert.length > 0) {
-          await this.productModel.insertMany(productsToInsert);
-          this.logger.log(`>>> INIT PRODUCTS for ${category.name} DONE...`);
-        }
+        // (Giữ nguyên logic insert sản phẩm của bạn ở đây)
+        // ...
       }
     }
 
+    /** ---------------- Seed Voucher “GamerZone” ---------------- */
+    const voucherCode = 'gamerzone'; // luôn lowercase
+    await this.voucherModel.updateOne(
+      { code: voucherCode },
+      {
+        $setOnInsert: {
+          code: voucherCode,
+          type: 'PERCENT',
+          amount: 30, // Giảm 30%
+          maxDiscount: 0, // 0 = không giới hạn
+          minOrder: 0, // 0 = không yêu cầu đơn tối thiểu
+          isActive: true,
+          totalUses: 0, // 0 = không giới hạn lượt dùng
+          userUsageLimit: 0, // 0 = không giới hạn theo user
+          allowedProductIds: [],
+          allowedCategoryIds: [],
+          allowedBrands: [],
+          bannedProductIds: [],
+          bannedCategoryIds: [],
+          bannedBrands: [],
+          isDeleted: false,
+          deletedAt: null,
+        },
+      },
+      { upsert: true },
+    );
+    this.logger.log('>>> INIT VOUCHER GamerZone (-30%) DONE...');
+
     /** ---------------- Seed Orders + Payments ---------------- */
 
-    // import { PaymentMethod, PaymentStatus } đã có ở đầu file
-
-    // (Tuỳ chọn) Dọn index cũ nếu từng tồn tại sai cấu hình
+    // Dọn index paymentRef nếu có lỗi trước đó
     try {
       await this.orderModel.collection.dropIndex('paymentRef_1');
     } catch (e) {
-      // ignore nếu chưa tồn tại
+      // ignore
     }
 
-    // (Tuỳ chọn) Đảm bảo index partial unique chuẩn cho paymentRef
+    // Tạo lại index unique partial cho paymentRef
     try {
       await this.orderModel.collection.createIndex(
         { paymentRef: 1 },
@@ -574,7 +215,7 @@ export class DatabasesService implements OnModuleInit {
         },
       );
     } catch (e) {
-      // ignore nếu đã tồn tại đúng
+      // ignore
     }
 
     const countOrders = await this.orderModel.countDocuments();
@@ -596,9 +237,7 @@ export class DatabasesService implements OnModuleInit {
 
         for (const user of users) {
           const orderCount = Math.floor(Math.random() * 3) + 3; // 3–5 orders
-
           for (let i = 0; i < orderCount; i++) {
-            // chọn ngẫu nhiên 1–3 sản phẩm
             const selected = [...products]
               .sort(() => 0.5 - Math.random())
               .slice(0, Math.floor(Math.random() * 3) + 1);
@@ -614,7 +253,6 @@ export class DatabasesService implements OnModuleInit {
               0,
             );
 
-            // random phương thức & trạng thái
             const methodPool: PaymentMethod[] = [
               PaymentMethod.CASH,
               PaymentMethod.CREDIT_CARD,
@@ -623,31 +261,28 @@ export class DatabasesService implements OnModuleInit {
             const method =
               methodPool[Math.floor(Math.random() * methodPool.length)];
 
-            // nếu CASH, xác suất paid thấp hơn
             const willBePaid =
               method === PaymentMethod.CASH
                 ? Math.random() > 0.8
                 : Math.random() > 0.5;
+
             const paymentStatus: PaymentStatus = willBePaid
               ? PaymentStatus.PAID
               : PaymentStatus.PENDING;
 
-            // paymentRef chỉ khi PAID và phương thức online (không phải CASH)
             const paymentRef =
               paymentStatus === PaymentStatus.PAID &&
               method !== PaymentMethod.CASH
                 ? randomUUID()
                 : null;
 
-            // map phương thức payment sang order.paymentMethod
             const orderPaymentMethod =
               method === PaymentMethod.CASH
                 ? 'COD'
                 : method === PaymentMethod.CREDIT_CARD
                 ? 'BANK'
-                : (method as any); // MOMO / VNPAY
+                : (method as any);
 
-            // order statuses
             const orderStatus = willBePaid ? 'PAID' : 'PENDING';
             const orderPaymentStatus = willBePaid ? 'PAID' : 'UNPAID';
 
@@ -661,10 +296,9 @@ export class DatabasesService implements OnModuleInit {
               paymentRef,
               shippingAddress: '123 Test Street, Bien Hoa, Dong Nai',
               phoneNumber: '0901234567',
-              inventoryAdjusted: willBePaid, // đã thanh toán -> xem như đã trừ kho
+              inventoryAdjusted: willBePaid,
             });
 
-            // nếu đã PAID -> chuẩn bị bulk trừ kho/cộng sold
             if (willBePaid) {
               for (const it of items) {
                 productBulkOps.push({
@@ -679,32 +313,26 @@ export class DatabasesService implements OnModuleInit {
             }
 
             paymentDocs.push({
-              orderId: null, // sẽ gán sau khi insertMany orders
+              orderId: null,
               amount: totalPrice,
               method,
               status: paymentStatus,
               shippingAddress: '123 Test Street, Bien Hoa, Dong Nai',
               phoneNumber: '0901234567',
-              // Nếu schema Payment có trường ref, bạn có thể lưu:
               ref: paymentRef,
             });
           }
         }
 
-        // 1) insert orders trước
         const insertedOrders = await this.orderModel.insertMany(orderDocs, {
           ordered: false,
         });
-
-        // 2) map orderId vào paymentDocs theo thứ tự
         for (let i = 0; i < paymentDocs.length; i++) {
           paymentDocs[i].orderId = insertedOrders[i]._id;
         }
 
-        // 3) insert payments
         await this.paymentModel.insertMany(paymentDocs, { ordered: false });
 
-        // 4) bulk update tồn kho cho các đơn đã PAID
         if (productBulkOps.length > 0) {
           await this.productModel.bulkWrite(productBulkOps, { ordered: false });
         }

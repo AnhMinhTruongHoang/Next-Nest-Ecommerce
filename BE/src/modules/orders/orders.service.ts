@@ -12,6 +12,7 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import aqp from 'api-query-params';
 import { Product, ProductDocument } from '../products/schema/product.schema';
 import { PaymentStatus } from '../payments/schema/payment.schema';
+import { VouchersService } from '../voucher/vouchers.service';
 
 @Injectable()
 export class OrdersService {
@@ -19,6 +20,7 @@ export class OrdersService {
     @InjectModel(Order.name) private orderModel: SoftDeleteModel<OrderDocument>,
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
     @InjectConnection() private readonly connection: Connection,
+    private readonly vouchersService: VouchersService,
   ) {}
 
   // CREATE
@@ -33,31 +35,104 @@ export class OrdersService {
       paymentMethod,
       paymentStatus,
       paymentRef,
+      voucherCode, // <-- FE truyền vào
     } = data;
 
+    if (!items?.length) {
+      throw new BadRequestException('Order items is required');
+    }
+
+    // Chuẩn hoá item ids
     const formattedItems = items.map((item) => ({
       ...item,
       productId: new Types.ObjectId(item.productId),
     }));
 
-    const totalPrice = formattedItems.reduce(
+    // Tính subtotal
+    const subtotal = formattedItems.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0,
     );
 
+    // Mặc định không có giảm giá
+    let discountAmount = 0;
+    let grandTotal = subtotal;
+    let appliedVoucherCode: string | null = null;
+
+    // Thử áp dụng voucher nếu có
+    if (voucherCode && String(voucherCode).trim()) {
+      try {
+        const productIds = formattedItems.map((it) => it.productId);
+        // Lấy thông tin sp để suy ra categoryIds & brands
+        const products = await this.productModel
+          .find({ _id: { $in: productIds } })
+          .select('_id brand category')
+          .lean();
+
+        const categoryIds = Array.from(
+          new Set(
+            products
+              .map((p) => p.category)
+              .flat()
+              .filter(Boolean)
+              .map((id) => String(id)),
+          ),
+        );
+
+        const brands = Array.from(
+          new Set(
+            products
+              .map((p) => p.brand)
+              .filter(Boolean)
+              .map((b) => String(b).trim()),
+          ),
+        );
+
+        const preview = await this.vouchersService.preview({
+          code: String(voucherCode).trim(),
+          userId:
+            userId && Types.ObjectId.isValid(userId)
+              ? String(userId)
+              : undefined,
+          orderSubtotal: subtotal,
+          productIds: productIds.map((id) => String(id)),
+          categoryIds,
+          brands,
+        });
+
+        // Tương thích các tên trường trả về
+        const discount = Number(
+          (preview as any)?.discount ?? (preview as any)?.discountAmount ?? 0,
+        );
+
+        discountAmount = Math.max(discount, 0);
+        grandTotal = Math.max(subtotal - discountAmount, 0);
+        appliedVoucherCode = String(voucherCode).trim();
+      } catch (e) {
+        // Voucher không hợp lệ -> bỏ qua và không chặn order
+        discountAmount = 0;
+        grandTotal = subtotal;
+        appliedVoucherCode = null;
+      }
+    }
+
+    // Dữ liệu order
     const orderData: any = {
       fullName,
       items: formattedItems,
-      totalPrice,
+      subtotal, // <-- thêm
+      discountAmount, // <-- thêm
+      totalPrice: grandTotal, // <-- giữ nguyên semantics: tổng cuối
       phoneNumber,
       shippingAddress,
       status: status ?? 'PENDING',
       paymentMethod: paymentMethod ?? 'COD',
       paymentStatus: paymentStatus ?? 'UNPAID',
       paymentRef,
+      voucherCode: appliedVoucherCode, // <-- thêm
     };
 
-    // chỉ gán userId nếu hợp lệ (đã login)
+    // gán userId (nếu hợp lệ)
     if (userId && Types.ObjectId.isValid(userId)) {
       orderData.userId = new Types.ObjectId(userId);
     }
@@ -69,8 +144,8 @@ export class OrdersService {
   // FIND ALL with pagination, filtering, sorting
   async findAll(currentPage: number, limit: number, qs: string) {
     const { filter, sort, population } = aqp(qs);
-    delete filter.current;
-    delete filter.pageSize;
+    delete (filter as any).current;
+    delete (filter as any).pageSize;
 
     const page = Math.max(1, +currentPage || 1);
     const defaultLimit = Math.max(1, +limit || 10);
@@ -83,7 +158,7 @@ export class OrdersService {
       .find(filter)
       .skip(offset)
       .limit(defaultLimit)
-      .sort(sort as any)
+      .sort((sort as any) || { createdAt: -1 })
       .populate(population)
       .exec();
 
@@ -140,10 +215,13 @@ export class OrdersService {
         ...item,
         productId: new Types.ObjectId(item.productId),
       }));
-      updateData.totalPrice = updateData.items.reduce(
+      const newSubtotal = updateData.items.reduce(
         (sum, item) => sum + item.price * item.quantity,
         0,
       );
+      // Nếu FE không yêu cầu re-apply voucher ở update, ta chỉ cập nhật tổng thường
+      updateData.subtotal = newSubtotal;
+      updateData.totalPrice = newSubtotal; // hoặc giữ nguyên discount cũ nếu bạn muốn
     }
 
     // trạng thái trước & sau
@@ -158,11 +236,11 @@ export class OrdersService {
       nextPaymentStatus === 'REFUNDED' ||
       nextStatus === 'CANCELED';
 
-    // Nếu không có side-effect kho → update thường
+    // Không có side-effect kho → update thường
     if (
       (!willBePaid && !willBeRefundedOrCanceled) ||
-      (willBePaid && prevAdjusted) || // đã trừ kho rồi mà lại set PAID nữa → bỏ qua
-      (willBeRefundedOrCanceled && !prevAdjusted) // chưa trừ kho mà refund/cancel → bỏ qua
+      (willBePaid && prevAdjusted) ||
+      (willBeRefundedOrCanceled && !prevAdjusted)
     ) {
       const updated = await this.orderModel
         .findByIdAndUpdate(id, updateData, { new: true })
@@ -171,16 +249,14 @@ export class OrdersService {
       return updated;
     }
 
-    // Cần tác động kho → transaction
+    // Có side-effect kho → transaction
     const session = await this.connection.startSession();
     session.startTransaction();
     try {
-      // 1) ghi order trước, đồng thời toggle cờ inventoryAdjusted phù hợp
       const toggle: Partial<Order> = {};
-      if (willBePaid && !prevAdjusted)
-        toggle['inventoryAdjusted'] = true as any;
+      if (willBePaid && !prevAdjusted) (toggle as any).inventoryAdjusted = true;
       if (willBeRefundedOrCanceled && prevAdjusted)
-        toggle['inventoryAdjusted'] = false as any;
+        (toggle as any).inventoryAdjusted = false;
 
       const updated = await this.orderModel
         .findByIdAndUpdate(
@@ -191,22 +267,17 @@ export class OrdersService {
         .exec();
       if (!updated) throw new NotFoundException('Order not found');
 
-      // 2) tác động kho
       if (willBePaid && !prevAdjusted) {
-        // trừ kho + cộng sold
         await this.adjustInventoryForOrder(updated, session);
       }
 
       if (willBeRefundedOrCanceled && prevAdjusted) {
-        // hoàn kho + giảm sold (không âm)
         for (const it of updated.items) {
           const pid = new Types.ObjectId(String(it.productId));
-
           const prod = await this.productModel.findById(pid).session(session);
           if (!prod) {
             throw new BadRequestException(`Product ${it.productId} not found`);
           }
-
           const newSold = Math.max((prod.sold ?? 0) - it.quantity, 0);
           const newStock = (prod.stock ?? 0) + it.quantity;
 
@@ -242,8 +313,7 @@ export class OrdersService {
     return deleted;
   }
 
-  // UPDATE STATUS
-  // orders.service.ts
+  // UPDATE STATUS by paymentRef
   async updateStatus(paymentRef: string, status: PaymentStatus) {
     const session = await this.connection.startSession();
     session.startTransaction();
@@ -257,12 +327,10 @@ export class OrdersService {
         );
 
       if (status === PaymentStatus.PAID) {
-        // set trạng thái đơn
         order.paymentStatus = 'PAID';
         order.status = 'PAID';
         await order.save({ session });
 
-        // chỉ trừ kho nếu CHƯA trừ
         if (!order.inventoryAdjusted) {
           await this.adjustInventoryForOrder(order, session);
           await this.orderModel.updateOne(
@@ -279,14 +347,11 @@ export class OrdersService {
         if (order.inventoryAdjusted) {
           for (const it of order.items) {
             const pid = new Types.ObjectId(String(it.productId));
-            // Lấy product hiện tại để trừ sold chính xác
             const prod = await this.productModel.findById(pid).session(session);
             if (!prod)
               throw new BadRequestException(
                 `Product ${it.productId} not found`,
               );
-
-            // Tính toán mới
             const newSold = Math.max((prod.sold ?? 0) - it.quantity, 0);
             const newStock = (prod.stock ?? 0) + it.quantity;
 
@@ -297,7 +362,6 @@ export class OrdersService {
             );
           }
 
-          // Reset flag đã trừ kho
           await this.orderModel.updateOne(
             { _id: order._id },
             { $set: { inventoryAdjusted: false } },
@@ -305,7 +369,6 @@ export class OrdersService {
           );
         }
       } else {
-        // FAILED hoặc các trạng thái không ảnh hưởng kho
         order.paymentStatus = 'UNPAID';
         await order.save({ session });
       }
@@ -320,7 +383,7 @@ export class OrdersService {
     }
   }
 
-  // VNPay callback → enum, không dùng string thô
+  // VNPay callback
   async confirmVNPayPayment(query: any) {
     const { vnp_TxnRef, vnp_ResponseCode } = query;
     const status: PaymentStatus =
@@ -329,7 +392,7 @@ export class OrdersService {
     return this.updateStatus(vnp_TxnRef, status);
   }
 
-  //// COD update paid
+  //// Kho: trừ/hoàn
   private async adjustInventoryForOrder(order: OrderDocument, session?: any) {
     for (const it of order.items) {
       const pid = new Types.ObjectId(String(it.productId));

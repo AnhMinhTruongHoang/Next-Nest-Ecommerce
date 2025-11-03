@@ -43,7 +43,12 @@ export class Order {
   @Prop()
   phoneNumber: string;
 
-  // ✅ chỉ unique nếu paymentRef là string (VNPay, Momo, v.v.)
+  @Prop({ type: String, default: null })
+  appliedVoucherCode?: string | null;
+
+  @Prop({ type: Number, default: 0, min: 0 })
+  voucherDiscount?: number;
+
   @Prop({ type: String, default: null })
   paymentRef?: string;
 

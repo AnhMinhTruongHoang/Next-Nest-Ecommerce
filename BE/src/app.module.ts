@@ -16,7 +16,6 @@ import { FilesModule } from './modules/files/files.module';
 import { DatabasesModule } from './modules/databases/databases.module';
 import { ProductsModule } from './modules/products/products.module';
 import { MembershipsModule } from './modules/memberships/memberships.module';
-import { PromotionsModule } from './modules/promotions/promotions.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { PaymentsModule } from './modules/payments/payments.module';
@@ -25,6 +24,7 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { multerConfig } from './modules/files/multer.config';
 import { VnpayModule } from './modules/vnpay/vnpay.module';
+import { VouchersModule } from './modules/voucher/vouchers.module';
 
 @Module({
   imports: [
@@ -86,13 +86,13 @@ import { VnpayModule } from './modules/vnpay/vnpay.module';
     HealthModule,
     ProductsModule,
     MembershipsModule,
-    PromotionsModule,
     CategoriesModule,
     OrdersModule,
     PaymentsModule,
     CartsModule,
     ReviewsModule,
     VnpayModule,
+    VouchersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
