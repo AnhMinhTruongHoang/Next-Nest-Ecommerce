@@ -14,13 +14,13 @@ const Highlight = () => {
           <div className="highlight-cover">
             <Image
               alt="Men Wear"
-              src="/images/cards/gitwar2.png"
+              src="/images/cards/MonesyE.jpg"
               fill
               className="highlight-img"
-              style={{ objectFit: "cover" }}
+              style={{ objectFit: "inherit" }}
             />
             <div className="highlight-overlay">
-              <h2>MEN WEAR</h2>
+              <h2>m0NESY choice</h2>
               <Button type="primary" size="large" className="highlight-btn">
                 KHÁM PHÁ
               </Button>
@@ -37,13 +37,13 @@ const Highlight = () => {
           <div className="highlight-cover">
             <Image
               alt="Women Active"
-              src="/images/cards/gitwar2.png"
+              src="/images/cards/niko.webp"
               fill
               className="highlight-img"
-              style={{ objectFit: "cover" }}
+              style={{ objectFit: "inherit" }}
             />
             <div className="highlight-overlay">
-              <h2>WOMEN ACTIVE</h2>
+              <h2> NIKO choice</h2>
               <Button type="primary" size="large" className="highlight-btn">
                 KHÁM PHÁ
               </Button>
