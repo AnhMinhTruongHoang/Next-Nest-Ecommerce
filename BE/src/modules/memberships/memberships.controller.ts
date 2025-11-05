@@ -40,6 +40,17 @@ export class MembershipsController {
       createdBy: newMembership.createdBy,
     };
   }
+  @Get('user/:userId')
+  @ResponseMessage('Fetch current membership tier of user')
+  getUserTier(@Param('userId') userId: string) {
+    return this.membershipsService.getTierByUser(userId);
+  }
+
+  @Post('preview')
+  @ResponseMessage('Preview membership tier by total spent')
+  preview(@Body() body: PreviewTierDto) {
+    return this.membershipsService.previewTier(body.totalSpent);
+  }
 
   @Get()
   @ResponseMessage('Fetch memberships with paginate')
@@ -72,11 +83,5 @@ export class MembershipsController {
   @ResponseMessage('Delete a membership')
   remove(@Param('id') id: string, @Users() user: IUser) {
     return this.membershipsService.remove(id);
-  }
-
-  @Post('preview')
-  @ResponseMessage('Preview membership tier by total spent')
-  preview(@Body() body: PreviewTierDto) {
-    return this.membershipsService.previewTier(body.totalSpent);
   }
 }
