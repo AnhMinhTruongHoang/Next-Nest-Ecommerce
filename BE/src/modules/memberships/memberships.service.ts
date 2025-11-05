@@ -50,4 +50,20 @@ export class MembershipsService {
     const res = await this.membershipModel.findByIdAndDelete(id);
     if (!res) throw new NotFoundException('Membership not found');
   }
+
+  async previewTier(totalSpent: number) {
+    const tiers = await this.membershipModel
+      .find({})
+      .sort({ minSpend: 1 })
+      .lean();
+
+    const matched =
+      tiers.find(
+        (t) =>
+          totalSpent >= t.minSpend &&
+          (t.maxSpend === undefined || totalSpent <= t.maxSpend),
+      ) || null;
+
+    return { tier: matched?.name || null, matched };
+  }
 }

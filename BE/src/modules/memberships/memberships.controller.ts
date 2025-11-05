@@ -16,6 +16,7 @@ import { Public, ResponseMessage, Users } from 'src/health/decorator/customize';
 import { IUser } from 'src/types/user.interface';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
+import { PreviewTierDto } from './dto/preview-tier.dto';
 
 @ApiTags('memberships')
 @UseGuards(JwtAuthGuard)
@@ -71,5 +72,11 @@ export class MembershipsController {
   @ResponseMessage('Delete a membership')
   remove(@Param('id') id: string, @Users() user: IUser) {
     return this.membershipsService.remove(id);
+  }
+
+  @Post('preview')
+  @ResponseMessage('Preview membership tier by total spent')
+  preview(@Body() body: PreviewTierDto) {
+    return this.membershipsService.previewTier(body.totalSpent);
   }
 }
