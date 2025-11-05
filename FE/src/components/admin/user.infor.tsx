@@ -7,11 +7,16 @@ import {
   Col,
   Form,
   Input,
-  InputNumber,
   Modal,
   Row,
   Typography,
   Divider,
+  Tag,
+  Progress,
+  Tooltip,
+  Card,
+  Skeleton,
+  InputNumber,
 } from "antd";
 import {
   UserOutlined,
@@ -19,6 +24,8 @@ import {
   PhoneOutlined,
   HomeOutlined,
   SaveOutlined,
+  CrownOutlined,
+  InfoCircleOutlined,
 } from "@ant-design/icons";
 import { useEffect, useMemo, useState } from "react";
 import type { FormProps } from "antd";
@@ -29,6 +36,23 @@ type FieldType = {
   name: string;
   phone: string;
   address: string;
+};
+
+type TierResp = {
+  totalSpent: number;
+  currentTier: null | {
+    _id?: string;
+    name: string;
+    discountRate?: number;
+    pointMultiplier?: number;
+    freeShipping?: boolean;
+    minSpend?: number;
+    maxSpend?: number | null;
+  };
+  nextTier: null | {
+    name: string;
+    needMore: number;
+  };
 };
 
 interface IUserInfoModalProps {
@@ -42,7 +66,6 @@ const phoneRule = [
     validator(_: any, value?: string) {
       if (!value) return Promise.resolve();
       const v = String(value).trim();
-      // 9–11 chữ số
       if (!/^\d{9,11}$/.test(v)) {
         return Promise.reject(
           new Error("Số điện thoại chỉ gồm 9–11 chữ số (không ký tự khác).")
@@ -55,16 +78,22 @@ const phoneRule = [
 
 const nameRule = [
   { required: true, message: "Tên hiển thị không được để trống!" },
-  {
-    max: 60,
-    message: "Tên tối đa 60 ký tự.",
-  },
+  { max: 60, message: "Tên tối đa 60 ký tự." },
 ];
 
 const addressRule = [
   { required: true, message: "Địa chỉ không được để trống!" },
   { max: 200, message: "Địa chỉ tối đa 200 ký tự." },
 ];
+
+const currencyVN = (n?: number) =>
+  new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+    maximumFractionDigits: 0,
+  }).format(n ?? 0);
+
+const MEMBERSHIP_API = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/memberships`;
 
 const UserInfoModal: React.FC<IUserInfoModalProps> = ({
   openManageAccount,
@@ -73,9 +102,10 @@ const UserInfoModal: React.FC<IUserInfoModalProps> = ({
   const [form] = Form.useForm<FieldType>();
   const { user, setUser } = useCurrentApp();
   const [isSubmit, setIsSubmit] = useState(false);
+  const [tierLoading, setTierLoading] = useState(false);
+  const [tier, setTier] = useState<TierResp | null>(null);
   const { message, notification } = App.useApp();
 
-  // điền form khi mở modal
   useEffect(() => {
     if (openManageAccount && user) {
       form.setFieldsValue({
@@ -88,10 +118,61 @@ const UserInfoModal: React.FC<IUserInfoModalProps> = ({
     }
   }, [openManageAccount, user, form]);
 
+  /// membership
+  useEffect(() => {
+    const fetchTier = async () => {
+      if (!openManageAccount || !user?._id) {
+        setTier(null);
+        return;
+      }
+      setTierLoading(true);
+      try {
+        const res = await fetch(`${MEMBERSHIP_API}/user/${user._id}`);
+        const json = await res.json();
+        const data: TierResp = json?.data ?? json;
+        setTier(data ?? null);
+      } catch {
+        setTier(null);
+      } finally {
+        setTierLoading(false);
+      }
+    };
+    fetchTier();
+  }, [openManageAccount, user?._id]);
+
   const headerTitle = useMemo(
-    () => (user?.name ? `Xin chào, ${user.name}` : "Cập nhật thông tin"),
+    () => (user?.name ? ` ${user.name}` : "Cập nhật thông tin"),
     [user?.name]
   );
+
+  //  tier color
+  const tierColor = (name?: string) => {
+    const n = (name || "").toLowerCase();
+    if (n.includes("gold")) return "gold";
+    if (n.includes("silver")) return "geekblue";
+    if (n.includes("bronze")) return "volcano";
+    return "processing";
+  };
+
+  const progressInfo = useMemo(() => {
+    if (!tier) return { percent: 0, helper: "" };
+    if (!tier.nextTier) {
+      return { percent: 100, helper: "Bạn đang ở hạng cao nhất" };
+    }
+    // Ước luong % tier
+    const currentMin = tier.currentTier?.minSpend ?? 0;
+    const nextMin = Math.max(tier.nextTier.needMore + tier.totalSpent, 0);
+    const denom = Math.max(nextMin - currentMin, 1);
+    const numer = Math.max(tier.totalSpent - currentMin, 0);
+    const percent = Math.max(
+      0,
+      Math.min(100, Math.round((numer / denom) * 100))
+    );
+    const helper = `Cần thêm ${currencyVN(tier.nextTier.needMore)} để lên ${
+      tier.nextTier.name
+    }`;
+    return { percent, helper };
+  }, [tier]);
 
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     const payload = {
@@ -105,7 +186,6 @@ const UserInfoModal: React.FC<IUserInfoModalProps> = ({
     try {
       let token = localStorage.getItem("access_token");
 
-      // fallback: nếu user đăng nhập OAUTH nhưng chưa có token, sync để lấy
       if (!token && user?.email) {
         const synced = await fetch(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/sync`,
@@ -186,7 +266,7 @@ const UserInfoModal: React.FC<IUserInfoModalProps> = ({
       }}
       footer={null}
       centered
-      width={560}
+      width={640}
       styles={{
         header: { borderBottom: "none" },
         body: { paddingTop: 8 },
@@ -194,15 +274,63 @@ const UserInfoModal: React.FC<IUserInfoModalProps> = ({
       title={
         <div style={{ textAlign: "center" }}>
           <Typography.Title level={4} style={{ margin: 0 }}>
-            👤 {headerTitle}
+            {headerTitle}
           </Typography.Title>
           <Typography.Text type="secondary">
-            Cập nhật thông tin liên hệ & giao hàng của bạn
+            Cập nhật thông tin & xem quyền lợi hội viên
           </Typography.Text>
         </div>
       }
     >
-      <Divider style={{ margin: "12px 0 20px" }} />
+      {/* Membership Card */}
+      <Card size="small" style={{ marginBottom: 14, borderRadius: 10 }}>
+        {tierLoading ? (
+          <Skeleton active paragraph={{ rows: 2 }} />
+        ) : !tier ? (
+          <Typography.Text type="secondary">
+            Không thể tải thông tin hạng hội viên.
+          </Typography.Text>
+        ) : (
+          <Row gutter={[12, 12]} align="middle">
+            <Col xs={24} md={10}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <CrownOutlined />
+                <Typography.Text strong>Hạng hiện tại:</Typography.Text>
+                <Tag
+                  color={tierColor(tier.currentTier?.name)}
+                  style={{ marginLeft: 4 }}
+                >
+                  {tier.currentTier?.name || "Chưa xếp hạng"}
+                </Tag>
+              </div>
+              <div style={{ marginTop: 6 }}>
+                <Typography.Text type="secondary">
+                  Tổng chi tiêu: <strong>{currencyVN(tier.totalSpent)}</strong>
+                </Typography.Text>
+              </div>
+            </Col>
+            <Col xs={24} md={14}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <Typography.Text strong>Tiến độ lên hạng</Typography.Text>
+                <Tooltip title="Tính theo minSpend/maxSpend của từng hạng">
+                  <InfoCircleOutlined />
+                </Tooltip>
+              </div>
+              <div style={{ marginTop: 8 }}>
+                <Progress
+                  percent={progressInfo.percent}
+                  status={progressInfo.percent === 100 ? "success" : "active"}
+                />
+                <Typography.Text type="secondary">
+                  {progressInfo.helper}
+                </Typography.Text>
+              </div>
+            </Col>
+          </Row>
+        )}
+      </Card>
+
+      <Divider style={{ margin: "12px 0 16px" }} />
 
       <Form<FieldType>
         form={form}
@@ -262,23 +390,10 @@ const UserInfoModal: React.FC<IUserInfoModalProps> = ({
             >
               <Input
                 prefix={<PhoneOutlined />}
-                inputMode="numeric"
                 placeholder="Ví dụ: 0912345678"
                 aria-label="Số điện thoại"
-                maxLength={11}
-                onKeyDown={(e) => {
-                  const ok =
-                    /[0-9]/.test(e.key) ||
-                    [
-                      "Backspace",
-                      "Delete",
-                      "Tab",
-                      "ArrowLeft",
-                      "ArrowRight",
-                    ].includes(e.key);
-                  if (!ok) e.preventDefault();
-                }}
                 allowClear
+                maxLength={11}
                 style={{ height: 42, borderRadius: 10 }}
               />
             </Form.Item>

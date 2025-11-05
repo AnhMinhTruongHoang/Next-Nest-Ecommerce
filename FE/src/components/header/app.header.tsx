@@ -12,6 +12,10 @@ import {
   Drawer,
   Tooltip,
   Spin,
+  Grid,
+  List,
+  Menu,
+  theme,
 } from "antd";
 import {
   Mouse,
@@ -34,7 +38,7 @@ import razerLogo from "../../../public/images/logos/razer2.png";
 import edraLogo from "../../../public/images/logos/edra.png";
 import logitechLogo from "../../../public/images/logos/logitec.png";
 import havitLogo from "../../../public/images/logos/havit.png";
-import React, { KeyboardEvent, MouseEvent } from "react";
+import React, { KeyboardEvent } from "react";
 import Image, { StaticImageData } from "next/image";
 import {
   DashboardFilled,
@@ -45,6 +49,9 @@ import {
 } from "@ant-design/icons";
 
 const { Header } = Layout;
+const { useBreakpoint } = Grid;
+const { useToken } = theme;
+
 type BrandLogoProps = {
   src: StaticImageData | string;
   alt: string;
@@ -139,15 +146,21 @@ export default function AppHeader() {
   const { carts } = useCurrentApp();
   const [openManageAccount, setOpenManageAccount] = useState(false);
   const [openOrderHistory, setOpenOrderHistory] = useState(false);
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(false);
+  const [openUserMenu, setOpenUserMenu] = useState(false);
+
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<SuggestItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [catMapByName, setCatMapByName] = useState<Record<string, string>>({});
   const backendURL =
     process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+
+  const screens = useBreakpoint();
+  const isMobileUI = !screens.md; // < 768px
+  const { token } = useToken();
 
   useEffect(() => {
     const cached = localStorage.getItem("catMapByName");
@@ -185,46 +198,6 @@ export default function AppHeader() {
     signOut({ callbackUrl: "/" });
   };
 
-  const userMenu = {
-    items: [
-      {
-        key: "profile",
-        label: "Profile",
-        icon: <UserIcon size={16} />,
-        onClick: () => setOpenManageAccount(true),
-      },
-      ...(session?.user?.role === "ADMIN"
-        ? [
-            {
-              key: "dashboard",
-              label: <NextLink href={`/dashboard`}>Dashboard</NextLink>,
-              icon: <DashboardFilled />,
-            },
-          ]
-        : [
-            {
-              key: "orders",
-              label: (
-                <span onClick={() => setOpenOrderHistory(true)}>
-                  Lịch sử mua hàng
-                </span>
-              ),
-              icon: <ShoppingCartOutlined />,
-            },
-          ]),
-      {
-        key: "logout",
-        label: (
-          <span style={{ cursor: "pointer" }} onClick={handleLogout}>
-            Logout
-          </span>
-        ),
-        icon: <LogoutOutlined />,
-      },
-    ],
-  };
-
-  // --- Cart popover
   const ContentPopover = () => (
     <div
       style={{
@@ -498,6 +471,93 @@ export default function AppHeader() {
     }
   };
 
+  // ===== User Menu (desktop dropdown content) =====
+  const UserMenuContent: React.FC = () => {
+    const items = [
+      {
+        key: "profile",
+        label: <span onClick={() => setOpenManageAccount(true)}>Profile</span>,
+        icon: <UserIcon size={16} />,
+      },
+      ...(session?.user?.role === "ADMIN"
+        ? [
+            {
+              key: "dashboard",
+              label: <NextLink href={`/dashboard`}>Dashboard</NextLink>,
+              icon: <DashboardFilled />,
+            },
+          ]
+        : [
+            {
+              key: "orders",
+              label: (
+                <span onClick={() => setOpenOrderHistory(true)}>
+                  Lịch sử mua hàng
+                </span>
+              ),
+              icon: <ShoppingCartOutlined />,
+            },
+          ]),
+      {
+        key: "logout",
+        label: <span onClick={handleLogout}>Logout</span>,
+        icon: <LogoutOutlined />,
+      },
+    ];
+
+    return (
+      <div
+        style={{
+          width: 220,
+          background: "#fff",
+          borderRadius: 12,
+          boxShadow: "0 12px 32px rgba(0,0,0,.16)",
+          padding: 8,
+          border: "1px solid #f0f0f0",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            padding: "8px 10px 6px",
+            borderBottom: "1px dashed #eee",
+            marginBottom: 6,
+          }}
+        >
+          <Avatar
+            size={36}
+            style={{ background: "#9b59b6", border: "2px solid #00ffe0" }}
+          >
+            {session?.user?.name?.charAt(0)?.toUpperCase() || "U"}
+          </Avatar>
+          <div style={{ lineHeight: 1.2 }}>
+            <div style={{ fontWeight: 600, fontSize: 13, color: "#111" }}>
+              {session?.user?.name || "User"}
+            </div>
+            <div style={{ fontSize: 12, color: "#888" }}>
+              {session?.user?.email}
+            </div>
+          </div>
+        </div>
+
+        <Menu
+          selectable={false}
+          items={items.map((it) => ({
+            ...it,
+            style: {
+              borderRadius: 8,
+              margin: "2px 0",
+              padding: "6px 10px",
+            },
+          }))}
+          onClick={() => setOpenUserMenu(false)}
+        />
+      </div>
+    );
+  };
+
   return (
     <Header
       style={{
@@ -610,7 +670,7 @@ export default function AppHeader() {
               key={item.key}
               popupRender={() => megaMenu}
               placement="bottom"
-              trigger={[isMobile ? "click" : "hover"]}
+              trigger={[isMobileUI ? "click" : "hover"]}
             >
               <Tooltip title={item.label} placement="bottom">
                 <div className="nav-item" onClick={() => goCategory(item.key)}>
@@ -756,23 +816,148 @@ export default function AppHeader() {
         {/* Account + Cart */}
         <div className="acct">
           {status === "loading" ? null : session ? (
-            <Dropdown
-              menu={userMenu}
-              placement="bottom"
-              arrow
-              trigger={[isMobile ? "click" : "click"]}
-            >
-              <Avatar
-                style={{
-                  backgroundColor: "#9b59b6",
-                  cursor: "pointer",
-                  border: "2px solid #00ffe0",
+            <>
+              {/* Desktop: Dropdown đẹp */}
+              {!isMobileUI ? (
+                <Dropdown
+                  open={openUserMenu}
+                  onOpenChange={setOpenUserMenu}
+                  popupRender={() => <UserMenuContent />}
+                  placement="bottomRight"
+                  arrow
+                  trigger={["click"]}
+                >
+                  <Avatar
+                    style={{
+                      backgroundColor: "#9b59b6",
+                      cursor: "pointer",
+                      border: "2px solid #00ffe0",
+                    }}
+                    size={35}
+                  >
+                    {session?.user?.name?.charAt(0)?.toUpperCase() || "U"}
+                  </Avatar>
+                </Dropdown>
+              ) : (
+                // Mobile responsive
+                <Avatar
+                  style={{
+                    backgroundColor: "#9b59b6",
+                    cursor: "pointer",
+                    border: "2px solid #00ffe0",
+                  }}
+                  size={35}
+                  onClick={() => setOpenUserMenu(true)}
+                >
+                  {session?.user?.name?.charAt(0)?.toUpperCase() || "U"}
+                </Avatar>
+              )}
+
+              {/* Drawer mobile */}
+              <Drawer
+                title="Tài khoản"
+                open={isMobileUI && openUserMenu}
+                onClose={() => setOpenUserMenu(false)}
+                placement="bottom"
+                height="auto"
+                styles={{
+                  header: { borderTopLeftRadius: 12, borderTopRightRadius: 12 },
+                  content: {
+                    borderTopLeftRadius: 12,
+                    borderTopRightRadius: 12,
+                  },
+                  body: { paddingTop: 0, paddingBottom: 12 },
                 }}
-                size={35}
               >
-                {session?.user?.name?.charAt(0)?.toUpperCase() || "U"}
-              </Avatar>
-            </Dropdown>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    padding: "8px 4px 12px",
+                  }}
+                >
+                  <Avatar
+                    size={40}
+                    style={{
+                      background: "#9b59b6",
+                      border: "2px solid #00ffe0",
+                    }}
+                  >
+                    {session?.user?.name?.charAt(0)?.toUpperCase() || "U"}
+                  </Avatar>
+                  <div style={{ lineHeight: 1.2 }}>
+                    <div style={{ fontWeight: 600 }}>
+                      {session?.user?.name || "User"}
+                    </div>
+                    <div style={{ color: "#888", fontSize: 12 }}>
+                      {session?.user?.email}
+                    </div>
+                  </div>
+                </div>
+
+                <List
+                  itemLayout="horizontal"
+                  dataSource={[
+                    {
+                      key: "profile",
+                      text: "Profile",
+                      onClick: () => setOpenManageAccount(true),
+                      icon: <UserIcon size={18} />,
+                    },
+                    ...(session?.user?.role === "ADMIN"
+                      ? [
+                          {
+                            key: "dashboard",
+                            text: "Dashboard",
+                            onClick: () => router.push("/dashboard"),
+                            icon: <DashboardFilled />,
+                          },
+                        ]
+                      : [
+                          {
+                            key: "orders",
+                            text: "Lịch sử mua hàng",
+                            onClick: () => setOpenOrderHistory(true),
+                            icon: <ShoppingCartOutlined />,
+                          },
+                        ]),
+                    {
+                      key: "logout",
+                      text: "Logout",
+                      onClick: handleLogout,
+                      icon: <LogoutOutlined />,
+                    },
+                  ]}
+                  renderItem={(item: any) => (
+                    <List.Item
+                      style={{ padding: "10px 6px" }}
+                      onClick={() => {
+                        item.onClick();
+                        setOpenUserMenu(false);
+                      }}
+                    >
+                      <List.Item.Meta
+                        avatar={
+                          <span
+                            style={{
+                              width: 28,
+                              display: "inline-flex",
+                              justifyContent: "center",
+                            }}
+                          >
+                            {item.icon}
+                          </span>
+                        }
+                        title={
+                          <span style={{ fontSize: 16 }}>{item.text}</span>
+                        }
+                      />
+                    </List.Item>
+                  )}
+                />
+              </Drawer>
+            </>
           ) : (
             <NextLink
               href="/auth/signin"
@@ -784,7 +969,7 @@ export default function AppHeader() {
 
           <Popover
             content={<ContentPopover />}
-            trigger={isMobile ? "click" : "hover"}
+            trigger={isMobileUI ? "click" : "hover"}
             placement="bottomRight"
           >
             <Badge count={carts?.length ?? 0} offset={[-2, 2]}>
@@ -796,7 +981,7 @@ export default function AppHeader() {
         </div>
       </div>
 
-      {/* Mobile Drawer Menu */}
+      {/* Mobile Drawer Menu (categories) */}
       <Drawer
         title="Danh mục sản phẩm"
         placement="left"
