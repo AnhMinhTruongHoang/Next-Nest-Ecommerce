@@ -1,4 +1,11 @@
-import { IsEmail, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
+import {
+  IsEmail,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Matches,
+} from 'class-validator';
 
 export class UpdateUserDto {
   @IsOptional()
@@ -6,8 +13,10 @@ export class UpdateUserDto {
   name?: string;
 
   @IsOptional()
-  @IsNumber()
-  phone?: number;
+  @Transform(({ value }) => String(value ?? '').trim())
+  @IsString()
+  @Matches(/^\d{9,11}$/, { message: 'Phone must be 9–11 digits' })
+  phone?: string;
 
   @IsOptional()
   @IsString()

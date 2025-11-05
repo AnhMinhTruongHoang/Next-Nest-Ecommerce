@@ -84,7 +84,7 @@ export class DatabasesService implements OnModuleInit {
         {
           name: "I'm admin",
           email: 'admin@gmail.com',
-          phone: 2131231233,
+          phone: '0912345678',
           password: initPassword,
           age: 30,
           gender: 'MALE',
@@ -95,7 +95,7 @@ export class DatabasesService implements OnModuleInit {
         {
           name: "I'm normal user",
           email: 'user@gmail.com',
-          phone: 21314331233,
+          phone: '0987654321',
           password: initPassword,
           age: 25,
           gender: 'FEMALE',
@@ -104,6 +104,7 @@ export class DatabasesService implements OnModuleInit {
           isActive: true,
         },
       ]);
+
       this.logger.log('>>> INIT USERS DONE...');
     }
 

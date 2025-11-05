@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsEmail,
   IsInt,
@@ -8,6 +8,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Matches,
   Max,
   Min,
   ValidateNested,
@@ -41,9 +42,11 @@ export class CreateUserDto {
   @IsOptional()
   gender?: string;
 
-  @IsNumber()
   @IsOptional()
-  phone?: number;
+  @Transform(({ value }) => String(value ?? '').trim())
+  @IsString()
+  @Matches(/^\d{9,11}$/, { message: 'Phone must be 9–11 digits' })
+  phone?: string;
 
   @IsOptional()
   address?: string;
@@ -97,7 +100,9 @@ export class RegisterUserDto {
   address?: string;
 
   @IsOptional()
+  @Transform(({ value }) => String(value ?? '').trim())
   @IsString()
+  @Matches(/^\d{9,11}$/, { message: 'Phone must be 9–11 digits' })
   phone?: string;
 
   // Thêm provider để lưu lại nguồn đăng nhập (VD: google, github)

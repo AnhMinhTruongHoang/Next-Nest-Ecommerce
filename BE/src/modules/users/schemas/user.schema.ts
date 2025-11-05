@@ -18,8 +18,8 @@ export class User {
   @Prop()
   age: number;
 
-  @Prop()
-  phone: number;
+  @Prop({ trim: true })
+  phone: string;
 
   @Prop()
   gender: string;

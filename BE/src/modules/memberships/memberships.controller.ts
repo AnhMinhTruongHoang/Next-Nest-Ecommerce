@@ -26,40 +26,29 @@ export class MembershipsController {
 
   @Post()
   @ResponseMessage('Create new membership')
-  async create(
-    @Body() createMembershipDto: CreateMembershipDto,
-    @Users() user: IUser,
-  ) {
-    const newMembership = await this.membershipsService.create(
-      createMembershipDto,
-      user,
-    );
-    return {
-      _id: newMembership._id,
-      createdAt: newMembership.createdAt,
-      createdBy: newMembership.createdBy,
-    };
-  }
-  @Get('user/:userId')
-  @ResponseMessage('Fetch current membership tier of user')
-  getUserTier(@Param('userId') userId: string) {
-    return this.membershipsService.getTierByUser(userId);
+  create(@Body() dto: CreateMembershipDto, @Users() user: IUser) {
+    return this.membershipsService.create(dto, user);
   }
 
-  @Post('preview')
-  @ResponseMessage('Preview membership tier by total spent')
-  preview(@Body() body: PreviewTierDto) {
-    return this.membershipsService.previewTier(body.totalSpent);
+  @Public()
+  @Get('preview')
+  @ResponseMessage('Preview tier by totalSpent')
+  preview(@Query('t') t: string) {
+    const totalSpent = Number(t || 0);
+    return this.membershipsService.previewTier(totalSpent);
   }
 
   @Get()
   @ResponseMessage('Fetch memberships with paginate')
-  findAll(
-    @Query('current') currentPage: string,
-    @Query('pageSize') limit: string,
-    @Query() qs: string,
-  ) {
+  findAll() {
     return this.membershipsService.findAll();
+  }
+
+  @Public()
+  @Get('user/:userId')
+  @ResponseMessage('Get tier of user')
+  getTier(@Param('userId') userId: string) {
+    return this.membershipsService.getTierByUser(userId);
   }
 
   @Public()
@@ -71,17 +60,13 @@ export class MembershipsController {
 
   @Patch(':id')
   @ResponseMessage('Update a membership')
-  update(
-    @Body() updateMembershipDto: UpdateMembershipDto,
-    @Users() user: IUser,
-    @Param('id') id: string,
-  ) {
-    return this.membershipsService.update(id, updateMembershipDto);
+  update(@Param('id') id: string, @Body() dto: UpdateMembershipDto) {
+    return this.membershipsService.update(id, dto);
   }
 
   @Delete(':id')
   @ResponseMessage('Delete a membership')
-  remove(@Param('id') id: string, @Users() user: IUser) {
+  remove(@Param('id') id: string) {
     return this.membershipsService.remove(id);
   }
 }
