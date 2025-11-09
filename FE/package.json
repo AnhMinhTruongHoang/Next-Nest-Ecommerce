@@ -38,6 +38,7 @@
     "react-slick": "0.30.3",
     "react-spinners": "^0.17.0",
     "react-tooltip": "^5.30.0",
+    "react-twitter-embed": "^4.0.4",
     "sass": "^1.93.2",
     "sharp": "^0.34.2",
     "slick-carousel": "1.8.1",

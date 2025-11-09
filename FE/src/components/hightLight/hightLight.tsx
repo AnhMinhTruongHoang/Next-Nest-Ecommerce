@@ -2,11 +2,11 @@
 
 import { Card, Button } from "antd";
 import Image from "next/image";
+import Link from "next/link";
 
 const Highlight = () => {
   return (
     <div className="highlight-wrapper">
-      {/* Card 1 */}
       <Card
         hoverable
         className="highlight-card"
@@ -16,20 +16,23 @@ const Highlight = () => {
               alt="Men Wear"
               src="/images/cards/MonesyE.jpg"
               fill
+              sizes="(max-width: 1024px) 90vw, 880px"
               className="highlight-img"
-              style={{ objectFit: "inherit" }}
+              style={{ objectFit: "cover" }}
+              priority
             />
             <div className="highlight-overlay">
               <h2>m0NESY choice</h2>
-              <Button type="primary" size="large" className="highlight-btn">
-                KHÁM PHÁ
-              </Button>
+              <Link href="/emagazine/g2">
+                <Button type="primary" size="large" className="highlight-btn">
+                  KHÁM PHÁ
+                </Button>
+              </Link>
             </div>
           </div>
         }
       />
 
-      {/* Card 2 */}
       <Card
         hoverable
         className="highlight-card"
@@ -39,20 +42,23 @@ const Highlight = () => {
               alt="Women Active"
               src="/images/cards/niko.webp"
               fill
+              sizes="(max-width: 1024px) 90vw, 880px"
               className="highlight-img"
-              style={{ objectFit: "inherit" }}
+              style={{ objectFit: "cover" }}
             />
             <div className="highlight-overlay">
-              <h2> NIKO choice</h2>
-              <Button type="primary" size="large" className="highlight-btn">
-                KHÁM PHÁ
-              </Button>
+              <h2>NIKO choice</h2>
+
+              <Link href="/emagazine/falcon">
+                <Button type="primary" size="large" className="highlight-btn">
+                  KHÁM PHÁ
+                </Button>
+              </Link>
             </div>
           </div>
         }
       />
 
-      {/* CSS */}
       <style jsx global>{`
         .highlight-wrapper {
           display: flex;
@@ -82,7 +88,6 @@ const Highlight = () => {
         .highlight-img {
           transition: transform 0.6s ease;
         }
-
         .highlight-card:hover .highlight-img {
           transform: scale(1.05);
         }
@@ -118,11 +123,9 @@ const Highlight = () => {
             width: 90%;
             height: 480px;
           }
-
           .highlight-cover {
             height: 480px;
           }
-
           .highlight-overlay h2 {
             font-size: 28px;
           }
@@ -134,20 +137,16 @@ const Highlight = () => {
             width: 100%;
             height: 360px;
           }
-
           .highlight-cover {
             height: 360px;
           }
-
           .highlight-overlay {
             padding: 20px;
           }
-
           .highlight-overlay h2 {
             font-size: 22px;
             margin-bottom: 8px;
           }
-
           .highlight-btn {
             height: 38px;
             font-size: 14px;

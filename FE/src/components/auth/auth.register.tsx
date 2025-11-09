@@ -259,15 +259,21 @@ export default function AuthSignUp() {
             <Form.Item name="agree" valuePropName="checked" noStyle>
               <Checkbox>
                 Tôi đồng ý với{" "}
-                <a onClick={() => setIsModalOpen(true)}>
-                  <a href="#" onClick={(e) => e.preventDefault()}>
-                    Điều khoản dịch vụ
-                  </a>{" "}
-                  &{" "}
-                  <a href="#" onClick={(e) => e.preventDefault()}>
-                    Chính sách bảo mật
-                  </a>
-                </a>
+                <Button
+                  type="link"
+                  onClick={() => setIsModalOpen(true)}
+                  style={{ padding: 0 }}
+                >
+                  Điều khoản dịch vụ
+                </Button>{" "}
+                &{" "}
+                <Button
+                  type="link"
+                  onClick={() => setIsModalOpen(true)}
+                  style={{ padding: 0 }}
+                >
+                  Chính sách bảo mật
+                </Button>
               </Checkbox>
             </Form.Item>
           </div>

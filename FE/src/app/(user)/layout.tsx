@@ -4,8 +4,7 @@ import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Layout, App as AntdApp, ConfigProvider } from "antd";
 import NProgress from "nprogress";
-import "nprogress/nprogress.css"; // nhớ có file css
-
+import "nprogress/nprogress.css";
 import AppHeader from "@/components/header/app.header";
 import AppFooter from "@/components/footer/app.footer";
 import { AppProvider } from "@/components/context/app.context";
@@ -37,7 +36,6 @@ export default function UnifiedLayout({
             </Header>
 
             <Content style={{ flex: 1, padding: 0, margin: 0 }}>
-              {/* children có thể dùng App.useApp() vì đang nằm trong <AntdApp> */}
               <main className="p-4">{children}</main>
             </Content>
 

@@ -35,7 +35,6 @@ const ProductsGrid = () => {
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [itemsPerSlide, setItemsPerSlide] = useState<number>(5);
 
-  // responsive
   useEffect(() => {
     const updateItemsPerSlide = () => {
       const w = window.innerWidth;

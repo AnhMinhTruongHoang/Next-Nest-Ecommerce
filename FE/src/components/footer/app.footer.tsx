@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { Layout, Typography, Row, Col, Space, Divider, Grid } from "antd";
 import {
   FacebookFilled,
@@ -17,18 +18,24 @@ const AppFooter = () => {
   const screens = useBreakpoint();
   const isMobile = !screens.md;
 
-  const aboutLinks = ["Về chúng tôi", "Tuyển dụng", "Blog", "Liên hệ"];
+  // Cấu hình mục lục & route nội bộ
+  const aboutLinks = [
+    { label: "Về chúng tôi", href: "/about" },
+    { label: "Hành trình", href: "/about#story" },
+    { label: "Đội ngũ", href: "/about#team" },
+    { label: "Giá trị cốt lõi", href: "/about#values" },
+  ];
   const supportLinks = [
-    "Trung tâm trợ giúp",
-    "Hướng dẫn mua hàng",
-    "Vận chuyển",
-    "Đổi trả & Hoàn tiền",
+    { label: "Trung tâm trợ giúp", href: "/support#help-center" },
+    { label: "Hướng dẫn mua hàng", href: "/support#how-to-buy" },
+    { label: "Vận chuyển", href: "/support#shipping" },
+    { label: "Đổi trả & Hoàn tiền", href: "/support#returns" },
   ];
   const policyLinks = [
-    "Chính sách bảo mật",
-    "Điều khoản dịch vụ",
-    "Bảo vệ người tiêu dùng",
-    "Chính sách bảo hành",
+    { label: "Chính sách bảo mật", href: "/policies#privacy" },
+    { label: "Điều khoản dịch vụ", href: "/policies#terms" },
+    { label: "Bảo vệ người tiêu dùng", href: "/policies#consumer" },
+    { label: "Chính sách bảo hành", href: "/policies#warranty" },
   ];
 
   const linkStyle: React.CSSProperties = {
@@ -52,6 +59,7 @@ const AppFooter = () => {
     fontSize: iconSize,
     color: "#fff",
     cursor: "pointer",
+    transition: "opacity .2s ease",
   };
 
   return (
@@ -64,6 +72,15 @@ const AppFooter = () => {
         marginTop: "auto",
       }}
     >
+      <style jsx global>{`
+        .footer-link:hover {
+          color: #fff !important;
+        }
+        .footer-social:hover {
+          opacity: 0.8;
+        }
+      `}</style>
+
       <Row
         gutter={[isMobile ? 12 : 32, isMobile ? 12 : 32]}
         justify={isMobile ? "start" : "center"}
@@ -75,10 +92,15 @@ const AppFooter = () => {
             VỀ CHÚNG TÔI
           </Typography.Title>
           <nav aria-label="About">
-            {aboutLinks.map((link, idx) => (
-              <a key={idx} href="#" style={linkStyle}>
-                {link}
-              </a>
+            {aboutLinks.map((l, idx) => (
+              <Link
+                key={idx}
+                href={l.href}
+                className="footer-link"
+                style={linkStyle}
+              >
+                {l.label}
+              </Link>
             ))}
           </nav>
         </Col>
@@ -89,10 +111,15 @@ const AppFooter = () => {
             HỖ TRỢ
           </Typography.Title>
           <nav aria-label="Support">
-            {supportLinks.map((link, idx) => (
-              <a key={idx} href="#" style={linkStyle}>
-                {link}
-              </a>
+            {supportLinks.map((l, idx) => (
+              <Link
+                key={idx}
+                href={l.href}
+                className="footer-link"
+                style={linkStyle}
+              >
+                {l.label}
+              </Link>
             ))}
           </nav>
         </Col>
@@ -103,38 +130,68 @@ const AppFooter = () => {
             CHÍNH SÁCH
           </Typography.Title>
           <nav aria-label="Policies">
-            {policyLinks.map((link, idx) => (
-              <a key={idx} href="#" style={linkStyle}>
-                {link}
-              </a>
+            {policyLinks.map((l, idx) => (
+              <Link
+                key={idx}
+                href={l.href}
+                className="footer-link"
+                style={linkStyle}
+              >
+                {l.label}
+              </Link>
             ))}
           </nav>
         </Col>
 
         {/* CONNECT & CONTACT */}
-        <Col
-          xs={24}
-          sm={12}
-          md={6}
-          style={{ textAlign: isMobile ? "left" : "left" }}
-        >
+        <Col xs={24} sm={12} md={6} style={{ textAlign: "left" }}>
           <Typography.Title level={5} style={sectionTitleStyle}>
             KẾT NỐI VỚI CHÚNG TÔI
           </Typography.Title>
           <Space size={isMobile ? 12 : "middle"} wrap>
-            <a aria-label="Facebook" href="#">
+            <a
+              aria-label="Facebook"
+              href="https://www.facebook.com/?locale=vi_VN"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer-social"
+            >
               <FacebookFilled style={iconStyle} />
             </a>
-            <a aria-label="Twitter" href="#">
+            <a
+              aria-label="X (Twitter)"
+              href="https://x.com/home"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer-social"
+            >
               <TwitterSquareFilled style={iconStyle} />
             </a>
-            <a aria-label="Google" href="#">
+            <a
+              aria-label="Gmail"
+              href="https://mail.google.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer-social"
+            >
               <GoogleSquareFilled style={iconStyle} />
             </a>
-            <a aria-label="Instagram" href="#">
+            <a
+              aria-label="Instagram"
+              href="https://www.instagram.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer-social"
+            >
               <InstagramFilled style={iconStyle} />
             </a>
-            <a aria-label="LinkedIn" href="#">
+            <a
+              aria-label="LinkedIn"
+              href="https://www.linkedin.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer-social"
+            >
               <LinkedinFilled style={iconStyle} />
             </a>
           </Space>

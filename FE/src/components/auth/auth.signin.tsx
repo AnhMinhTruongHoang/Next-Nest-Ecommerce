@@ -148,7 +148,7 @@ export default function AuthSignIn() {
           <Title level={3} style={{ margin: 0 }}>
             Đăng nhập
           </Title>
-          <Text type="secondary">Chào mừng bạn quay lại 👋</Text>
+          <Text type="secondary">GamerZone</Text>
         </div>
 
         {/* Error inline */}
