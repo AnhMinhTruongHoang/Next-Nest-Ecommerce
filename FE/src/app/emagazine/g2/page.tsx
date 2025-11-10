@@ -1,13 +1,23 @@
 "use client";
+import { Button, Modal } from "antd";
+import { PlayCircleOutlined } from "@ant-design/icons";
 import Image from "next/image";
+import { useRef, useState } from "react";
+import Link from "next/link";
 
 const HEADER_H = 80;
 
 export default function Page() {
   const sections = [
     "/images/inforgrafic/Section1.png",
-    "/images/inforgrafic/Section2.jpg",
+    "/images/inforgrafic/Section2.png",
+    "/images/inforgrafic/Section3.png",
+    "/images/inforgrafic/Section4.png",
   ];
+  const [loaded, setLoaded] = useState<boolean[]>(
+    Array(sections.length).fill(false)
+  );
+  const [open, setOpen] = useState(false);
 
   return (
     <div className="wrapper">
@@ -17,17 +27,77 @@ export default function Page() {
           className="section"
           style={{ minHeight: `calc(100vh - ${HEADER_H}px)` }}
         >
-          {/* Ảnh nền */}
+          {!loaded[i] && <div className="skeleton" />}
           <Image
             src={src}
             alt={`Section ${i + 1}`}
             fill
             sizes="100vw"
-            className={`img ${i === 1 ? "contain" : "cover"}`}
             priority={i === 0}
+            loading={i === 0 ? "eager" : "lazy"}
+            decoding="async"
+            fetchPriority={i === 0 ? "high" : "auto"}
+            quality={85}
+            className={`img ${i === 1 ? "contain" : "cover"} ${
+              loaded[i] ? "is-loaded" : ""
+            }`}
+            onLoadingComplete={() =>
+              setLoaded((arr) => {
+                const next = [...arr];
+                next[i] = true;
+                return next;
+              })
+            }
           />
         </section>
       ))}
+
+      <section className="cta">
+        <div className="cta__inner">
+          <h2 className="cta__title">CHƠI CHO NGÀY MAI</h2>
+          <p className="cta__desc">
+            Hãy giúp chúng tôi đảm bảo các thế hệ tương lai có thể TIẾP TỤC CHƠI
+            nữa. Chúng tôi tự hào thiết kế sản phẩm của mình theo hướng bền
+            vững, mang đến cho bạn những đột phá mới nhất mà không bao giờ ảnh
+            hưởng đến chất lượng hoặc hiệu suất.
+          </p>
+
+          <div className="cta__actions">
+            <Link href={"/productsList?brand=Logitech&sort=-sold"}>
+              <Button type="primary" size="large" className="btnPrimary">
+                TÌM HIỂU THÊM
+              </Button>
+            </Link>
+
+            <Button
+              size="large"
+              className="btnGhost"
+              icon={<PlayCircleOutlined className="btnIcon" />}
+              onClick={() => setOpen(true)}
+            >
+              XEM PHIM
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      <Modal
+        open={open}
+        footer={null}
+        centered
+        onCancel={() => setOpen(false)}
+        width={900}
+        style={{ padding: 0, background: "#000" }}
+      >
+        <video
+          autoPlay
+          controls
+          playsInline
+          style={{ width: "100%", display: "block" }}
+        >
+          <source src="/audio/LogitechPlay.mp4" type="video/mp4" />
+        </video>
+      </Modal>
 
       <style jsx>{`
         .wrapper {
@@ -39,7 +109,6 @@ export default function Page() {
           background: #000;
           scroll-snap-type: y mandatory;
         }
-
         .section {
           position: relative;
           width: 100vw;
@@ -47,43 +116,127 @@ export default function Page() {
           isolation: isolate;
           scroll-snap-align: start;
         }
-
+        .skeleton {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+              90deg,
+              rgba(255, 255, 255, 0.06) 25%,
+              rgba(255, 255, 255, 0.12) 37%,
+              rgba(255, 255, 255, 0.06) 63%
+            ),
+            #111;
+          background-size: 400% 100%;
+          animation: shimmer 1.2s ease-in-out infinite;
+          z-index: 0;
+        }
+        @keyframes shimmer {
+          0% {
+            background-position: -200% 0;
+          }
+          100% {
+            background-position: 200% 0;
+          }
+        }
         .img {
           position: absolute !important;
           inset: 0;
           width: 100%;
           height: 100%;
-          z-index: 0;
+          opacity: 0;
+          transition: opacity 500ms ease;
+          z-index: 1;
           pointer-events: none;
+          background: #000;
         }
-
+        .img.is-loaded {
+          opacity: 1;
+        }
         .img.cover {
           object-fit: cover;
         }
-
         .img.contain {
           object-fit: contain;
-          background: #000; /* tránh vùng trắng khi contain */
         }
 
-        /* ✅ Center video theo flexbox */
-        .overlay-center {
-          position: absolute;
-          inset: 0;
-          z-index: 10;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          pointer-events: none; /* không chặn scroll */
-        }
-
-        .player {
-          pointer-events: auto;
-          width: min(720px, 90vw);
-          max-height: 60vh;
-          border-radius: 12px;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        /* ===== CTA styles (giống ảnh) ===== */
+        .cta {
           background: #000;
+          color: #fff;
+          padding: 80px 16px 120px;
+          display: flex;
+          justify-content: center;
+        }
+        .cta__inner {
+          max-width: 880px;
+          text-align: center;
+        }
+        .cta__title {
+          font-size: 44px;
+          line-height: 1.1;
+          font-weight: 800;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+          margin: 0 0 20px;
+        }
+        .cta__desc {
+          max-width: 760px;
+          margin: 0 auto 28px;
+          color: #bfeaff; /* xanh nhạt nhẹ giống ảnh */
+          font-size: 16px;
+          line-height: 1.6;
+        }
+        .cta__actions {
+          display: inline-flex;
+          gap: 16px;
+          margin-top: 8px;
+        }
+
+        /* Nút primary */
+        :global(.btnPrimary) {
+          height: 44px;
+          padding: 0 22px;
+          font-weight: 700;
+          border-radius: 8px;
+          background: #00c2ff;
+          border: none;
+        }
+        :global(.btnPrimary:hover) {
+          background: #22d0ff !important;
+        }
+
+        /* Nút viền (outline) có icon */
+        :global(.btnGhost) {
+          height: 44px;
+          padding: 0 22px;
+          font-weight: 700;
+          border-radius: 8px;
+          background: transparent;
+          border: 2px solid #00c2ff;
+          color: #00c2ff;
+        }
+        :global(.btnGhost:hover) {
+          border-color: #22d0ff !important;
+          color: #22d0ff !important;
+        }
+        :global(.btnIcon) {
+          font-size: 18px;
+          margin-right: 6px;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+          .cta__title {
+            font-size: 32px;
+          }
+          .cta__actions {
+            flex-direction: column;
+            width: 100%;
+          }
+          :global(.btnPrimary),
+          :global(.btnGhost) {
+            width: 100%;
+          }
         }
       `}</style>
     </div>
