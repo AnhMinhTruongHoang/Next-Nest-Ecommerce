@@ -1,0 +1,96 @@
+.page {
+  background: #0f0f0f;
+  min-height: 100dvh;
+  color: #d9d9d9;
+}
+
+.article {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 40px 16px 80px;
+}
+
+.eyebrow {
+  color: #9fe870;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 12px;
+  margin: 0 0 8px;
+  text-align: center;
+}
+
+.title {
+  text-align: center;
+  color: #44d62c; /* xanh Razer */
+  font-size: clamp(26px, 4.5vw, 36px);
+  line-height: 1.2;
+  margin: 0;
+}
+
+.date {
+  text-align: center;
+  color: #9aa0a6;
+  margin-top: 6px;
+}
+
+.figure {
+  position: relative;
+  width: 100%;
+  text-align: center;
+  aspect-ratio: 16 / 9;
+  margin: 28px 0 10px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #111;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.img {
+  object-fit: cover;
+}
+
+.caption {
+  text-align: center;
+  font-style: italic;
+  color: #bdbdbd;
+  margin: 12px 8px 0;
+}
+
+/* Body text */
+.section {
+  margin-top: 32px;
+  font-size: 15.5px;
+  line-height: 1.75;
+
+  p + p {
+    margin-top: 14px;
+  }
+}
+
+.h3 {
+  color: #ffffff;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  margin: 8px 0 14px;
+  font-size: clamp(20px, 3.6vw, 28px);
+  text-align: center;
+}
+
+.quote {
+  margin: 18px 0 0;
+  padding: 14px 16px;
+  border-left: 3px solid #44d62c;
+  background: #131313;
+  border-radius: 6px;
+  color: #d7d7d7;
+  font-style: italic;
+}
+
+@media (max-width: 640px) {
+  .article {
+    padding: 24px 12px 64px;
+  }
+  .figure {
+    aspect-ratio: 4 / 3;
+  }
+}

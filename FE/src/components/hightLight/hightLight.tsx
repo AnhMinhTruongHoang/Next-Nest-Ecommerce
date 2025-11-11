@@ -12,23 +12,24 @@ const Highlight = () => {
         className="highlight-card"
         cover={
           <div className="highlight-cover">
-            <Image
-              alt="Men Wear"
-              src="/images/cards/MonesyE.jpg"
-              fill
-              sizes="(max-width: 1024px) 90vw, 880px"
-              className="highlight-img"
-              style={{ objectFit: "cover" }}
-              priority
-            />
-            <div className="highlight-overlay">
-              <h2>m0NESY choice</h2>
-              <Link href="/emagazine/g2">
+            <Link href="/emagazine/g2">
+              <Image
+                alt="Men Wear"
+                src="/images/cards/MonesyE.jpg"
+                fill
+                sizes="(max-width: 1024px) 90vw, 880px"
+                className="highlight-img"
+                style={{ objectFit: "cover" }}
+                priority
+              />
+              <div className="highlight-overlay">
+                <h2>m0NESY choice</h2>
+
                 <Button type="primary" size="large" className="highlight-btn">
                   KHÁM PHÁ
                 </Button>
-              </Link>
-            </div>
+              </div>
+            </Link>
           </div>
         }
       />
@@ -38,23 +39,23 @@ const Highlight = () => {
         className="highlight-card"
         cover={
           <div className="highlight-cover">
-            <Image
-              alt="Women Active"
-              src="/images/cards/niko.webp"
-              fill
-              sizes="(max-width: 1024px) 90vw, 880px"
-              className="highlight-img"
-              style={{ objectFit: "cover" }}
-            />
-            <div className="highlight-overlay">
-              <h2>NIKO choice</h2>
+            <Link href="/emagazine/falcon">
+              <Image
+                alt="Women Active"
+                src="/images/cards/niko.webp"
+                fill
+                sizes="(max-width: 1024px) 90vw, 880px"
+                className="highlight-img"
+                style={{ objectFit: "cover" }}
+              />
+              <div className="highlight-overlay">
+                <h2>NIKO choice</h2>
 
-              <Link href="/emagazine/falcon">
                 <Button type="primary" size="large" className="highlight-btn">
                   KHÁM PHÁ
                 </Button>
-              </Link>
-            </div>
+              </div>
+            </Link>
           </div>
         }
       />

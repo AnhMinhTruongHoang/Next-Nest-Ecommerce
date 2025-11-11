@@ -1,6 +1,7 @@
 "use client";
 
 import { Typography, Divider } from "antd";
+import styles from "@/styles/footerPage.module.scss";
 
 const SECTION_GAP = 32;
 
@@ -14,70 +15,20 @@ const toc = [
 
 export default function SupportPage() {
   return (
-    <main
-      style={{ maxWidth: 980, margin: "0 auto", padding: "24px 16px 60px" }}
-    >
-      <style jsx global>{`
-        html {
-          scroll-behavior: smooth;
-        }
-        .section {
-          scroll-margin-top: 90px;
-        }
-        .toc {
-          position: static;
-          top: 84px;
-          background: #fff;
-          border: 1px solid #eee;
-          border-radius: 10px;
-          padding: 12px;
-        }
-        @media (max-width: 768px) {
-          .toc {
-            position: static;
-            padding: 0;
-            border: none;
-          }
-          .toc details {
-            border: 1px solid #eee;
-            border-radius: 10px;
-            padding: 10px 12px;
-            background: #fff;
-          }
-          .toc summary {
-            cursor: pointer;
-            font-weight: 600;
-          }
-          .toc ul {
-            margin-top: 10px;
-          }
-        }
-        .toc a {
-          color: #1677ff;
-          text-decoration: none;
-        }
-        .toc a:hover {
-          text-decoration: underline;
-        }
-        code.block {
-          display: inline-block;
-          background: #f6f8fa;
-          padding: 6px 8px;
-          border-radius: 6px;
-          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-            "Liberation Mono", "Courier New", monospace;
-        }
-      `}</style>
-
-      <Typography.Title level={2} style={{ marginTop: 8 }}>
+    <main className={styles.container}>
+      <Typography.Title level={2} style={{ marginTop: 8, textAlign: "center" }}>
         Hỗ trợ
       </Typography.Title>
-      <Typography.Paragraph type="secondary">
+
+      <Typography.Paragraph
+        style={{ marginTop: 8, textAlign: "center" }}
+        type="secondary"
+      >
         Hướng dẫn, chính sách giao nhận, đổi trả và các kênh liên hệ khi cần trợ
         giúp.
       </Typography.Paragraph>
-
-      <aside className="toc" aria-label="Mục lục">
+    
+      <aside className={styles.toc} aria-label="Mục lục">
         <details open>
           <summary>Mục lục</summary>
           <ul style={{ listStyle: "none", paddingLeft: 0, margin: "12px 0 0" }}>
@@ -94,7 +45,7 @@ export default function SupportPage() {
 
       <section
         id="help-center"
-        className="section"
+        className={styles.section}
         style={{ marginTop: SECTION_GAP }}
       >
         <Typography.Title level={3}>Trung tâm trợ giúp</Typography.Title>
@@ -105,25 +56,25 @@ export default function SupportPage() {
 
       <section
         id="how-to-buy"
-        className="section"
+        className={styles.section}
         style={{ marginTop: SECTION_GAP }}
       >
         <Typography.Title level={3}>Hướng dẫn mua hàng</Typography.Title>
         <ol>
-          <li>Chọn sản phẩm &rarr; Thêm vào giỏ</li>
+          <li>Chọn sản phẩm → Thêm vào giỏ</li>
           <li>Điền thông tin nhận hàng</li>
           <li>Chọn phương thức thanh toán</li>
           <li>Xác nhận đơn</li>
         </ol>
         <Typography.Paragraph>
           Mẹo: dùng ô tìm kiếm ở header, hoặc lọc theo{" "}
-          <code className="block">Danh mục / Khoảng giá</code>.
+          <code className={styles.codeBlock}>Danh mục / Khoảng giá</code>.
         </Typography.Paragraph>
       </section>
 
       <section
         id="shipping"
-        className="section"
+        className={styles.section}
         style={{ marginTop: SECTION_GAP }}
       >
         <Typography.Title level={3}>Vận chuyển</Typography.Title>
@@ -136,7 +87,7 @@ export default function SupportPage() {
 
       <section
         id="returns"
-        className="section"
+        className={styles.section}
         style={{ marginTop: SECTION_GAP }}
       >
         <Typography.Title level={3}>Đổi trả & Hoàn tiền</Typography.Title>
@@ -149,7 +100,7 @@ export default function SupportPage() {
 
       <section
         id="contact"
-        className="section"
+        className={styles.section}
         style={{ marginTop: SECTION_GAP }}
       >
         <Typography.Title level={3}>Liên hệ hỗ trợ</Typography.Title>

@@ -2,6 +2,7 @@
 
 import { Button } from "antd";
 import Image from "next/image";
+import Link from "next/link";
 
 const ExclusiveBanner1 = () => {
   return (
@@ -17,19 +18,21 @@ const ExclusiveBanner1 = () => {
 
       <div className="banner-overlay">
         <h2 className="razer-text fade-in">Razer Exclusive</h2>
-        <Button
-          type="primary"
-          size="large"
-          className="banner-btn fade-in"
-          style={{
-            backgroundColor: "greenyellow",
-            borderColor: "#66B933",
-            color: "#000",
-            fontWeight: "bold",
-          }}
-        >
-          KHÁM PHÁ
-        </Button>
+        <Link href={"/exclusivePromo"}>
+          <Button
+            type="primary"
+            size="large"
+            className="banner-btn fade-in"
+            style={{
+              backgroundColor: "greenyellow",
+              borderColor: "#66B933",
+              color: "#000",
+              fontWeight: "bold",
+            }}
+          >
+            KHÁM PHÁ
+          </Button>
+        </Link>
       </div>
 
       <style jsx>{`

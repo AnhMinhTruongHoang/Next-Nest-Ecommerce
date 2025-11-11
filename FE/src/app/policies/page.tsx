@@ -1,8 +1,7 @@
 "use client";
 
 import { Typography, Divider, Alert } from "antd";
-
-const SECTION_GAP = 32;
+import styles from "@/styles/footerPage.module.scss";
 
 const toc = [
   { id: "privacy", label: "Chính sách bảo mật" },
@@ -13,61 +12,18 @@ const toc = [
 
 export default function PoliciesPage() {
   return (
-    <main
-      style={{ maxWidth: 980, margin: "0 auto", padding: "24px 16px 60px" }}
-    >
-      <style jsx global>{`
-        html {
-          scroll-behavior: smooth;
-        }
-        .section {
-          scroll-margin-top: 90px;
-        }
-        .toc {
-          position: static;
-          top: 84px;
-          background: #fff;
-          border: 1px solid #eee;
-          border-radius: 10px;
-          padding: 12px;
-        }
-        @media (max-width: 768px) {
-          .toc {
-            position: static;
-            padding: 0;
-            border: none;
-          }
-          .toc details {
-            border: 1px solid #eee;
-            border-radius: 10px;
-            padding: 10px 12px;
-            background: #fff;
-          }
-          .toc summary {
-            cursor: pointer;
-            font-weight: 600;
-          }
-          .toc ul {
-            margin-top: 10px;
-          }
-        }
-        .toc a {
-          color: #1677ff;
-          text-decoration: none;
-        }
-        .toc a:hover {
-          text-decoration: underline;
-        }
-      `}</style>
-
-      <Typography.Title level={2} style={{ marginTop: 8 }}>
+    <main className={styles.container}>
+      <Typography.Title level={2} style={{ marginTop: 8, textAlign: "center" }}>
         Chính sách
       </Typography.Title>
-      <Typography.Paragraph type="secondary">
+      <Typography.Paragraph
+        type="secondary"
+        style={{ marginTop: 8, textAlign: "center" }}
+      >
         Điều khoản & chính sách áp dụng cho khách hàng và đối tác.
       </Typography.Paragraph>
-
-      <aside className="toc" aria-label="Mục lục">
+      <Divider />
+      <aside className={styles.toc} aria-label="Mục lục">
         <details open>
           <summary>Mục lục</summary>
           <ul style={{ listStyle: "none", paddingLeft: 0, margin: "12px 0 0" }}>
@@ -82,11 +38,7 @@ export default function PoliciesPage() {
 
       <Divider />
 
-      <section
-        id="privacy"
-        className="section"
-        style={{ marginTop: SECTION_GAP }}
-      >
+      <section id="privacy" className={`${styles.section} ${styles.mt32}`}>
         <Typography.Title level={3}>Chính sách bảo mật</Typography.Title>
         <Typography.Paragraph>
           Chúng tôi chỉ thu thập dữ liệu tối thiểu phục vụ xử lý đơn hàng, bảo
@@ -95,11 +47,7 @@ export default function PoliciesPage() {
         </Typography.Paragraph>
       </section>
 
-      <section
-        id="terms"
-        className="section"
-        style={{ marginTop: SECTION_GAP }}
-      >
+      <section id="terms" className={`${styles.section} ${styles.mt32}`}>
         <Typography.Title level={3}>Điều khoản dịch vụ</Typography.Title>
         <ul>
           <li>Không lạm dụng hệ thống để trục lợi khuyến mãi.</li>
@@ -108,11 +56,7 @@ export default function PoliciesPage() {
         </ul>
       </section>
 
-      <section
-        id="consumer"
-        className="section"
-        style={{ marginTop: SECTION_GAP }}
-      >
+      <section id="consumer" className={`${styles.section} ${styles.mt32}`}>
         <Typography.Title level={3}>Bảo vệ người tiêu dùng</Typography.Title>
         <Alert
           type="info"
@@ -122,11 +66,8 @@ export default function PoliciesPage() {
         />
       </section>
 
-      <section
-        id="warranty"
-        className="section"
-        style={{ marginTop: SECTION_GAP }}
-      >
+      <section id="warranty" className={`${styles.section} ${styles.mt32}`}>
+        <br />
         <Typography.Title level={3}>Chính sách bảo hành</Typography.Title>
         <ul>
           <li>Bảo hành theo tiêu chuẩn của hãng (tem/phiếu/serial hợp lệ).</li>
