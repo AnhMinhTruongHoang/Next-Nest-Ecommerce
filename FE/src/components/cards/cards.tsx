@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "antd";
 import Image from "next/image";
-import { ProductOutlined, FullscreenOutlined } from "@ant-design/icons";
+import { ProductOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import "antd/dist/reset.css";
@@ -61,12 +61,6 @@ const Cards = () => {
   const router = useRouter();
   const [showHover, setShowHover] = useState(false);
   const [catMapByName, setCatMapByName] = useState<Record<string, string>>({});
-  const itemRefs = useRef<Record<number, HTMLDivElement | null>>({});
-
-  // set ref từng card để fullscreen
-  const setItemRef = (id: number) => (node: HTMLDivElement | null) => {
-    itemRefs.current[id] = node;
-  };
 
   useEffect(() => {
     const cached = localStorage.getItem("catMapByName");
@@ -88,43 +82,12 @@ const Cards = () => {
   const goCategory = (key: CardList["key"]) => {
     const catName = CATEGORY_NAME_FROM_KEY[key];
     const sp = new URLSearchParams();
+
     const id = catMapByName[catName.toLowerCase()];
     if (id) sp.set("category", id);
     else sp.set("categoryName", catName);
     sp.set("sort", "-sold");
     router.push(`/productsList?${sp.toString()}`);
-  };
-
-  // Fullscreen toggle
-  const toggleFullscreen = async (id: number) => {
-    const el = itemRefs.current[id];
-    if (!el) return;
-
-    const isFs =
-      document.fullscreenElement ||
-      (document as any).webkitFullscreenElement ||
-      (document as any).mozFullScreenElement ||
-      (document as any).msFullscreenElement;
-
-    try {
-      if (!isFs) {
-        await (
-          el.requestFullscreen ||
-          (el as any).webkitRequestFullscreen ||
-          (el as any).mozRequestFullScreen ||
-          (el as any).msRequestFullscreen
-        )?.call(el);
-      } else {
-        await (
-          document.exitFullscreen ||
-          (document as any).webkitExitFullscreen ||
-          (document as any).mozCancelFullScreen ||
-          (document as any).msExitFullscreen
-        )?.call(document);
-      }
-    } catch (e) {
-      console.error("Fullscreen error:", e);
-    }
   };
 
   return (
@@ -180,16 +143,19 @@ const Cards = () => {
             <Card
               hoverable
               className="card-item"
+              onClick={() => goCategory(card.key)}
               style={{ cursor: "pointer" }}
               cover={
-                <div ref={setItemRef(card.id)} className="image-wrapper">
+                <div className="image-wrapper">
                   <Image
                     alt={card.title}
                     src={card.image}
                     fill
                     sizes="(max-width: 768px) 100vw, 340px"
                     className={`main-img ${showHover ? "active" : ""}`}
+                    priority={false}
                   />
+
                   {card.hoverImage && (
                     <Image
                       alt={`${card.title} hover`}
@@ -197,23 +163,10 @@ const Cards = () => {
                       fill
                       sizes="(max-width: 768px) 100vw, 340px"
                       className={`hover-img ${showHover ? "active" : ""}`}
+                      priority={false}
                     />
                   )}
-
-                  {/* Fullscreen Button */}
-                  <button
-                    className="fs-btn"
-                    aria-label="Xem toàn màn hình"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleFullscreen(card.id);
-                    }}
-                  >
-                    <FullscreenOutlined />
-                  </button>
-
-                  {/* Overlay Title */}
-                  <div className="overlay" onClick={() => goCategory(card.key)}>
+                  <div className="overlay">
                     <span className="title">{card.title}</span>
                   </div>
                 </div>
@@ -222,7 +175,6 @@ const Cards = () => {
           </div>
         ))}
 
-        {/* CSS */}
         <style jsx>{`
           .cards-grid {
             display: grid;
@@ -246,7 +198,6 @@ const Cards = () => {
             height: 100%;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
           }
-
           :global(.ant-card-hoverable.card-item:hover) {
             transform: translateY(-5px);
             box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
@@ -257,7 +208,6 @@ const Cards = () => {
             width: 100%;
             padding-top: 133%;
             overflow: hidden;
-            background: #000;
           }
 
           .main-img,
@@ -275,21 +225,21 @@ const Cards = () => {
             z-index: 1;
           }
 
+          /* Hover bằng chuột */
           .image-wrapper:hover .main-img {
             transform: scale(1.08);
             opacity: 0;
           }
-
           .image-wrapper:hover .hover-img {
             opacity: 1;
             transform: scale(1.05);
           }
 
+          /* Auto play toàn bộ card */
           .main-img.active {
             opacity: 0;
             transform: scale(1.08);
           }
-
           .hover-img.active {
             opacity: 1;
             transform: scale(1.05);
@@ -318,37 +268,9 @@ const Cards = () => {
             text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
           }
 
-          .fs-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 3;
-            width: 36px;
-            height: 36px;
-            border: 1px solid rgba(255, 255, 255, 0.35);
-            border-radius: 999px;
-            background: rgba(0, 0, 0, 0.45);
-            color: #fff;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(6px);
-            cursor: pointer;
-            transition: transform 0.2s ease, background 0.2s ease;
-          }
-
-          .fs-btn:hover {
-            transform: scale(1.06);
-            background: rgba(0, 0, 0, 0.65);
-          }
-
           @media (max-width: 768px) {
             .title {
               font-size: 14px;
-            }
-            .fs-btn {
-              width: 32px;
-              height: 32px;
             }
           }
         `}</style>

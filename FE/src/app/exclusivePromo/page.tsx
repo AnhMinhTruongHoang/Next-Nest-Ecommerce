@@ -61,7 +61,10 @@ export default function ExclusivePage() {
         </section>
 
         <section className={styles.section}>
-          <h3 className={styles.h3}>Cut Through The Chaos</h3>
+          <h3 className={styles.h3}>
+            <span style={{ color: "coral" }}> Zenless Zone Zero </span>X
+            <span style={{ color: "#44d62c" }}> Razer</span>
+          </h3>
           <p>
             Bộ sưu tập gồm <strong>Razer Iskur V2 X</strong>,{" "}
             <strong>Razer BlackWidow V4 X</strong>, <strong>Razer Cobra</strong>{" "}

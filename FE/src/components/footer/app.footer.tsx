@@ -232,7 +232,7 @@ const AppFooter = () => {
           color: "#aaa",
         }}
       >
-        © 2025 Bản quyền thuộc về M1nh
+        ©2025 GamerZone
       </div>
     </Footer>
   );

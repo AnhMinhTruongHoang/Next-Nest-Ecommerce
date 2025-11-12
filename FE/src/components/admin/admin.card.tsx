@@ -1,8 +1,7 @@
 "use client";
 
 import { RegionLabels } from "../DashBoard/map/label";
-import { WeeksProfit } from "../DashBoard/Profit/Profit.week";
-import { PaymentsOverview } from "../DashBoard/payments-overview/payment.overView";
+import { PaymentsOverview } from "../DashBoard/payments-overview/payment.OverView";
 import OVCard from "../DashBoard/overview/ov.card";
 
 interface AdminCardProps {
@@ -21,22 +20,14 @@ export default function AdminCard({ searchParams }: AdminCardProps) {
         gap: "16px",
       }}
     >
-      {/* TỔNG QUAN */}
       <div style={{ gridColumn: "span 12 / span 12" }}>
         <OVCard />
       </div>
 
-      {/* TỔNG QUAN THANH TOÁN */}
       <div style={{ gridColumn: "span 12 / span 12" }}>
         <PaymentsOverview timeFrame="monthly" />
       </div>
 
-      {/* LỢI NHUẬN THEO TUẦN */}
-      <div style={{ gridColumn: "span 12 / span 12" }}>
-        <WeeksProfit timeFrame="this week" />
-      </div>
-
-      {/* BẢN ĐỒ KHU VỰC */}
       <div
         style={{
           gridColumn: "span 12 / span 12",

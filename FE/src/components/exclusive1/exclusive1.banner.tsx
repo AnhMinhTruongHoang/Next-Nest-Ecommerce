@@ -15,10 +15,10 @@ const ExclusiveBanner1 = () => {
         style={{ objectFit: "inherit", objectPosition: "left center" }}
         sizes="100vw"
       />
+      <Link href={"/exclusivePromo"}>
+        <div className="banner-overlay">
+          <h2 className="razer-text fade-in">Razer Exclusive</h2>
 
-      <div className="banner-overlay">
-        <h2 className="razer-text fade-in">Razer Exclusive</h2>
-        <Link href={"/exclusivePromo"}>
           <Button
             type="primary"
             size="large"
@@ -32,8 +32,8 @@ const ExclusiveBanner1 = () => {
           >
             KHÁM PHÁ
           </Button>
-        </Link>
-      </div>
+        </div>
+      </Link>
 
       <style jsx>{`
         /* Banner container */
