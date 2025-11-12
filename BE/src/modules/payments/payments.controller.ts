@@ -21,6 +21,15 @@ export class PaymentsController {
     return this.paymentsService.create(orderId, dto.method);
   }
 
+  @Get('overview')
+  async getOverview(
+    @Query('timeFrame') timeFrame: 'monthly' | 'yearly' = 'monthly',
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ) {
+    return this.paymentsService.getOverview({ timeFrame, from, to });
+  }
+
   @Get()
   findAll() {
     return this.paymentsService.findAll();
@@ -34,14 +43,5 @@ export class PaymentsController {
   @Patch(':id')
   updateStatus(@Param('id') id: string, @Body() dto: UpdatePaymentDto) {
     return this.paymentsService.updateStatus(id, dto.status);
-  }
-
-  @Get('overview')
-  async getOverview(
-    @Query('timeFrame') timeFrame: 'monthly' | 'yearly' = 'monthly',
-    @Query('from') from?: string,
-    @Query('to') to?: string,
-  ) {
-    return this.paymentsService.getOverview({ timeFrame, from, to });
   }
 }
