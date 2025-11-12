@@ -16,7 +16,6 @@ import type { ColumnsType } from "antd/es/table";
 import type { TablePaginationConfig } from "antd/es/table/interface";
 import { ReloadOutlined, SearchOutlined, StarFilled } from "@ant-design/icons";
 
-// ===== Kiểu dữ liệu =====
 interface IUserRef {
   _id: string;
   email: string;

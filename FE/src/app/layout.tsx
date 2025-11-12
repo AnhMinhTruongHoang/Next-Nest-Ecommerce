@@ -6,6 +6,7 @@ import NProgressWrapper from "@/lib/nprogress.wrapper";
 import { ToastProvider } from "@/utils/toast";
 import { App } from "antd";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
+import InternalChatBot from "@/components/contacts/InternalChatBot";
 
 export const metadata = {
   title: "Gamer Zone",
@@ -26,6 +27,7 @@ export default function RootLayout({
               <ToastProvider>
                 <NProgressWrapper>
                   <App>{children}</App>
+                  <InternalChatBot />
                 </NProgressWrapper>
               </ToastProvider>
             </NextAuthWrapper>

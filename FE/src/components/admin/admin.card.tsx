@@ -12,31 +12,64 @@ export default function AdminCard({ searchParams }: AdminCardProps) {
   console.log("searchParams:", searchParams);
 
   return (
-    <div
-      style={{
-        marginTop: "16px",
-        display: "grid",
-        gridTemplateColumns: "repeat(12, minmax(0, 1fr))",
-        gap: "16px",
-      }}
-    >
-      <div style={{ gridColumn: "span 12 / span 12" }}>
+    <div className="wrapper">
+      <div className="block">
         <OVCard />
       </div>
 
-      <div style={{ gridColumn: "span 12 / span 12" }}>
+      <div className="block">
         <PaymentsOverview timeFrame="monthly" />
       </div>
 
-      <div
-        style={{
-          gridColumn: "span 12 / span 12",
-          textAlign: "center",
-          marginTop: "15px",
-        }}
-      >
+      <div className="block center">
         <RegionLabels />
       </div>
+
+      <style jsx>{`
+        .wrapper {
+          margin-top: 16px;
+          display: grid;
+          grid-template-columns: 1fr; /* mobile-first: 1 cột */
+          gap: 12px; /* gap nhỏ trên mobile */
+        }
+
+        .block {
+          grid-column: 1 / -1; /* full width */
+        }
+
+        .center {
+          text-align: center;
+          margin-top: 12px;
+        }
+
+        /* ≥768px (md): 6 cột */
+        @media (min-width: 768px) {
+          .wrapper {
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 16px;
+          }
+          .block {
+            grid-column: 1 / -1; /* vẫn full width, dễ đổi sau này */
+          }
+          .center {
+            margin-top: 14px;
+          }
+        }
+
+        /* ≥1024px (lg): 12 cột */
+        @media (min-width: 1024px) {
+          .wrapper {
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+            gap: 16px;
+          }
+          .block {
+            grid-column: span 12;
+          }
+          .center {
+            margin-top: 15px;
+          }
+        }
+      `}</style>
     </div>
   );
 }

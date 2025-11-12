@@ -70,8 +70,8 @@ const OVCard = () => {
     <Spin spinning={loading} size={isMobile ? "small" : "default"}>
       <Row
         gutter={[
-          { xs: 12, sm: 16, md: 24, lg: 32 }, // horizontal
-          { xs: 12, sm: 16, md: 24, lg: 32 }, // vertical
+          { xs: 12, sm: 16, md: 24, lg: 32 },
+          { xs: 12, sm: 16, md: 24, lg: 32 },
         ]}
         wrap
       >
@@ -79,14 +79,12 @@ const OVCard = () => {
           <Card
             variant="borderless"
             size={isMobile ? "small" : "default"}
-            bodyStyle={{
+            style={{
               padding: isMobile ? 12 : 20,
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
               minHeight: isMobile ? 96 : 120,
-            }}
-            style={{
               textAlign: "center",
               height: "100%",
               boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
@@ -106,14 +104,12 @@ const OVCard = () => {
           <Card
             variant="borderless"
             size={isMobile ? "small" : "default"}
-            bodyStyle={{
+            style={{
               padding: isMobile ? 12 : 20,
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
               minHeight: isMobile ? 96 : 120,
-            }}
-            style={{
               textAlign: "center",
               height: "100%",
               boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
@@ -133,14 +129,12 @@ const OVCard = () => {
           <Card
             variant="borderless"
             size={isMobile ? "small" : "default"}
-            bodyStyle={{
+            style={{
               padding: isMobile ? 12 : 20,
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
               minHeight: isMobile ? 96 : 120,
-            }}
-            style={{
               textAlign: "center",
               height: "100%",
               boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
