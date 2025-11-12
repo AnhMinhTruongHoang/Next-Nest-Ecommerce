@@ -8,15 +8,15 @@ import {
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User as UserM, UserDocument } from './schemas/user.schema';
-import mongoose, { Model } from 'mongoose';
+import mongoose from 'mongoose';
 import { genSaltSync, hashSync, compareSync } from 'bcryptjs';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import aqp from 'api-query-params';
 import { Users } from 'src/health/decorator/customize';
 import { IUser } from 'src/types/user.interface';
-import { v4 as uuidv4 } from 'uuid';
 import { MailerService } from '@nestjs-modules/mailer';
 import dayjs from 'dayjs';
+import { customAlphabet } from 'nanoid';
 
 @Injectable()
 export class UsersService {
@@ -26,13 +26,36 @@ export class UsersService {
     private mailerService: MailerService,
   ) {}
 
-  // NOTE: Hashes a password with bcrypt
+  private generateCode6(): string {
+    // 6 char
+    const gen = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', 6);
+    return gen();
+  }
+
+  private normalizeEmail(email: string) {
+    return (email || '').trim().toLowerCase();
+  }
+
+  // Hashes a password with bcrypt
   getHashPassword = (password: string) => {
     const salt = genSaltSync(10);
     return hashSync(password, salt);
   };
 
-  // NOTE: Creates a new user (admin-level creation)
+  // Sends activation email
+  async sendVerificationEmail(email: string, name: string, codeId: string) {
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'Activate your account',
+      template: 'register.hbs',
+      context: {
+        name: name ?? email,
+        activationCode: codeId,
+      },
+    });
+  }
+
+  /* ------------ Admin create user ------------ */
   async create(createUserDto: CreateUserDto, @Users() user: IUser) {
     const {
       name,
@@ -46,16 +69,17 @@ export class UsersService {
       avatarUrl,
     } = createUserDto;
 
-    const isExist = await this.userModel.findOne({ email });
+    const emailNorm = this.normalizeEmail(email);
+    const isExist = await this.userModel.findOne({ email: emailNorm });
     if (isExist) {
-      throw new BadRequestException(`Email: ${email} already exists.`);
+      throw new BadRequestException(`Email: ${emailNorm} already exists.`);
     }
 
     const hashPassword = this.getHashPassword(password);
 
     const newUser = await this.userModel.create({
       name,
-      email,
+      email: emailNorm,
       password: hashPassword,
       age,
       phone,
@@ -73,32 +97,22 @@ export class UsersService {
     return newUser;
   }
 
-  // NOTE: Sends activation email to user
-  async sendVerificationEmail(email: string, name: string, codeId: string) {
-    await this.mailerService.sendMail({
-      to: email,
-      subject: 'Activate your account',
-      template: 'register.hbs',
-      context: {
-        name: name ?? email,
-        activationCode: codeId,
-      },
-    });
-  }
-
-  // NOTE: Register user (self-registration)
+  /* ------------ Self-register ------------ */
   async register(user: RegisterUserDto) {
     const { name, email, password, age, gender, address } = user;
-    const isExist = await this.userModel.findOne({ email });
+    const emailNorm = this.normalizeEmail(email);
+
+    const isExist = await this.userModel.findOne({ email: emailNorm });
     if (isExist) {
-      throw new BadRequestException(`Email: ${email} is existed.`);
+      throw new BadRequestException(`Email: ${emailNorm} is existed.`);
     }
 
-    const codeId = uuidv4();
+    const codeId = this.generateCode6(); // <— thay cho uuid
     const hashPassword = this.getHashPassword(password);
+
     const newRegister = await this.userModel.create({
       name,
-      email,
+      email: emailNorm,
       password: hashPassword,
       age,
       gender,
@@ -109,12 +123,11 @@ export class UsersService {
       codeExpired: dayjs().add(1, 'day'),
     });
 
-    await this.sendVerificationEmail(email, name, codeId);
-
+    await this.sendVerificationEmail(emailNorm, name, codeId);
     return newRegister;
   }
 
-  // NOTE: Verify account with code (email activation)
+  /* ------------ Verify account ------------ */
   async handleActive(data: CodeAuthDto) {
     const user = await this.userModel.findOne({
       _id: data._id,
@@ -130,6 +143,7 @@ export class UsersService {
     return { message: 'Account activated successfully' };
   }
 
+  /* ------------ Update profile (admin) ------------ */
   async update(updateUserDto: UpdateUserDto, user: IUser, _id: string) {
     if (!mongoose.Types.ObjectId.isValid(_id)) {
       throw new BadRequestException('Invalid user ID');
@@ -146,21 +160,21 @@ export class UsersService {
       },
     );
 
-    // Fetch fresh user to return
+    // trả về user mới (ẩn password)
     const updatedUser = await this.userModel.findById(_id).select('-password');
-
     return updatedUser;
   }
 
-  // NOTE: Retry activation (resend code)
+  /* ------------ Resend activation code ------------ */
   async retryActive(email: string) {
-    const user = await this.userModel.findOne({ email });
+    const emailNorm = this.normalizeEmail(email);
+    const user = await this.userModel.findOne({ email: emailNorm });
 
     if (!user) throw new BadRequestException('Account does not exist');
     if (user.isActive)
       throw new BadRequestException('Account is already activated');
 
-    const codeId = uuidv4();
+    const codeId = this.generateCode6(); // <— thay cho uuid
     await this.userModel.updateOne(
       { _id: user._id },
       {
@@ -173,15 +187,16 @@ export class UsersService {
     return { _id: user._id };
   }
 
-  // NOTE: Retry forgot Password (resend code)
+  /* ------------ Resend forgot-password code ------------ */
   async retryPassword(email: string) {
-    const user = await this.userModel.findOne({ email });
+    const emailNorm = this.normalizeEmail(email);
+    const user = await this.userModel.findOne({ email: emailNorm });
 
     if (!user) {
       throw new BadRequestException('Account does not exist');
     }
 
-    const codeId = uuidv4();
+    const codeId = this.generateCode6(); // <— thay cho uuid
     await this.userModel.updateOne(
       { _id: user._id },
       {
@@ -190,9 +205,8 @@ export class UsersService {
       },
     );
 
-    // Send email
-    this.mailerService.sendMail({
-      to: user.email, // recipient
+    await this.mailerService.sendMail({
+      to: user.email,
       subject: 'Change your password active code',
       template: 'resetpassword.hbs',
       context: {
@@ -200,39 +214,43 @@ export class UsersService {
         resetCode: codeId,
       },
     });
+
     return { _id: user._id, email: user.email };
   }
 
-  // NOTE: change Password (resend code)
+  /* ------------ Change password (by code) ------------ */
   async changePassword(data: ChangePasswordDto) {
     if (data.confirmPassword !== data.password) {
       throw new BadRequestException('Password is not match !');
     }
-    const user = await this.userModel.findOne({ email: data.email });
 
+    const emailNorm = this.normalizeEmail(data.email);
+    const user = await this.userModel.findOne({ email: emailNorm });
     if (!user) {
       throw new BadRequestException('Account does not exist');
     }
 
-    // check expire code
+    // Nếu DTO có field 'code', kiểm tra luôn cho chặt (không bắt buộc nếu bạn chưa dùng):
+    if ((data as any).code && (data as any).code !== user.codeId) {
+      throw new BadRequestException('Invalid or expired code');
+    }
+
     const isBeforeCheck = dayjs().isBefore(user.codeExpired);
-
-    if (isBeforeCheck) {
-      // valid => update password
-      const newPassword = await this.getHashPassword(data.password);
-      await user.updateOne({ password: newPassword });
-
-      return { isBeforeCheck };
-    } else {
+    if (!isBeforeCheck) {
       throw new BadRequestException('Mã code không hợp lệ hoặc đã hết hạn');
     }
+
+    const newPassword = this.getHashPassword(data.password);
+    await user.updateOne({ password: newPassword });
+
+    return { isBeforeCheck: true };
   }
 
-  // NOTE: Find all users with pagination, filtering and sorting
+  /* ------------ List users ------------ */
   async findAll(currentPage: number, limit: number, qs: string) {
     const { filter, sort, population } = aqp(qs);
-    delete filter.current;
-    delete filter.pageSize;
+    delete (filter as any).current;
+    delete (filter as any).pageSize;
 
     const offset = (+currentPage - 1) * +limit;
     const defaultLimit = +limit || 10;
@@ -246,7 +264,7 @@ export class UsersService {
       .limit(defaultLimit)
       .sort(sort as any)
       .select('-password')
-      .populate(population)
+      .populate(population as any)
       .exec();
 
     return {
@@ -260,37 +278,39 @@ export class UsersService {
     };
   }
 
-  // NOTE: Find a single user by ID
+  /* ------------ Get one ------------ */
   async findOne(id: string) {
     if (!mongoose.Types.ObjectId.isValid(id)) return 'Not found user';
     return this.userModel
       .findOne({ _id: id })
-
+      .select('-password')
       .populate({ path: 'role', select: { name: 1, _id: 1 } });
   }
 
-  // NOTE: Find a user by username/email for login
+  /* ------------ For login ------------ */
   findOneByUsername(username: string) {
+    const emailNorm = this.normalizeEmail(username);
     return this.userModel
-      .findOne({ email: username })
+      .findOne({ email: emailNorm })
       .populate({ path: 'role', select: { name: 1 } });
   }
 
-  // NOTE: Find a user by email
+  /* ------------ Find by email ------------ */
   async findByEmail(email: string) {
-    if (!email) throw new BadRequestException('Email is required');
+    const emailNorm = this.normalizeEmail(email);
+    if (!emailNorm) throw new BadRequestException('Email is required');
 
     return this.userModel
-      .findOne({ email })
+      .findOne({ email: emailNorm })
       .populate({ path: 'role', select: { name: 1, _id: 1 } });
   }
 
-  // NOTE: Compare password with hash (login)
+  /* ------------ Password compare ------------ */
   isValidPassword(password: string, hash: string) {
     return compareSync(password, hash);
   }
 
-  // NOTE: Soft delete user (admin only)
+  /* ------------ Soft delete ------------ */
   async remove(id: string, user: IUser) {
     if (!mongoose.Types.ObjectId.isValid(id)) return 'Not found user';
 
@@ -313,45 +333,29 @@ export class UsersService {
     return { message: 'User deleted' };
   }
 
-  // NOTE: Update refresh token for user (used after login or token refresh)
+  /* ------------ Tokens ------------ */
   async updateUserToken(refreshToken: string, _id: string) {
     const updated = await this.userModel.updateOne({ _id }, { refreshToken });
     return { message: 'Token updated', updated };
   }
 
-  // NOTE: Find user by refresh token (used in auth flow)
   async findUserByToken(refreshToken: string) {
     return this.userModel
       .findOne({ refreshToken })
       .populate({ path: 'role', select: { name: 1 } });
   }
 
-  // create user from OAuth provider (active ngay, không gửi email verify)
-  async createOAuthUser(data: {
-    email: string;
-    name?: string;
-    provider?: string;
-  }) {
-    const { email, name, provider } = data;
-    if (!email) throw new BadRequestException('Email is required');
+  /* ------------ Strategies helpers ------------ */
+  async validateUser(username: string, password: string) {
+    const emailNorm = this.normalizeEmail(username);
+    const user = await this.userModel.findOne({ email: emailNorm });
+    if (!user) return null;
+    if (!this.isValidPassword(password, user.password)) return null;
+    return user;
+  }
 
-    // Nếu đã tồn tại thì trả về luôn
-    const exist = await this.userModel.findOne({ email });
-    if (exist) return exist;
-
-    // tạo password giả (vì cần field password), hash nó
-    const randomPassword = Math.random().toString(36).slice(-8);
-    const hashPassword = this.getHashPassword(randomPassword);
-
-    const newUser = await this.userModel.create({
-      name: name ?? email.split('@')[0],
-      email,
-      password: hashPassword,
-      role: 'USER',
-      accountType: provider ? provider.toUpperCase() : 'OAUTH',
-      isActive: true, // active ngay cho social login
-    });
-
-    return newUser;
+  async findById(_id: string) {
+    if (!mongoose.Types.ObjectId.isValid(_id)) return null;
+    return this.userModel.findById(_id).select('-password');
   }
 }
