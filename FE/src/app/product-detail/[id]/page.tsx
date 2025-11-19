@@ -5,9 +5,9 @@ import { notFound } from "next/navigation";
 export default async function ProductDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = params;
+  const { id } = await params;
   const baseURL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   try {
