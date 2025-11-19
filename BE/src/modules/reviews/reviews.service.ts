@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, FilterQuery, Types } from 'mongoose';
-import { Review, ReviewDocument } from './Schema/review.schema';
+import { Review, ReviewDocument } from './schema/review.schema';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { QueryReviewDto } from './dto/query-review.dto';
