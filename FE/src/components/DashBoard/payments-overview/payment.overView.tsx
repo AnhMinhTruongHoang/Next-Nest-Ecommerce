@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { getPaymentsOverviewData } from "./overview.data";
-import { standardFormat } from "../overview/format";
 import { PaymentsOverviewChart } from "./chart.payment";
+import { standardFormat } from "../overview/format";
 
 type DataPoint = { x: string | number; y: number };
 type PaymentsOverviewData = { received: DataPoint[]; due: DataPoint[] };
