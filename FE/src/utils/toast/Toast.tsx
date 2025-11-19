@@ -14,6 +14,8 @@ export type ToastProps = {
   onExited: () => void;
 } & ToastStyle;
 
+export type AlertColor = "success" | "info" | "warning" | "error";
+
 export const Toast = ({
   message,
   onExited,

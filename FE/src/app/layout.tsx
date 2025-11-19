@@ -3,10 +3,10 @@ import "antd/dist/reset.css";
 import ClientConfigProvider from "@/lib/ClientConfigProvider";
 import NextAuthWrapper from "@/lib/next.auth.wrapper";
 import NProgressWrapper from "@/lib/nprogress.wrapper";
-import { ToastProvider } from "@/utils/toast";
 import { App } from "antd";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import InternalChatBot from "@/components/contacts/InternalChatBot";
+import { ToastProvider } from "@/utils/toast";
 
 export const metadata = {
   title: "Gamer Zone",
