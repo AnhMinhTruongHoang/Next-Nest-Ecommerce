@@ -1,8 +1,8 @@
 "use client";
 
-import { RegionLabels } from "../dashboard/map/label";
-import OVCard from "../dashboard/overview/ov.card";
-import { PaymentsOverview } from "../dashboard/payments-overview/payment.OverView";
+import { RegionLabels } from "../dashboard_temp/map/label";
+import OVCard from "../dashboard_temp/overview/ov.card";
+import { PaymentsOverview } from "../dashboard_temp/payments-overview/payment.OverView";
 
 interface AdminCardProps {
   searchParams?: any;
