@@ -2,6 +2,7 @@
 
 import React, { useMemo, useRef } from "react";
 import ChatBot from "react-chatbotify";
+import type { Params } from "react-chatbotify";
 
 type Product = {
   _id?: string;
@@ -13,9 +14,13 @@ type Product = {
 };
 
 type Props = {
-  apiBase?: string; // VD: "http://localhost:8000/api/v1"
-  pageSize?: number; // số item / trang backend, mặc định 200
-  adminMessengerUrl?: string; // link Messenger admin
+  apiBase?: string;
+  pageSize?: number;
+  adminMessengerUrl?: string;
+};
+
+type ChatParams = Params & {
+  setState: (val: string | React.ReactNode) => void;
 };
 
 const InternalChatBot: React.FC<Props> = ({
@@ -25,7 +30,6 @@ const InternalChatBot: React.FC<Props> = ({
 }) => {
   const cacheRef = useRef<{ products?: Product[] }>({});
 
-  // Gọi API public, tự gom nhiều trang
   const fetchAllProducts = async (): Promise<Product[]> => {
     if (cacheRef.current.products) return cacheRef.current.products;
 
@@ -65,7 +69,7 @@ const InternalChatBot: React.FC<Props> = ({
     new Intl.NumberFormat("vi-VN").format(Number(n || 0)) + "₫";
 
   const renderProductsNode = (products: Product[]) => {
-    const showMax = 50; // tránh nặng UI
+    const showMax = 50;
     const slice = products.slice(0, showMax);
     return (
       <div style={{ maxWidth: 320 }}>
@@ -118,59 +122,41 @@ const InternalChatBot: React.FC<Props> = ({
         ],
         path: "handleOption",
       },
+
       handleOption: {
-        message: async ({ userInput }: { userInput: string }) => {
+        message: ({ userInput }: ChatParams) => {
           switch (userInput) {
-            case "Danh sách sản phẩm": {
-              try {
-                const products = await fetchAllProducts();
-                return products.length
-                  ? renderProductsNode(products)
-                  : "⚠️ Không có sản phẩm nào.";
-              } catch (e: any) {
-                return `❌ Lỗi tải sản phẩm: ${e?.message ?? "Unknown error"}`;
-              }
-            }
-            case "Xem thống kê": {
-              try {
-                const products = await fetchAllProducts();
-                const total = products.length;
-                const inStock = products.reduce(
-                  (s, p) => s + (Number.isFinite(p.stock!) ? p.stock! : 0),
-                  0
-                );
-                const sumList = products.reduce(
-                  (s, p) => s + (p.price || 0),
-                  0
-                );
-                return `📊 Thống kê nhanh: ${total} sản phẩm • Tồn kho tổng: ${inStock} • Tổng giá niêm yết: ${vnd(
-                  sumList
-                )}`;
-              } catch (e: any) {
-                return `❌ Lỗi tải thống kê: ${e?.message ?? "Unknown error"}`;
-              }
-            }
+            case "Danh sách sản phẩm":
+              return "⏳ Đang tải sản phẩm...";
+            case "Xem thống kê":
+              return "⏳ Đang tính toán thống kê...";
             case "Trạng thái hệ thống":
               return "🟢 Tất cả dịch vụ đang hoạt động ổn định.";
             case "Liên hệ admin":
-              return (
-                <span>
-                  📧 Nhắn trực tiếp qua{" "}
-                  <a
-                    href={adminMessengerUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ color: "#4f46e5", fontWeight: 600 }}
-                  >
-                    Messenger
-                  </a>{" "}
-                  để được hỗ trợ nhanh hơn 💬
-                </span>
-              );
+              return "📧 Nhắn trực tiếp qua Messenger để được hỗ trợ nhanh hơn 💬";
             default:
               return "❓ Mình chưa hiểu ý bạn, thử lại nhé!";
           }
         },
+
+        actions: [
+          {
+            name: "fetchProducts",
+            run: async ({ userInput, setState }: ChatParams) => {
+              if (userInput === "Danh sách sản phẩm") {
+                try {
+                  const products = await fetchAllProducts();
+                  setState(renderProductsNode(products));
+                } catch (e: any) {
+                  setState(
+                    `❌ Lỗi tải sản phẩm: ${e?.message ?? "Unknown error"}`
+                  );
+                }
+              }
+            },
+          },
+        ],
+
         next: "start",
       },
     }),
@@ -179,7 +165,7 @@ const InternalChatBot: React.FC<Props> = ({
 
   return (
     <ChatBot
-      flow={flow}
+      flow={flow as any}
       settings={{
         general: {
           showHeader: true,

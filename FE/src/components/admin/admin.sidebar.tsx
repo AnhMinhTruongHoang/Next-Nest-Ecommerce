@@ -65,6 +65,15 @@ const AdminSideBar = () => {
           label: <Link href="/dashboard/orders">Quản lý đơn hàng</Link>,
         },
 
+        {
+          key: "vouchers",
+          icon: <TicketCheckIcon />,
+          label: <Link href="/dashboard/vouchers">Quản lý voucher</Link>,
+        },
+
+        {
+          type: "divider",
+        },
         // Nhóm Feedback
         {
           key: "feedback",
@@ -75,44 +84,6 @@ const AdminSideBar = () => {
               key: "comments",
               label: <Link href="/dashboard/comments">Quản lý đánh giá</Link>,
             },
-          ],
-        },
-
-        {
-          key: "vouchers",
-          icon: <TicketCheckIcon />,
-          label: <Link href="/dashboard/vouchers">Quản lý voucher</Link>,
-        },
-
-        {
-          type: "divider",
-        },
-        {
-          key: "nav2",
-          label: "Điều hướng 2",
-          icon: <AppstoreOutlined />,
-          children: [
-            { key: "opt5", label: "Tùy chọn 5" },
-            { key: "opt6", label: "Tùy chọn 6" },
-            {
-              key: "sub3",
-              label: "Menu con",
-              children: [
-                { key: "opt7", label: "Tùy chọn 7" },
-                { key: "opt8", label: "Tùy chọn 8" },
-              ],
-            },
-          ],
-        },
-        {
-          key: "nav3",
-          label: "Điều hướng 3",
-          icon: <SettingOutlined />,
-          children: [
-            { key: "opt9", label: "Tùy chọn 9" },
-            { key: "opt10", label: "Tùy chọn 10" },
-            { key: "opt11", label: "Tùy chọn 11" },
-            { key: "opt12", label: "Tùy chọn 12" },
           ],
         },
       ],
