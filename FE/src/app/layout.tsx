@@ -27,7 +27,7 @@ export default function RootLayout({
               <ToastProvider>
                 <NProgressWrapper>
                   <App>{children}</App>
-                  <InternalChatBot />
+                  {typeof window !== "undefined" && <InternalChatBot />}
                 </NProgressWrapper>
               </ToastProvider>
             </NextAuthWrapper>
