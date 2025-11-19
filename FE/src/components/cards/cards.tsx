@@ -7,7 +7,7 @@ import { ProductOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import "antd/dist/reset.css";
-import "../../styles/globals.scss";
+import "../../styles/globals.css";
 
 const { Meta } = Card;
 
