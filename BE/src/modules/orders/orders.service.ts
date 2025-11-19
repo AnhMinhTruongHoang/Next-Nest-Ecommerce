@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Connection, Model, Types } from 'mongoose';
-import { Order, OrderDocument } from './Schema/order.schema';
+import { Order, OrderDocument } from './schema/order.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
