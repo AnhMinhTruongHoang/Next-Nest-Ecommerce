@@ -5,7 +5,7 @@ import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import axios from 'axios';
 import { randomUUID } from 'crypto';
 
-import { User, UserDocument } from '../users/schemas/user.schema';
+import { User, UserDocument } from '../users/schema/user.schema';
 import {
   Membership,
   MembershipDocument,

@@ -8,7 +8,7 @@ import { DatabasesController } from './databases.controller';
 import { UsersModule } from '../users/users.module';
 
 // ======= SCHEMAS mà DatabasesService inject =======
-import { User, UserSchema } from '../users/schemas/user.schema';
+import { User, UserSchema } from '../users/schema/user.schema';
 import {
   Membership,
   MembershipSchema,
