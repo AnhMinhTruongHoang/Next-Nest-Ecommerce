@@ -1,13 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-
 import { DatabasesService } from './databases.service';
 import { DatabasesController } from './databases.controller';
-
 import { UsersModule } from '../users/users.module';
-
-// ======= SCHEMAS mà DatabasesService inject =======
 import { User, UserSchema } from '../users/schema/user.schema';
 import {
   Membership,
