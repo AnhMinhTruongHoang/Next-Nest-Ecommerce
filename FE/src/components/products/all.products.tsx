@@ -69,7 +69,7 @@ const ProductsPage = () => {
     const initCategory = async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/categories`
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/categories`
         );
         const data = await res.json();
         if (data?.data) {
@@ -165,7 +165,7 @@ const ProductsPage = () => {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/products?${query}`
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/products?${query}`
       );
       const data = await res.json();
       if (data?.data) {
