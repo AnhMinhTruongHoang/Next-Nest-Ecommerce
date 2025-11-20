@@ -14,7 +14,7 @@ lerna-debug.log*
 
 # Environment variables
 .env
-
+.env.development
 
 # OS
 .DS_Store
