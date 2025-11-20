@@ -47,7 +47,7 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({
       if (status === "CANCELED") body.paymentStatus = "UNPAID";
 
       const res = await fetch(
-        `http://localhost:8000/api/v1/orders/${orderData._id}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/${orderData._id}`,
         {
           method: "PATCH",
           headers: {

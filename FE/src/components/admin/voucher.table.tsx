@@ -50,8 +50,6 @@ interface IVoucher {
 
 type Meta = { current: number; pageSize: number; pages: number; total: number };
 
-const API_BASE = "http://localhost:8000/api/v1";
-
 const VouchersTable: React.FC = () => {
   const [danhSach, setDanhSach] = useState<IVoucher[]>([]);
   const [dangTai, setDangTai] = useState(false);
@@ -103,7 +101,7 @@ const VouchersTable: React.FC = () => {
     setDangTai(true);
     try {
       const res = await fetch(
-        `${API_BASE}/vouchers?current=${trangHienTai}&pageSize=${kichThuocTrang}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/vouchers?current=${trangHienTai}&pageSize=${kichThuocTrang}`,
         { headers }
       );
       const duLieu = await res.json();
@@ -129,10 +127,13 @@ const VouchersTable: React.FC = () => {
   const xuLyXoa = async (voucher: IVoucher) => {
     setDangTai(true);
     try {
-      const res = await fetch(`${API_BASE}/vouchers/${voucher._id}`, {
-        method: "DELETE",
-        headers,
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/vouchers/${voucher._id}`,
+        {
+          method: "DELETE",
+          headers,
+        }
+      );
       const duLieu = await res.json();
       if (duLieu?.data?._id) {
         notification.success({ message: "Xóa voucher thành công" });
@@ -506,11 +507,14 @@ const ModalTaoVoucher: React.FC<{
       }
 
       setDangGui(true);
-      const res = await fetch(`${API_BASE}/vouchers`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(duLieuGui),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/vouchers`,
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify(duLieuGui),
+        }
+      );
       const duLieu = await res.json();
 
       if (duLieu?.data?._id) {
@@ -673,11 +677,14 @@ const ModalCapNhatVoucher: React.FC<{
       }
 
       setDangGui(true);
-      const res = await fetch(`${API_BASE}/vouchers/${data._id}`, {
-        method: "PATCH",
-        headers,
-        body: JSON.stringify(duLieuGui),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/vouchers/${data._id}`,
+        {
+          method: "PATCH",
+          headers,
+          body: JSON.stringify(duLieuGui),
+        }
+      );
       const duLieu = await res.json();
 
       if (duLieu?.data?._id) {

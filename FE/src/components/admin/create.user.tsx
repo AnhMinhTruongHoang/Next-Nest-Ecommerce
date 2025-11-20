@@ -32,7 +32,7 @@ const CreateUserModal = (props: IProps) => {
 
       const data = { name, email, password, age, gender, role, address };
 
-      const res = await fetch("http://localhost:8000/api/v1/users", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${access_token}`,

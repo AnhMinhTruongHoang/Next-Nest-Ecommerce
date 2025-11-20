@@ -57,7 +57,7 @@ const UsersTable = () => {
       if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
 
       const res = await fetch(
-        `http://localhost:8000/api/v1/users?current=${meta.current}&pageSize=${meta.pageSize}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users?current=${meta.current}&pageSize=${meta.pageSize}`,
         { headers }
       );
       const d = await res.json();
@@ -79,7 +79,7 @@ const UsersTable = () => {
     setLoading(true);
     try {
       const res = await fetch(
-        `http://localhost:8000/api/v1/users?current=${page}&pageSize=${pageSize}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users?current=${page}&pageSize=${pageSize}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,

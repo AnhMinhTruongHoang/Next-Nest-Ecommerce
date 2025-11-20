@@ -6,14 +6,17 @@ import { revalidateTag } from "next/cache";
 export const updateUserAction = async (data: any, access_token: string) => {
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  const res = await fetch(`http://localhost:8000/api/v1/users/${data._id}`, {
-    method: "PATCH",
-    headers: {
-      Authorization: `Bearer ${access_token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/${data._id}`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    }
+  );
 
   const d = await res.json();
 
@@ -23,13 +26,16 @@ export const updateUserAction = async (data: any, access_token: string) => {
 
 /// Delete user
 export const deleteUserAction = async (user: IUser, access_token: string) => {
-  const res = await fetch(`http://localhost:8000/api/v1/users/${user._id}`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${access_token}`,
-      "Content-Type": "application/json",
-    },
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/${user._id}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
 
   const d = await res.json();
 
@@ -41,13 +47,16 @@ export const deleteOrderAction = async (
   order: IOrder,
   access_token: string
 ) => {
-  const res = await fetch(`http://localhost:8000/api/v1/orders/${order._id}`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${access_token}`,
-      "Content-Type": "application/json",
-    },
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/${order._id}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
 
   const d = await res.json();
 

@@ -46,7 +46,7 @@ const CreateProductModal = (props: IProps) => {
   // Lấy danh sách danh mục khi mở modal
   useEffect(() => {
     if (isCreateModalOpen) {
-      fetch("http://localhost:8000/api/v1/categories", {
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/categories`, {
         headers: { Authorization: `Bearer ${access_token}` },
       })
         .then((res) => res.json())
@@ -141,14 +141,17 @@ const CreateProductModal = (props: IProps) => {
         images: sliderUrls,
       };
 
-      const res = await fetch("http://localhost:8000/api/v1/products", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/products`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       const d = await res.json();
 
@@ -195,7 +198,7 @@ const CreateProductModal = (props: IProps) => {
             name="thumbnail"
             listType="picture-circle"
             beforeUpload={beforeUpload}
-            action="http://localhost:8000/api/v1/products/upload"
+            action={`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/upload`}
             headers={{
               Authorization: `Bearer ${access_token}`,
             }}
@@ -303,7 +306,7 @@ const CreateProductModal = (props: IProps) => {
         listType="picture-card"
         multiple
         beforeUpload={beforeUpload}
-        action="http://localhost:8000/api/v1/products/upload-slider"
+        action={`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/upload-slider`}
         headers={{
           Authorization: `Bearer ${access_token}`,
         }}

@@ -126,17 +126,20 @@ const Payment = ({ setCurrentStep }: IProps) => {
 
     try {
       const { productIds, categoryIds, brands } = buildPreviewPayload();
-      const res = await fetch("http://localhost:8000/api/v1/vouchers/preview", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" }, // preview có thể public
-        body: JSON.stringify({
-          code,
-          orderSubtotal: subtotal,
-          productIds,
-          categoryIds,
-          brands,
-        }),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/vouchers/preview`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            code,
+            orderSubtotal: subtotal,
+            productIds,
+            categoryIds,
+            brands,
+          }),
+        }
+      );
       const d = await res.json();
 
       // API của bạn trả { data: {...} } hay trả trực tiếp? – xử lý linh hoạt:

@@ -55,7 +55,6 @@ type UsersCommentProps = {
 const UsersComment: React.FC<UsersCommentProps> = ({
   productId,
   accessToken,
-  apiBase = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000",
   currentUser = { name: "Bạn", avatar: "https://joeschmoe.io/api/v1/random" },
   placeholder = "Nhập bình luận của bạn...",
   submitText = "Gửi đánh giá",
@@ -79,7 +78,7 @@ const UsersComment: React.FC<UsersCommentProps> = ({
     try {
       setLoading(true);
       const res = await fetch(
-        `${apiBase}/api/v1/reviews?productId=${productId}&page=1&limit=20&sort=recent`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/reviews?productId=${productId}&page=1&limit=20&sort=recent`,
         { headers }
       );
       const d = await res.json();
@@ -119,7 +118,7 @@ const UsersComment: React.FC<UsersCommentProps> = ({
 
     setSubmitting(true);
     try {
-      const res = await fetch(`${apiBase}/api/v1/reviews`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/reviews`, {
         method: "POST",
         headers,
         body: JSON.stringify({

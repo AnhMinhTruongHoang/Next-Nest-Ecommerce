@@ -62,7 +62,7 @@ const ReviewsTable: React.FC = () => {
     try {
       setLoading(true);
       const res = await fetch(
-        `http://localhost:8000/api/v1/reviews?page=${page}&limit=${limit}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/reviews?page=${page}&limit=${limit}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -121,13 +121,16 @@ const ReviewsTable: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/reviews/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/reviews/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
       const d = await res.json();
       if (res.ok || d?.ok) {
         notification.success({ message: "Xoá đánh giá thành công!" });

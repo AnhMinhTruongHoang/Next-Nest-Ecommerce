@@ -53,7 +53,7 @@ const ProductsTable = () => {
     try {
       setLoading(true);
       const res = await fetch(
-        `http://localhost:8000/api/v1/products?current=${page}&pageSize=${pageSize}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/products?current=${page}&pageSize=${pageSize}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,

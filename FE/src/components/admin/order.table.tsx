@@ -48,7 +48,7 @@ const OrderTable = () => {
     setLoading(true);
     try {
       const res = await fetch(
-        `http://localhost:8000/api/v1/orders?current=${page}&pageSize=${pageSize}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders?current=${page}&pageSize=${pageSize}`,
         {
           headers: {
             Authorization: `Bearer ${access_token}`,

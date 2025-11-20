@@ -6,14 +6,17 @@ import { revalidateTag } from "next/cache";
 export const updateProductAction = async (data: any, access_token: string) => {
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  const res = await fetch(`http://localhost:8000/api/v1/products/${data._id}`, {
-    method: "PATCH",
-    headers: {
-      Authorization: `Bearer ${access_token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/products/${data._id}`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    }
+  );
 
   const d = await res.json();
 
@@ -27,7 +30,7 @@ export const deleteProductAction = async (
   access_token: string
 ) => {
   const res = await fetch(
-    `http://localhost:8000/api/v1/products/${Product._id}`,
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/products/${Product._id}`,
     {
       method: "DELETE",
       headers: {

@@ -105,7 +105,7 @@ export async function getVNPayUrlAPI(
   paymentRef?: string
 ): Promise<string> {
   const response = await fetch(
-    "http://localhost:8000/api/v1/vnpay/payment-url",
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/vnpay/payment-url`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -140,23 +140,26 @@ export async function createOrderAPI(
   paymentRef?: string,
   voucherCode?: string
 ) {
-  const response = await fetch("http://localhost:8000/api/v1/orders", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      userId,
-      fullName,
-      shippingAddress,
-      phoneNumber,
-      totalPrice,
-      paymentMethod,
-      items,
-      paymentRef,
-      voucherCode,
-    }),
-  });
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId,
+        fullName,
+        shippingAddress,
+        phoneNumber,
+        totalPrice,
+        paymentMethod,
+        items,
+        paymentRef,
+        voucherCode,
+      }),
+    }
+  );
 
   if (!response.ok) {
     const error = await response.json();
@@ -170,11 +173,20 @@ export async function updatePaymentOrderAPI(
   paymentStatus: string,
   paymentRef: string
 ) {
-  const url = `http://localhost:8000/api/v1/orders/confirm-payment?vnp_TxnRef=${paymentRef}&vnp_ResponseCode=${
-    paymentStatus === "PAYMENT_SUCCEED" ? "00" : "99"
-  }`;
+  const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-  const res = await fetch(url);
-  if (!res.ok) throw new Error("Không thể cập nhật trạng thái thanh toán");
-  return await res.json();
+  const responseCode = paymentStatus === "PAYMENT_SUCCEED" ? "00" : "99";
+
+  const url = `${BASE_URL}/orders/confirm-payment?vnp_TxnRef=${paymentRef}&vnp_ResponseCode=${responseCode}`;
+
+  const res = await fetch(url, {
+    method: "GET",
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error("Không thể cập nhật trạng thái thanh toán");
+  }
+
+  return res.json();
 }

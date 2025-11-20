@@ -25,8 +25,6 @@ interface IAppContext {
 const CurrentAppContext = createContext<IAppContext | null>(null);
 type TProps = { children: React.ReactNode };
 
-const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
-
 /** Chuẩn hóa chuỗi Bearer */
 const asBearer = (token?: string | null) => {
   if (!token) return null;
@@ -39,7 +37,7 @@ const asBearer = (token?: string | null) => {
 export const fetchAccountAPI = async (token: string): Promise<IUser | null> => {
   try {
     const res = await axios.get<IBackendRes<IFetchAccount>>(
-      `${BASE_URL}/api/v1/auth/account`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/account`,
       { headers: { Authorization: asBearer(token)! } }
     );
     return res.data?.data?.user ?? null;
@@ -62,11 +60,14 @@ export const syncOAuthUserAPI = async (
   provider: string
 ) => {
   try {
-    const res = await axios.post(`${BASE_URL}/api/v1/auth/sync`, {
-      email,
-      name,
-      provider,
-    });
+    const res = await axios.post(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/sync`,
+      {
+        email,
+        name,
+        provider,
+      }
+    );
     // Kỳ vọng backend trả: { data: { user, access_token } }
     return res.data?.data ?? null;
   } catch (err: any) {

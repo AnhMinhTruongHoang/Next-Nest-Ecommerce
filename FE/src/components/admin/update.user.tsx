@@ -62,7 +62,7 @@ const UpdateUserModal = (props: IProps) => {
     setIsSubmit(true);
     try {
       const res = await fetch(
-        `http://localhost:8000/api/v1/users/${data._id}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/${data._id}`,
         {
           method: "PATCH",
           headers: {

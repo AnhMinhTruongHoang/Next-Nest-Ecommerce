@@ -59,7 +59,7 @@ const UpdateProductModal = (props: IProps) => {
   // Lấy danh sách danh mục khi modal mở
   useEffect(() => {
     if (isUpdateModalOpen) {
-      fetch("http://localhost:8000/api/v1/categories", {
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/categories`, {
         headers: { Authorization: `Bearer ${access_token}` },
       })
         .then((res) => res.json())
@@ -232,7 +232,7 @@ const UpdateProductModal = (props: IProps) => {
             name="thumbnail"
             listType="picture-circle"
             beforeUpload={beforeUpload}
-            action="http://localhost:8000/api/v1/products/upload"
+            action={`${process.env.NEXT_PUBLIC_BACKEND_URL}/upload`}
             headers={{
               Authorization: `Bearer ${access_token}`,
             }}
@@ -319,7 +319,7 @@ const UpdateProductModal = (props: IProps) => {
         listType="picture-card"
         multiple
         beforeUpload={beforeUpload}
-        action="http://localhost:8000/api/v1/products/upload-slider"
+        action={`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/upload-slider`}
         headers={{
           Authorization: `Bearer ${access_token}`,
         }}

@@ -155,9 +155,6 @@ export default function AppHeader() {
   const [suggestions, setSuggestions] = useState<SuggestItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [catMapByName, setCatMapByName] = useState<Record<string, string>>({});
-  const backendURL =
-    process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
-
   const screens = useBreakpoint();
   const isMobileUI = !screens.md; // < 768px
   const { token } = useToken();
@@ -176,7 +173,9 @@ export default function AppHeader() {
 
     (async () => {
       try {
-        const res = await fetch(`${backendURL}/api/v1/categories`);
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/categories`
+        );
         const json = await res.json();
         const arr: Array<{ _id: string; name: string }> = json?.data ?? [];
         const map: Record<string, string> = {};
@@ -190,7 +189,7 @@ export default function AppHeader() {
         console.error("Load categories failed", e);
       }
     })();
-  }, [backendURL]);
+  }, [process.env.NEXT_PUBLIC_BACKEND_URL]);
 
   const handleLogout = () => {
     localStorage.removeItem("access_token");
@@ -430,7 +429,9 @@ export default function AppHeader() {
     setLoading(true);
     try {
       const res = await fetch(
-        `${backendURL}/api/v1/products/suggest?q=${encodeURIComponent(q)}`
+        `${
+          process.env.NEXT_PUBLIC_BACKEND_URL
+        }/api/v1/products/suggest?q=${encodeURIComponent(q)}`
       );
       const json = await res.json();
       const items: SuggestItem[] = Array.isArray(json)

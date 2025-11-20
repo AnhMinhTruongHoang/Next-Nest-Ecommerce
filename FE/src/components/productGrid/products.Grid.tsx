@@ -55,7 +55,7 @@ const ProductsGrid = () => {
       try {
         const query = `current=1&pageSize=20&sort=-sold`;
         const res = await fetch(
-          `http://localhost:8000/api/v1/products?${query}`
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/products?${query}`
         );
         const data = await res.json();
         const result: TProduct[] = data?.data?.result ?? [];
@@ -64,7 +64,7 @@ const ProductsGrid = () => {
           result.map(async (p) => {
             try {
               const r = await fetch(
-                `http://localhost:8000/api/v1/reviews/summary/${p._id}`
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/reviews/summary/${p._id}`
               );
               const summary = await r.json();
               return {

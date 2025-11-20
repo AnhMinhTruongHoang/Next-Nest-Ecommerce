@@ -4,7 +4,6 @@ import { Card, Col, Row, Statistic, Spin, Grid } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import CountUp from "react-countup";
 
-const API_BASE = "http://localhost:8000/api/v1";
 const { useBreakpoint } = Grid;
 
 const OVCard = () => {
@@ -24,15 +23,24 @@ const OVCard = () => {
     const fetchDashboardData = async () => {
       try {
         const [usersRes, ordersRes, booksRes] = await Promise.all([
-          fetch(`${API_BASE}/users?current=1&pageSize=9999`, {
-            signal: controller.signal,
-          }).then((r) => r.json()),
-          fetch(`${API_BASE}/orders?current=1&pageSize=9999`, {
-            signal: controller.signal,
-          }).then((r) => r.json()),
-          fetch(`${API_BASE}/products?current=1&pageSize=9999`, {
-            signal: controller.signal,
-          }).then((r) => r.json()),
+          fetch(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/users?current=1&pageSize=9999`,
+            {
+              signal: controller.signal,
+            }
+          ).then((r) => r.json()),
+          fetch(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders?current=1&pageSize=9999`,
+            {
+              signal: controller.signal,
+            }
+          ).then((r) => r.json()),
+          fetch(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/products?current=1&pageSize=9999`,
+            {
+              signal: controller.signal,
+            }
+          ).then((r) => r.json()),
         ]);
 
         setDataDashboard({
