@@ -98,7 +98,7 @@ const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
       try {
         const query = `current=1&pageSize=10&category=${cat}&sort=-sold`;
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/products?${query}`
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/products?${query}`
         );
         const data = await res.json();
         let result: TProduct[] = data?.data?.result ?? [];
@@ -110,7 +110,7 @@ const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
           result.map(async (p) => {
             try {
               const r = await fetch(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/reviews/summary/${p._id}`
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/reviews/summary/${p._id}`
               );
               const summary = await r.json();
               return {

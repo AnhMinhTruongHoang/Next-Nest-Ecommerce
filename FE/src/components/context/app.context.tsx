@@ -37,7 +37,7 @@ const asBearer = (token?: string | null) => {
 export const fetchAccountAPI = async (token: string): Promise<IUser | null> => {
   try {
     const res = await axios.get<IBackendRes<IFetchAccount>>(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/account`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/account`,
       { headers: { Authorization: asBearer(token)! } }
     );
     return res.data?.data?.user ?? null;
@@ -61,7 +61,7 @@ export const syncOAuthUserAPI = async (
 ) => {
   try {
     const res = await axios.post(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/sync`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/sync`,
       {
         email,
         name,

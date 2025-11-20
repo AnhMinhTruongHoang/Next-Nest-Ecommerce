@@ -28,7 +28,7 @@ export default function VerifyPage() {
     setSubmitting(true);
     try {
       const res = await sendRequest<IBackendRes<any>>({
-        url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/check-code`,
+        url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/check-code`,
         method: "POST",
         body: { _id: String(id), code: values.code.trim() },
       });

@@ -174,7 +174,7 @@ export default function AppHeader() {
     (async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/categories`
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/categories`
         );
         const json = await res.json();
         const arr: Array<{ _id: string; name: string }> = json?.data ?? [];
@@ -431,7 +431,7 @@ export default function AppHeader() {
       const res = await fetch(
         `${
           process.env.NEXT_PUBLIC_BACKEND_URL
-        }/api/v1/products/suggest?q=${encodeURIComponent(q)}`
+        }/products/suggest?q=${encodeURIComponent(q)}`
       );
       const json = await res.json();
       const items: SuggestItem[] = Array.isArray(json)

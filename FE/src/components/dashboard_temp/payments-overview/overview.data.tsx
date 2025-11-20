@@ -28,7 +28,7 @@ export async function getPaymentsOverviewData(
   if (opts?.from) params.set("from", opts.from);
   if (opts?.to) params.set("to", opts.to);
 
-  const res = await fetch(`${base}/api/v1/payments/overview?${params}`, {
+  const res = await fetch(`${base}/payments/overview?${params}`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
     signal: opts?.signal,

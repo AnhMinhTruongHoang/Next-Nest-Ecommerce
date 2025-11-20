@@ -33,7 +33,7 @@ const ModalChangePassword = ({ isModalOpen, setIsModalOpen }: any) => {
   const onFinishStep0 = async (values: any) => {
     const { email } = values;
     const res = await sendRequest<IBackendRes<any>>({
-      url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/retry-password`,
+      url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/retry-password`,
       method: "POST",
       body: { email },
     });
@@ -61,7 +61,7 @@ const ModalChangePassword = ({ isModalOpen, setIsModalOpen }: any) => {
     }
 
     const res = await sendRequest<IBackendRes<any>>({
-      url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/change-password`,
+      url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/change-password`,
       method: "POST",
       body: {
         code,

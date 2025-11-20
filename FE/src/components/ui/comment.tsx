@@ -78,7 +78,7 @@ const UsersComment: React.FC<UsersCommentProps> = ({
     try {
       setLoading(true);
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/reviews?productId=${productId}&page=1&limit=20&sort=recent`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/reviews?productId=${productId}&page=1&limit=20&sort=recent`,
         { headers }
       );
       const d = await res.json();
@@ -118,15 +118,18 @@ const UsersComment: React.FC<UsersCommentProps> = ({
 
     setSubmitting(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/reviews`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          productId,
-          rating,
-          comment: trimmed,
-        }),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/reviews`,
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            productId,
+            rating,
+            comment: trimmed,
+          }),
+        }
+      );
 
       const d = await res.json();
       if (!res.ok) throw new Error(d?.message || "Gửi đánh giá thất bại");

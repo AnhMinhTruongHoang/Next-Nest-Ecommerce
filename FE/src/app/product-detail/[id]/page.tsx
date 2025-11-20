@@ -8,10 +8,11 @@ export default async function ProductDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const baseURL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   try {
-    const res = await axios.get(`${baseURL}/api/v1/products/${id}`);
+    const res = await axios.get(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/products/${id}`
+    );
     const currentProduct = res.data?.data ?? null;
 
     if (!currentProduct) {

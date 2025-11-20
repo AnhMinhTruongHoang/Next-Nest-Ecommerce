@@ -93,7 +93,7 @@ const currencyVN = (n?: number) =>
     maximumFractionDigits: 0,
   }).format(n ?? 0);
 
-const MEMBERSHIP_API = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/memberships`;
+const MEMBERSHIP_API = `${process.env.NEXT_PUBLIC_BACKEND_URL}/memberships`;
 
 const UserInfoModal: React.FC<IUserInfoModalProps> = ({
   openManageAccount,
@@ -188,7 +188,7 @@ const UserInfoModal: React.FC<IUserInfoModalProps> = ({
 
       if (!token && user?.email) {
         const synced = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/sync`,
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/sync`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -214,7 +214,7 @@ const UserInfoModal: React.FC<IUserInfoModalProps> = ({
       const bearer = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/users/${payload._id}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/${payload._id}`,
         {
           method: "PATCH",
           headers: {

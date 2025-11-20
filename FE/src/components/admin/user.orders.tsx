@@ -56,7 +56,7 @@ const OrderHistoryModal: React.FC<Props> = ({
     }
     setLoading(true);
     try {
-      const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/orders/user/${userId}`;
+      const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/user/${userId}`;
       const res = await axios.get(url, {
         // phá cache của browser/proxy
         params: { _ts: Date.now() },

@@ -19,7 +19,7 @@ export function useReviews(
     setLoading(true);
     try {
       const res = await fetch(
-        `${apiBase}/api/v1/reviews?productId=${productId}&page=1&limit=20&sort=recent`,
+        `${apiBase}/reviews?productId=${productId}&page=1&limit=20&sort=recent`,
         { headers }
       );
       const d = await res.json();
@@ -31,7 +31,7 @@ export function useReviews(
 
   const create = useCallback(
     async (payload: { rating: number; comment?: string }) => {
-      const res = await fetch(`${apiBase}/api/v1/reviews`, {
+      const res = await fetch(`${apiBase}/reviews`, {
         method: "POST",
         headers,
         body: JSON.stringify({ productId, ...payload }),
