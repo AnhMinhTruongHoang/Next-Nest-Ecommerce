@@ -1,3 +1,5 @@
+// ProductDetail.tsx - cleaned version using getImageUrl
+
 "use client";
 
 import {
@@ -29,6 +31,7 @@ import ModalGallery from "@/components/products/modal.gallery";
 import "../../styles/product.scss";
 import UsersComment from "../ui/comment";
 import SuggestionList from "./product.suggestion";
+import { getImageUrl } from "@/utils/getImageUrl";
 
 const { Title, Text } = Typography;
 
@@ -42,130 +45,84 @@ const ProductDetail = ({ currentProduct }: IProps) => {
   const [imageGallery, setImageGallery] = useState<any[]>([]);
   const [isOpenModalGallery, setIsOpenModalGallery] = useState(false);
   const [currentQuantity, setCurrentQuantity] = useState<number>(1);
+
   const refGallery = useRef<ReactImageGallery>(null);
   const router = useRouter();
   const { setCarts } = useCurrentApp();
   const { message } = App.useApp();
 
-  // Tính tồn kho khả dụng (ưu tiên stock, fallback sang quantity nếu BE cũ)
-  const stock =
-    (currentProduct?.stock ?? currentProduct?.quantity ?? 0) > 0
-      ? Number(currentProduct?.stock ?? currentProduct?.quantity ?? 0)
-      : 0;
+  const stock = Number(currentProduct?.stock ?? currentProduct?.quantity ?? 0);
 
-  // Build image list for gallery
   useEffect(() => {
     if (!currentProduct) return;
 
-    const images: any[] = [];
-    const buildUrl = (url?: string) => {
-      if (!url || url.trim() === "") return null;
-      return url.startsWith("http")
-        ? url
-        : `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`;
-    };
+    const imgs: any[] = [];
 
-    const thumb = buildUrl(currentProduct.thumbnail);
-    if (thumb) images.push({ original: thumb, thumbnail: thumb });
+    const thumb = getImageUrl(currentProduct.thumbnail);
+    if (thumb) imgs.push({ original: thumb, thumbnail: thumb });
 
     if (Array.isArray(currentProduct.images)) {
       currentProduct.images.forEach((item) => {
-        const url = buildUrl(item);
-        if (url) images.push({ original: url, thumbnail: url });
+        const url = getImageUrl(item);
+        if (url) imgs.push({ original: url, thumbnail: url });
       });
     }
 
-    if (images.length === 0) {
-      images.push({
+    if (!imgs.length) {
+      imgs.push({
         original: "/images/noimage.png",
         thumbnail: "/images/noimage.png",
       });
     }
 
-    setImageGallery(images);
+    setImageGallery(imgs);
   }, [currentProduct]);
 
-  // Lấy số lượng item này đã có trong giỏ (để chặn vượt stock)
   const getInCartQuantity = () => {
-    const cartStorage = localStorage.getItem("carts");
-    const carts: ICart[] = cartStorage ? JSON.parse(cartStorage) : [];
+    const raw = localStorage.getItem("carts");
+    const carts: ICart[] = raw ? JSON.parse(raw) : [];
     const idx = carts.findIndex((c) => c._id === currentProduct?._id);
     return idx > -1 ? Number(carts[idx].quantity || 0) : 0;
   };
 
   const availableStock = Math.max(0, stock - getInCartQuantity());
 
-  // Quantity logic
   const handleQuantityChange = (type: UserAction) => {
     if (!currentProduct) return;
-
     if (type === "MINUS") {
       setCurrentQuantity((q) => Math.max(1, q - 1));
     } else {
-      // PLUS
-      setCurrentQuantity((q) => {
-        const next = q + 1;
-        if (availableStock <= 0) return q;
-        return Math.min(next, availableStock);
-      });
+      setCurrentQuantity((q) => Math.min(q + 1, availableStock));
     }
   };
 
-  // input value
   const handleChangeInput = (value: string) => {
-    if (!currentProduct) return;
     const n = Number(value);
-    if (Number.isFinite(n)) {
-      if (availableStock <= 0) {
-        setCurrentQuantity(1);
-        return;
-      }
-      if (n > 0) {
-        setCurrentQuantity(Math.min(n, availableStock));
-      }
-    }
+    if (!Number.isFinite(n)) return;
+    setCurrentQuantity(Math.min(Math.max(1, n), availableStock));
   };
 
-  // Add to cart
   const handleAddToCart = () => {
-    if (!currentProduct) {
-      message.error("Không tìm thấy sản phẩm");
-      return;
-    }
+    if (!currentProduct) return message.error("Không tìm thấy sản phẩm");
+    if (availableStock <= 0) return message.error("Hết hàng");
 
-    if (availableStock <= 0) {
-      message.error("Sản phẩm đã hết hàng");
-      return;
-    }
-
-    if (currentQuantity <= 0) {
-      message.error("Số lượng không hợp lệ");
-      return;
-    }
-
-    const cartStorage = localStorage.getItem("carts");
-    let carts: ICart[] = cartStorage ? JSON.parse(cartStorage) : [];
+    const raw = localStorage.getItem("carts");
+    let carts: ICart[] = raw ? JSON.parse(raw) : [];
 
     const idx = carts.findIndex((c) => c._id === currentProduct._id);
     const inCart = idx > -1 ? Number(carts[idx].quantity || 0) : 0;
 
-    const canAdd = Math.max(0, stock - inCart);
-    if (canAdd <= 0) {
-      message.warning("Bạn đã thêm tối đa theo tồn kho");
-      return;
-    }
+    const addQty = Math.min(currentQuantity, Math.max(0, stock - inCart));
+    if (addQty <= 0)
+      return message.warning("Bạn đã thêm tối đa số lượng tồn kho");
 
-    const addQty = Math.min(currentQuantity, canAdd);
-
-    if (idx > -1) {
-      carts[idx].quantity = inCart + addQty;
-    } else {
+    if (idx > -1) carts[idx].quantity = inCart + addQty;
+    else
       carts.push({
         _id: currentProduct._id,
         quantity: addQty,
         detail: currentProduct,
       });
-    }
 
     localStorage.setItem("carts", JSON.stringify(carts));
     setCarts(carts);
@@ -173,38 +130,22 @@ const ProductDetail = ({ currentProduct }: IProps) => {
   };
 
   const handleAddBuyNow = () => {
-    if (!currentProduct) {
-      message.error("Không tìm thấy sản phẩm");
-      return;
-    }
-    if (availableStock <= 0) {
-      message.error("Sản phẩm đã hết hàng");
-      return;
-    }
-    if (currentQuantity <= 0) {
-      message.error("Số lượng không hợp lệ");
-      return;
-    }
+    if (!currentProduct) return message.error("Không tìm thấy sản phẩm");
+    if (availableStock <= 0) return message.error("Hết hàng");
 
-    const cartStorage = localStorage.getItem("carts");
-    let carts: ICart[] = cartStorage ? JSON.parse(cartStorage) : [];
+    const raw = localStorage.getItem("carts");
+    let carts: ICart[] = raw ? JSON.parse(raw) : [];
 
     const idx = carts.findIndex((c) => c._id === currentProduct._id);
-    const inCart = idx > -1 ? Number(carts[idx].quantity || 0) : 0;
-    const canSet = Math.max(0, stock);
+    const finalQty = Math.min(currentQuantity, availableStock);
 
-    const finalQty = Math.min(currentQuantity, canSet);
-
-    if (idx > -1) {
-      carts[idx].quantity = finalQty;
-      carts[idx].detail = currentProduct;
-    } else {
+    if (idx > -1) carts[idx].quantity = finalQty;
+    else
       carts.push({
         _id: currentProduct._id,
         quantity: finalQty,
         detail: currentProduct,
       });
-    }
 
     localStorage.setItem("carts", JSON.stringify(carts));
     setCarts(carts);
@@ -214,7 +155,7 @@ const ProductDetail = ({ currentProduct }: IProps) => {
   if (!currentProduct) return null;
 
   const sold = Number(currentProduct.sold || 0);
-  const isOutOfStock = stock <= 0;
+  const isOutOfStock = availableStock <= 0;
 
   return (
     <div style={{ background: "#f5f5f5", padding: "30px 0" }}>
@@ -239,9 +180,7 @@ const ProductDetail = ({ currentProduct }: IProps) => {
             <Col xs={24} md={10}>
               <ReactImageGallery
                 ref={refGallery}
-                items={imageGallery.filter(
-                  (img) => img.original && img.original.trim() !== ""
-                )}
+                items={imageGallery.filter((i) => i.original)}
                 showPlayButton={false}
                 showFullscreenButton={false}
                 slideOnThumbnailOver
@@ -251,7 +190,6 @@ const ProductDetail = ({ currentProduct }: IProps) => {
               />
             </Col>
 
-            {/*  Thông tin sản phẩm */}
             <Col xs={24} md={14}>
               <Space
                 direction="vertical"
@@ -262,44 +200,35 @@ const ProductDetail = ({ currentProduct }: IProps) => {
                   {currentProduct.name}
                 </Title>
 
-                {currentProduct.brand ? (
+                {currentProduct.brand && (
                   <Tag color="blue">{currentProduct.brand}</Tag>
-                ) : null}
+                )}
 
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <Rate disabled defaultValue={5} style={{ fontSize: 14 }} />
                   <Text type="secondary">Đã bán {sold}</Text>
                   {isOutOfStock ? (
-                    <Tag color="error" style={{ marginLeft: 8 }}>
-                      Hết hàng
-                    </Tag>
+                    <Tag color="error">Hết hàng</Tag>
                   ) : (
-                    <Tag color="green" style={{ marginLeft: 8 }}>
-                      Còn {stock} sản phẩm
-                    </Tag>
+                    <Tag color="green">Còn {availableStock} sản phẩm</Tag>
                   )}
                 </div>
 
-                {currentProduct.description ? (
-                  <div style={{ width: "100%", marginTop: 8 }}>
-                    <Text type="secondary">{currentProduct.description}</Text>
-                  </div>
-                ) : null}
+                {currentProduct.description && (
+                  <Text type="secondary">{currentProduct.description}</Text>
+                )}
 
-                <Title
-                  level={4}
-                  style={{ color: "#ff4d4f", fontWeight: 600, marginTop: 8 }}
-                >
+                <Title level={4} style={{ color: "#ff4d4f", marginTop: 8 }}>
                   {new Intl.NumberFormat("vi-VN", {
                     style: "currency",
                     currency: "VND",
                   }).format(currentProduct.price ?? 0)}
                 </Title>
 
-                <Divider style={{ margin: "12px 0" }} />
+                <Divider />
 
                 <div>
-                  <Text strong>Số lượng: </Text>
+                  <Text strong>Số lượng:</Text>
                   <Space>
                     <Button
                       icon={<MinusOutlined />}
@@ -309,14 +238,8 @@ const ProductDetail = ({ currentProduct }: IProps) => {
                     <InputNumber
                       value={currentQuantity}
                       min={1}
-                      max={Math.max(1, availableStock || stock || 1)}
-                      onChange={(value) => {
-                        if (value !== null) {
-                          handleChangeInput(value.toString());
-                        }
-                      }}
-                      disabled={isOutOfStock}
-                      style={{ width: 80 }}
+                      max={availableStock}
+                      onChange={(v) => v && handleChangeInput(v.toString())}
                     />
                     <Button
                       icon={<PlusOutlined />}
@@ -328,23 +251,23 @@ const ProductDetail = ({ currentProduct }: IProps) => {
                   </Space>
                 </div>
 
-                <Divider style={{ margin: "12px 0" }} />
+                <Divider />
 
                 <Space wrap>
                   <Button
                     type="primary"
                     size="large"
                     icon={<ShoppingCartOutlined />}
-                    onClick={handleAddToCart}
                     disabled={isOutOfStock}
+                    onClick={handleAddToCart}
                   >
                     Thêm vào giỏ hàng
                   </Button>
                   <Button
                     size="large"
                     danger
-                    onClick={handleAddBuyNow}
                     disabled={isOutOfStock}
+                    onClick={handleAddBuyNow}
                   >
                     Mua ngay
                   </Button>
@@ -353,7 +276,6 @@ const ProductDetail = ({ currentProduct }: IProps) => {
             </Col>
           </Row>
 
-          <br />
           <br />
           <UsersComment
             productId={currentProduct._id}

@@ -1,3 +1,6 @@
+//
+const BACKEND_URL = "https://next-nest-ecommerce.onrender.com";
+
 export const getImageUrl = (url?: string) => {
   if (!url) return "";
 
@@ -6,8 +9,8 @@ export const getImageUrl = (url?: string) => {
   }
 
   if (url.startsWith("/slider") || url.startsWith("/thumbnails")) {
-    return `https://next-nest-ecommerce.onrender.com/images${url}`;
+    return `${BACKEND_URL}/images${url}`;
   }
 
-  return `https://next-nest-ecommerce.onrender.com${url}`;
+  return `${BACKEND_URL}${url}`;
 };

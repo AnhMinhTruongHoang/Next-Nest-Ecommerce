@@ -12,6 +12,7 @@ import {
   Divider,
 } from "antd";
 import { v4 as uuidv4 } from "uuid";
+import { getImageUrl } from "@/utils/getImageUrl";
 
 interface ViewProductModalProps {
   isViewModalOpen: boolean;
@@ -21,13 +22,6 @@ interface ViewProductModalProps {
 }
 
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
-
-// helper build full url
-const getImageUrl = (url?: string) => {
-  if (!url) return "";
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  return `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`;
-};
 
 const ViewProductModal: React.FC<ViewProductModalProps> = ({
   isViewModalOpen,
@@ -50,36 +44,40 @@ const ViewProductModal: React.FC<ViewProductModalProps> = ({
   const [previewImage, setPreviewImage] = useState("");
   const [fileList, setFileList] = useState<UploadFile[]>([]);
 
+  // build fileList cho Upload preview
   useEffect(() => {
-    if (productData) {
-      const imgs: UploadFile[] = [];
+    if (!productData) {
+      setFileList([]);
+      return;
+    }
 
-      if (productData.thumbnail) {
+    const imgs: UploadFile[] = [];
+
+    if (productData.thumbnail) {
+      imgs.push({
+        uid: uuidv4(),
+        name: "thumbnail",
+        status: "done",
+        url: getImageUrl(productData.thumbnail),
+      });
+    }
+
+    if (Array.isArray(productData.images) && productData.images.length) {
+      productData.images.forEach((item) => {
         imgs.push({
           uid: uuidv4(),
-          name: "thumbnail",
+          name: item,
           status: "done",
-          url: getImageUrl(productData.thumbnail),
+          url: getImageUrl(item),
         });
-      }
-
-      if (productData.images?.length) {
-        productData.images.forEach((item) => {
-          imgs.push({
-            uid: uuidv4(),
-            name: item,
-            status: "done",
-            url: getImageUrl(item),
-          });
-        });
-      }
-
-      setFileList(imgs);
+      });
     }
+
+    setFileList(imgs);
   }, [productData]);
 
   const handlePreview = async (file: UploadFile) => {
-    if (!file.url && !file.preview) {
+    if (!file.url && !file.preview && file.originFileObj) {
       file.preview = await getBase64(file.originFileObj as FileType);
     }
     setPreviewImage(file.url || (file.preview as string));
@@ -111,34 +109,47 @@ const ViewProductModal: React.FC<ViewProductModalProps> = ({
               />
             </Descriptions.Item>
           )}
+
           <Descriptions.Item label="Tên sản phẩm">
             {safeText(productData.name)}
           </Descriptions.Item>
+
           <Descriptions.Item label="Thương hiệu">
             {safeText(productData.brand)}
           </Descriptions.Item>
+
           <Descriptions.Item label="Danh mục">
             {safeText(productData.category)}
           </Descriptions.Item>
+
           <Descriptions.Item label="Giá">
-            {productData.price.toLocaleString("vi-VN")} ₫
+            {(productData.price ?? 0).toLocaleString("vi-VN")} ₫
           </Descriptions.Item>
+
           <Descriptions.Item label="Tồn kho">
-            {productData.stock}
+            {productData.stock ?? 0}
           </Descriptions.Item>
+
           <Descriptions.Item label="Đã bán">
-            {productData.sold}
+            {productData.sold ?? 0}
           </Descriptions.Item>
+
           <Descriptions.Item label="Ngày tạo">
-            {new Date(productData.createdAt).toLocaleString()}
+            {productData.createdAt
+              ? new Date(productData.createdAt).toLocaleString("vi-VN")
+              : "-"}
           </Descriptions.Item>
+
           <Descriptions.Item label="Ngày cập nhật">
-            {new Date(productData.updatedAt).toLocaleString()}
+            {productData.updatedAt
+              ? new Date(productData.updatedAt).toLocaleString("vi-VN")
+              : "-"}
           </Descriptions.Item>
         </Descriptions>
       )}
 
       <Divider>Xem trước hình ảnh</Divider>
+
       <div style={{ display: "flex", justifyContent: "center" }}>
         <Upload
           action="#"
