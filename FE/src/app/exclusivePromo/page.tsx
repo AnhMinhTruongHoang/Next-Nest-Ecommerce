@@ -145,7 +145,7 @@ export default function ExclusivePage() {
 
           <figure className={styles.figure}>
             <Image
-              src="/images/postImages/mo.webp"
+              src="/images/postImages/Mo.webp"
               alt="Razer Iskur V2 X – Zenless Zone Zero Edition"
               fill
               sizes="(max-width: 980px) 100vw, 980px"
