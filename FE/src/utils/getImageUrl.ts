@@ -1,3 +1,4 @@
+/// url images
 const BACKEND_URL = "https://next-nest-ecommerce.onrender.com";
 
 export const getImageUrl = (url?: string) => {
