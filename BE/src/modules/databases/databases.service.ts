@@ -476,7 +476,7 @@ export class DatabasesService implements OnModuleInit {
                 sold: 0,
                 brand: 'Havit',
                 category: category._id,
-                thumbnail: '//thumbnails/havitH1.jpg',
+                thumbnail: '/thumbnails/havitH1.jpg',
                 images: ['/slider/havith1s1.jpg', '/slider/havith1s2.jpg'],
               },
             ];
