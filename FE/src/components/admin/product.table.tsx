@@ -45,7 +45,7 @@ const ProductsTable = () => {
 
   useEffect(() => {
     if (accessToken) {
-      getData(1, 999999); // load tất cả khi mở
+      getData(1, 999999);
     }
   }, [accessToken]);
 
@@ -74,7 +74,7 @@ const ProductsTable = () => {
         pageSize: d.data.meta.pageSize,
         total: pageSize === 999999 ? d.data.result.length : d.data.meta.total,
         showSizeChanger: true,
-        pageSizeOptions: ["10", "20", "50", "100", "0"], // 0 = ∞
+        pageSizeOptions: ["10", "20", "50", "100", "0"], 
         showTotal: (total: number, range: [number, number]) =>
           `${range[0]}-${range[1]} / ${total} sản phẩm`,
         onChange: handleOnChange,

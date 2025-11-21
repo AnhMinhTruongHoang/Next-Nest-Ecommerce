@@ -1,5 +1,5 @@
 /// url images
-const BACKEND_URL = "https://next-nest-ecommerce.onrender.com/api/v1";
+const BACKEND_URL = "https://next-nest-ecommerce.onrender.com";
 
 export const getImageUrl = (url?: string) => {
   if (!url) return "";
