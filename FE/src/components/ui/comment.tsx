@@ -52,10 +52,20 @@ type UsersCommentProps = {
   submitText?: string;
 };
 
+// Chuẩn hóa avatar: bỏ "", "null", "undefined", khoảng trắng
+const normalizeAvatar = (url?: string | null): string | undefined => {
+  if (!url) return undefined;
+  const trimmed = url.trim();
+  if (!trimmed || trimmed === "null" || trimmed === "undefined")
+    return undefined;
+  return trimmed;
+};
+
 const UsersComment: React.FC<UsersCommentProps> = ({
   productId,
   accessToken,
-  currentUser = { name: "Bạn", avatar: "https://joeschmoe.io/api/v1/random" },
+  apiBase,
+  currentUser = { name: "Bạn", avatar: "" },
   placeholder = "Nhập bình luận của bạn...",
   submitText = "Gửi đánh giá",
 }) => {
@@ -66,6 +76,11 @@ const UsersComment: React.FC<UsersCommentProps> = ({
   const [rating, setRating] = useState<number>(5);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  const baseUrl =
+    apiBase ||
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
+    "https://next-nest-ecommerce.onrender.com/api/v1";
 
   const headers = useMemo(() => {
     const h: Record<string, string> = { "Content-Type": "application/json" };
@@ -78,21 +93,23 @@ const UsersComment: React.FC<UsersCommentProps> = ({
     try {
       setLoading(true);
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/reviews?productId=${productId}&page=1&limit=20&sort=recent`,
+        `${baseUrl}/reviews?productId=${productId}&page=1&limit=20&sort=recent`,
         { headers }
       );
       const d = await res.json();
+
       const items = (d?.items || d?.data?.items || []).map((r: any) => ({
         _id: r._id,
         author: r.createdBy?.email || r.userId?.email || "Ẩn danh",
-        avatar: r.userId?.avatar || undefined,
+        avatar: normalizeAvatar(r.userId?.avatar),
         content: r.comment || "",
         rating: r.rating || 0,
         createdAt: r.createdAt || new Date().toISOString(),
         likes: 0,
         dislikes: 0,
         action: null,
-      }));
+      })) as CommentItem[];
+
       setComments(items);
     } catch (e) {
       message.error("Không tải được bình luận.");
@@ -104,7 +121,7 @@ const UsersComment: React.FC<UsersCommentProps> = ({
   useEffect(() => {
     if (productId) fetchReviews();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productId]);
+  }, [productId, baseUrl]);
 
   // ===== POST review =====
   const handleSubmit = async () => {
@@ -118,18 +135,15 @@ const UsersComment: React.FC<UsersCommentProps> = ({
 
     setSubmitting(true);
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/reviews`,
-        {
-          method: "POST",
-          headers,
-          body: JSON.stringify({
-            productId,
-            rating,
-            comment: trimmed,
-          }),
-        }
-      );
+      const res = await fetch(`${baseUrl}/reviews`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          productId,
+          rating,
+          comment: trimmed,
+        }),
+      });
 
       const d = await res.json();
       if (!res.ok) throw new Error(d?.message || "Gửi đánh giá thất bại");
@@ -179,6 +193,10 @@ const UsersComment: React.FC<UsersCommentProps> = ({
     );
   };
 
+  const currentUserAvatar = normalizeAvatar(currentUser.avatar);
+  const currentUserInitial =
+    currentUser.name?.trim()?.charAt(0)?.toUpperCase() || "B";
+
   return (
     <div style={{ marginTop: 24 }}>
       {/* Danh sách bình luận */}
@@ -188,79 +206,82 @@ const UsersComment: React.FC<UsersCommentProps> = ({
         locale={{ emptyText: "Chưa có bình luận nào." }}
         header={comments.length ? `${comments.length} bình luận` : undefined}
         itemLayout="horizontal"
-        renderItem={(item, idx) => (
-          <div
-            key={item._id || `${item.author}-${idx}`}
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: 12,
-              padding: "12px 0",
-              borderBottom: "1px solid #f0f0f0",
-            }}
-          >
-            <Avatar src={item.avatar || undefined}>
-              {!item.avatar ? item.author.charAt(0).toUpperCase() : null}
-            </Avatar>
+        renderItem={(item, idx) => {
+          const avatarSrc = normalizeAvatar(item.avatar);
+          const initial = item.author?.trim()?.charAt(0)?.toUpperCase() || "A";
 
-            <div style={{ flex: 1 }}>
-              <Space direction="vertical" size={6} style={{ width: "100%" }}>
-                {/* header */}
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "baseline",
-                  }}
-                >
-                  <Text strong>{item.author}</Text>
-                  <Text type="secondary" style={{ fontSize: 12 }}>
-                    {dayjs(item.createdAt).fromNow()}
-                  </Text>
-                </div>
+          return (
+            <div
+              key={item._id || `${item.author}-${idx}`}
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 12,
+                padding: "12px 0",
+                borderBottom: "1px solid #f0f0f0",
+              }}
+            >
+              <Avatar src={avatarSrc}>{!avatarSrc ? initial : null}</Avatar>
 
-                {/* rating + content */}
-                <div>
-                  {item.rating ? (
-                    <Rate disabled defaultValue={item.rating} />
-                  ) : null}
-                  <p style={{ margin: "4px 0 0" }}>{item.content}</p>
-                </div>
+              <div style={{ flex: 1 }}>
+                <Space direction="vertical" size={6} style={{ width: "100%" }}>
+                  {/* header */}
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "baseline",
+                    }}
+                  >
+                    <Text strong>{item.author}</Text>
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      {dayjs(item.createdAt).fromNow()}
+                    </Text>
+                  </div>
 
-                {/* actions */}
-                <Space size={16} style={{ color: "rgba(0,0,0,0.45)" }}>
-                  <Tooltip title="Like">
-                    <span
-                      onClick={() => handleLike(idx)}
-                      style={{ cursor: "pointer", userSelect: "none" }}
-                    >
-                      {item.action === "liked" ? (
-                        <LikeFilled />
-                      ) : (
-                        <LikeOutlined />
-                      )}{" "}
-                      {item.likes}
-                    </span>
-                  </Tooltip>
+                  {/* rating + content */}
+                  <div>
+                    {item.rating ? (
+                      <Rate disabled defaultValue={item.rating} />
+                    ) : null}
+                    <p style={{ margin: "4px 0 0" }}>{item.content}</p>
+                  </div>
 
-                  <Tooltip title="Dislike">
-                    <span
-                      onClick={() => handleDislike(idx)}
-                      style={{ cursor: "pointer", userSelect: "none" }}
-                    >
-                      {item.action === "disliked" ? (
-                        <DislikeFilled />
-                      ) : (
-                        <DislikeOutlined />
-                      )}{" "}
-                      {item.dislikes}
-                    </span>
-                  </Tooltip>
+                  {/* actions */}
+                  <Space size={16} style={{ color: "rgba(0,0,0,0.45)" }}>
+                    <Tooltip title="Like">
+                      <span
+                        onClick={() => handleLike(idx)}
+                        style={{ cursor: "pointer", userSelect: "none" }}
+                      >
+                        {item.action === "liked" ? (
+                          <LikeFilled />
+                        ) : (
+                          <LikeOutlined />
+                        )}{" "}
+                        {item.likes}
+                      </span>
+                    </Tooltip>
+
+                    <Tooltip title="Dislike">
+                      <span
+                        onClick={() => handleDislike(idx)}
+                        style={{ cursor: "pointer", userSelect: "none" }}
+                      >
+                        {item.action === "disliked" ? (
+                          <DislikeFilled />
+                        ) : (
+                          <DislikeOutlined />
+                        )}{" "}
+                        {item.dislikes}
+                      </span>
+                    </Tooltip>
+                  </Space>
                 </Space>
-              </Space>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        }}
       />
 
       {/* Form nhập đánh giá */}
@@ -272,10 +293,8 @@ const UsersComment: React.FC<UsersCommentProps> = ({
           marginTop: 24,
         }}
       >
-        <Avatar src={currentUser.avatar || undefined}>
-          {!currentUser.avatar
-            ? currentUser.name.charAt(0).toUpperCase()
-            : null}
+        <Avatar src={currentUserAvatar}>
+          {!currentUserAvatar ? currentUserInitial : null}
         </Avatar>
 
         <div style={{ flex: 1 }}>
