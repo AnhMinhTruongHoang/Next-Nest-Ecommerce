@@ -18,7 +18,6 @@ import {
 } from "antd";
 import { updateProductAction } from "@/lib/product.actions";
 import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
-import { getImageUrl } from "@/utils/getImageUrl";
 
 interface ICategory {
   _id: string;
@@ -37,6 +36,21 @@ interface IProps {
   dataUpdate: null | IProduct;
   setDataUpdate: (v: null | IProduct) => void;
 }
+
+const IMAGE_BASE_URL =
+  process.env.NEXT_PUBLIC_STATIC_URL ||
+  "https://next-nest-ecommerce.onrender.com";
+
+const buildImageUrl = (url?: string) => {
+  if (!url) return "";
+
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+
+  // DB lưu kiểu: /thumbnails/xxx.webp hoặc /slider/xxx.jpg
+  return `${IMAGE_BASE_URL}/images${url}`;
+};
 
 const UpdateProductModal = (props: IProps) => {
   const {
@@ -96,7 +110,7 @@ const UpdateProductModal = (props: IProps) => {
           uid: "-1",
           name: "thumbnail.png",
           status: "done",
-          url: getImageUrl(dataUpdate.thumbnail),
+          url: buildImageUrl(dataUpdate.thumbnail),
           path: dataUpdate.thumbnail,
         } as MyUploadFile,
       ]);
@@ -111,7 +125,7 @@ const UpdateProductModal = (props: IProps) => {
           uid: String(idx),
           name: `slider-${idx}.png`,
           status: "done",
-          url: getImageUrl(p),
+          url: buildImageUrl(p),
           path: p,
         })) as MyUploadFile[]
       );
@@ -191,7 +205,6 @@ const UpdateProductModal = (props: IProps) => {
       sliderPaths = sliderList
         .map((f, idx) => {
           if (f.path) return f.path;
-          // fallback: nếu không có path thì lấy ảnh cũ theo index
           if (Array.isArray(dataUpdate.images)) {
             return dataUpdate.images[idx];
           }
@@ -259,9 +272,8 @@ const UpdateProductModal = (props: IProps) => {
               if (file.status === "done") {
                 const path = file.response?.data?.file as string | undefined;
                 if (path) {
-                  // lưu path relative và url để hiển thị
                   (file as MyUploadFile).path = path;
-                  file.url = getImageUrl(path);
+                  file.url = buildImageUrl(path);
                 }
               }
               setThumbnailList(fileList as MyUploadFile[]);
@@ -352,7 +364,7 @@ const UpdateProductModal = (props: IProps) => {
               const path = raw.startsWith("/") ? raw : `/slider/${raw}`;
 
               (file as MyUploadFile).path = path;
-              file.url = getImageUrl(path);
+              file.url = buildImageUrl(path);
             }
           }
           setSliderList(fileList as MyUploadFile[]);
