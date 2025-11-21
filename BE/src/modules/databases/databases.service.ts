@@ -177,10 +177,10 @@ export class DatabasesService implements OnModuleInit {
                 sold: 0,
                 brand: 'Logitech',
                 category: category._id,
-                thumbnail: '/images/thumbnails/LogitechG102t.jpg',
+                thumbnail: '/thumbnails/LogitechG102t.jpg',
                 images: [
-                  '/images/slider/LogitechG102s2.jpg',
-                  '/images/slider/LogitechG102s3.jpg',
+                  '/slider/LogitechG102s2.jpg',
+                  '/slider/LogitechG102s3.jpg',
                 ],
               },
 
@@ -193,11 +193,11 @@ export class DatabasesService implements OnModuleInit {
                 sold: 0,
                 brand: 'Razer',
                 category: category._id,
-                thumbnail: '/images/thumbnails/RazerDeathAdderT.jpg',
+                thumbnail: '/thumbnails/RazerDeathAdderT.jpg',
                 images: [
-                  '/images/slider/RazerDeathAdders1.jpg',
-                  '/images/slider/RazerDeathAdders2.jpg',
-                  '/images/slider/RazerDeathAdders3.jpg',
+                  '/slider/RazerDeathAdders1.jpg',
+                  '/slider/RazerDeathAdders2.jpg',
+                  '/slider/RazerDeathAdders3.jpg',
                 ],
               },
               {
@@ -209,11 +209,11 @@ export class DatabasesService implements OnModuleInit {
                 sold: 0,
                 brand: 'SteelSeries',
                 category: category._id,
-                thumbnail: '/images/thumbnails/SteelSeriesRivalT.jpg',
+                thumbnail: '/thumbnails/SteelSeriesRivalT.jpg',
                 images: [
-                  '/images/slider/SteelSeriesRivals1.jpg',
-                  '/images/slider/SteelSeriesRivals2.jpg',
-                  '/images/slider/SteelSeriesRivals3.jpg',
+                  '/slider/SteelSeriesRivals1.jpg',
+                  '/slider/SteelSeriesRivals2.jpg',
+                  '/slider/SteelSeriesRivals3.jpg',
                 ],
               },
               {
@@ -225,10 +225,10 @@ export class DatabasesService implements OnModuleInit {
                 sold: 0,
                 brand: 'Razer/zzz',
                 category: category._id,
-                thumbnail: '/images/thumbnails/razer.zzz.mouse.jpg',
+                thumbnail: '/thumbnails/razer.zzz.mouse.jpg',
                 images: [
-                  '/images/slider/mouse.razer.zzz1.jpg',
-                  '/images/slider/mouse.razer.zzz2.jpg',
+                  '/slider/mouse.razer.zzz1.jpg',
+                  '/slider/mouse.razer.zzz2.jpg',
                 ],
               },
               {
@@ -240,10 +240,10 @@ export class DatabasesService implements OnModuleInit {
                 sold: 0,
                 brand: 'Razer/zzz',
                 category: category._id,
-                thumbnail: '/images/thumbnails/razer.zzz.pad.jpg',
+                thumbnail: '/thumbnails/razer.zzz.pad.jpg',
                 images: [
-                  '/images/slider/mouse.razer.zzz2.jpg',
-                  '/images/slider/razer.zzz.jpg',
+                  '/slider/mouse.razer.zzz2.jpg',
+                  '/slider/razer.zzz.jpg',
                 ],
               },
             ];
@@ -260,11 +260,11 @@ export class DatabasesService implements OnModuleInit {
                 sold: 0,
                 brand: 'Razer',
                 category: category._id,
-                thumbnail: '/images/thumbnails/RazerBlackWidowT.jpg',
+                thumbnail: '/thumbnails/RazerBlackWidowT.jpg',
                 images: [
-                  '/images/slider/RazerBlackWidows1.jpg',
-                  '/images/slider/RazerBlackWidows2.jpg',
-                  '/images/slider/RazerBlackWidows3.jpg',
+                  '/slider/RazerBlackWidows1.jpg',
+                  '/slider/RazerBlackWidows2.jpg',
+                  '/slider/RazerBlackWidows3.jpg',
                 ],
               },
 
@@ -277,11 +277,11 @@ export class DatabasesService implements OnModuleInit {
                 sold: 0,
                 brand: 'Corsair',
                 category: category._id,
-                thumbnail: '/images/thumbnails/CorsairK95T.jpg',
+                thumbnail: '/thumbnails/CorsairK95T.jpg',
                 images: [
-                  '/images/slider/CorsairK95s1.jpg',
-                  '/images/slider/CorsairK95s2.jpg',
-                  '/images/slider/CorsairK95s3.jpg',
+                  '/slider/CorsairK95s1.jpg',
+                  '/slider/CorsairK95s2.jpg',
+                  '/slider/CorsairK95s3.jpg',
                 ],
               },
               {
@@ -293,11 +293,11 @@ export class DatabasesService implements OnModuleInit {
                 sold: 0,
                 brand: 'Logitech',
                 category: category._id,
-                thumbnail: '/images/thumbnails/LogitechAuroraT.jpg',
+                thumbnail: '/thumbnails/LogitechAuroraT.jpg',
                 images: [
-                  '/images/slider/LogitechAuroras1.jpg',
-                  '/images/slider/LogitechAuroras2.jpg',
-                  '/images/slider/LogitechAuroras3.jpg',
+                  '/slider/LogitechAuroras1.jpg',
+                  '/slider/LogitechAuroras2.jpg',
+                  '/slider/LogitechAuroras3.jpg',
                 ],
               },
               {
@@ -309,10 +309,10 @@ export class DatabasesService implements OnModuleInit {
                 sold: 0,
                 brand: 'Razer/zzz',
                 category: category._id,
-                thumbnail: '/images/thumbnails/razer.zzz.keyboard.jpg',
+                thumbnail: '/thumbnails/razer.zzz.keyboard.jpg',
                 images: [
-                  '/images/slider/keyoard.razer.zzz1.jpg',
-                  '/images/slider/razer.zzz.jpg',
+                  '/slider/keyoard.razer.zzz1.jpg',
+                  '/slider/razer.zzz.jpg',
                 ],
               },
             ];
@@ -329,11 +329,8 @@ export class DatabasesService implements OnModuleInit {
                 sold: 0,
                 brand: 'ASUS',
                 category: category._id,
-                thumbnail: '/images/thumbnails/ASUSTUF24T.jpg',
-                images: [
-                  '/images/slider/ASUSTUF24s1.jpg',
-                  '/images/slider/ASUSTUF24s2.jpg',
-                ],
+                thumbnail: '/thumbnails/ASUSTUF24T.jpg',
+                images: ['/slider/ASUSTUF24s1.jpg', '/slider/ASUSTUF24s2.jpg'],
               },
               {
                 name: 'Acer Predator 27"',
@@ -344,10 +341,10 @@ export class DatabasesService implements OnModuleInit {
                 sold: 0,
                 brand: 'Acer',
                 category: category._id,
-                thumbnail: '/images/thumbnails/AcerPredator27T.jpg',
+                thumbnail: '/thumbnails/AcerPredator27T.jpg',
                 images: [
-                  '/images/slider/AcerPredator27s1.jpg',
-                  '/images/slider/AcerPredator27s2.jpg',
+                  '/slider/AcerPredator27s1.jpg',
+                  '/slider/AcerPredator27s2.jpg',
                 ],
               },
               {
@@ -359,10 +356,10 @@ export class DatabasesService implements OnModuleInit {
                 sold: 0,
                 brand: 'Samsung',
                 category: category._id,
-                thumbnail: '/images/thumbnails/SamsungOdysseyG5T.jpg',
+                thumbnail: '/thumbnails/SamsungOdysseyG5T.jpg',
                 images: [
-                  '/images/slider/SamsungOdysseyG5s1.jpg',
-                  '/images/slider/SamsungOdysseyG5s2.jpg',
+                  '/slider/SamsungOdysseyG5s1.jpg',
+                  '/slider/SamsungOdysseyG5s2.jpg',
                 ],
               },
             ];
@@ -379,10 +376,10 @@ export class DatabasesService implements OnModuleInit {
                 sold: 0,
                 brand: 'Razer/zzz',
                 category: category._id,
-                thumbnail: '/images/thumbnails/razer.zzz.chair.jpg',
+                thumbnail: '/thumbnails/razer.zzz.chair.jpg',
                 images: [
-                  '/images/slider/chair.razer.zzz1.jpg',
-                  '/images/slider/razer.zzz.jpg',
+                  '/slider/chair.razer.zzz1.jpg',
+                  '/slider/razer.zzz.jpg',
                 ],
               },
               {
@@ -394,10 +391,10 @@ export class DatabasesService implements OnModuleInit {
                 sold: 0,
                 brand: 'DXRacer',
                 category: category._id,
-                thumbnail: '/images/thumbnails/DXRacerFormulaT.jpg',
+                thumbnail: '/thumbnails/DXRacerFormulaT.jpg',
                 images: [
-                  '/images/slider/DXRacerFormulas1.png',
-                  '/images/slider/DXRacerFormulas2.jpg',
+                  '/slider/DXRacerFormulas1.png',
+                  '/slider/DXRacerFormulas2.jpg',
                 ],
               },
               {
@@ -409,10 +406,10 @@ export class DatabasesService implements OnModuleInit {
                 sold: 0,
                 brand: 'Secretlab',
                 category: category._id,
-                thumbnail: '/images/thumbnails/SecretlabTitanEvoT.jpg',
+                thumbnail: '/thumbnails/SecretlabTitanEvoT.jpg',
                 images: [
-                  '/images/slider/SecretlabTitanEvos1.jpg',
-                  '/images/slider/SteelSeriesRivals2.jpg',
+                  '/slider/SecretlabTitanEvos1.jpg',
+                  '/slider/SteelSeriesRivals2.jpg',
                 ],
               },
               {
@@ -424,10 +421,10 @@ export class DatabasesService implements OnModuleInit {
                 sold: 0,
                 brand: 'AKRacing',
                 category: category._id,
-                thumbnail: '/images/thumbnails/AKRacingCoreExT.jpg',
+                thumbnail: '/thumbnails/AKRacingCoreExT.jpg',
                 images: [
-                  '/images/slider/AKRacingCoreExs1.jpg',
-                  '/images/slider/AKRacingCoreEXs2.jpg',
+                  '/slider/AKRacingCoreExs1.jpg',
+                  '/slider/AKRacingCoreEXs2.jpg',
                 ],
               },
             ];
@@ -443,11 +440,8 @@ export class DatabasesService implements OnModuleInit {
                 sold: 0,
                 brand: 'E-dra',
                 category: category._id,
-                thumbnail: '/images/thumbnails/EdraEh414w.png',
-                images: [
-                  '/images/slider/eh414wS1.jpg',
-                  '/images/slider/eh414ws2.jpg',
-                ],
+                thumbnail: '/thumbnails/EdraEh414w.png',
+                images: ['/slider/eh414wS1.jpg', '/slider/eh414ws2.jpg'],
               },
               {
                 name: 'Havit TW980',
@@ -457,11 +451,8 @@ export class DatabasesService implements OnModuleInit {
                 sold: 0,
                 brand: 'Havit',
                 category: category._id,
-                thumbnail: '/images/thumbnails/havitTW9s2.webp',
-                images: [
-                  '/images/slider/havitTW9s1.webp',
-                  '/images/slider/havitTW9.webp',
-                ],
+                thumbnail: '/thumbnails/havitTW9s2.webp',
+                images: ['/slider/havitTW9s1.webp', '/slider/havitTW9.webp'],
               },
               {
                 name: 'Havit Camo',
@@ -471,11 +462,8 @@ export class DatabasesService implements OnModuleInit {
                 sold: 0,
                 brand: 'Havit',
                 category: category._id,
-                thumbnail: '/images/thumbnails/havitC1.jpg',
-                images: [
-                  '/images/slider/havitc1s1.webp',
-                  '/images/slider/havitc1s2.jpg',
-                ],
+                thumbnail: '/thumbnails/havitC1.jpg',
+                images: ['/slider/havitc1s1.webp', '/slider/havitc1s2.jpg'],
               },
               {
                 name: 'Havit H1A',
@@ -485,11 +473,8 @@ export class DatabasesService implements OnModuleInit {
                 sold: 0,
                 brand: 'Havit',
                 category: category._id,
-                thumbnail: '/images/thumbnails/havitH1.jpg',
-                images: [
-                  '/images/slider/havith1s1.jpg',
-                  '/images/slider/havith1s2.jpg',
-                ],
+                thumbnail: '//thumbnails/havitH1.jpg',
+                images: ['/slider/havith1s1.jpg', '/slider/havith1s2.jpg'],
               },
             ];
             break;
@@ -504,11 +489,8 @@ export class DatabasesService implements OnModuleInit {
                 sold: 0,
                 brand: 'E-dra',
                 category: category._id,
-                thumbnail: '/images/thumbnails/EdraCaseW.jpg',
-                images: [
-                  '/images/slider/havitBasss1.webp',
-                  '/images/slider/EdraPads1.jpg',
-                ],
+                thumbnail: '/thumbnails/EdraCaseW.jpg',
+                images: ['/slider/havitBasss1.webp', '/slider/EdraPads1.jpg'],
               },
 
               {
@@ -519,11 +501,8 @@ export class DatabasesService implements OnModuleInit {
                 sold: 0,
                 brand: 'E-dra',
                 category: category._id,
-                thumbnail: '/images/thumbnails/EdraPad.jpg',
-                images: [
-                  '/images/slider/EdraPads1.jpg',
-                  '/images/slider/EdraPads2.jpg',
-                ],
+                thumbnail: '/thumbnails/EdraPad.jpg',
+                images: ['/slider/EdraPads1.jpg', '/slider/EdraPads2.jpg'],
               },
               {
                 name: 'havit Bass',
@@ -533,10 +512,10 @@ export class DatabasesService implements OnModuleInit {
                 sold: 0,
                 brand: 'Havit',
                 category: category._id,
-                thumbnail: '/images/thumbnails/havitBass.jpg',
+                thumbnail: '/thumbnails/havitBass.jpg',
                 images: [
-                  '/images/slider/havitBasss1.webp',
-                  '/images/slider/havitBasss2.webp',
+                  '/slider/havitBasss1.webp',
+                  '/slider/havitBasss2.webp',
                 ],
               },
             ];

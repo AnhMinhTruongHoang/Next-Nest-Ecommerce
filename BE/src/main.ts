@@ -50,7 +50,14 @@ async function bootstrap() {
   app.useStaticAssets(join(__dirname, '..', 'public'));
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
   app.setViewEngine('ejs');
-  app.use('/images', express.static(join(__dirname, '..', 'public/images')));
+
+  // ============================
+  // FIX STATIC IMAGE ROUTE HERE
+  // ============================
+  app.use(
+    '/api/v1/images',
+    express.static(join(__dirname, '..', 'public/images')),
+  );
 
   // Helmet
   app.use(helmet());
