@@ -23,7 +23,7 @@ export class Membership {
   @Prop({ default: 0, min: 0 })
   monthlyFee: number;
 
-  @Prop({ required: true, min: 0 })
+  @Prop({ min: 0, default: 0 })
   minSpend: number;
 
   @Prop({ required: false, min: 0 })
