@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
   ChangePasswordDto,
   CodeAuthDto,
@@ -12,7 +12,6 @@ import mongoose from 'mongoose';
 import { genSaltSync, hashSync, compareSync } from 'bcryptjs';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import aqp from 'api-query-params';
-import { Users } from 'src/health/decorator/customize';
 import { IUser } from 'src/types/user.interface';
 import { MailerService } from '@nestjs-modules/mailer';
 import dayjs from 'dayjs';
@@ -20,14 +19,16 @@ import { customAlphabet } from 'nanoid';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     @InjectModel(UserM.name)
-    private userModel: SoftDeleteModel<UserDocument>,
-    private mailerService: MailerService,
+    private readonly userModel: SoftDeleteModel<UserDocument>,
+    private readonly mailerService: MailerService,
   ) {}
 
+  // ====== Helpers ======
   private generateCode6(): string {
-    // 6 char
     const gen = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', 6);
     return gen();
   }
@@ -37,26 +38,30 @@ export class UsersService {
   }
 
   // Hashes a password with bcrypt
-  getHashPassword = (password: string) => {
+  getHashPassword(password: string) {
     const salt = genSaltSync(10);
     return hashSync(password, salt);
-  };
-
-  // Sends activation email
-  async sendVerificationEmail(email: string, name: string, codeId: string) {
-    await this.mailerService.sendMail({
-      to: email,
-      subject: 'Activate your account',
-      template: 'register.hbs',
-      context: {
-        name: name ?? email,
-        activationCode: codeId,
-      },
-    });
   }
 
-  /* ------------ Admin create user ------------ */
-  async create(createUserDto: CreateUserDto, @Users() user: IUser) {
+  // Gửi mail kích hoạt tài khoản (bọc try/catch để không làm crash API)
+  async sendVerificationEmail(email: string, name: string, codeId: string) {
+    try {
+      await this.mailerService.sendMail({
+        to: email,
+        subject: 'Activate your account',
+        template: 'register.hbs',
+        context: {
+          name: name ?? email,
+          activationCode: codeId,
+        },
+      });
+    } catch (err) {
+      this.logger.error(`❌ Email send failed (activation) to: ${email}`, err);
+    }
+  }
+
+  // ====== Admin create user ======
+  async create(createUserDto: CreateUserDto, user: IUser) {
     const {
       name,
       email,
@@ -85,7 +90,7 @@ export class UsersService {
       phone,
       gender,
       address,
-      role: 'USER',
+      role,
       avatarUrl,
       isActive: false,
       createdBy: {
@@ -97,7 +102,7 @@ export class UsersService {
     return newUser;
   }
 
-  /* ------------ Self-register ------------ */
+  // ====== Self-register ======
   async register(user: RegisterUserDto) {
     const { name, email, password, age, gender, address } = user;
     const emailNorm = this.normalizeEmail(email);
@@ -107,7 +112,7 @@ export class UsersService {
       throw new BadRequestException(`Email: ${emailNorm} is existed.`);
     }
 
-    const codeId = this.generateCode6(); // <— thay cho uuid
+    const codeId = this.generateCode6();
     const hashPassword = this.getHashPassword(password);
 
     const newRegister = await this.userModel.create({
@@ -127,7 +132,7 @@ export class UsersService {
     return newRegister;
   }
 
-  /* ------------ Verify account ------------ */
+  // ====== Verify account ======
   async handleActive(data: CodeAuthDto) {
     const user = await this.userModel.findOne({
       _id: data._id,
@@ -143,7 +148,7 @@ export class UsersService {
     return { message: 'Account activated successfully' };
   }
 
-  /* ------------ Update profile (admin) ------------ */
+  // ====== Update profile (admin) ======
   async update(updateUserDto: UpdateUserDto, user: IUser, _id: string) {
     if (!mongoose.Types.ObjectId.isValid(_id)) {
       throw new BadRequestException('Invalid user ID');
@@ -160,12 +165,11 @@ export class UsersService {
       },
     );
 
-    // trả về user mới (ẩn password)
     const updatedUser = await this.userModel.findById(_id).select('-password');
     return updatedUser;
   }
 
-  /* ------------ Resend activation code ------------ */
+  // ====== Resend activation code ======
   async retryActive(email: string) {
     const emailNorm = this.normalizeEmail(email);
     const user = await this.userModel.findOne({ email: emailNorm });
@@ -174,7 +178,7 @@ export class UsersService {
     if (user.isActive)
       throw new BadRequestException('Account is already activated');
 
-    const codeId = this.generateCode6(); // <— thay cho uuid
+    const codeId = this.generateCode6();
     await this.userModel.updateOne(
       { _id: user._id },
       {
@@ -187,7 +191,7 @@ export class UsersService {
     return { _id: user._id };
   }
 
-  /* ------------ Resend forgot-password code ------------ */
+  // ====== Resend forgot-password code ======
   async retryPassword(email: string) {
     const emailNorm = this.normalizeEmail(email);
     const user = await this.userModel.findOne({ email: emailNorm });
@@ -196,7 +200,7 @@ export class UsersService {
       throw new BadRequestException('Account does not exist');
     }
 
-    const codeId = this.generateCode6(); // <— thay cho uuid
+    const codeId = this.generateCode6();
     await this.userModel.updateOne(
       { _id: user._id },
       {
@@ -205,20 +209,27 @@ export class UsersService {
       },
     );
 
-    await this.mailerService.sendMail({
-      to: user.email,
-      subject: 'Change your password active code',
-      template: 'resetpassword.hbs',
-      context: {
-        name: user?.name ?? user.email,
-        resetCode: codeId,
-      },
-    });
+    try {
+      await this.mailerService.sendMail({
+        to: user.email,
+        subject: 'Change your password active code',
+        template: 'resetpassword.hbs',
+        context: {
+          name: user?.name ?? user.email,
+          resetCode: codeId,
+        },
+      });
+    } catch (err) {
+      this.logger.error(
+        `❌ Email send failed (reset password) to: ${user.email}`,
+        err,
+      );
+    }
 
     return { _id: user._id, email: user.email };
   }
 
-  /* ------------ Change password (by code) ------------ */
+  // ====== Change password (by code) ======
   async changePassword(data: ChangePasswordDto) {
     if (data.confirmPassword !== data.password) {
       throw new BadRequestException('Password is not match !');
@@ -230,7 +241,6 @@ export class UsersService {
       throw new BadRequestException('Account does not exist');
     }
 
-    // Nếu DTO có field 'code', kiểm tra luôn cho chặt (không bắt buộc nếu bạn chưa dùng):
     if ((data as any).code && (data as any).code !== user.codeId) {
       throw new BadRequestException('Invalid or expired code');
     }
@@ -246,7 +256,7 @@ export class UsersService {
     return { isBeforeCheck: true };
   }
 
-  /* ------------ List users ------------ */
+  // ====== List users ======
   async findAll(currentPage: number, limit: number, qs: string) {
     const { filter, sort, population } = aqp(qs);
     delete (filter as any).current;
@@ -278,7 +288,7 @@ export class UsersService {
     };
   }
 
-  /* ------------ Get one ------------ */
+  // ====== Get one ======
   async findOne(id: string) {
     if (!mongoose.Types.ObjectId.isValid(id)) return 'Not found user';
     return this.userModel
@@ -287,7 +297,7 @@ export class UsersService {
       .populate({ path: 'role', select: { name: 1, _id: 1 } });
   }
 
-  /* ------------ For login ------------ */
+  // ====== For login ======
   findOneByUsername(username: string) {
     const emailNorm = this.normalizeEmail(username);
     return this.userModel
@@ -295,7 +305,7 @@ export class UsersService {
       .populate({ path: 'role', select: { name: 1 } });
   }
 
-  /* ------------ Find by email ------------ */
+  // ====== Find by email ======
   async findByEmail(email: string) {
     const emailNorm = this.normalizeEmail(email);
     if (!emailNorm) throw new BadRequestException('Email is required');
@@ -305,12 +315,12 @@ export class UsersService {
       .populate({ path: 'role', select: { name: 1, _id: 1 } });
   }
 
-  /* ------------ Password compare ------------ */
+  // ====== Password compare ======
   isValidPassword(password: string, hash: string) {
     return compareSync(password, hash);
   }
 
-  /* ------------ Soft delete ------------ */
+  // ====== Soft delete ======
   async remove(id: string, user: IUser) {
     if (!mongoose.Types.ObjectId.isValid(id)) return 'Not found user';
 
@@ -333,7 +343,7 @@ export class UsersService {
     return { message: 'User deleted' };
   }
 
-  /* ------------ Tokens ------------ */
+  // ====== Tokens ======
   async updateUserToken(refreshToken: string, _id: string) {
     const updated = await this.userModel.updateOne({ _id }, { refreshToken });
     return { message: 'Token updated', updated };
@@ -345,7 +355,7 @@ export class UsersService {
       .populate({ path: 'role', select: { name: 1 } });
   }
 
-  /* ------------ Strategies helpers ------------ */
+  // ====== Strategies helpers ======
   async validateUser(username: string, password: string) {
     const emailNorm = this.normalizeEmail(username);
     const user = await this.userModel.findOne({ email: emailNorm });

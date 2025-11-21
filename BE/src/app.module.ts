@@ -57,7 +57,7 @@ import { VouchersModule } from './modules/voucher/vouchers.module';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         transport: {
-          host: 'smtp.gmail.com',
+          host: configService.get<string>('EMAIL_HOST') || 'smtp.gmail.com',
           port: 465,
           secure: true,
           auth: {
@@ -66,7 +66,7 @@ import { VouchersModule } from './modules/voucher/vouchers.module';
           },
         },
         defaults: {
-          from: 'minhlapro01@gmail.com',
+          from: `"GamerZone" <${configService.get<string>('EMAIL_AUTH_USER')}>`,
         },
         template: {
           dir: process.cwd() + '/src/mail/templates/',
