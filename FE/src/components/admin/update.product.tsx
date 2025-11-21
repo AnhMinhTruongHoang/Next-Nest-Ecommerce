@@ -27,6 +27,8 @@ interface ICategory {
 
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
+type MyUploadFile = UploadFile & { path?: string };
+
 interface IProps {
   access_token: string;
   getData: () => Promise<void>;
@@ -50,14 +52,13 @@ const UpdateProductModal = (props: IProps) => {
   const { Option } = Select;
   const [isSubmit, setIsSubmit] = useState(false);
   const [categories, setCategories] = useState<ICategory[]>([]);
-  const [thumbnailList, setThumbnailList] = useState<UploadFile[]>([]);
-  const [sliderList, setSliderList] = useState<UploadFile[]>([]);
+  const [thumbnailList, setThumbnailList] = useState<MyUploadFile[]>([]);
+  const [sliderList, setSliderList] = useState<MyUploadFile[]>([]);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
   const [loading, setLoading] = useState(false);
   const { notification } = App.useApp();
 
-  // Lấy danh mục khi mở modal
   useEffect(() => {
     if (isUpdateModalOpen) {
       fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/categories`, {
@@ -73,51 +74,53 @@ const UpdateProductModal = (props: IProps) => {
     }
   }, [isUpdateModalOpen, access_token, notification]);
 
-  // Set form + ảnh khi có dataUpdate
+  /* ============== ĐỔ DỮ LIỆU FORM + ẢNH ============== */
   useEffect(() => {
-    if (dataUpdate) {
-      form.setFieldsValue({
-        name: dataUpdate.name,
-        brand: dataUpdate.brand,
-        price: dataUpdate.price,
-        stock: dataUpdate.stock,
-        category:
-          typeof dataUpdate.category === "object"
-            ? (dataUpdate.category as any)._id
-            : dataUpdate.category,
-      });
+    if (!dataUpdate) return;
 
-      // thumbnail
-      if (dataUpdate.thumbnail) {
-        setThumbnailList([
-          {
-            uid: "-1",
-            name: "thumbnail.png",
-            status: "done",
-            url: getImageUrl(dataUpdate.thumbnail),
-          } as UploadFile,
-        ]);
-      } else {
-        setThumbnailList([]);
-      }
+    form.setFieldsValue({
+      name: dataUpdate.name,
+      brand: dataUpdate.brand,
+      price: dataUpdate.price,
+      stock: dataUpdate.stock,
+      category:
+        typeof dataUpdate.category === "object"
+          ? (dataUpdate.category as any)._id
+          : dataUpdate.category,
+    });
 
-      // slider images
-      if (Array.isArray(dataUpdate.images)) {
-        setSliderList(
-          dataUpdate.images.map((url, idx) => ({
-            uid: String(idx),
-            name: `slider-${idx}.png`,
-            status: "done",
-            url: getImageUrl(url),
-          })) as UploadFile[]
-        );
-      } else {
-        setSliderList([]);
-      }
+    // Thumbnail: lưu cả url để hiển thị, path để gửi lại BE
+    if (dataUpdate.thumbnail) {
+      setThumbnailList([
+        {
+          uid: "-1",
+          name: "thumbnail.png",
+          status: "done",
+          url: getImageUrl(dataUpdate.thumbnail),
+          path: dataUpdate.thumbnail,
+        } as MyUploadFile,
+      ]);
+    } else {
+      setThumbnailList([]);
+    }
+
+    // Slider images
+    if (Array.isArray(dataUpdate.images)) {
+      setSliderList(
+        dataUpdate.images.map((p, idx) => ({
+          uid: String(idx),
+          name: `slider-${idx}.png`,
+          status: "done",
+          url: getImageUrl(p),
+          path: p,
+        })) as MyUploadFile[]
+      );
+    } else {
+      setSliderList([]);
     }
   }, [dataUpdate, form]);
 
-  // ===== helper preview =====
+  /* ============== PREVIEW ẢNH ============== */
   const getBase64 = (file: FileType): Promise<string> =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -167,56 +170,62 @@ const UpdateProductModal = (props: IProps) => {
     setSliderList([]);
   };
 
+  /* ============== SUBMIT ============== */
   const onFinish = async (values: any) => {
     setIsSubmit(true);
-    if (dataUpdate) {
-      // thumbnail: ưu tiên path trong response, fallback về URL hiện tại
-      const thumbnailFile = thumbnailList.find((f) => f.status === "done");
-      const thumbnailUrl =
-        thumbnailFile?.response?.data?.file ||
-        thumbnailFile?.url ||
-        dataUpdate.thumbnail ||
-        "";
 
-      // slider images: lấy path từ response, nếu không có thì dùng url hiện tại
-      const sliderUrls = sliderList
-        .filter((f) => f.status === "done")
-        .flatMap((f) => {
-          if (Array.isArray(f.response?.data?.files)) {
-            // BE trả về mảng file path / filename
-            return f.response.data.files as string[];
-          }
-          if (typeof f.url === "string") {
-            return [f.url];
-          }
-          return [];
-        })
-        .filter((u) => !!u);
-
-      const payload = {
-        _id: dataUpdate._id,
-        ...values,
-        thumbnail: thumbnailUrl,
-        images: sliderUrls,
-      };
-
-      const d = await updateProductAction(payload, access_token);
-      if (d.data) {
-        await getData();
-        notification.success({
-          message: "Cập nhật sản phẩm thành công.",
-        });
-        handleCloseModal();
-      } else {
-        notification.error({
-          message: "Có lỗi xảy ra",
-          description: JSON.stringify(d.message),
-        });
-      }
+    if (!dataUpdate) {
+      setIsSubmit(false);
+      return;
     }
+
+    // thumbnail: lấy path (relative) từ file.path, nếu không có thì dùng path cũ
+    const thumbnailFile = thumbnailList[0] as MyUploadFile | undefined;
+    const thumbnailPath = thumbnailFile?.path || dataUpdate.thumbnail || "";
+
+    // slider: map tất cả file.path, fallback về dataUpdate.images nếu file không có path
+    let sliderPaths: string[] = [];
+
+    if (sliderList.length) {
+      sliderPaths = sliderList
+        .map((f, idx) => {
+          if (f.path) return f.path;
+          // fallback: nếu không có path thì lấy ảnh cũ theo index
+          if (Array.isArray(dataUpdate.images)) {
+            return dataUpdate.images[idx];
+          }
+          return null;
+        })
+        .filter((p): p is string => !!p);
+    } else if (Array.isArray(dataUpdate.images)) {
+      sliderPaths = dataUpdate.images;
+    }
+
+    const payload = {
+      _id: dataUpdate._id,
+      ...values,
+      thumbnail: thumbnailPath,
+      images: sliderPaths,
+    };
+
+    const d = await updateProductAction(payload, access_token);
+    if (d.data) {
+      await getData();
+      notification.success({
+        message: "Cập nhật sản phẩm thành công.",
+      });
+      handleCloseModal();
+    } else {
+      notification.error({
+        message: "Có lỗi xảy ra",
+        description: JSON.stringify(d.message),
+      });
+    }
+
     setIsSubmit(false);
   };
 
+  /* ============== RENDER ============== */
   return (
     <Modal
       title={<div style={{ textAlign: "center" }}>Cập nhật sản phẩm</div>}
@@ -249,10 +258,12 @@ const UpdateProductModal = (props: IProps) => {
               if (file.status === "done") {
                 const path = file.response?.data?.file as string | undefined;
                 if (path) {
+                  // lưu path relative và url để hiển thị
+                  (file as MyUploadFile).path = path;
                   file.url = getImageUrl(path);
                 }
               }
-              setThumbnailList(fileList);
+              setThumbnailList(fileList as MyUploadFile[]);
             }}
             onPreview={handlePreview}
           >
@@ -288,9 +299,7 @@ const UpdateProductModal = (props: IProps) => {
         <Form.Item
           label="Tồn kho"
           name="stock"
-          rules={[
-            { required: true, message: "Vui lòng nhập số lượng tồn kho!" },
-          ]}
+          rules={[{ required: true, message: "Vui lòng nhập số lượng tồn!" }]}
         >
           <InputNumber style={{ width: "100%" }} min={0} />
         </Form.Item>
@@ -338,13 +347,14 @@ const UpdateProductModal = (props: IProps) => {
           if (file.status === "done") {
             const urls = file.response?.data?.files as string[] | undefined;
             if (Array.isArray(urls) && urls.length > 0) {
-              const raw = urls[0];
-              // BE có thể trả filename hoặc path, xử lý cả 2
+              const raw = urls[0]; // BE trả về filename hoặc path
               const path = raw.startsWith("/") ? raw : `/slider/${raw}`;
+
+              (file as MyUploadFile).path = path;
               file.url = getImageUrl(path);
             }
           }
-          setSliderList(fileList);
+          setSliderList(fileList as MyUploadFile[]);
         }}
         onPreview={handlePreview}
       >
