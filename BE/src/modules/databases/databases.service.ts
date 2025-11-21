@@ -120,6 +120,7 @@ export class DatabasesService implements OnModuleInit {
           pointMultiplier: 1,
           freeShipping: false,
           monthlyFee: 0,
+          minSpend: 500000,
         },
         {
           name: 'Silver',
@@ -128,6 +129,7 @@ export class DatabasesService implements OnModuleInit {
           pointMultiplier: 1.5,
           freeShipping: false,
           monthlyFee: 5,
+          minSpend: 1000000,
         },
         {
           name: 'Gold',
@@ -136,6 +138,7 @@ export class DatabasesService implements OnModuleInit {
           pointMultiplier: 2,
           freeShipping: true,
           monthlyFee: 10,
+          minSpend: 5000000,
         },
       ]);
       this.logger.log('>>> INIT MEMBERSHIPS DONE...');
