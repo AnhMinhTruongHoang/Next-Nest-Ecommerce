@@ -127,6 +127,7 @@ const UpdateProductModal = (props: IProps) => {
       reader.readAsDataURL(file);
       reader.onload = () => resolve(reader.result as string);
       reader.onerror = (error) => reject(error);
+      console.log(dataUpdate);
     });
 
   const handlePreview = async (file: UploadFile) => {
