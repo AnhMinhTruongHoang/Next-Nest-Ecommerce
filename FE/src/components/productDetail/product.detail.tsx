@@ -1,5 +1,3 @@
-// ProductDetail.tsx - cleaned version using getImageUrl
-
 "use client";
 
 import {
