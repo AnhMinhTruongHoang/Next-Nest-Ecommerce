@@ -18,6 +18,7 @@ import {
 } from "antd";
 import { updateProductAction } from "@/lib/product.actions";
 import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
+import { getImageUrl } from "@/utils/getImageUrl";
 
 interface ICategory {
   _id: string;
@@ -56,7 +57,7 @@ const UpdateProductModal = (props: IProps) => {
   const [loading, setLoading] = useState(false);
   const { notification } = App.useApp();
 
-  // Lấy danh sách danh mục khi modal mở
+  // Lấy danh mục khi mở modal
   useEffect(() => {
     if (isUpdateModalOpen) {
       fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/categories`, {
@@ -65,18 +66,14 @@ const UpdateProductModal = (props: IProps) => {
         .then((res) => res.json())
         .then((d) => {
           if (d.data) setCategories(d.data);
+        })
+        .catch(() => {
+          notification.error({ message: "Không tải được danh mục" });
         });
     }
-  }, [isUpdateModalOpen]);
+  }, [isUpdateModalOpen, access_token, notification]);
 
-  // Hàm build URL đầy đủ
-  const getFullUrl = (url: string) => {
-    if (!url) return "";
-    if (url.startsWith("http")) return url;
-    return `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`;
-  };
-
-  // Set giá trị form + load ảnh khi có dataUpdate
+  // Set form + ảnh khi có dataUpdate
   useEffect(() => {
     if (dataUpdate) {
       form.setFieldsValue({
@@ -90,35 +87,37 @@ const UpdateProductModal = (props: IProps) => {
             : dataUpdate.category,
       });
 
+      // thumbnail
       if (dataUpdate.thumbnail) {
         setThumbnailList([
           {
             uid: "-1",
             name: "thumbnail.png",
             status: "done",
-            url: getFullUrl(dataUpdate.thumbnail),
+            url: getImageUrl(dataUpdate.thumbnail),
           } as UploadFile,
         ]);
       } else {
         setThumbnailList([]);
       }
 
+      // slider images
       if (Array.isArray(dataUpdate.images)) {
         setSliderList(
           dataUpdate.images.map((url, idx) => ({
             uid: String(idx),
             name: `slider-${idx}.png`,
             status: "done",
-            url: getFullUrl(url),
+            url: getImageUrl(url),
           })) as UploadFile[]
         );
       } else {
         setSliderList([]);
       }
     }
-  }, [dataUpdate]);
+  }, [dataUpdate, form]);
 
-  // Xử lý preview ảnh
+  // ===== helper preview =====
   const getBase64 = (file: FileType): Promise<string> =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -140,13 +139,16 @@ const UpdateProductModal = (props: IProps) => {
       file.type === "image/jpeg" ||
       file.type === "image/png" ||
       file.type === "image/webp";
+
     if (!isValid) {
       message.error("Chỉ được phép tải lên file JPG/PNG/WEBP!");
     }
+
     const isLt5M = file.size / 1024 / 1024 < 5;
     if (!isLt5M) {
       message.error("Ảnh phải nhỏ hơn 5MB!");
     }
+
     return isValid && isLt5M;
   };
 
@@ -168,22 +170,28 @@ const UpdateProductModal = (props: IProps) => {
   const onFinish = async (values: any) => {
     setIsSubmit(true);
     if (dataUpdate) {
+      // thumbnail: ưu tiên path trong response, fallback về URL hiện tại
       const thumbnailFile = thumbnailList.find((f) => f.status === "done");
       const thumbnailUrl =
-        thumbnailFile?.response?.data?.file || thumbnailFile?.url || "";
+        thumbnailFile?.response?.data?.file ||
+        thumbnailFile?.url ||
+        dataUpdate.thumbnail ||
+        "";
 
+      // slider images: lấy path từ response, nếu không có thì dùng url hiện tại
       const sliderUrls = sliderList
         .filter((f) => f.status === "done")
         .flatMap((f) => {
           if (Array.isArray(f.response?.data?.files)) {
-            return f.response.data.files;
+            // BE trả về mảng file path / filename
+            return f.response.data.files as string[];
           }
           if (typeof f.url === "string") {
             return [f.url];
           }
           return [];
         })
-        .filter((url) => !!url);
+        .filter((u) => !!u);
 
       const payload = {
         _id: dataUpdate._id,
@@ -239,9 +247,9 @@ const UpdateProductModal = (props: IProps) => {
             fileList={thumbnailList}
             onChange={({ file, fileList }) => {
               if (file.status === "done") {
-                const url = file.response?.data?.file;
-                if (url) {
-                  file.url = getFullUrl(url);
+                const path = file.response?.data?.file as string | undefined;
+                if (path) {
+                  file.url = getImageUrl(path);
                 }
               }
               setThumbnailList(fileList);
@@ -280,7 +288,9 @@ const UpdateProductModal = (props: IProps) => {
         <Form.Item
           label="Tồn kho"
           name="stock"
-          rules={[{ required: true, message: "Vui lòng nhập số lượng tồn!" }]}
+          rules={[
+            { required: true, message: "Vui lòng nhập số lượng tồn kho!" },
+          ]}
         >
           <InputNumber style={{ width: "100%" }} min={0} />
         </Form.Item>
@@ -326,9 +336,12 @@ const UpdateProductModal = (props: IProps) => {
         fileList={sliderList}
         onChange={({ file, fileList }) => {
           if (file.status === "done") {
-            const urls = file.response?.data?.files;
+            const urls = file.response?.data?.files as string[] | undefined;
             if (Array.isArray(urls) && urls.length > 0) {
-              file.url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/images/slider/${urls[0]}`;
+              const raw = urls[0];
+              // BE có thể trả filename hoặc path, xử lý cả 2
+              const path = raw.startsWith("/") ? raw : `/slider/${raw}`;
+              file.url = getImageUrl(path);
             }
           }
           setSliderList(fileList);
