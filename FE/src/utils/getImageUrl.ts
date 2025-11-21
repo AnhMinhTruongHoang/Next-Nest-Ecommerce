@@ -1,7 +1,12 @@
-const BACKEND_URL = "https://next-nest-ecommerce.onrender.com";
+/// url images
+const BACKEND_URL = "https://next-nest-ecommerce.onrender.com/api/v1";
 
 export const getImageUrl = (url?: string) => {
   if (!url) return "";
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+
+  // nếu đã full URL
+  if (url.startsWith("http")) return url;
+
+  // DB lưu dạng /slider/... hoặc /thumbnails/...
   return `${BACKEND_URL}/images${url}`;
 };
