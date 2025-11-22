@@ -176,7 +176,7 @@ export default function AppHeader() {
 
     (async () => {
       try {
-        const res = await fetch(`${backendURL}/api/v1/categories`);
+        const res = await fetch(`${backendURL}/categories`);
         const json = await res.json();
         const arr: Array<{ _id: string; name: string }> = json?.data ?? [];
         const map: Record<string, string> = {};
