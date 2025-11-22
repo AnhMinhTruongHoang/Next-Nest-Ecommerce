@@ -155,8 +155,7 @@ export default function AppHeader() {
   const [suggestions, setSuggestions] = useState<SuggestItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [catMapByName, setCatMapByName] = useState<Record<string, string>>({});
-  const backendURL =
-    process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+  const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   const screens = useBreakpoint();
   const isMobileUI = !screens.md; // < 768px
@@ -430,7 +429,7 @@ export default function AppHeader() {
     setLoading(true);
     try {
       const res = await fetch(
-        `${backendURL}/api/v1/products/suggest?q=${encodeURIComponent(q)}`
+        `${backendURL}/products/suggest?q=${encodeURIComponent(q)}`
       );
       const json = await res.json();
       const items: SuggestItem[] = Array.isArray(json)
