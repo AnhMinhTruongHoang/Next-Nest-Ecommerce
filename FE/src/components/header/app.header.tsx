@@ -417,7 +417,6 @@ export default function AppHeader() {
     </div>
   );
 
-  // --- Search suggestions with tiny debounce
   const debounceRef = useRef<number | null>(null);
 
   const fetchSuggestions = async (keyword: string) => {
@@ -477,14 +476,16 @@ export default function AppHeader() {
     const items = [
       {
         key: "profile",
-        label: <span onClick={() => setOpenManageAccount(true)}>Profile</span>,
+        label: (
+          <span onClick={() => setOpenManageAccount(true)}>Hồ sơ cá nhân</span>
+        ),
         icon: <UserIcon size={16} />,
       },
       ...(session?.user?.role === "ADMIN"
         ? [
             {
               key: "dashboard",
-              label: <NextLink href={`/dashboard`}>Dashboard</NextLink>,
+              label: <NextLink href={`/dashboard`}>Trang quản trị</NextLink>,
               icon: <DashboardFilled />,
             },
           ]
@@ -501,7 +502,7 @@ export default function AppHeader() {
           ]),
       {
         key: "logout",
-        label: <span onClick={handleLogout}>Logout</span>,
+        label: <span onClick={handleLogout}>Đăng xuất</span>,
         icon: <LogoutOutlined />,
       },
     ];
@@ -531,11 +532,11 @@ export default function AppHeader() {
             size={36}
             style={{ background: "#9b59b6", border: "2px solid #00ffe0" }}
           >
-            {session?.user?.name?.charAt(0)?.toUpperCase() || "U"}
+            {session?.user?.name?.charAt(0)?.toUpperCase() || "K"}
           </Avatar>
           <div style={{ lineHeight: 1.2 }}>
             <div style={{ fontWeight: 600, fontSize: 13, color: "#111" }}>
-              {session?.user?.name || "User"}
+              {session?.user?.name || "Khách"}
             </div>
             <div style={{ fontSize: 12, color: "#888" }}>
               {session?.user?.email}
@@ -818,7 +819,7 @@ export default function AppHeader() {
         <div className="acct">
           {status === "loading" ? null : session ? (
             <>
-              {/* Desktop: Dropdown đẹp */}
+              {/* Desktop: Dropdown user */}
               {!isMobileUI ? (
                 <Dropdown
                   open={openUserMenu}
@@ -832,11 +833,10 @@ export default function AppHeader() {
                     style={{
                       backgroundColor: "#9b59b6",
                       cursor: "pointer",
-                      border: "2px solid #00ffe0",
                     }}
                     size={35}
                   >
-                    {session?.user?.name?.charAt(0)?.toUpperCase() || "U"}
+                    {session?.user?.name?.charAt(0)?.toUpperCase() || "K"}
                   </Avatar>
                 </Dropdown>
               ) : (
@@ -850,7 +850,7 @@ export default function AppHeader() {
                   size={35}
                   onClick={() => setOpenUserMenu(true)}
                 >
-                  {session?.user?.name?.charAt(0)?.toUpperCase() || "U"}
+                  {session?.user?.name?.charAt(0)?.toUpperCase() || "K"}
                 </Avatar>
               )}
 
@@ -885,11 +885,11 @@ export default function AppHeader() {
                       border: "2px solid #00ffe0",
                     }}
                   >
-                    {session?.user?.name?.charAt(0)?.toUpperCase() || "U"}
+                    {session?.user?.name?.charAt(0)?.toUpperCase() || "K"}
                   </Avatar>
                   <div style={{ lineHeight: 1.2 }}>
                     <div style={{ fontWeight: 600 }}>
-                      {session?.user?.name || "User"}
+                      {session?.user?.name || "Khách"}
                     </div>
                     <div style={{ color: "#888", fontSize: 12 }}>
                       {session?.user?.email}
@@ -902,7 +902,7 @@ export default function AppHeader() {
                   dataSource={[
                     {
                       key: "profile",
-                      text: "Profile",
+                      text: "Hồ sơ cá nhân",
                       onClick: () => setOpenManageAccount(true),
                       icon: <UserIcon size={18} />,
                     },
@@ -910,7 +910,7 @@ export default function AppHeader() {
                       ? [
                           {
                             key: "dashboard",
-                            text: "Dashboard",
+                            text: "Trang quản trị",
                             onClick: () => router.push("/dashboard"),
                             icon: <DashboardFilled />,
                           },
@@ -925,7 +925,7 @@ export default function AppHeader() {
                         ]),
                     {
                       key: "logout",
-                      text: "Logout",
+                      text: "Đăng xuất",
                       onClick: handleLogout,
                       icon: <LogoutOutlined />,
                     },
@@ -964,7 +964,7 @@ export default function AppHeader() {
               href="/auth/signin"
               style={{ color: "#fff", fontWeight: 500, cursor: "pointer" }}
             >
-              Login
+              Đăng nhập
             </NextLink>
           )}
 

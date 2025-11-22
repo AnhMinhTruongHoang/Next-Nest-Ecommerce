@@ -48,7 +48,6 @@ const buildImageUrl = (url?: string) => {
     return url;
   }
 
-  // DB lưu kiểu: /thumbnails/xxx.webp hoặc /slider/xxx.jpg
   return `${IMAGE_BASE_URL}/images${url}`;
 };
 

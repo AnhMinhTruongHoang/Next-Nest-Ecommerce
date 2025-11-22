@@ -312,7 +312,7 @@ const UserInfoModal: React.FC<IUserInfoModalProps> = ({
             <Col xs={24} md={14}>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <Typography.Text strong>Tiến độ lên hạng</Typography.Text>
-                <Tooltip title="Tính theo minSpend/maxSpend của từng hạng">
+                <Tooltip title="Tính theo Tổng giá trị đơn hàng của từng hạng">
                   <InfoCircleOutlined />
                 </Tooltip>
               </div>
