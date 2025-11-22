@@ -110,37 +110,41 @@ export class DatabasesService implements OnModuleInit {
     }
 
     /** ---------------- Seed Memberships ---------------- */
+    const membershipsSeed = [
+      {
+        name: 'Bronze',
+        description: 'Hạng cơ bản cho khách mới',
+        discountRate: 0,
+        pointMultiplier: 1,
+        freeShipping: false,
+        monthlyFee: 0,
+        minSpend: 0,
+        maxSpend: 1_000_000 - 1,
+      },
+      {
+        name: 'Silver',
+        description: 'Hạng thành viên với ưu đãi tốt hơn',
+        discountRate: 5,
+        pointMultiplier: 1.5,
+        freeShipping: false,
+        monthlyFee: 50_000,
+        minSpend: 1_000_000,
+        maxSpend: 5_000_000 - 1,
+      },
+      {
+        name: 'Gold',
+        description: 'Hạng cao cấp với nhiều quyền lợi nhất',
+        discountRate: 10,
+        pointMultiplier: 2,
+        freeShipping: true,
+        monthlyFee: 100_000,
+        minSpend: 5_000_000,
+      },
+    ];
+
     const countMemberships = await this.membershipsModel.countDocuments();
     if (countMemberships === 0) {
-      await this.membershipsModel.insertMany([
-        {
-          name: 'Bronze',
-          description: 'Basic membership',
-          discountRate: 0,
-          pointMultiplier: 1,
-          freeShipping: false,
-          monthlyFee: 0,
-          minSpend: 500000,
-        },
-        {
-          name: 'Silver',
-          description: 'Better benefits',
-          discountRate: 5,
-          pointMultiplier: 1.5,
-          freeShipping: false,
-          monthlyFee: 5,
-          minSpend: 1000000,
-        },
-        {
-          name: 'Gold',
-          description: 'Premium benefits',
-          discountRate: 10,
-          pointMultiplier: 2,
-          freeShipping: true,
-          monthlyFee: 10,
-          minSpend: 5000000,
-        },
-      ]);
+      await this.membershipsModel.insertMany(membershipsSeed);
       this.logger.log('>>> INIT MEMBERSHIPS DONE...');
     }
 
