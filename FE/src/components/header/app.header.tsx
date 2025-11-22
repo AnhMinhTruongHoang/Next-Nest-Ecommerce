@@ -155,6 +155,8 @@ export default function AppHeader() {
   const [suggestions, setSuggestions] = useState<SuggestItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [catMapByName, setCatMapByName] = useState<Record<string, string>>({});
+  const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
   const screens = useBreakpoint();
   const isMobileUI = !screens.md; // < 768px
   const { token } = useToken();
@@ -173,9 +175,7 @@ export default function AppHeader() {
 
     (async () => {
       try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/categories`
-        );
+        const res = await fetch(`${backendURL}/categories`);
         const json = await res.json();
         const arr: Array<{ _id: string; name: string }> = json?.data ?? [];
         const map: Record<string, string> = {};
@@ -189,7 +189,7 @@ export default function AppHeader() {
         console.error("Load categories failed", e);
       }
     })();
-  }, [process.env.NEXT_PUBLIC_BACKEND_URL]);
+  }, [backendURL]);
 
   const handleLogout = () => {
     localStorage.removeItem("access_token");
@@ -417,6 +417,7 @@ export default function AppHeader() {
     </div>
   );
 
+  // --- Search suggestions with tiny debounce
   const debounceRef = useRef<number | null>(null);
 
   const fetchSuggestions = async (keyword: string) => {
@@ -428,9 +429,7 @@ export default function AppHeader() {
     setLoading(true);
     try {
       const res = await fetch(
-        `${
-          process.env.NEXT_PUBLIC_BACKEND_URL
-        }/products/suggest?q=${encodeURIComponent(q)}`
+        `${backendURL}/products/suggest?q=${encodeURIComponent(q)}`
       );
       const json = await res.json();
       const items: SuggestItem[] = Array.isArray(json)
@@ -476,16 +475,14 @@ export default function AppHeader() {
     const items = [
       {
         key: "profile",
-        label: (
-          <span onClick={() => setOpenManageAccount(true)}>Hồ sơ cá nhân</span>
-        ),
+        label: <span onClick={() => setOpenManageAccount(true)}>Profile</span>,
         icon: <UserIcon size={16} />,
       },
       ...(session?.user?.role === "ADMIN"
         ? [
             {
               key: "dashboard",
-              label: <NextLink href={`/dashboard`}>Trang quản trị</NextLink>,
+              label: <NextLink href={`/dashboard`}>Quản lý</NextLink>,
               icon: <DashboardFilled />,
             },
           ]
@@ -532,11 +529,11 @@ export default function AppHeader() {
             size={36}
             style={{ background: "#9b59b6", border: "2px solid #00ffe0" }}
           >
-            {session?.user?.name?.charAt(0)?.toUpperCase() || "K"}
+            {session?.user?.name?.charAt(0)?.toUpperCase() || "U"}
           </Avatar>
           <div style={{ lineHeight: 1.2 }}>
             <div style={{ fontWeight: 600, fontSize: 13, color: "#111" }}>
-              {session?.user?.name || "Khách"}
+              {session?.user?.name || "User"}
             </div>
             <div style={{ fontSize: 12, color: "#888" }}>
               {session?.user?.email}
@@ -819,7 +816,7 @@ export default function AppHeader() {
         <div className="acct">
           {status === "loading" ? null : session ? (
             <>
-              {/* Desktop: Dropdown user */}
+              {/* Desktop: Dropdown đẹp */}
               {!isMobileUI ? (
                 <Dropdown
                   open={openUserMenu}
@@ -833,10 +830,11 @@ export default function AppHeader() {
                     style={{
                       backgroundColor: "#9b59b6",
                       cursor: "pointer",
+                      border: "2px solid #00ffe0",
                     }}
                     size={35}
                   >
-                    {session?.user?.name?.charAt(0)?.toUpperCase() || "K"}
+                    {session?.user?.name?.charAt(0)?.toUpperCase() || "U"}
                   </Avatar>
                 </Dropdown>
               ) : (
@@ -850,7 +848,7 @@ export default function AppHeader() {
                   size={35}
                   onClick={() => setOpenUserMenu(true)}
                 >
-                  {session?.user?.name?.charAt(0)?.toUpperCase() || "K"}
+                  {session?.user?.name?.charAt(0)?.toUpperCase() || "U"}
                 </Avatar>
               )}
 
@@ -885,11 +883,11 @@ export default function AppHeader() {
                       border: "2px solid #00ffe0",
                     }}
                   >
-                    {session?.user?.name?.charAt(0)?.toUpperCase() || "K"}
+                    {session?.user?.name?.charAt(0)?.toUpperCase() || "U"}
                   </Avatar>
                   <div style={{ lineHeight: 1.2 }}>
                     <div style={{ fontWeight: 600 }}>
-                      {session?.user?.name || "Khách"}
+                      {session?.user?.name || "User"}
                     </div>
                     <div style={{ color: "#888", fontSize: 12 }}>
                       {session?.user?.email}
@@ -902,7 +900,7 @@ export default function AppHeader() {
                   dataSource={[
                     {
                       key: "profile",
-                      text: "Hồ sơ cá nhân",
+                      text: "Profile",
                       onClick: () => setOpenManageAccount(true),
                       icon: <UserIcon size={18} />,
                     },
@@ -910,7 +908,7 @@ export default function AppHeader() {
                       ? [
                           {
                             key: "dashboard",
-                            text: "Trang quản trị",
+                            text: "Dashboard",
                             onClick: () => router.push("/dashboard"),
                             icon: <DashboardFilled />,
                           },
@@ -925,7 +923,7 @@ export default function AppHeader() {
                         ]),
                     {
                       key: "logout",
-                      text: "Đăng xuất",
+                      text: "Logout",
                       onClick: handleLogout,
                       icon: <LogoutOutlined />,
                     },
