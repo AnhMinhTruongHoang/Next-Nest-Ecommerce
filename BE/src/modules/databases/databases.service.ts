@@ -437,7 +437,7 @@ export class DatabasesService implements OnModuleInit {
             ];
             break;
 
-          case 'Headsets':
+          case 'Headset':
             productsToInsert = [
               {
                 name: 'EdraEh414w',
