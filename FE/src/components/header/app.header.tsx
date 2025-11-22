@@ -355,8 +355,14 @@ export default function AppHeader() {
     }
     const id = catMapByName[catName.toLowerCase()];
     const sp = new URLSearchParams();
-    if (id) sp.set("category", id);
-    else sp.set("categoryName", catName);
+
+    if (!id) {
+      console.error("Không tìm được category id cho:", catName, catMapByName);
+      router.push("/productsList");
+      return;
+    }
+
+    sp.set("category", id);
     sp.set("sort", "-sold");
     router.push(`/productsList?${sp.toString()}`);
   };
