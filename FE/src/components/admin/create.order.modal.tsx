@@ -43,7 +43,6 @@ const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
   const buildAuthHeader = () =>
     accessToken?.startsWith("Bearer ") ? accessToken : `Bearer ${accessToken}`;
 
-  // 🔹 Load list sản phẩm khi mở modal
   useEffect(() => {
     if (!isOpen) return;
 
@@ -177,8 +176,11 @@ const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
       confirmLoading={submitting}
       maskClosable={false}
       width={900}
+      styles={{
+        body: { padding: "24px 36px" },
+      }}
       title={
-        <div style={{ textAlign: "center", fontWeight: 600, fontSize: 18 }}>
+        <div style={{ textAlign: "center", fontWeight: 700, fontSize: 20 }}>
           TẠO ĐƠN HÀNG MỚI
         </div>
       }
@@ -193,11 +195,18 @@ const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
           paymentMethod: "COD",
           paymentStatus: "UNPAID",
         }}
+        style={{ width: "100%", marginTop: 12 }}
       >
-        <Divider>Thông tin khách hàng</Divider>
-        <Space style={{ width: "100%" }} direction="vertical">
+        {/* =================== CUSTOMER INFO =================== */}
+        <Divider orientation="left" style={{ fontWeight: 600 }}>
+          Thông tin khách hàng
+        </Divider>
+
+        <div
+          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}
+        >
           <Form.Item label="User ID (tuỳ chọn)" name="userId">
-            <Input placeholder="Nhập _id user nếu có (có thể bỏ trống)" />
+            <Input placeholder="Nhập _id user nếu có" />
           </Form.Item>
 
           <Form.Item
@@ -211,46 +220,50 @@ const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
           <Form.Item
             label="Số điện thoại"
             name="phoneNumber"
-            rules={[
-              { required: true, message: "Vui lòng nhập số điện thoại!" },
-            ]}
+            rules={[{ required: true, message: "Vui lòng nhập SĐT!" }]}
           >
             <Input />
-          </Form.Item>
-
-          <Form.Item
-            label="Địa chỉ giao hàng"
-            name="shippingAddress"
-            rules={[{ required: true, message: "Vui lòng nhập địa chỉ!" }]}
-          >
-            <Input.TextArea rows={2} />
           </Form.Item>
 
           <Form.Item label="Email" name="email">
             <Input />
           </Form.Item>
+        </div>
 
-          <Form.Item label="Ghi chú" name="note">
-            <Input.TextArea rows={2} />
-          </Form.Item>
-        </Space>
+        <Form.Item
+          label="Địa chỉ giao hàng"
+          name="shippingAddress"
+          rules={[{ required: true, message: "Vui lòng nhập địa chỉ!" }]}
+        >
+          <Input.TextArea rows={2} />
+        </Form.Item>
 
-        <Divider>Sản phẩm trong đơn</Divider>
+        <Form.Item label="Ghi chú" name="note">
+          <Input.TextArea rows={2} />
+        </Form.Item>
+
+        {/* =================== ORDER ITEMS =================== */}
+        <Divider orientation="left" style={{ fontWeight: 600 }}>
+          Sản phẩm trong đơn
+        </Divider>
 
         <Form.List name="items">
           {(fields, { add, remove }) => (
             <>
               {fields.map((field) => (
-                <Space
+                <div
                   key={field.key}
                   style={{
-                    display: "flex",
-                    marginBottom: 8,
-                    alignItems: "flex-start",
+                    display: "grid",
+                    gridTemplateColumns: "260px 120px 140px 80px",
+                    gap: 16,
+                    marginBottom: 12,
+                    padding: 12,
+                    borderRadius: 8,
+                    background: "#fafafa",
+                    alignItems: "center",
                   }}
-                  align="baseline"
                 >
-                  {/* 🔥 Product ID -> Select tên sản phẩm */}
                   <Form.Item
                     {...field}
                     label="Sản phẩm"
@@ -260,7 +273,6 @@ const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
                     <Select
                       showSearch
                       placeholder="Chọn sản phẩm"
-                      style={{ width: 260 }}
                       loading={loadingProducts}
                       optionFilterProp="label"
                       filterOption={(input, option) =>
@@ -269,11 +281,9 @@ const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
                           .includes(input.toLowerCase())
                       }
                       options={products.map((p) => ({
-                        label: `${p.name}${
-                          p.price
-                            ? ` - ${p.price.toLocaleString("vi-VN")} ₫`
-                            : ""
-                        }`,
+                        label: `${p.name} - ${p.price?.toLocaleString(
+                          "vi-VN"
+                        )} ₫`,
                         value: p._id,
                       }))}
                     />
@@ -283,38 +293,34 @@ const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
                     {...field}
                     label="Số lượng"
                     name={[field.name, "quantity"]}
-                    rules={[{ required: true, message: "Nhập số lượng!" }]}
+                    rules={[{ required: true, message: "Nhập SL!" }]}
                   >
-                    <InputNumber min={1} style={{ width: 120 }} />
+                    <InputNumber min={1} style={{ width: "100%" }} />
                   </Form.Item>
 
                   <Form.Item
                     {...field}
                     label="Đơn giá"
                     name={[field.name, "price"]}
-                    rules={[{ required: true, message: "Nhập đơn giá!" }]}
+                    rules={[{ required: true, message: "Nhập giá!" }]}
                   >
-                    <InputNumber<number>
+                    <InputNumber
                       min={0}
                       style={{ width: "100%" }}
-                      formatter={(value) =>
-                        value
-                          ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-                          : ""
+                      formatter={(v) =>
+                        v ? `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ""
                       }
-                      parser={(value) =>
-                        value ? Number(value.replace(/\./g, "")) : 0
-                      }
+                      parser={(v) => Number(v?.replace(/\./g, "")) || 0}
                     />
                   </Form.Item>
 
                   <Button type="link" danger onClick={() => remove(field.name)}>
                     Xoá
                   </Button>
-                </Space>
+                </div>
               ))}
 
-              <Form.Item>
+              <Form.Item style={{ textAlign: "center" }}>
                 <Button type="dashed" onClick={() => add()} block>
                   + Thêm sản phẩm
                 </Button>
@@ -323,11 +329,20 @@ const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
           )}
         </Form.List>
 
-        <Divider>Thanh toán</Divider>
+        {/* =================== PAYMENT =================== */}
+        <Divider orientation="left" style={{ fontWeight: 600 }}>
+          Thanh toán
+        </Divider>
 
-        <Space style={{ width: "100%" }} wrap>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "200px 200px 200px 200px",
+            gap: 20,
+          }}
+        >
           <Form.Item label="Trạng thái đơn" name="status">
-            <Select style={{ width: 180 }}>
+            <Select>
               <Option value="PENDING">PENDING</Option>
               <Option value="PAID">PAID</Option>
               <Option value="SHIPPED">SHIPPED</Option>
@@ -338,7 +353,7 @@ const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
           </Form.Item>
 
           <Form.Item label="Phương thức thanh toán" name="paymentMethod">
-            <Select style={{ width: 180 }}>
+            <Select>
               <Option value="COD">COD</Option>
               <Option value="BANK">BANK</Option>
               <Option value="MOMO">MOMO</Option>
@@ -347,7 +362,7 @@ const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
           </Form.Item>
 
           <Form.Item label="Trạng thái thanh toán" name="paymentStatus">
-            <Select style={{ width: 180 }}>
+            <Select>
               <Option value="UNPAID">UNPAID</Option>
               <Option value="PAID">PAID</Option>
               <Option value="REFUNDED">REFUNDED</Option>
@@ -355,13 +370,13 @@ const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
           </Form.Item>
 
           <Form.Item label="Mã giảm giá" name="voucherCode">
-            <Input style={{ width: 200 }} />
+            <Input />
           </Form.Item>
+        </div>
 
-          <Form.Item label="Mã thanh toán (paymentRef)" name="paymentRef">
-            <Input style={{ width: 220 }} />
-          </Form.Item>
-        </Space>
+        <Form.Item label="Mã thanh toán (paymentRef)" name="paymentRef">
+          <Input style={{ width: 260 }} />
+        </Form.Item>
       </Form>
     </Modal>
   );
