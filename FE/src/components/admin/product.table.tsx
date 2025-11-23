@@ -18,7 +18,6 @@ import {
   ReloadOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-import { deleteProductAction } from "@/lib/product.actions";
 import CreateProductModal from "./create.product";
 import UpdateProductModal from "./update.product";
 import ViewProductModal from "./view.Product.Modal";
@@ -36,10 +35,14 @@ const ProductsTable = () => {
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState<any>(false);
 
+  // Lấy token & chuẩn hoá (bỏ Bearer nếu có)
   useEffect(() => {
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("access_token");
-      if (token) setAccessToken(token);
+      if (token) {
+        const pureToken = token.startsWith("Bearer ") ? token.slice(7) : token;
+        setAccessToken(pureToken);
+      }
     }
   }, []);
 
@@ -47,7 +50,10 @@ const ProductsTable = () => {
     if (accessToken) {
       getData(1, 999999);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken]);
+
+  const getAuthHeader = () => (accessToken ? `Bearer ${accessToken}` : "");
 
   const getData = async (page = 1, pageSize = 20) => {
     try {
@@ -56,7 +62,7 @@ const ProductsTable = () => {
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/products?current=${page}&pageSize=${pageSize}`,
         {
           headers: {
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: getAuthHeader(),
             "Content-Type": "application/json",
           },
         }
@@ -74,7 +80,7 @@ const ProductsTable = () => {
         pageSize: d.data.meta.pageSize,
         total: pageSize === 999999 ? d.data.result.length : d.data.meta.total,
         showSizeChanger: true,
-        pageSizeOptions: ["10", "20", "50", "100", "0"], 
+        pageSizeOptions: ["10", "20", "50", "100", "0"],
         showTotal: (total: number, range: [number, number]) =>
           `${range[0]}-${range[1]} / ${total} sản phẩm`,
         onChange: handleOnChange,
@@ -97,13 +103,38 @@ const ProductsTable = () => {
     getData(page, realPageSize || 20);
   };
 
+  // ===== DELETE PRODUCT trực tiếp trong table, không dùng deleteProductAction =====
   const handleDeleteProduct = async (product: IProduct) => {
-    const d = await deleteProductAction(product, accessToken);
-    if (d.data) {
-      notification.success({ message: "Xóa sản phẩm thành công." });
-      getData(1, pagination?.pageSize || 999999);
-    } else {
-      notification.error({ message: JSON.stringify(d.message) });
+    if (!product?._id) return;
+
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/products/${product._id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: getAuthHeader(),
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const d = await res.json();
+
+      if (res.ok && d.data) {
+        notification.success({ message: "Xóa sản phẩm thành công." });
+        getData(1, pagination?.pageSize || 999999);
+      } else {
+        notification.error({
+          message: "Không thể xóa sản phẩm",
+          description: JSON.stringify(d.message),
+        });
+      }
+    } catch (error) {
+      notification.error({ message: "Lỗi khi xóa sản phẩm!" });
+    } finally {
+      setLoading(false);
     }
   };
 

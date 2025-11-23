@@ -16,7 +16,8 @@ import {
 } from "antd";
 import type { GetProp, UploadFile, UploadProps } from "antd";
 import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
-import { getImageUrl } from "@/utils/getImageUrl";
+
+const { Option } = Select;
 
 interface IProps {
   access_token: string;
@@ -26,8 +27,32 @@ interface IProps {
 }
 
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
-
 type MyUploadFile = UploadFile & { path?: string };
+
+/* ========== HELPER getImageUrl LOCAL ========== */
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  "https://next-nest-ecommerce.onrender.com";
+
+const buildAuthHeader = (token: string) =>
+  token?.startsWith("Bearer ") ? token : `Bearer ${token}`;
+
+const getImageUrl = (url?: string) => {
+  if (!url) return "";
+
+  // nếu đã là full URL
+  if (url.startsWith("http")) return url;
+
+  // nếu BE trả sẵn /images/...
+  if (url.startsWith("/images/")) return `${BACKEND_URL}${url}`;
+
+  // nếu path dạng /thumbnails/... hoặc /slider/...
+  if (url.startsWith("/")) return `${BACKEND_URL}/images${url}`;
+
+  // nếu chỉ là tên file, hoặc thumbnails/xxx.jpg
+  return `${BACKEND_URL}/images/${url}`;
+};
+/* ============================================= */
 
 const CreateProductModal = (props: IProps) => {
   const { access_token, getData, isCreateModalOpen, setIsCreateModalOpen } =
@@ -50,8 +75,8 @@ const CreateProductModal = (props: IProps) => {
   // Lấy danh sách danh mục khi mở modal
   useEffect(() => {
     if (isCreateModalOpen) {
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/categories`, {
-        headers: { Authorization: `Bearer ${access_token}` },
+      fetch(`${BACKEND_URL}/categories`, {
+        headers: { Authorization: buildAuthHeader(access_token) },
       })
         .then((res) => res.json())
         .then((d) => {
@@ -116,7 +141,7 @@ const CreateProductModal = (props: IProps) => {
     const thumbnailFile = thumbnailList.find((f) => f.status === "done");
     const thumbnailPath =
       (thumbnailFile as MyUploadFile | undefined)?.path ||
-      thumbnailFile?.response?.data?.file ||
+      (thumbnailFile as any)?.response?.data?.file ||
       "";
 
     // Lấy list path slider (path tương đối)
@@ -126,10 +151,9 @@ const CreateProductModal = (props: IProps) => {
         const mf = f as MyUploadFile;
 
         // Nếu BE trả files, ưu tiên dùng path từ đó
-        if (Array.isArray(f.response?.data?.files)) {
-          // giả sử dùng file đầu tiên trong mảng
-          const raw = f.response.data.files[0] as string;
-          if (raw) return [raw];
+        const files = (f as any)?.response?.data?.files as string[] | undefined;
+        if (Array.isArray(files) && files.length > 0) {
+          return files;
         }
 
         if (mf.path) return [mf.path];
@@ -147,21 +171,18 @@ const CreateProductModal = (props: IProps) => {
 
       const payload = {
         ...values,
-        thumbnail: thumbnailPath, // gửi path, không gửi full URL
+        thumbnail: thumbnailPath, // gửi path (BE sẽ map sang /images)
         images: sliderPaths,
       };
 
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/products`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${access_token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+      const res = await fetch(`${BACKEND_URL}/products`, {
+        method: "POST",
+        headers: {
+          Authorization: buildAuthHeader(access_token),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
       const d = await res.json();
 
@@ -208,18 +229,19 @@ const CreateProductModal = (props: IProps) => {
             name="thumbnail"
             listType="picture-circle"
             beforeUpload={beforeUpload}
-            action={`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/upload`}
+            action={`${BACKEND_URL}/products/upload`}
             headers={{
-              Authorization: `Bearer ${access_token}`,
+              Authorization: buildAuthHeader(access_token),
             }}
             fileList={thumbnailList}
             onChange={({ file, fileList }) => {
-              // khi upload xong, BE trả về path tương đối
               if (file.status === "done") {
-                const path = file.response?.data?.file as string | undefined;
+                const path = (file as any)?.response?.data?.file as
+                  | string
+                  | undefined;
                 if (path) {
                   (file as MyUploadFile).path = path;
-                  file.url = getImageUrl(path); // dùng helper để show ảnh
+                  file.url = getImageUrl(path); // show ảnh từ path
                 }
               }
               setThumbnailList(fileList as MyUploadFile[]);
@@ -255,9 +277,9 @@ const CreateProductModal = (props: IProps) => {
         >
           <Select placeholder="Chọn danh mục">
             {categories.map((cat) => (
-              <Select.Option key={cat._id} value={cat._id}>
+              <Option key={cat._id} value={cat._id}>
                 {cat.name}
-              </Select.Option>
+              </Option>
             ))}
           </Select>
         </Form.Item>
@@ -318,18 +340,20 @@ const CreateProductModal = (props: IProps) => {
         listType="picture-card"
         multiple
         beforeUpload={beforeUpload}
-        action={`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/upload-slider`}
+        action={`${BACKEND_URL}/products/upload-slider`}
         headers={{
-          Authorization: `Bearer ${access_token}`,
+          Authorization: buildAuthHeader(access_token),
         }}
         fileList={sliderList}
         onChange={({ file, fileList }) => {
           if (file.status === "done") {
-            const urls = file.response?.data?.files as string[] | undefined;
+            const urls = (file as any)?.response?.data?.files as
+              | string[]
+              | undefined;
             if (Array.isArray(urls) && urls.length > 0) {
               const raw = urls[0];
               if (raw) {
-                const path = raw; // BE đã trả relative path
+                const path = raw; // BE trả ra relative path
                 (file as MyUploadFile).path = path;
                 file.url = getImageUrl(path);
               }

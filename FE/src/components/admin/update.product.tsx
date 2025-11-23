@@ -16,7 +16,6 @@ import {
   Image,
   App,
 } from "antd";
-import { updateProductAction } from "@/lib/product.actions";
 import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 import { getImageUrl } from "@/utils/getImageUrl";
 
@@ -26,7 +25,6 @@ interface ICategory {
 }
 
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
-
 type MyUploadFile = UploadFile & { path?: string };
 
 interface IProps {
@@ -59,10 +57,16 @@ const UpdateProductModal = (props: IProps) => {
   const [loading, setLoading] = useState(false);
   const { notification } = App.useApp();
 
+  const buildAuthHeader = () =>
+    access_token?.startsWith("Bearer ")
+      ? access_token
+      : `Bearer ${access_token}`;
+
+  // load categories khi mở modal
   useEffect(() => {
     if (isUpdateModalOpen) {
       fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/categories`, {
-        headers: { Authorization: `Bearer ${access_token}` },
+        headers: { Authorization: buildAuthHeader() },
       })
         .then((res) => res.json())
         .then((d) => {
@@ -72,7 +76,7 @@ const UpdateProductModal = (props: IProps) => {
           notification.error({ message: "Không tải được danh mục" });
         });
     }
-  }, [isUpdateModalOpen, access_token, notification]);
+  }, [isUpdateModalOpen, notification, access_token]);
 
   /* ============== ĐỔ DỮ LIỆU FORM + ẢNH ============== */
   useEffect(() => {
@@ -89,7 +93,7 @@ const UpdateProductModal = (props: IProps) => {
           : dataUpdate.category,
     });
 
-    // Thumbnail: dùng getImageUrl
+    // Thumbnail
     if (dataUpdate.thumbnail) {
       setThumbnailList([
         {
@@ -179,15 +183,17 @@ const UpdateProductModal = (props: IProps) => {
       return;
     }
 
+    // thumbnail: ưu tiên path mới, fallback thumbnail cũ
     const thumbnailFile = thumbnailList[0] as MyUploadFile | undefined;
     const thumbnailPath = thumbnailFile?.path || dataUpdate.thumbnail || "";
 
+    // slider images
     let sliderPaths: string[] = [];
 
     if (sliderList.length) {
       sliderPaths = sliderList
         .map((f, idx) => {
-          if (f.path) return f.path;
+          if ((f as MyUploadFile).path) return (f as MyUploadFile).path!;
           if (Array.isArray(dataUpdate.images)) {
             return dataUpdate.images[idx];
           }
@@ -205,21 +211,41 @@ const UpdateProductModal = (props: IProps) => {
       images: sliderPaths,
     };
 
-    const d = await updateProductAction(payload, access_token);
-    if (d.data) {
-      await getData();
-      notification.success({
-        message: "Cập nhật sản phẩm thành công.",
-      });
-      handleCloseModal();
-    } else {
-      notification.error({
-        message: "Có lỗi xảy ra",
-        description: JSON.stringify(d.message),
-      });
-    }
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/products/${payload._id}`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: buildAuthHeader(),
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
-    setIsSubmit(false);
+      const d = await res.json();
+
+      if (res.ok && d.data) {
+        await getData();
+        notification.success({
+          message: "Cập nhật sản phẩm thành công.",
+        });
+        handleCloseModal();
+      } else {
+        notification.error({
+          message: "Có lỗi xảy ra",
+          description: JSON.stringify(d.message || d),
+        });
+      }
+    } catch (err: any) {
+      notification.error({
+        message: "Lỗi khi cập nhật sản phẩm",
+        description: err?.message || "Không thể kết nối tới máy chủ",
+      });
+    } finally {
+      setIsSubmit(false);
+    }
   };
 
   /* ============== RENDER ============== */
@@ -248,7 +274,7 @@ const UpdateProductModal = (props: IProps) => {
             beforeUpload={beforeUpload}
             action={`${process.env.NEXT_PUBLIC_BACKEND_URL}/upload`}
             headers={{
-              Authorization: `Bearer ${access_token}`,
+              Authorization: buildAuthHeader(),
             }}
             fileList={thumbnailList}
             onChange={({ file, fileList }) => {
@@ -256,7 +282,7 @@ const UpdateProductModal = (props: IProps) => {
                 const path = file.response?.data?.file as string | undefined;
                 if (path) {
                   (file as MyUploadFile).path = path;
-                  file.url = getImageUrl(path); // 👈 dùng getImageUrl
+                  file.url = getImageUrl(path);
                 }
               }
               setThumbnailList(fileList as MyUploadFile[]);
@@ -336,16 +362,15 @@ const UpdateProductModal = (props: IProps) => {
         beforeUpload={beforeUpload}
         action={`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/upload-slider`}
         headers={{
-          Authorization: `Bearer ${access_token}`,
+          Authorization: buildAuthHeader(),
         }}
         fileList={sliderList}
         onChange={({ file, fileList }) => {
           if (file.status === "done") {
             const urls = file.response?.data?.files as string[] | undefined;
             if (Array.isArray(urls) && urls.length > 0) {
-              const raw = urls[0]; // BE trả filename hoặc path
+              const raw = urls[0];
               const path = raw.startsWith("/") ? raw : `/slider/${raw}`;
-
               (file as MyUploadFile).path = path;
               file.url = getImageUrl(path);
             }
