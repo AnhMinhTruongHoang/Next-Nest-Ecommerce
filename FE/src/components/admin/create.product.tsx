@@ -16,6 +16,7 @@ import {
 } from "antd";
 import type { GetProp, UploadFile, UploadProps } from "antd";
 import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
+import { getImageUrl } from "@/utils/getImageUrl";
 
 interface IProps {
   access_token: string;
@@ -23,7 +24,10 @@ interface IProps {
   isCreateModalOpen: boolean;
   setIsCreateModalOpen: (v: boolean) => void;
 }
+
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
+
+type MyUploadFile = UploadFile & { path?: string };
 
 const CreateProductModal = (props: IProps) => {
   const { access_token, getData, isCreateModalOpen, setIsCreateModalOpen } =
@@ -35,8 +39,8 @@ const CreateProductModal = (props: IProps) => {
   const [previewImage, setPreviewImage] = useState("");
 
   // Upload states
-  const [thumbnailList, setThumbnailList] = useState<UploadFile[]>([]);
-  const [sliderList, setSliderList] = useState<UploadFile[]>([]);
+  const [thumbnailList, setThumbnailList] = useState<MyUploadFile[]>([]);
+  const [sliderList, setSliderList] = useState<MyUploadFile[]>([]);
 
   // Category state
   const [categories, setCategories] = useState<{ _id: string; name: string }[]>(
@@ -59,7 +63,7 @@ const CreateProductModal = (props: IProps) => {
           });
         });
     }
-  }, [isCreateModalOpen]);
+  }, [isCreateModalOpen, access_token, notification]);
 
   // preview base64
   const getBase64 = (file: FileType): Promise<string> =>
@@ -108,28 +112,34 @@ const CreateProductModal = (props: IProps) => {
   };
 
   const onFinish = async (values: any) => {
-    // Thumbnail
+    // Lấy path thumbnail (path tương đối BE trả về)
     const thumbnailFile = thumbnailList.find((f) => f.status === "done");
-    const thumbnailUrl =
-      thumbnailFile?.response?.data?.file || thumbnailFile?.url || "";
+    const thumbnailPath =
+      (thumbnailFile as MyUploadFile | undefined)?.path ||
+      thumbnailFile?.response?.data?.file ||
+      "";
 
-    // Slider
-    const sliderUrls = sliderList
+    // Lấy list path slider (path tương đối)
+    const sliderPaths: string[] = sliderList
       .filter((f) => f.status === "done")
       .flatMap((f) => {
+        const mf = f as MyUploadFile;
+
+        // Nếu BE trả files, ưu tiên dùng path từ đó
         if (Array.isArray(f.response?.data?.files)) {
-          return f.response.data.files;
+          // giả sử dùng file đầu tiên trong mảng
+          const raw = f.response.data.files[0] as string;
+          if (raw) return [raw];
         }
-        if (typeof f.url === "string") {
-          return [f.url];
-        }
+
+        if (mf.path) return [mf.path];
         return [];
       })
-      .filter((url) => !!url);
+      .filter(Boolean);
 
     setLoading(true);
     try {
-      if (!thumbnailUrl || sliderUrls.length === 0) {
+      if (!thumbnailPath || sliderPaths.length === 0) {
         notification.error({ message: "Upload ảnh chưa hoàn tất!" });
         setLoading(false);
         return;
@@ -137,8 +147,8 @@ const CreateProductModal = (props: IProps) => {
 
       const payload = {
         ...values,
-        thumbnail: thumbnailUrl,
-        images: sliderUrls,
+        thumbnail: thumbnailPath, // gửi path, không gửi full URL
+        images: sliderPaths,
       };
 
       const res = await fetch(
@@ -204,13 +214,15 @@ const CreateProductModal = (props: IProps) => {
             }}
             fileList={thumbnailList}
             onChange={({ file, fileList }) => {
+              // khi upload xong, BE trả về path tương đối
               if (file.status === "done") {
-                const url = file.response?.data?.file;
-                if (url) {
-                  file.url = `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`;
+                const path = file.response?.data?.file as string | undefined;
+                if (path) {
+                  (file as MyUploadFile).path = path;
+                  file.url = getImageUrl(path); // dùng helper để show ảnh
                 }
               }
-              setThumbnailList(fileList);
+              setThumbnailList(fileList as MyUploadFile[]);
             }}
             onPreview={handlePreview}
           >
@@ -313,12 +325,17 @@ const CreateProductModal = (props: IProps) => {
         fileList={sliderList}
         onChange={({ file, fileList }) => {
           if (file.status === "done") {
-            const urls = file.response?.data?.files;
+            const urls = file.response?.data?.files as string[] | undefined;
             if (Array.isArray(urls) && urls.length > 0) {
-              file.url = `${process.env.NEXT_PUBLIC_BACKEND_URL}${urls[0]}`;
+              const raw = urls[0];
+              if (raw) {
+                const path = raw; // BE đã trả relative path
+                (file as MyUploadFile).path = path;
+                file.url = getImageUrl(path);
+              }
             }
           }
-          setSliderList(fileList);
+          setSliderList(fileList as MyUploadFile[]);
         }}
         onPreview={handlePreview}
       >
