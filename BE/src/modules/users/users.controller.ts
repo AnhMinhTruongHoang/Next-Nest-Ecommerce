@@ -29,7 +29,6 @@ export class UsersController {
     const newUser = await this.usersService.create(createUserDto, user);
     return {
       _id: newUser?._id,
-      createdAt: newUser?.createdAt,
     };
   }
 

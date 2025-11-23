@@ -61,12 +61,13 @@ export class UsersService {
         },
       });
     } catch (err) {
-      this.logger.error(`❌ Email send failed (activation) to: ${email}`, err);
+      this.logger.error(`Email send failed (activation) to: ${email}`, err);
     }
   }
 
   // ====== Admin create user ======
-  async create(createUserDto: CreateUserDto, user: IUser) {
+
+  async create(createUserDto: CreateUserDto) {
     const {
       name,
       email,
@@ -98,10 +99,6 @@ export class UsersService {
       role,
       avatarUrl,
       isActive: false,
-      createdBy: {
-        _id: user._id,
-        email: user.email,
-      },
     });
 
     return newUser;
