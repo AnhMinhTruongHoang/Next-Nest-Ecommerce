@@ -304,7 +304,7 @@ const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
                     name={[field.name, "price"]}
                     rules={[{ required: true, message: "Nhập giá!" }]}
                   >
-                    <InputNumber
+                    <InputNumber<number>
                       min={0}
                       style={{ width: "100%" }}
                       formatter={(v) =>
