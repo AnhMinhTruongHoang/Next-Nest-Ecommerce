@@ -47,12 +47,6 @@ export class User {
   @Prop()
   createdAt: Date;
 
-  @Prop({ type: Object })
-  createdBy: {
-    _id: mongoose.Schema.Types.ObjectId;
-    email: string;
-  };
-
   @Prop({ default: false })
   isActive: boolean;
 

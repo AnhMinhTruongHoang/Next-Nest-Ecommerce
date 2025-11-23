@@ -22,20 +22,14 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Public()
   @Post()
   @UseGuards(JwtAuthGuard)
   @ResponseMessage('Create New User')
-  async create(
-    @Body()
-    createUserDto: CreateUserDto,
-    @Users() user: IUser,
-  ) {
-    let NewUser = await this.usersService.create(createUserDto, user);
+  async create(@Body() createUserDto: CreateUserDto, @Users() user: IUser) {
+    const newUser = await this.usersService.create(createUserDto, user);
     return {
-      _id: NewUser?._id,
-      createdAt: NewUser?.createdAt,
-      createdBy: NewUser?.createdBy,
+      _id: newUser?._id,
+      createdAt: newUser?.createdAt,
     };
   }
 
