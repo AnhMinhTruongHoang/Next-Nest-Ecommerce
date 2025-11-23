@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Modal,
   Form,
@@ -22,6 +22,12 @@ interface CreateOrderModalProps {
   reload: () => Promise<void>; // gọi lại getData ở parent
 }
 
+type SimpleProduct = {
+  _id: string;
+  name: string;
+  price?: number;
+};
+
 const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
   isOpen,
   setIsOpen,
@@ -31,6 +37,56 @@ const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
   const [form] = Form.useForm();
   const { notification } = App.useApp();
   const [submitting, setSubmitting] = useState(false);
+  const [products, setProducts] = useState<SimpleProduct[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+
+  const buildAuthHeader = () =>
+    accessToken?.startsWith("Bearer ") ? accessToken : `Bearer ${accessToken}`;
+
+  // 🔹 Load list sản phẩm khi mở modal
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const fetchProducts = async () => {
+      setLoadingProducts(true);
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/products?current=1&pageSize=9999`,
+          {
+            headers: {
+              Authorization: buildAuthHeader(),
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const d = await res.json();
+        if (d.data && Array.isArray(d.data.result)) {
+          setProducts(
+            d.data.result.map((p: any) => ({
+              _id: p._id,
+              name: p.name,
+              price: p.price,
+            }))
+          );
+        } else {
+          notification.error({
+            message: "Không lấy được danh sách sản phẩm",
+            description: JSON.stringify(d.message || d),
+          });
+        }
+      } catch (err: any) {
+        notification.error({
+          message: "Lỗi tải danh sách sản phẩm",
+          description: err?.message || "Không thể gọi API /products",
+        });
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+
+    fetchProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const handleClose = () => {
     form.resetFields();
@@ -85,9 +141,7 @@ const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: accessToken.startsWith("Bearer ")
-            ? accessToken
-            : `Bearer ${accessToken}`,
+          Authorization: buildAuthHeader(),
         },
         body: JSON.stringify(payload),
       });
@@ -196,15 +250,34 @@ const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
                   }}
                   align="baseline"
                 >
+                  {/* 🔥 Product ID -> Select tên sản phẩm */}
                   <Form.Item
                     {...field}
-                    label="Product ID"
+                    label="Sản phẩm"
                     name={[field.name, "productId"]}
-                    rules={[
-                      { required: true, message: "Nhập productId (MongoId)!" },
-                    ]}
+                    rules={[{ required: true, message: "Chọn sản phẩm!" }]}
                   >
-                    <Input style={{ width: 260 }} />
+                    <Select
+                      showSearch
+                      placeholder="Chọn sản phẩm"
+                      style={{ width: 260 }}
+                      loading={loadingProducts}
+                      optionFilterProp="children"
+                      filterOption={(input, option) =>
+                        (option?.children as string)
+                          .toLowerCase()
+                          .includes(input.toLowerCase())
+                      }
+                    >
+                      {products.map((p) => (
+                        <Option key={p._id} value={p._id}>
+                          {p.name}
+                          {p.price
+                            ? ` - ${p.price.toLocaleString("vi-VN")} ₫`
+                            : ""}
+                        </Option>
+                      ))}
+                    </Select>
                   </Form.Item>
 
                   <Form.Item
