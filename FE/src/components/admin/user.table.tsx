@@ -12,7 +12,6 @@ import {
 } from "@ant-design/icons";
 import UpdateUserModal from "./update.user";
 import CreateUserModal from "./create.user";
-import { deleteUserAction } from "@/lib/user.actions";
 import ViewUserModal from "./view.User.Modal";
 
 const UsersTable = () => {
@@ -32,14 +31,15 @@ const UsersTable = () => {
     total: 0,
   });
 
+  // Lấy token từ localStorage, luôn chuẩn hoá thành "raw token" (không có Bearer)
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("access_token");
-      if (token) {
-        const formattedToken = token.startsWith("Bearer ")
-          ? token
-          : `Bearer ${token}`;
-        setAccessToken(formattedToken);
+      const stored = localStorage.getItem("access_token");
+      if (stored) {
+        const pureToken = stored.startsWith("Bearer ")
+          ? stored.slice(7)
+          : stored;
+        setAccessToken(pureToken);
       }
     }
   }, []);
@@ -48,17 +48,20 @@ const UsersTable = () => {
     if (accessToken) {
       getData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken]);
 
   const getData = async () => {
     setLoading(true);
     try {
-      const headers: any = { "Content-Type": "application/json" };
-      if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
-
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/users?current=${meta.current}&pageSize=${meta.pageSize}`,
-        { headers }
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
       );
       const d = await res.json();
 
@@ -66,7 +69,10 @@ const UsersTable = () => {
         setListUsers(d.data.result);
         setMeta(d.data.meta);
       } else {
-        notification.error({ message: "Dữ liệu không hợp lệ hoặc Token lỗi" });
+        notification.error({
+          message: "Dữ liệu không hợp lệ hoặc Token lỗi",
+          description: JSON.stringify(d.message),
+        });
       }
     } catch (error) {
       notification.error({ message: "Lỗi khi gọi API" });
@@ -94,21 +100,43 @@ const UsersTable = () => {
         setListUsers(d.data.result);
         setMeta(d.data.meta);
       }
+    } catch (e) {
+      notification.error({ message: "Lỗi khi phân trang" });
     } finally {
       setLoading(false);
     }
   };
 
+  // ===== DELETE USER: viết trực tiếp trong table, không dùng deleteUserAction nữa =====
   const handleDeleteUser = async (user: IUser) => {
+    if (!user?._id) return;
+
     setLoading(true);
     try {
-      const d = await deleteUserAction(user, accessToken);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/${user._id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const d = await res.json();
+
       if (d.data) {
         notification.success({ message: "Xóa người dùng thành công." });
         getData();
       } else {
-        notification.error({ message: JSON.stringify(d.message) });
+        notification.error({
+          message: "Không thể xóa người dùng",
+          description: JSON.stringify(d.message),
+        });
       }
+    } catch (error) {
+      notification.error({ message: "Lỗi khi xóa người dùng" });
     } finally {
       setLoading(false);
     }
@@ -165,7 +193,9 @@ const UsersTable = () => {
         <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
       ),
       onFilter: (value, record) =>
-        record.name.toLowerCase().includes((value as string).toLowerCase()),
+        record.name
+          ?.toLowerCase()
+          .includes((value as string).toLowerCase() ?? ""),
     },
     {
       title: "Vai trò",
@@ -225,6 +255,7 @@ const UsersTable = () => {
           icon={<PlusOutlined />}
           type="primary"
           onClick={() => setIsCreateModalOpen(true)}
+          disabled={!accessToken}
         >
           Thêm mới
         </Button>
@@ -250,13 +281,13 @@ const UsersTable = () => {
         userData={viewUser}
       />
       <CreateUserModal
-        access_token={accessToken}
+        access_token={accessToken} // raw token
         getData={getData}
         isCreateModalOpen={isCreateModalOpen}
         setIsCreateModalOpen={setIsCreateModalOpen}
       />
       <UpdateUserModal
-        access_token={accessToken}
+        access_token={accessToken} 
         getData={getData}
         isUpdateModalOpen={isUpdateModalOpen}
         setIsUpdateModalOpen={setIsUpdateModalOpen}
