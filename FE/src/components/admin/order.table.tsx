@@ -20,6 +20,7 @@ import {
 import "../../styles/users.css";
 import dayjs from "dayjs";
 import ViewOrderModal from "./view.order";
+import CreateOrderModal from "./create.order.modal";
 
 const OrderTable = () => {
   const [listOrder, setListOrder] = useState<IOrder[]>([]);
@@ -330,6 +331,12 @@ const OrderTable = () => {
         dataSource={filteredOrders}
         rowKey={"_id"}
         pagination={pagination}
+      />
+      <CreateOrderModal
+        isOpen={isCreateModalOpen}
+        setIsOpen={setIsCreateModalOpen}
+        accessToken={access_token}
+        reload={() => getData(1, pagination?.pageSize || 999999)}
       />
       <ViewOrderModal
         orderData={orderData}
