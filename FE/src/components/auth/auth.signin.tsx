@@ -255,30 +255,20 @@ export default function AuthSignIn() {
         {/* Social buttons */}
         <div
           style={{
-            display: "grid",
             gridTemplateColumns: "1fr 1fr",
             gap: 12,
+            textAlign: "center",
+            justifyContent: "center",
           }}
         >
-          <Button
-            size="large"
-            icon={<GithubOutlined />}
-            onClick={() => signIn("github", { callbackUrl: "/" })}
-            style={{
-              borderRadius: 10,
-              borderColor: "#000",
-            }}
-          >
-            GitHub
-          </Button>
           <Button
             size="large"
             icon={<GoogleOutlined />}
             onClick={() => signIn("google", { callbackUrl: "/" })}
             style={{
               borderRadius: 10,
-              borderColor: "#db4437",
-              color: "#db4437",
+              textAlign: "center",
+              justifyContent: "center",
             }}
           >
             Google
