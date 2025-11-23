@@ -41,7 +41,7 @@ export class User {
 
   ////
 
-  @Prop()
+  @Prop({ default: false })
   isDeleted: boolean;
 
   @Prop()

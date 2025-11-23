@@ -52,7 +52,7 @@ export class UsersController {
   @Public()
   @ResponseMessage('fetch user by id')
   @Get(':id')
-  async (@Param('id') id: string) {
+  async(@Param('id') id: string) {
     const foundUser = this.usersService.findOne(id);
     return foundUser;
   }
@@ -67,6 +67,7 @@ export class UsersController {
     return this.usersService.update(updateUserDto, user, id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   @ResponseMessage('Delete a User')
   remove(@Param('id') id: string, @Users() users: IUser) {

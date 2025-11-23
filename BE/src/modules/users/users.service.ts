@@ -323,6 +323,9 @@ export class UsersService {
   // ====== Soft delete ======
   async remove(id: string, user: IUser) {
     if (!mongoose.Types.ObjectId.isValid(id)) return 'Not found user';
+    if (!user || !user._id) {
+      throw new BadRequestException('Current user is required');
+    }
 
     const foundUser = await this.userModel.findById(id);
     if (foundUser?.email === 'admin@gmail.com') {
@@ -333,7 +336,7 @@ export class UsersService {
       { _id: id },
       {
         deletedBy: {
-          _id: user._id,
+          _id: new mongoose.Types.ObjectId(user._id),
           email: user.email,
         },
       },
