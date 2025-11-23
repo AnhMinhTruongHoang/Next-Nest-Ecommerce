@@ -262,22 +262,21 @@ const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
                       placeholder="Chọn sản phẩm"
                       style={{ width: 260 }}
                       loading={loadingProducts}
-                      optionFilterProp="children"
+                      optionFilterProp="label"
                       filterOption={(input, option) =>
-                        (option?.children as string)
+                        (option?.label as string)
                           .toLowerCase()
                           .includes(input.toLowerCase())
                       }
-                    >
-                      {products.map((p) => (
-                        <Option key={p._id} value={p._id}>
-                          {p.name}
-                          {p.price
+                      options={products.map((p) => ({
+                        label: `${p.name}${
+                          p.price
                             ? ` - ${p.price.toLocaleString("vi-VN")} ₫`
-                            : ""}
-                        </Option>
-                      ))}
-                    </Select>
+                            : ""
+                        }`,
+                        value: p._id,
+                      }))}
+                    />
                   </Form.Item>
 
                   <Form.Item
