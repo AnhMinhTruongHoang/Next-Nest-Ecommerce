@@ -17,7 +17,6 @@ import {
   ReloadOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-import { deleteOrderAction } from "@/lib/user.actions";
 import "../../styles/users.css";
 import dayjs from "dayjs";
 import ViewOrderModal from "./view.order";
@@ -42,6 +41,7 @@ const OrderTable = () => {
 
   useEffect(() => {
     getData(1, 999999);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getData = async (page = 1, pageSize = 50) => {
@@ -94,16 +94,39 @@ const OrderTable = () => {
     getData(page, realPageSize || 50);
   };
 
+  // ==== DELETE ORDER TRỰC TIẾP TRONG TABLE ====
   const handleDeleteOrder = async (order: IOrder) => {
+    if (!order?._id) return;
+
     setLoading(true);
     try {
-      const d = await deleteOrderAction(order, access_token);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/${order._id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const d = await res.json();
+
       if (d.data) {
-        notification.success({ message: "Xóa Order thành công." });
+        notification.success({ message: "Xóa order thành công." });
+        // load lại dữ liệu với pageSize hiện tại
         getData(1, pagination?.pageSize || 999999);
       } else {
-        notification.error({ message: JSON.stringify(d.message) });
+        notification.error({
+          message: "Xóa thất bại",
+          description: JSON.stringify(d.message),
+        });
       }
+    } catch (error) {
+      notification.error({
+        message: "Lỗi khi xóa đơn hàng",
+      });
     } finally {
       setLoading(false);
     }
