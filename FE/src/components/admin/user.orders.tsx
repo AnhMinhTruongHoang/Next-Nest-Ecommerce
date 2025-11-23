@@ -4,6 +4,7 @@ import { Modal, Table, message, Spin, Empty, Image, Button, Space } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { ReloadOutlined } from "@ant-design/icons";
 import axios from "axios";
+import { getImageUrl } from "@/utils/getImageUrl";
 
 interface Product {
   _id: string;
@@ -42,13 +43,6 @@ const OrderHistoryModal: React.FC<Props> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const getImageUrl = (url?: string) => {
-    if (!url) return "";
-    if (url.startsWith("http://") || url.startsWith("https://")) return url;
-    return `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`;
-  };
-
-  // ---- Fetch orders (có cache-busting) ----
   const fetchOrders = async () => {
     if (!userId) {
       setOrders([]);
@@ -58,7 +52,6 @@ const OrderHistoryModal: React.FC<Props> = ({
     try {
       const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/user/${userId}`;
       const res = await axios.get(url, {
-        // phá cache của browser/proxy
         params: { _ts: Date.now() },
         headers: { "Cache-Control": "no-cache" },
       });
@@ -163,6 +156,7 @@ const OrderHistoryModal: React.FC<Props> = ({
                   }}
                   preview={false}
                 />
+
                 <div
                   style={{
                     display: "flex",
