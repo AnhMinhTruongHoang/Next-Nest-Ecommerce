@@ -137,52 +137,49 @@ const CreateProductModal = (props: IProps) => {
   };
 
   const onFinish = async (values: any) => {
-    // Lấy path thumbnail (path tương đối BE trả về)
+    // Lấy file thumbnail
     const thumbnailFile = thumbnailList.find((f) => f.status === "done");
     const thumbnailPath =
       (thumbnailFile as MyUploadFile | undefined)?.path ||
-      (thumbnailFile as any)?.response?.data?.file ||
+      ((thumbnailFile as any)?.response?.file as string) ||
       "";
 
-    // Lấy list path slider (path tương đối)
+    // Lấy list path slider
     const sliderPaths: string[] = sliderList
       .filter((f) => f.status === "done")
-      .flatMap((f) => {
+      .map((f) => {
         const mf = f as MyUploadFile;
-
-        // Nếu BE trả files, ưu tiên dùng path từ đó
-        const files = (f as any)?.response?.data?.files as string[] | undefined;
-        if (Array.isArray(files) && files.length > 0) {
-          return files;
-        }
-
-        if (mf.path) return [mf.path];
-        return [];
+        if (mf.path) return mf.path;
+        const files = (f as any)?.response?.files as string[] | undefined;
+        return files?.[0];
       })
-      .filter(Boolean);
+      .filter(Boolean) as string[];
 
     setLoading(true);
     try {
-      if (!thumbnailPath || sliderPaths.length === 0) {
-        notification.error({ message: "Upload ảnh chưa hoàn tất!" });
+      if (!thumbnailPath) {
+        notification.error({ message: "Chưa có ảnh thumbnail!" });
         setLoading(false);
         return;
       }
 
       const payload = {
         ...values,
-        thumbnail: thumbnailPath, // gửi path (BE sẽ map sang /images)
-        images: sliderPaths,
+        thumbnail: thumbnailPath, // ví dụ: /images/thumbnails/xxx.png
+        images: sliderPaths, // ví dụ: ["/images/slider/1.png", ...]
       };
 
-      const res = await fetch(`${BACKEND_URL}/products`, {
-        method: "POST",
-        headers: {
-          Authorization: buildAuthHeader(access_token),
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/products`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       const d = await res.json();
 
@@ -229,19 +226,17 @@ const CreateProductModal = (props: IProps) => {
             name="thumbnail"
             listType="picture-circle"
             beforeUpload={beforeUpload}
-            action={`${BACKEND_URL}/products/upload`}
+            action={`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/upload`}
             headers={{
-              Authorization: buildAuthHeader(access_token),
+              Authorization: `Bearer ${access_token}`,
             }}
             fileList={thumbnailList}
             onChange={({ file, fileList }) => {
               if (file.status === "done") {
-                const path = (file as any)?.response?.data?.file as
-                  | string
-                  | undefined;
+                const path = (file.response as any)?.file as string | undefined;
                 if (path) {
-                  (file as MyUploadFile).path = path;
-                  file.url = getImageUrl(path); // show ảnh từ path
+                  (file as MyUploadFile).path = path; // lưu path để gửi lên BE
+                  file.url = getImageUrl(path); // hiển thị preview
                 }
               }
               setThumbnailList(fileList as MyUploadFile[]);
@@ -340,23 +335,18 @@ const CreateProductModal = (props: IProps) => {
         listType="picture-card"
         multiple
         beforeUpload={beforeUpload}
-        action={`${BACKEND_URL}/products/upload-slider`}
+        action={`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/upload-slider`}
         headers={{
-          Authorization: buildAuthHeader(access_token),
+          Authorization: `Bearer ${access_token}`,
         }}
         fileList={sliderList}
         onChange={({ file, fileList }) => {
           if (file.status === "done") {
-            const urls = (file as any)?.response?.data?.files as
-              | string[]
-              | undefined;
+            const urls = (file.response as any)?.files as string[] | undefined;
             if (Array.isArray(urls) && urls.length > 0) {
-              const raw = urls[0];
-              if (raw) {
-                const path = raw; // BE trả ra relative path
-                (file as MyUploadFile).path = path;
-                file.url = getImageUrl(path);
-              }
+              const path = urls[0]; // mỗi file Upload tương ứng 1 path
+              (file as MyUploadFile).path = path;
+              file.url = getImageUrl(path);
             }
           }
           setSliderList(fileList as MyUploadFile[]);
