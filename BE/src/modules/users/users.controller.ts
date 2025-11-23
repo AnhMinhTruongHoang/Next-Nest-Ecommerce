@@ -25,8 +25,8 @@ export class UsersController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @ResponseMessage('Create New User')
-  async create(@Body() createUserDto: CreateUserDto, @Users() user: IUser) {
-    const newUser = await this.usersService.create(createUserDto, user);
+  async create(@Body() createUserDto: CreateUserDto) {
+    const newUser = await this.usersService.create(createUserDto);
     return {
       _id: newUser?._id,
     };
