@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   ChangePasswordDto,
   CodeAuthDto,
@@ -321,35 +326,15 @@ export class UsersService {
   }
 
   // ====== Soft delete ======
-  async remove(id: string, user?: IUser) {
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('Invalid user ID');
-    }
 
-    const foundUser = await this.userModel.findById(id);
-    if (!foundUser) {
-      throw new BadRequestException('Not found user');
-    }
-
-    if (foundUser.email === 'admin@gmail.com') {
-      throw new BadRequestException('Cannot delete admin@gmail.com');
-    }
-
-    if (user) {
-      await this.userModel.updateOne(
-        { _id: id },
-        {
-          deletedBy: {
-            _id: new mongoose.Types.ObjectId(user._id),
-            email: user.email,
-          },
-        },
-      );
-    }
-
-    await this.userModel.softDelete({ _id: id });
-
-    return { message: 'User deleted' };
+  async remove(id: string) {
+    const updated = await this.userModel.findByIdAndUpdate(
+      id,
+      { isDeleted: true },
+      { new: true },
+    );
+    if (!updated) throw new NotFoundException('Users not found');
+    return { ok: true };
   }
 
   // ====== Tokens ======

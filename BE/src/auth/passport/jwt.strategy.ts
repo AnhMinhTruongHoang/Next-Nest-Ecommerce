@@ -19,8 +19,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    console.log('>>> JWT PAYLOAD:', payload);
-
     const { _id, name, email, role } = payload;
 
     let permissions: { method: string; apiPath: string }[] = [];

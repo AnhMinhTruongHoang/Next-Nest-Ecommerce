@@ -81,6 +81,7 @@ export class ProductsController {
   }
 
   @Delete(':id')
+  @ResponseMessage('Soft delete product')
   remove(@Param('id') id: string) {
     return this.productsService.remove(id);
   }

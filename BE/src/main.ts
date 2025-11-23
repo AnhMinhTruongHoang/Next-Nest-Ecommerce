@@ -87,11 +87,6 @@ async function bootstrap() {
   });
 
   await app.listen(configService.get<string>('PORT') || 8000);
-  console.log(
-    ` Server running on http://localhost:${
-      configService.get<string>('PORT') || 8000
-    }`,
-  );
 }
 
 bootstrap();

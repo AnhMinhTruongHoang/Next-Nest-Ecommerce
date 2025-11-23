@@ -30,7 +30,6 @@ export class UsersController {
     createUserDto: CreateUserDto,
     @Users() user: IUser,
   ) {
-    console.log('>>> User from request:', user);
     let NewUser = await this.usersService.create(createUserDto, user);
     return {
       _id: NewUser?._id,
@@ -67,10 +66,9 @@ export class UsersController {
     return this.usersService.update(updateUserDto, user, id);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   @ResponseMessage('Delete a User')
-  remove(@Param('id') id: string, @Users() users: IUser) {
-    return this.usersService.remove(id, users);
+  remove(@Param('id') id: string) {
+    return this.usersService.remove(id);
   }
 }
