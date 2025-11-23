@@ -6,7 +6,7 @@ import { Form, Input, Modal, Select, InputNumber, App } from "antd";
 const { Option } = Select;
 
 interface IProps {
-  access_token: string;
+  access_token: string; // raw token truyền từ UsersTable
   getData: () => Promise<void>;
   isCreateModalOpen: boolean;
   setIsCreateModalOpen: (v: boolean) => void;
@@ -35,15 +35,18 @@ const CreateUserModal = (props: IProps) => {
       const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${access_token}`,
           "Content-Type": "application/json",
+          // chuẩn hoá token giống UpdateUserModal
+          Authorization: access_token?.startsWith("Bearer ")
+            ? access_token
+            : `Bearer ${access_token}`,
         },
         body: JSON.stringify(data),
       });
 
       const d = await res.json();
 
-      if (d.data) {
+      if (res.ok && d.data) {
         await getData();
         notification.success({
           message: "Tạo mới người dùng thành công.",
@@ -52,13 +55,15 @@ const CreateUserModal = (props: IProps) => {
       } else {
         notification.error({
           message: "Có lỗi xảy ra",
-          description: JSON.stringify(d.message),
+          description: d?.message
+            ? JSON.stringify(d.message)
+            : "Không thể tạo người dùng",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       notification.error({
         message: "Có lỗi xảy ra",
-        description: "Không thể kết nối tới máy chủ.",
+        description: error?.message || "Không thể kết nối tới máy chủ.",
       });
     } finally {
       setLoading(false);
