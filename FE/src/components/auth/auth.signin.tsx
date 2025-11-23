@@ -266,9 +266,15 @@ export default function AuthSignIn() {
             icon={<GoogleOutlined />}
             onClick={() => signIn("google", { callbackUrl: "/" })}
             style={{
-              borderRadius: 10,
-              textAlign: "center",
+              borderRadius: 6,
               justifyContent: "center",
+              backgroundColor: "#4285F4",
+              color: "#fff",
+              border: "none",
+              fontWeight: 500,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
             }}
           >
             Google
