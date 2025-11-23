@@ -19,7 +19,7 @@ interface CreateOrderModalProps {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   accessToken: string;
-  reload: () => Promise<void>; // gọi lại getData ở parent
+  reload: () => Promise<void>;
 }
 
 type SimpleProduct = {
@@ -198,7 +198,7 @@ const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
         style={{ width: "100%", marginTop: 12 }}
       >
         {/* =================== CUSTOMER INFO =================== */}
-        <Divider orientation="left" style={{ fontWeight: 600 }}>
+        <Divider orientation="center" style={{ fontWeight: 600 }}>
           Thông tin khách hàng
         </Divider>
 
@@ -243,7 +243,7 @@ const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
         </Form.Item>
 
         {/* =================== ORDER ITEMS =================== */}
-        <Divider orientation="left" style={{ fontWeight: 600 }}>
+        <Divider orientation="center" style={{ fontWeight: 600 }}>
           Sản phẩm trong đơn
         </Divider>
 
@@ -369,8 +369,12 @@ const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
             </Select>
           </Form.Item>
 
-          <Form.Item label="Mã giảm giá" name="voucherCode">
-            <Input />
+          <Form.Item
+            style={{ flex: "1 1 50%", maxWidth: "400px" }}
+            label="Mã giảm giá"
+            name="voucherCode"
+          >
+            <Input style={{ width: "100%" }} />
           </Form.Item>
         </div>
 
