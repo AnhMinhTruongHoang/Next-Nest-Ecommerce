@@ -144,7 +144,7 @@ const Cards = () => {
               hoverable
               className="card-item"
               onClick={() => goCategory(card.key)}
-              style={{ cursor: "pointer" }}
+              style={{ cursor: "pointer", padding: 0 }}
               cover={
                 <div className="image-wrapper">
                   <Image
@@ -169,6 +169,14 @@ const Cards = () => {
                   <div className="overlay">
                     <span className="title">{card.title}</span>
                   </div>
+                  <Meta
+                    style={{
+                      textAlign: "center",
+                      justifyContent: "center",
+                      color: "#00FFE0",
+                    }}
+                    title=" GamerZone"
+                  />
                 </div>
               }
             />

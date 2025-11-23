@@ -38,10 +38,10 @@ export const deleteUserAction = async (user: IUser, access_token: string) => {
   );
 
   const d = await res.json();
-
   revalidateTag("listUsers");
   return d;
 };
+
 /// Delete order
 export const deleteOrderAction = async (
   order: IOrder,
