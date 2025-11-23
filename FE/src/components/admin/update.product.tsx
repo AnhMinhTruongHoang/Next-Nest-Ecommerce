@@ -18,6 +18,7 @@ import {
 } from "antd";
 import { updateProductAction } from "@/lib/product.actions";
 import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
+import { getImageUrl } from "@/utils/getImageUrl";
 
 interface ICategory {
   _id: string;
@@ -36,20 +37,6 @@ interface IProps {
   dataUpdate: null | IProduct;
   setDataUpdate: (v: null | IProduct) => void;
 }
-
-const IMAGE_BASE_URL =
-  process.env.NEXT_PUBLIC_STATIC_URL ||
-  "https://next-nest-ecommerce.onrender.com";
-
-const buildImageUrl = (url?: string) => {
-  if (!url) return "";
-
-  if (url.startsWith("http://") || url.startsWith("https://")) {
-    return url;
-  }
-
-  return `${IMAGE_BASE_URL}/images${url}`;
-};
 
 const UpdateProductModal = (props: IProps) => {
   const {
@@ -102,14 +89,14 @@ const UpdateProductModal = (props: IProps) => {
           : dataUpdate.category,
     });
 
-    // Thumbnail: lưu cả url để hiển thị, path để gửi lại BE
+    // Thumbnail: dùng getImageUrl
     if (dataUpdate.thumbnail) {
       setThumbnailList([
         {
           uid: "-1",
           name: "thumbnail.png",
           status: "done",
-          url: buildImageUrl(dataUpdate.thumbnail),
+          url: getImageUrl(dataUpdate.thumbnail),
           path: dataUpdate.thumbnail,
         } as MyUploadFile,
       ]);
@@ -124,7 +111,7 @@ const UpdateProductModal = (props: IProps) => {
           uid: String(idx),
           name: `slider-${idx}.png`,
           status: "done",
-          url: buildImageUrl(p),
+          url: getImageUrl(p),
           path: p,
         })) as MyUploadFile[]
       );
@@ -140,7 +127,6 @@ const UpdateProductModal = (props: IProps) => {
       reader.readAsDataURL(file);
       reader.onload = () => resolve(reader.result as string);
       reader.onerror = (error) => reject(error);
-      console.log(dataUpdate);
     });
 
   const handlePreview = async (file: UploadFile) => {
@@ -193,11 +179,9 @@ const UpdateProductModal = (props: IProps) => {
       return;
     }
 
-    // thumbnail: lấy path (relative) từ file.path, nếu không có thì dùng path cũ
     const thumbnailFile = thumbnailList[0] as MyUploadFile | undefined;
     const thumbnailPath = thumbnailFile?.path || dataUpdate.thumbnail || "";
 
-    // slider: map tất cả file.path, fallback về dataUpdate.images nếu file không có path
     let sliderPaths: string[] = [];
 
     if (sliderList.length) {
@@ -272,7 +256,7 @@ const UpdateProductModal = (props: IProps) => {
                 const path = file.response?.data?.file as string | undefined;
                 if (path) {
                   (file as MyUploadFile).path = path;
-                  file.url = buildImageUrl(path);
+                  file.url = getImageUrl(path); // 👈 dùng getImageUrl
                 }
               }
               setThumbnailList(fileList as MyUploadFile[]);
@@ -359,11 +343,11 @@ const UpdateProductModal = (props: IProps) => {
           if (file.status === "done") {
             const urls = file.response?.data?.files as string[] | undefined;
             if (Array.isArray(urls) && urls.length > 0) {
-              const raw = urls[0]; // BE trả về filename hoặc path
+              const raw = urls[0]; // BE trả filename hoặc path
               const path = raw.startsWith("/") ? raw : `/slider/${raw}`;
 
               (file as MyUploadFile).path = path;
-              file.url = buildImageUrl(path);
+              file.url = getImageUrl(path);
             }
           }
           setSliderList(fileList as MyUploadFile[]);
