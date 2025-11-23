@@ -16,19 +16,19 @@ const slides: Slide[] = [
     id: 1,
     title: "",
     image: "/images/banners/banner6.png",
-    link: "/product-detail/69079cbdd5402175fadf4838",
+    link: "/product-detail/692190c152b600997c5407a9",
   },
   {
     id: 2,
     title: "",
     image: "/images/banners/EdraBanner.jpg",
-    link: "/productsList?category=69079cbcd5402175fadf481f&sort=-sold",
+    link: "/product-detail/692190c152b600997c5407ae",
   },
   {
     id: 3,
     title: "",
     image: "/images/banners/banner5.jpg",
-    link: "/product-detail/69079cbdd5402175fadf4832",
+    link: "/product-detail/692190c152b600997c5407a3",
   },
 ];
 
