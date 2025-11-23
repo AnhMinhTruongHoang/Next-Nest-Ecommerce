@@ -22,6 +22,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Public()
   @Post()
   @UseGuards(JwtAuthGuard)
   @ResponseMessage('Create New User')
