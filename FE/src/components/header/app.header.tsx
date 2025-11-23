@@ -481,7 +481,7 @@ export default function AppHeader() {
     const items = [
       {
         key: "profile",
-        label: <span onClick={() => setOpenManageAccount(true)}>Profile</span>,
+        label: <span onClick={() => setOpenManageAccount(true)}>Hồ sơ</span>,
         icon: <UserIcon size={16} />,
       },
       ...(session?.user?.role === "ADMIN"
