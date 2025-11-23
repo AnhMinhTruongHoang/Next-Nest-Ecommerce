@@ -17,9 +17,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       secretOrKey: configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
     });
   }
-  ////////////
 
-  async validate(payload: IUser) {
+  async validate(payload: any) {
+    console.log('>>> JWT PAYLOAD:', payload);
+
     const { _id, name, email, role } = payload;
 
     let permissions: { method: string; apiPath: string }[] = [];
@@ -33,7 +34,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       ];
     }
 
-    // Gán req.user ở đây
     return {
       _id,
       name,
