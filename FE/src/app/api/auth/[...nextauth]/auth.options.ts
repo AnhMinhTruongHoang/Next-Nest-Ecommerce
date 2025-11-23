@@ -7,7 +7,7 @@ import { sendRequest } from "@/utils/api";
 import { JWT } from "next-auth/jwt";
 
 export const authOptions: AuthOptions = {
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXT_AUTH_SECRET,
   // Configure one or more authentication providers
   providers: [
     // local login
