@@ -264,7 +264,7 @@ const OrderHistoryModal: React.FC<Props> = ({
       title={
         <Space style={{ width: "100%", justifyContent: "center" }}>
           <span style={{ fontWeight: 700, fontSize: 18 }}>
-            📦 Lịch sử đơn hàng
+             Lịch sử đơn hàng
           </span>
           <ReloadOutlined
             style={{ color: "green" }}
@@ -284,7 +284,7 @@ const OrderHistoryModal: React.FC<Props> = ({
           dataSource={orders}
           columns={columns}
           rowKey="_id"
-          pagination={{ pageSize: 5 }}
+          pagination={{ pageSize: 5 ,  position: ["bottomCenter"], }}
           locale={{
             emptyText: (
               <Empty
