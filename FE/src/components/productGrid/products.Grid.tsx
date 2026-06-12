@@ -94,39 +94,18 @@ const ProductsGrid = () => {
     () => chunkArray(listProduct, itemsPerSlide),
     [listProduct, itemsPerSlide]
   );
-
   return (
-    <div>
-      <div
-        style={{
-          textAlign: "center",
-          padding: "8px",
-          fontWeight: "bold",
-          marginTop: 30,
-
-        }}
-      >
+    <div className="best-sellers-section">
+      <div className="section-title">
         <h1>Best Sellers</h1>
       </div>
-
+  
       {/* Loading */}
       {isLoading && (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-            gap: 24,
-            maxWidth: 1400,
-            margin: "16px auto 40px",
-            padding: "0 16px",
-          }}
-        >
+        <div className="loading-grid">
           {Array.from({ length: itemsPerSlide }).map((_, i) => (
-            <Card key={`sk-${i}`} hoverable style={{ borderRadius: 12 }}>
-              <Skeleton.Image
-                style={{ width: "100%", height: 180, borderRadius: 8 }}
-                active
-              />
+            <Card key={`sk-${i}`} hoverable className="product-card">
+              <Skeleton.Image className="skeleton-img" active />
               <div style={{ marginTop: 12 }}>
                 <Skeleton active paragraph={{ rows: 2 }} />
               </div>
@@ -134,53 +113,37 @@ const ProductsGrid = () => {
           ))}
         </div>
       )}
-
+  
       {/* Error */}
       {!isLoading && errorMsg && (
-        <div style={{ textAlign: "center", margin: "16px 0 40px" }}>
+        <div className="message-text">
           {errorMsg}
         </div>
       )}
-
+  
       {/* Empty */}
       {!isLoading && !errorMsg && listProduct.length === 0 && (
-        <div style={{ textAlign: "center", margin: "16px 0 40px" }}>
-          <Empty description="Chưa có sản phẩm phù hợp" />
+        <div className="empty-box">
+          <Empty description={<span style={{ color: "#b8b8b8" }}>Chưa có sản phẩm phù hợp</span>} />
         </div>
       )}
-
+  
       {/* Carousel */}
       {!isLoading && !errorMsg && listProduct.length > 0 && (
-        <Carousel arrows dots autoplay>
+        <Carousel arrows dots autoplay className="best-seller-carousel">
           {slides.map((group, index) => (
             <div key={index}>
-              <div
-                style={{
-                  display: "flex",
-                  gap: 24,
-                  flexWrap: "wrap",
-                  justifyContent: "center",
-                  marginTop: 16,
-                  marginBottom: 30,
-                }}
-              >
+              <div className="products-slide">
                 {group.map((p) => {
                   const imgSrc = getImageUrl(p.thumbnail);
+  
                   return (
                     <Card
                       key={p._id}
                       hoverable
-                      style={{
-                        width: 300,
-                        borderRadius: 12,
-                        overflow: "hidden",
-                        backgroundColor:"#181A1B"
-                      }}
+                      className="product-card"
                       cover={
-                        <div
-                          className="group overflow-hidden"
-                          style={{ position: "relative", height: 200 }}
-                        >
+                        <div className="product-img-wrapper">
                           <Image
                             alt={p.name}
                             src={imgSrc}
@@ -196,50 +159,29 @@ const ProductsGrid = () => {
                     >
                       <Meta
                         title={
-                          <div
-                            title={p.name}
-                            style={{
-                              textAlign: "center",
-                              fontWeight: 600,
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                            }}
-                          >
+                          <div title={p.name} className="product-name">
                             {p.name}
                           </div>
                         }
                         description={
-                          <div style={{ marginTop: 8 }}>
-                            <div
-                              style={{
-                                justifyContent: "center",
-                                textAlign: "center",
-                              }}
-                            >
+                          <div className="product-info">
+                            <div className="rating-box">
                               <Rate
                                 disabled
                                 allowHalf
                                 value={p.averageRating ?? 0}
                                 style={{ color: "#faad14" }}
                               />
-                              <div style={{ fontSize: 12, color: "#888" }}>
+                              <div className="review-text">
                                 ({p.totalReviews ?? 0} đánh giá)
                               </div>
                             </div>
-
-                            <div
-                              style={{
-                                textAlign: "center",
-                                fontWeight: 700,
-                                color: "#d0021b",
-                                marginTop: 4,
-                              }}
-                            >
+  
+                            <div className="product-price">
                               {currencyVN(p.price)}
                             </div>
-
-                            <div style={{ textAlign: "center", marginTop: 6 }}>
+  
+                            <div className="sold-box">
                               <Tag color="green">{p.sold ?? 0} đã bán</Tag>
                             </div>
                           </div>
@@ -253,10 +195,168 @@ const ProductsGrid = () => {
           ))}
         </Carousel>
       )}
-
+  
       <style jsx global>{`
-        .ant-card-hoverable:hover {
-          box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+        .best-sellers-section {
+          background-color: #1e2021;
+          padding: 10px 0 50px;
+        }
+  
+        .section-title {
+          text-align: center;
+          padding: 8px;
+          font-weight: bold;
+          margin-top: 30px;
+        }
+  
+        .section-title h1 {
+          color: #ffffff;
+          margin: 0;
+          font-size: 32px;
+          letter-spacing: 0.5px;
+        }
+  
+        .loading-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+          gap: 24px;
+          max-width: 1400px;
+          margin: 16px auto 40px;
+          padding: 0 16px;
+        }
+  
+        .products-slide {
+          display: flex;
+          gap: 24px;
+          flex-wrap: wrap;
+          justify-content: center;
+          margin-top: 16px;
+          margin-bottom: 35px;
+        }
+  
+        .product-card {
+          width: 300px;
+          border-radius: 14px;
+          overflow: hidden;
+          background-color: #181a1b !important;
+          border: 1px solid #2a2d2e !important;
+          cursor: pointer;
+          transition: transform 0.3s ease, box-shadow 0.3s ease,
+            border-color 0.3s ease;
+        }
+  
+        .product-card .ant-card-body {
+          background-color: #181a1b;
+          padding: 16px;
+        }
+  
+        .product-card:hover {
+          transform: translateY(-6px);
+          border-color: #00ffe0 !important;
+          box-shadow: 0 12px 30px rgba(0, 255, 224, 0.12) !important;
+        }
+  
+        .product-img-wrapper {
+          position: relative;
+          height: 200px;
+          overflow: hidden;
+          background-color: #111;
+        }
+  
+        .product-img-wrapper img {
+          transition: transform 0.45s ease;
+        }
+  
+        .product-card:hover .product-img-wrapper img {
+          transform: scale(1.08);
+        }
+  
+        .product-name {
+          text-align: center;
+          font-weight: 700;
+          color: #ffffff;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+  
+        .product-info {
+          margin-top: 8px;
+        }
+  
+        .rating-box {
+          text-align: center;
+        }
+  
+        .review-text {
+          font-size: 12px;
+          color: #9ca3af;
+          margin-top: 2px;
+        }
+  
+        .product-price {
+          text-align: center;
+          font-weight: 800;
+          color: #ff4d4f;
+          margin-top: 6px;
+          font-size: 16px;
+        }
+  
+        .sold-box {
+          text-align: center;
+          margin-top: 8px;
+        }
+  
+        .message-text,
+        .empty-box {
+          text-align: center;
+          margin: 16px 0 40px;
+          color: #b8b8b8;
+        }
+  
+        .skeleton-img {
+          width: 100% !important;
+          height: 180px !important;
+          border-radius: 8px !important;
+        }
+  
+        .product-card .ant-skeleton-title,
+        .product-card .ant-skeleton-paragraph > li {
+          background: linear-gradient(
+            90deg,
+            #252829 25%,
+            #333738 37%,
+            #252829 63%
+          ) !important;
+        }
+  
+        .best-seller-carousel .slick-dots li button {
+          background: rgba(255, 255, 255, 0.45) !important;
+        }
+  
+        .best-seller-carousel .slick-dots li.slick-active button {
+          background: #00ffe0 !important;
+        }
+  
+        .best-seller-carousel .slick-prev,
+        .best-seller-carousel .slick-next {
+          color: #ffffff !important;
+        }
+  
+        .best-seller-carousel .slick-prev::after,
+        .best-seller-carousel .slick-next::after {
+          border-color: #ffffff !important;
+        }
+  
+        @media (max-width: 768px) {
+          .section-title h1 {
+            font-size: 26px;
+          }
+  
+          .product-card {
+            width: 90%;
+            max-width: 320px;
+          }
         }
       `}</style>
     </div>
