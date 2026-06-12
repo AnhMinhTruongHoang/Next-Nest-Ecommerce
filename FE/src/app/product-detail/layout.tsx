@@ -14,7 +14,7 @@ export default function UnifiedLayout({
 }) {
   return (
     <AppProvider>
-      <Layout style={{ minHeight: "100vh" }}>
+      <Layout style={{ minHeight: "100vh" ,backgroundColor:"#1E2021" }}>
         <Header style={{ padding: 0, margin: 0 }}>
           <AppHeader />
         </Header>

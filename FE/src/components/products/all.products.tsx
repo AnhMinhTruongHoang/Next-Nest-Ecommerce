@@ -221,47 +221,347 @@ const ProductsPage = () => {
   ];
 
   return (
-    <div style={{ background: "#efefef", padding: "20px 0" }}>
-      <style jsx>{`
+    <div className="products-list-page">
+      <style jsx global>{`
+        .products-list-page {
+          background: #1e2021;
+          min-height: 100vh;
+          padding: 24px 16px 50px;
+        }
+  
+        .homepage-container {
+          max-width: 1440px;
+          margin: 0 auto;
+        }
+  
+        .filter-sidebar,
+        .product-list-panel {
+          background: #181a1b;
+          border: 1px solid #2a2d2e;
+          border-radius: 14px;
+          box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+        }
+  
+        .filter-sidebar {
+          padding: 18px;
+          position: sticky;
+          top: 90px;
+        }
+  
+        .filter-title {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          color: #ffffff;
+          font-weight: 700;
+        }
+  
+        .product-list-panel {
+          padding: 18px;
+        }
+  
+        .products-list-page .ant-divider {
+          border-color: #303435 !important;
+        }
+  
+        .products-list-page .ant-form-item-label > label,
+        .products-list-page .ant-checkbox-wrapper,
+        .products-list-page .ant-rate-text,
+        .products-list-page .ant-typography {
+          color: #e5e7eb !important;
+        }
+  
+        .products-list-page .ant-input-number {
+          background: #111314 !important;
+          border-color: #303435 !important;
+          color: #ffffff !important;
+        }
+  
+        .products-list-page .ant-input-number-input {
+          color: #ffffff !important;
+        }
+  
+        .products-list-page .ant-input-number:hover,
+        .products-list-page .ant-input-number-focused {
+          border-color: #00ffe0 !important;
+        }
+  
+        .mobile-tabs {
+          width: 100%;
+        }
+  
+        .mobile-tabs .ant-tabs-nav {
+          margin-bottom: 18px !important;
+        }
+  
+        .mobile-tabs .ant-tabs-tab {
+          color: #b8b8b8 !important;
+          padding: 8px 12px !important;
+        }
+  
+        .mobile-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
+          color: #00ffe0 !important;
+        }
+  
+        .mobile-tabs .ant-tabs-ink-bar {
+          background: #00ffe0 !important;
+        }
+  
+        .customize-row {
+          display: grid !important;
+          grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+          gap: 18px;
+        }
+  
+        .column {
+          width: 100%;
+        }
+  
+        .wrapper {
+          height: 100%;
+          background: #181a1b;
+          border: 1px solid #2a2d2e;
+          border-radius: 14px;
+          overflow: hidden;
+          padding-bottom: 12px;
+          transition: transform 0.3s ease, box-shadow 0.3s ease,
+            border-color 0.3s ease;
+        }
+  
+        .wrapper:hover {
+          transform: translateY(-6px);
+          border-color: #00ffe0;
+          box-shadow: 0 12px 28px rgba(0, 255, 224, 0.12);
+        }
+  
+        .thumbnail {
+          width: 100%;
+          height: 180px;
+          background: #111314;
+          overflow: hidden;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+  
+        .thumbnail img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          padding: 10px;
+          transition: transform 0.45s ease;
+        }
+  
+        .wrapper:hover .thumbnail img {
+          transform: scale(1.08);
+        }
+  
+        .text {
+          color: #ffffff;
+          font-weight: 700;
+          font-size: 15px;
+          min-height: 44px;
+          padding: 12px 10px 4px;
+          line-height: 1.45;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+  
+        .price {
+          color: #ff4d4f;
+          font-weight: 800;
+          font-size: 16px;
+          margin-top: 6px;
+        }
+  
+        .rating {
+          color: #b8b8b8;
+          font-size: 12px;
+          margin-top: 8px;
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+        }
+  
+        .products-list-page .ant-pagination {
+          flex-wrap: wrap;
+          gap: 6px;
+        }
+  
+        .products-list-page .ant-pagination-item {
+          background: #181a1b !important;
+          border-color: #303435 !important;
+        }
+  
+        .products-list-page .ant-pagination-item a {
+          color: #e5e7eb !important;
+        }
+  
+        .products-list-page .ant-pagination-item-active {
+          border-color: #00ffe0 !important;
+        }
+  
+        .products-list-page .ant-pagination-item-active a {
+          color: #00ffe0 !important;
+        }
+  
+        .products-list-page .ant-pagination-prev button,
+        .products-list-page .ant-pagination-next button {
+          background: #181a1b !important;
+          border-color: #303435 !important;
+          color: #e5e7eb !important;
+        }
+  
         .mobile-filter-fab {
           display: none;
         }
+  
+        .products-list-page .ant-spin-text {
+          color: #00ffe0 !important;
+        }
+  
+        .mobile-filter-drawer .ant-drawer-content {
+          background: #181a1b !important;
+        }
+  
+        .mobile-filter-drawer .ant-drawer-header {
+          background: #181a1b !important;
+          border-bottom: 1px solid #303435 !important;
+        }
+  
+        .mobile-filter-drawer .ant-drawer-title,
+        .mobile-filter-drawer .ant-drawer-close {
+          color: #ffffff !important;
+        }
+  
+        .mobile-filter-drawer .ant-form-item-label > label,
+        .mobile-filter-drawer .ant-checkbox-wrapper,
+        .mobile-filter-drawer .ant-rate-text {
+          color: #e5e7eb !important;
+        }
+  
+        .mobile-filter-drawer .ant-divider {
+          border-color: #303435 !important;
+        }
+  
+        .mobile-filter-drawer .ant-input-number {
+          background: #111314 !important;
+          border-color: #303435 !important;
+        }
+  
+        .mobile-filter-drawer .ant-input-number-input {
+          color: #ffffff !important;
+        }
+  
+        @media (max-width: 992px) {
+          .customize-row {
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 14px;
+          }
+  
+          .thumbnail {
+            height: 160px;
+          }
+        }
+  
         @media (max-width: 768px) {
+          .products-list-page {
+            padding: 16px 10px 80px;
+          }
+  
+          .product-list-panel {
+            padding: 12px;
+            border-radius: 12px;
+          }
+  
           .mobile-filter-fab {
             display: block;
           }
-        }
-        @media (max-width: 768px) {
+  
           .mobile-tabs {
             overflow-x: auto;
             white-space: nowrap;
-            scrollbar-width: thin;
+            scrollbar-width: none;
           }
-          :global(.mobile-tabs .ant-tabs-nav-list) {
+  
+          .mobile-tabs::-webkit-scrollbar {
+            display: none;
+          }
+  
+          .mobile-tabs .ant-tabs-nav-list {
             flex-wrap: nowrap !important;
           }
-          :global(.mobile-tabs .ant-tabs-tab) {
-            padding-inline: 8px !important;
+  
+          .mobile-tabs .ant-tabs-tab {
+            padding: 7px 10px !important;
+            font-size: 13px;
+          }
+  
+          .customize-row {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+          }
+  
+          .thumbnail {
+            height: 145px;
+          }
+  
+          .text {
+            font-size: 13px;
+            min-height: 40px;
+            padding: 10px 8px 2px;
+          }
+  
+          .price {
+            font-size: 14px;
+          }
+  
+          .rating {
+            font-size: 11px;
+            gap: 2px;
+            padding: 0 4px;
+          }
+  
+          .rating .ant-rate {
+            font-size: 9px !important;
+          }
+  
+          .products-list-page .ant-pagination-options {
+            display: none !important;
+          }
+        }
+  
+        @media (max-width: 380px) {
+          .customize-row {
+            gap: 10px;
+          }
+  
+          .thumbnail {
+            height: 130px;
+          }
+  
+          .text {
+            font-size: 12px;
+          }
+  
+          .price {
             font-size: 13px;
           }
         }
       `}</style>
-
-      <div
-        className="homepage-container"
-        style={{ maxWidth: 1440, margin: "0 auto" }}
-      >
+  
+      <div className="homepage-container">
         <Row gutter={[20, 20]}>
-          {/* --- Sidebar filter --- */}
+          {/* Sidebar filter desktop */}
           <Col md={4} sm={0} xs={0}>
-            <div
-              style={{ padding: "20px", background: "#fff", borderRadius: 5 }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <div className="filter-sidebar">
+              <div className="filter-title">
                 <span>
-                  <FilterTwoTone />{" "}
-                  <span style={{ fontWeight: 500 }}>Bộ lọc tìm kiếm</span>
+                  <FilterTwoTone /> <span>Bộ lọc tìm kiếm</span>
                 </span>
+  
                 <ReloadOutlined
                   title="Reset"
                   onClick={() => {
@@ -271,7 +571,9 @@ const ProductsPage = () => {
                   }}
                 />
               </div>
+  
               <Divider />
+  
               <Form
                 onFinish={onFinish}
                 form={form}
@@ -296,8 +598,9 @@ const ProductsPage = () => {
                     </Row>
                   </Checkbox.Group>
                 </Form.Item>
-
+  
                 <Divider />
+  
                 <Form.Item label="Khoảng giá" labelCol={{ span: 24 }}>
                   <Row gutter={[10, 10]} style={{ width: "100%" }}>
                     <Col xl={11} md={24}>
@@ -309,9 +612,13 @@ const ProductsPage = () => {
                         />
                       </Form.Item>
                     </Col>
+  
                     <Col xl={2} md={0}>
-                      <div> - </div>
+                      <div style={{ color: "#b8b8b8", textAlign: "center" }}>
+                        -
+                      </div>
                     </Col>
+  
                     <Col xl={11} md={24}>
                       <Form.Item name={["range", "to"]} noStyle>
                         <InputNumber
@@ -322,6 +629,7 @@ const ProductsPage = () => {
                       </Form.Item>
                     </Col>
                   </Row>
+  
                   <Button
                     onClick={() => form.submit()}
                     style={{ width: "100%", marginTop: 10 }}
@@ -330,8 +638,9 @@ const ProductsPage = () => {
                     Áp dụng
                   </Button>
                 </Form.Item>
-
+  
                 <Divider />
+  
                 <Form.Item label="Đánh giá" labelCol={{ span: 24 }}>
                   {[5, 4, 3, 2, 1].map((val) => (
                     <div key={val}>
@@ -349,13 +658,11 @@ const ProductsPage = () => {
               </Form>
             </div>
           </Col>
-
-          {/* --- Product list --- */}
+  
+          {/* Product list */}
           <Col md={20} xs={24}>
             <Spin spinning={isLoading} tip="Loading...">
-              <div
-                style={{ padding: "20px", background: "#fff", borderRadius: 5 }}
-              >
+              <div className="product-list-panel">
                 <div
                   style={{
                     display: "flex",
@@ -372,7 +679,7 @@ const ProductsPage = () => {
                     onChange={(value) => setSortQuery(value)}
                   />
                 </div>
-
+  
                 <Row className="customize-row">
                   {listProduct?.map((item, index) => (
                     <div
@@ -383,31 +690,21 @@ const ProductsPage = () => {
                     >
                       <div className="wrapper">
                         <div className="thumbnail">
-                          <img
-                            src={getImageUrl(item.thumbnail)}
-                            alt="thumbnail"
-                          />
+                          <img src={getImageUrl(item.thumbnail)} alt="thumbnail" />
                         </div>
-                        <div
-                          style={{ textAlign: "center" }}
-                          className="text"
-                          title={item.name}
-                        >
+  
+                        <div className="text" title={item.name}>
                           {item.name}
                         </div>
-                        <div className="price" style={{ textAlign: "center" }}>
+  
+                        <div className="price">
                           {new Intl.NumberFormat("vi-VN", {
                             style: "currency",
                             currency: "VND",
                           }).format(item?.price ?? 0)}
                         </div>
-                        <div
-                          className="rating"
-                          style={{
-                            textAlign: "center",
-                            justifyContent: "center",
-                          }}
-                        >
+  
+                        <div className="rating">
                           <Rate
                             value={5}
                             disabled
@@ -421,7 +718,7 @@ const ProductsPage = () => {
                     </div>
                   ))}
                 </Row>
-
+  
                 <Row
                   style={{
                     display: "flex",
@@ -446,8 +743,8 @@ const ProductsPage = () => {
           </Col>
         </Row>
       </div>
-
-      {/* --- FAB filter (mobile) --- */}
+  
+      {/* FAB filter mobile */}
       <FloatButton
         className="mobile-filter-fab"
         icon={<FilterTwoTone twoToneColor="#52c41a" />}
@@ -456,15 +753,16 @@ const ProductsPage = () => {
         onClick={() => setShowMobileFilter(true)}
         tooltip="Bộ lọc"
       />
-
-      {/* --- Drawer filter (mobile) --- */}
+  
+      {/* Drawer filter mobile */}
       <Drawer
+        className="mobile-filter-drawer"
         title="Bộ lọc tìm kiếm"
         placement="left"
         open={showMobileFilter}
         onClose={() => setShowMobileFilter(false)}
-        width={"80%"}
-        styles={{ body: { paddingBottom: 24 } }}
+        width="86%"
+        styles={{ body: { paddingBottom: 24, background: "#181A1B" } }}
       >
         <Form
           onFinish={onFinish}
@@ -490,8 +788,9 @@ const ProductsPage = () => {
               </Row>
             </Checkbox.Group>
           </Form.Item>
-
+  
           <Divider />
+  
           <Form.Item label="Khoảng giá" labelCol={{ span: 24 }}>
             <Row gutter={[10, 10]} style={{ width: "100%" }}>
               <Col span={11}>
@@ -503,9 +802,11 @@ const ProductsPage = () => {
                   />
                 </Form.Item>
               </Col>
-              <Col span={2} style={{ textAlign: "center" }}>
+  
+              <Col span={2} style={{ textAlign: "center", color: "#b8b8b8" }}>
                 -
               </Col>
+  
               <Col span={11}>
                 <Form.Item name={["range", "to"]} noStyle>
                   <InputNumber
@@ -516,6 +817,7 @@ const ProductsPage = () => {
                 </Form.Item>
               </Col>
             </Row>
+  
             <Button
               onClick={() => form.submit()}
               style={{ width: "100%", marginTop: 10 }}
@@ -524,8 +826,9 @@ const ProductsPage = () => {
               Áp dụng
             </Button>
           </Form.Item>
-
+  
           <Divider />
+  
           <Form.Item label="Đánh giá" labelCol={{ span: 24 }}>
             {[5, 4, 3, 2, 1].map((val) => (
               <div key={val}>

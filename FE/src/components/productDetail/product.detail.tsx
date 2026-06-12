@@ -156,22 +156,33 @@ const ProductDetail = ({ currentProduct }: IProps) => {
   const isOutOfStock = availableStock <= 0;
 
   return (
-    <div style={{ background: "#f5f5f5", padding: "30px 0" }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+    <div className="product-detail-page">
+      <div className="product-detail-container">
         <Breadcrumb
+          className="product-breadcrumb"
           style={{ marginBottom: 16 }}
           items={[
-            { title: <Link href="/productsList">Sản phẩm</Link> },
-            { title: "Chi tiết sản phẩm" },
+            {
+              title: (
+                <Link href="/productsList" style={{ color: "#00FFE0" }}>
+                  Sản phẩm
+                </Link>
+              ),
+            },
+            {
+              title: <span style={{ color: "#b8b8b8" }}>Chi tiết sản phẩm</span>,
+            },
           ]}
         />
-
+  
         <Card
           variant="borderless"
-          style={{
-            borderRadius: 12,
-            overflow: "hidden",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+          className="product-detail-card"
+          styles={{
+            body: {
+              backgroundColor: "#181A1B",
+              padding: 24,
+            },
           }}
         >
           <Row gutter={[32, 32]}>
@@ -187,70 +198,78 @@ const ProductDetail = ({ currentProduct }: IProps) => {
                 onClick={() => setIsOpenModalGallery(true)}
               />
             </Col>
-
+  
             <Col xs={24} md={14}>
-              <Space
-                direction="vertical"
-                size="middle"
-                style={{ width: "100%" }}
-              >
-                <Title level={3} style={{ margin: 0 }}>
+              <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+                <Title level={3} className="product-title">
                   {currentProduct.name}
                 </Title>
-
+  
                 {currentProduct.brand && (
                   <Tag color="blue">{currentProduct.brand}</Tag>
                 )}
-
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <Rate disabled defaultValue={5} style={{ fontSize: 14 }} />
-                  <Text type="secondary">Đã bán {sold}</Text>
+  
+                <div className="product-rating-row">
+                  <Rate
+                    disabled
+                    defaultValue={5}
+                    style={{ fontSize: 14, color: "#faad14" }}
+                  />
+  
+                  <Text className="product-sub-text">Đã bán {sold}</Text>
+  
                   {isOutOfStock ? (
                     <Tag color="error">Hết hàng</Tag>
                   ) : (
                     <Tag color="green">Còn {availableStock} sản phẩm</Tag>
                   )}
                 </div>
-
+  
                 {currentProduct.description && (
-                  <Text type="secondary">{currentProduct.description}</Text>
+                  <Text className="product-description">
+                    {currentProduct.description}
+                  </Text>
                 )}
-
-                <Title level={4} style={{ color: "#ff4d4f", marginTop: 8 }}>
+  
+                <Title level={4} className="product-price">
                   {new Intl.NumberFormat("vi-VN", {
                     style: "currency",
                     currency: "VND",
                   }).format(currentProduct.price ?? 0)}
                 </Title>
-
-                <Divider />
-
+  
+                <Divider className="dark-divider" />
+  
                 <div>
-                  <Text strong>Số lượng:</Text>
-                  <Space>
+                  <Text strong className="quantity-label">
+                    Số lượng:
+                  </Text>
+  
+                  <Space style={{ marginLeft: 12 }}>
                     <Button
                       icon={<MinusOutlined />}
                       onClick={() => handleQuantityChange("MINUS")}
                       disabled={isOutOfStock || currentQuantity <= 1}
                     />
+  
                     <InputNumber
+                      className="quantity-input"
                       value={currentQuantity}
                       min={1}
                       max={availableStock}
                       onChange={(v) => v && handleChangeInput(v.toString())}
                     />
+  
                     <Button
                       icon={<PlusOutlined />}
                       onClick={() => handleQuantityChange("PLUS")}
-                      disabled={
-                        isOutOfStock || currentQuantity >= availableStock
-                      }
+                      disabled={isOutOfStock || currentQuantity >= availableStock}
                     />
                   </Space>
                 </div>
-
-                <Divider />
-
+  
+                <Divider className="dark-divider" />
+  
                 <Space wrap>
                   <Button
                     type="primary"
@@ -261,6 +280,7 @@ const ProductDetail = ({ currentProduct }: IProps) => {
                   >
                     Thêm vào giỏ hàng
                   </Button>
+  
                   <Button
                     size="large"
                     danger
@@ -273,22 +293,26 @@ const ProductDetail = ({ currentProduct }: IProps) => {
               </Space>
             </Col>
           </Row>
-
+  
           <br />
-          <UsersComment
-            productId={currentProduct._id}
-            accessToken={
-              typeof window !== "undefined"
-                ? localStorage.getItem("access_token") || undefined
-                : undefined
-            }
-          />
-
-          <Divider />
+  
+          <div className="comment-wrapper">
+            <UsersComment
+              productId={currentProduct._id}
+              accessToken={
+                typeof window !== "undefined"
+                  ? localStorage.getItem("access_token") || undefined
+                  : undefined
+              }
+            />
+          </div>
+  
+          <Divider className="dark-divider" />
+  
           <SuggestionList currentProduct={currentProduct} />
         </Card>
       </div>
-
+  
       <ModalGallery
         isOpen={isOpenModalGallery}
         setIsOpen={setIsOpenModalGallery}
@@ -296,6 +320,149 @@ const ProductDetail = ({ currentProduct }: IProps) => {
         items={imageGallery}
         title={currentProduct.name}
       />
+  
+      <style jsx global>{`
+        .product-detail-page {
+          background-color: #1e2021;
+          min-height: 100vh;
+          padding: 30px 16px;
+        }
+  
+        .product-detail-container {
+          max-width: 1200px;
+          margin: 0 auto;
+        }
+  
+        .product-detail-card {
+          border-radius: 16px !important;
+          overflow: hidden;
+          background-color: #181a1b !important;
+          border: 1px solid #2a2d2e !important;
+          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28) !important;
+        }
+  
+        .product-title {
+          color: #ffffff !important;
+          margin: 0 !important;
+          font-weight: 800 !important;
+        }
+  
+        .product-sub-text,
+        .product-description {
+          color: #b8b8b8 !important;
+        }
+  
+        .product-description {
+          line-height: 1.7;
+        }
+  
+        .product-price {
+          color: #ff4d4f !important;
+          margin-top: 8px !important;
+          font-weight: 800 !important;
+        }
+  
+        .product-rating-row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+  
+        .quantity-label {
+          color: #ffffff !important;
+        }
+  
+        .dark-divider {
+          border-color: #303435 !important;
+          margin: 12px 0 !important;
+        }
+  
+        .quantity-input .ant-input-number-input {
+          color: #ffffff !important;
+          background-color: #111314 !important;
+        }
+  
+        .quantity-input {
+          background-color: #111314 !important;
+          border-color: #303435 !important;
+        }
+  
+        .quantity-input:hover,
+        .quantity-input:focus-within {
+          border-color: #00ffe0 !important;
+        }
+  
+        .product-gallery {
+          background-color: #111314;
+          border-radius: 14px;
+          overflow: hidden;
+          border: 1px solid #2a2d2e;
+        }
+  
+        .product-gallery .image-gallery-slide-wrapper {
+          background-color: #111314;
+        }
+  
+        .product-gallery .image-gallery-image {
+          background-color: #111314;
+          object-fit: contain;
+        }
+  
+        .product-gallery .image-gallery-thumbnail {
+          background-color: #181a1b;
+          border: 1px solid #303435;
+          border-radius: 8px;
+          overflow: hidden;
+        }
+  
+        .product-gallery .image-gallery-thumbnail.active,
+        .product-gallery .image-gallery-thumbnail:hover {
+          border-color: #00ffe0;
+        }
+  
+        .product-gallery .image-gallery-icon {
+          color: #ffffff;
+          filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.8));
+        }
+  
+        .product-breadcrumb .ant-breadcrumb-separator {
+          color: #777 !important;
+        }
+  
+        .comment-wrapper {
+          margin-top: 16px;
+        }
+  
+        .comment-wrapper .ant-card {
+          background-color: #181a1b !important;
+          border-color: #2a2d2e !important;
+        }
+  
+        .comment-wrapper .ant-card-body {
+          background-color: #181a1b !important;
+        }
+  
+        .comment-wrapper .ant-typography,
+        .comment-wrapper p,
+        .comment-wrapper span {
+          color: #e5e7eb;
+        }
+  
+        @media (max-width: 768px) {
+          .product-detail-page {
+            padding: 20px 12px;
+          }
+  
+          .product-detail-card .ant-card-body {
+            padding: 16px !important;
+          }
+  
+          .product-title {
+            font-size: 22px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 };
