@@ -277,12 +277,6 @@ const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
                               {p.sold ?? 0} đã bán
                             </Tag>
                           </div>
-
-                          
-                          <span className="review-count">
-                              ({p.totalReviews ?? 0})
-                            </span>
-  
   
                           <div className="price-block">
                             {original && (
@@ -447,24 +441,28 @@ const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
           color: #c9d1d9;
         }
   
-        .rating-row {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 6px;
-          margin-bottom: 8px;
-          flex-wrap: wrap;
-        }
-  
-        .review-count {
-          font-size: 12px;
-          color: #b8b8b8;
-        }
-  
-        .sold-tag {
-          margin-left: 0 !important;
-        }
-  
+       .rating-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  width: 100%;
+  text-align: center;
+}
+
+.review-count {
+  font-size: 12px;
+  color: #b8b8b8;
+}
+
+.sold-tag {
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+}
         .price-block {
           text-align: center;
         }
