@@ -94,72 +94,49 @@ export default function AuthSignUp() {
   );
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background:
-          "radial-gradient(1200px 600px at 80% -10%, #ffe6e6, transparent 60%), radial-gradient(900px 500px at -10% 20%, #e6f7ff, transparent 60%), linear-gradient(180deg, #fafafa, #f5f5f5)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 24,
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: 480,
-          background: "#fff",
-          borderRadius: 16,
-          boxShadow: "0 20px 60px rgba(0,0,0,.06)",
-          padding: 28,
-          position: "relative",
-        }}
-      >
+    <div className="signup-page">
+      <div className="signup-card">
         {/* Back */}
-        <div style={{ position: "absolute", top: 12, left: 12 }}>
+        <div className="signup-back">
           <Link href="/auth/signin" aria-label="Quay lại đăng nhập">
-            <Button icon={<ArrowLeftOutlined />} type="text">
+            <Button icon={<ArrowLeftOutlined />} type="text" className="back-btn">
               Quay lại
             </Button>
           </Link>
         </div>
-
+  
         {/* Header */}
-        <div style={{ textAlign: "center", marginTop: 8, marginBottom: 10 }}>
-          <Avatar
-            size={72}
-            style={{
-              background:
-                "conic-gradient(from 180deg at 50% 50%, #597ef7, #2f54eb, #91caff)",
-              marginBottom: 12,
-              boxShadow: "0 8px 18px rgba(47,84,235,.25)",
-            }}
-          >
-            <LockOutlined style={{ fontSize: 28, color: "#fff" }} />
-          </Avatar>
-          <Title level={3} style={{ margin: 0 }}>
+        <div className="signup-header">
+        <Avatar
+  size={72}
+  src="/images/logos/gz.png"
+  className="signup-avatar"
+/>
+  
+          <Title level={3} className="signup-title">
             Tạo tài khoản
           </Title>
-          <Text type="secondary">GamerZone</Text>
+  
+          <Text className="signup-subtitle">GamerZone</Text>
         </div>
-
+  
         {inlineError && (
           <Alert
             type="error"
             message="Không thể đăng ký"
             description={inlineError}
             showIcon
-            style={{ marginBottom: 16 }}
+            className="signup-alert"
           />
         )}
-
+  
         <Form<SignUpForm>
           form={form}
           layout="vertical"
           onFinish={handleFinish}
           requiredMark={false}
           initialValues={{ agree: true }}
+          className="signup-form"
         >
           <Form.Item
             name="name"
@@ -172,11 +149,11 @@ export default function AuthSignUp() {
             <Input
               size="large"
               placeholder="Nguyễn Văn A"
-              prefix={<UserOutlined style={{ color: "#999" }} />}
+              prefix={<UserOutlined style={{ color: "#8b949e" }} />}
               allowClear
             />
           </Form.Item>
-
+  
           <Form.Item
             name="email"
             label="Email"
@@ -188,14 +165,14 @@ export default function AuthSignUp() {
             <Input
               size="large"
               placeholder="email@domain.com"
-              prefix={<MailOutlined style={{ color: "#999" }} />}
+              prefix={<MailOutlined style={{ color: "#8b949e" }} />}
               allowClear
               autoComplete="email"
             />
           </Form.Item>
-
-          <Row gutter={12}>
-            <Col span={12}>
+  
+          <Row gutter={[12, 0]}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="password"
                 label="Mật khẩu"
@@ -210,13 +187,14 @@ export default function AuthSignUp() {
               >
                 <Input.Password
                   size="large"
-                  prefix={<LockTwoTone twoToneColor="#2f54eb" />}
+                  prefix={<LockTwoTone twoToneColor="#00ffe0" />}
                   placeholder="••••••••"
                   autoComplete="new-password"
                 />
               </Form.Item>
             </Col>
-            <Col span={12}>
+  
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="confirmPassword"
                 label="Nhập lại mật khẩu"
@@ -238,31 +216,22 @@ export default function AuthSignUp() {
               >
                 <Input.Password
                   size="large"
-                  prefix={<LockTwoTone twoToneColor="#2f54eb" />}
+                  prefix={<LockTwoTone twoToneColor="#00ffe0" />}
                   placeholder="••••••••"
                   autoComplete="new-password"
                 />
               </Form.Item>
             </Col>
           </Row>
-
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              gap: 8,
-              marginBottom: 8,
-              alignItems: "center",
-              flexWrap: "wrap",
-            }}
-          >
+  
+          <div className="terms-row">
             <Form.Item name="agree" valuePropName="checked" noStyle>
               <Checkbox>
                 Tôi đồng ý với{" "}
                 <Button
                   type="link"
                   onClick={() => setIsModalOpen(true)}
-                  style={{ padding: 0 }}
+                  className="inline-link-btn"
                 >
                   Điều khoản dịch vụ
                 </Button>{" "}
@@ -270,31 +239,25 @@ export default function AuthSignUp() {
                 <Button
                   type="link"
                   onClick={() => setIsModalOpen(true)}
-                  style={{ padding: 0 }}
+                  className="inline-link-btn"
                 >
                   Chính sách bảo mật
                 </Button>
               </Checkbox>
             </Form.Item>
           </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              textAlign: "center",
-              marginTop: 12,
-            }}
-          >
-            <Text type="secondary" style={{ fontSize: 12 }}>
+  
+          <div className="signin-text">
+            <Text>
               Đã có tài khoản?{" "}
               <Link href="/auth/signin">
-                <Button type="link" style={{ padding: 0, fontSize: 12 }}>
+                <Button type="link" className="signin-link-btn">
                   Đăng nhập
                 </Button>
               </Link>
             </Text>
           </div>
+  
           <Form.Item
             shouldUpdate
             rules={[
@@ -316,21 +279,298 @@ export default function AuthSignUp() {
                 block
                 loading={submitting}
                 disabled={!form.getFieldValue("agree")}
+                className="signup-submit-btn"
               >
                 Tạo tài khoản
               </Button>
             )}
           </Form.Item>
         </Form>
-
-        <div style={{ textAlign: "center", marginTop: 8 }}>
-          <Text type="secondary">
+  
+        <div className="signup-note">
+          <Text>
             Bằng việc đăng ký, bạn đồng ý nhận thông tin cập nhật từ chúng tôi.
             Bạn có thể huỷ bất cứ lúc nào.
           </Text>
         </div>
       </div>
+  
       <TermsModal isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
+  
+      {/* Style */}
+      <style jsx global>{`
+        .signup-page {
+          min-height: 100vh;
+          background:
+            radial-gradient(
+              900px 500px at 80% -10%,
+              rgba(0, 255, 224, 0.14),
+              transparent 60%
+            ),
+            radial-gradient(
+              700px 420px at -10% 20%,
+              rgba(255, 77, 0, 0.13),
+              transparent 60%
+            ),
+            linear-gradient(180deg, #1e2021, #111314);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 24px;
+        }
+  
+        .signup-card {
+          width: 100%;
+          max-width: 480px;
+          background: #181a1b;
+          border: 1px solid #2a2d2e;
+          border-radius: 18px;
+          box-shadow: 0 22px 70px rgba(0, 0, 0, 0.38);
+          padding: 30px 28px 28px;
+          position: relative;
+        }
+  
+        .signup-back {
+          position: absolute;
+          top: 12px;
+          left: 12px;
+        }
+  
+        .back-btn {
+          color: #e5e7eb !important;
+        }
+  
+        .back-btn:hover {
+          color: #00ffe0 !important;
+          background: rgba(0, 255, 224, 0.08) !important;
+        }
+  
+        .signup-header {
+          text-align: center;
+          margin-top: 12px;
+          margin-bottom: 14px;
+        }
+  
+      .signup-avatar {
+  background: transparent !important;
+  margin-bottom: 12px;
+  box-shadow: 0 10px 24px rgba(0, 255, 224, 0.2);
+  border: 2px solid #00ffe0;
+}
+
+.signup-avatar img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  padding: 2px;
+}
+  
+        .signup-title {
+          margin: 0 !important;
+          color: #ffffff !important;
+          font-weight: 800 !important;
+        }
+  
+        .signup-subtitle {
+          color: #00ffe0 !important;
+          font-weight: 700;
+          letter-spacing: 0.5px;
+        }
+  
+        .signup-alert {
+          margin-bottom: 16px;
+          background: rgba(255, 77, 79, 0.12) !important;
+          border-color: rgba(255, 77, 79, 0.35) !important;
+        }
+  
+        .signup-alert .ant-alert-message {
+          color: #ff7875 !important;
+        }
+  
+        .signup-alert .ant-alert-description {
+          color: #e5e7eb !important;
+        }
+  
+        .signup-form .ant-form-item-label > label {
+          color: #e5e7eb !important;
+          font-weight: 600;
+        }
+  
+        .signup-form .ant-input,
+        .signup-form .ant-input-affix-wrapper {
+          background: #111314 !important;
+          border-color: #303435 !important;
+          color: #ffffff !important;
+          border-radius: 10px !important;
+        }
+  
+        .signup-form .ant-input-affix-wrapper:hover,
+        .signup-form .ant-input-affix-wrapper-focused,
+        .signup-form .ant-input:hover,
+        .signup-form .ant-input:focus {
+          border-color: #00ffe0 !important;
+          box-shadow: 0 0 0 2px rgba(0, 255, 224, 0.08) !important;
+        }
+  
+        .signup-form .ant-input::placeholder,
+        .signup-form .ant-input-password input::placeholder {
+          color: #6b7280 !important;
+        }
+  
+        .signup-form .ant-input-password-icon {
+          color: #8b949e !important;
+        }
+  
+        .signup-form .ant-form-item-explain-error {
+          color: #ff7875 !important;
+          font-size: 12px;
+        }
+  
+        .signup-form .ant-form-item-tooltip {
+          color: #00ffe0 !important;
+        }
+  
+        .terms-row {
+          display: flex;
+          justify-content: space-between;
+          gap: 8px;
+          margin-bottom: 8px;
+          align-items: center;
+          flex-wrap: wrap;
+        }
+  
+        .terms-row .ant-checkbox-wrapper {
+          color: #e5e7eb !important;
+          line-height: 1.7;
+        }
+  
+        .terms-row .ant-checkbox-inner {
+          background-color: #111314 !important;
+          border-color: #4b5563 !important;
+        }
+  
+        .terms-row .ant-checkbox-checked .ant-checkbox-inner {
+          background-color: #00b894 !important;
+          border-color: #00b894 !important;
+        }
+  
+        .inline-link-btn,
+        .signin-link-btn {
+          color: #00ffe0 !important;
+          padding: 0 !important;
+          font-weight: 600 !important;
+        }
+  
+        .inline-link-btn:hover,
+        .signin-link-btn:hover {
+          color: #4dfff0 !important;
+        }
+  
+        .signin-text {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          text-align: center;
+          margin-top: 12px;
+          margin-bottom: 10px;
+        }
+  
+        .signin-text .ant-typography {
+          color: #b8b8b8 !important;
+          font-size: 13px;
+        }
+  
+        .signup-submit-btn {
+          height: 46px !important;
+          border-radius: 12px !important;
+          border: none !important;
+          background: linear-gradient(135deg, #ff4d00, #ff7a00) !important;
+          font-weight: 800 !important;
+          box-shadow: 0 10px 24px rgba(255, 77, 0, 0.22) !important;
+        }
+  
+        .signup-submit-btn:hover {
+          background: linear-gradient(135deg, #ff6a1a, #ff8c1a) !important;
+        }
+  
+        .signup-submit-btn:disabled {
+          background: #303435 !important;
+          color: #777 !important;
+          box-shadow: none !important;
+        }
+  
+        .signup-note {
+          text-align: center;
+          margin-top: 8px;
+        }
+  
+        .signup-note .ant-typography {
+          color: #8b949e !important;
+          font-size: 13px;
+          line-height: 1.6;
+        }
+  
+        @media (max-width: 576px) {
+          .signup-page {
+            padding: 16px;
+            align-items: flex-start;
+            padding-top: 42px;
+          }
+  
+          .signup-card {
+            max-width: 100%;
+            padding: 56px 18px 22px;
+            border-radius: 16px;
+          }
+  
+          .signup-back {
+            top: 10px;
+            left: 10px;
+          }
+  
+          .signup-header {
+            margin-top: 0;
+          }
+  
+          .signup-avatar {
+            width: 64px !important;
+            height: 64px !important;
+            line-height: 64px !important;
+          }
+  
+          .signup-title {
+            font-size: 24px !important;
+          }
+  
+          .terms-row .ant-checkbox-wrapper {
+            font-size: 13px;
+          }
+  
+          .inline-link-btn,
+          .signin-link-btn {
+            font-size: 13px !important;
+          }
+  
+          .signup-submit-btn {
+            height: 44px !important;
+          }
+        }
+  
+        @media (max-width: 380px) {
+          .signup-page {
+            padding: 12px;
+            padding-top: 32px;
+          }
+  
+          .signup-card {
+            padding: 54px 14px 20px;
+          }
+  
+          .signup-title {
+            font-size: 22px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
