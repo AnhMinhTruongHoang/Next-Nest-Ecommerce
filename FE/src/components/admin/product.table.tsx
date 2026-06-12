@@ -304,60 +304,63 @@ const ProductsTable = () => {
   ];
 
   return (
-    <div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 16,
-        }}
-      >
-        <h2>Bảng sản phẩm</h2>
-        <Space>
+    <div className="gz-product-admin-page">
+      <div className="gz-product-admin-header">
+        <div>
+          <h2 className="gz-product-admin-title">Bảng sản phẩm</h2>
+          <p className="gz-product-admin-subtitle">
+            Quản lý sản phẩm, tồn kho và doanh số
+          </p>
+        </div>
+  
+        <Space className="gz-product-admin-actions" wrap>
           <Button
             type="text"
-            icon={<ReloadOutlined style={{ color: "green" }} />}
+            icon={<ReloadOutlined style={{ color: "#00c781" }} />}
             onClick={() => getData(1, pagination?.pageSize || 999999)}
+            className="gz-product-refresh-btn"
           >
             Làm mới
           </Button>
+  
           <Button
             icon={<PlusOutlined />}
             type="primary"
             onClick={() => setIsCreateModalOpen(true)}
+            className="gz-product-add-btn"
           >
             Thêm mới
           </Button>
         </Space>
       </div>
-
+  
       <Spin spinning={loading} tip="Đang tải dữ liệu...">
-        <Table
-          columns={columns}
-          dataSource={listProducts}
-          rowKey="_id"
-          pagination={pagination}
-        />
+        <div className="gz-product-table-card">
+          <Table<IProduct>
+            className="gz-product-admin-table"
+            columns={columns}
+            dataSource={listProducts}
+            rowKey="_id"
+            pagination={pagination}
+            scroll={{ x: 1050 }}
+          />
+        </div>
       </Spin>
-
-      {/* Modal xem chi tiết */}
+  
       <ViewProductModal
         productData={viewProduct}
         isViewModalOpen={isViewModalOpen}
         setIsViewModalOpen={setIsViewModalOpen}
         setViewProduct={setViewProduct}
       />
-
-      {/* Modal tạo mới */}
+  
       <CreateProductModal
         access_token={accessToken}
         getData={() => getData(1, pagination?.pageSize || 999999)}
         isCreateModalOpen={isCreateModalOpen}
         setIsCreateModalOpen={setIsCreateModalOpen}
       />
-
-      {/* Modal cập nhật */}
+  
       <UpdateProductModal
         access_token={accessToken}
         getData={() => getData(1, pagination?.pageSize || 999999)}
@@ -366,6 +369,295 @@ const ProductsTable = () => {
         dataUpdate={dataUpdate}
         setDataUpdate={setDataUpdate}
       />
+  
+      <style jsx global>{`
+        .gz-product-admin-page {
+          width: 100%;
+          color: #ffffff;
+        }
+  
+        .gz-product-admin-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 16px;
+          margin-bottom: 18px;
+          padding: 16px 18px;
+          background: #181a1b;
+          border: 1px solid #2a2d2e;
+          border-radius: 16px;
+          box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+        }
+  
+        .gz-product-admin-title {
+          margin: 0;
+          color: #ffffff;
+          font-size: 26px;
+          font-weight: 800;
+        }
+  
+        .gz-product-admin-subtitle {
+          margin: 5px 0 0;
+          color: #8b949e;
+          font-size: 13px;
+        }
+  
+        .gz-product-admin-actions {
+          justify-content: flex-end;
+        }
+  
+        .gz-product-refresh-btn {
+          color: #e5e7eb !important;
+          border-radius: 10px !important;
+        }
+  
+        .gz-product-refresh-btn:hover {
+          color: #00ffe0 !important;
+          background: rgba(0, 255, 224, 0.08) !important;
+        }
+  
+        .gz-product-add-btn {
+          border: none !important;
+          border-radius: 10px !important;
+          font-weight: 800 !important;
+          background: linear-gradient(135deg, #ff4d00, #ff7a00) !important;
+          box-shadow: 0 8px 18px rgba(255, 77, 0, 0.18) !important;
+        }
+  
+        .gz-product-table-card {
+          background: #181a1b;
+          border: 1px solid #2a2d2e;
+          border-radius: 16px;
+          overflow: hidden;
+          box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+        }
+  
+        .gz-product-admin-table .ant-table {
+          background: #181a1b !important;
+          color: #e5e7eb !important;
+        }
+  
+        .gz-product-admin-table .ant-table-container {
+          background: #181a1b !important;
+        }
+  
+        .gz-product-admin-table .ant-table-thead > tr > th {
+          background: #111314 !important;
+          color: #ffffff !important;
+          border-bottom: 1px solid #303435 !important;
+          font-weight: 800 !important;
+          white-space: nowrap;
+        }
+  
+        .gz-product-admin-table .ant-table-tbody > tr > td {
+          background: #181a1b !important;
+          color: #d1d5db !important;
+          border-bottom: 1px solid #2a2d2e !important;
+          vertical-align: middle;
+        }
+  
+        .gz-product-admin-table .ant-table-tbody > tr:hover > td {
+          background: #202324 !important;
+        }
+  
+        .gz-product-admin-table .ant-table-cell-row-hover {
+          background: #202324 !important;
+        }
+  
+        .gz-product-name-btn {
+          color: #00ffe0 !important;
+          font-weight: 700 !important;
+          padding: 0 !important;
+          white-space: normal !important;
+          text-align: center;
+        }
+  
+        .gz-product-name-btn:hover {
+          color: #ff7a00 !important;
+        }
+  
+        .gz-product-thumb {
+          object-fit: cover !important;
+          border-radius: 8px !important;
+          border: 1px solid #303435;
+          background: #111314;
+          padding: 3px;
+        }
+  
+        .gz-product-edit-btn {
+          border: none !important;
+          border-radius: 999px !important;
+          background: rgba(0, 255, 224, 0.12) !important;
+          color: #00ffe0 !important;
+          font-weight: 700 !important;
+        }
+  
+        .gz-product-edit-btn:hover {
+          background: rgba(0, 255, 224, 0.22) !important;
+          color: #ffffff !important;
+        }
+  
+        .gz-product-delete-btn {
+          border-radius: 999px !important;
+          font-weight: 700 !important;
+        }
+  
+        .gz-product-admin-table .ant-table-column-sorter {
+          color: #8b949e !important;
+        }
+  
+        .gz-product-admin-table .ant-table-filter-trigger {
+          color: #8b949e !important;
+        }
+  
+        .gz-product-admin-table .ant-table-filter-trigger:hover {
+          color: #00ffe0 !important;
+        }
+  
+        .gz-product-admin-table .ant-empty-description {
+          color: #8b949e !important;
+        }
+  
+        .gz-product-admin-table .ant-pagination {
+          padding: 12px 16px;
+          margin: 0 !important;
+          justify-content: center !important;
+        }
+  
+        .gz-product-admin-table .ant-pagination-item {
+          background: #111314 !important;
+          border-color: #303435 !important;
+        }
+  
+        .gz-product-admin-table .ant-pagination-item a {
+          color: #e5e7eb !important;
+        }
+  
+        .gz-product-admin-table .ant-pagination-item-active {
+          border-color: #00ffe0 !important;
+        }
+  
+        .gz-product-admin-table .ant-pagination-item-active a {
+          color: #00ffe0 !important;
+        }
+  
+        .gz-product-admin-table .ant-pagination-prev button,
+        .gz-product-admin-table .ant-pagination-next button {
+          background: #111314 !important;
+          border-color: #303435 !important;
+          color: #e5e7eb !important;
+        }
+  
+        .gz-product-admin-table .ant-select-selector {
+          background: #111314 !important;
+          border-color: #303435 !important;
+          color: #ffffff !important;
+        }
+  
+        .gz-product-admin-page .ant-spin-text {
+          color: #00ffe0 !important;
+        }
+  
+        .gz-product-admin-page .ant-spin-dot-item {
+          background-color: #00ffe0 !important;
+        }
+  
+        .gz-product-filter-dropdown {
+          padding: 10px;
+          background: #181a1b;
+          border: 1px solid #2a2d2e;
+          border-radius: 10px;
+        }
+  
+        .gz-product-filter-dropdown .ant-input {
+          width: 188px;
+          margin-bottom: 8px;
+          display: block;
+          background: #111314 !important;
+          border-color: #303435 !important;
+          color: #ffffff !important;
+        }
+  
+        .gz-product-filter-dropdown .ant-input::placeholder {
+          color: #6b7280 !important;
+        }
+  
+        .gz-product-filter-dropdown .ant-input:hover,
+        .gz-product-filter-dropdown .ant-input:focus {
+          border-color: #00ffe0 !important;
+          box-shadow: 0 0 0 2px rgba(0, 255, 224, 0.08) !important;
+        }
+  
+        @media (max-width: 992px) {
+          .gz-product-admin-header {
+            flex-direction: column;
+            align-items: stretch;
+          }
+  
+          .gz-product-admin-actions {
+            justify-content: flex-start;
+          }
+        }
+  
+        @media (max-width: 768px) {
+          .gz-product-admin-header {
+            padding: 14px;
+            border-radius: 14px;
+          }
+  
+          .gz-product-admin-title {
+            font-size: 22px;
+          }
+  
+          .gz-product-admin-subtitle {
+            font-size: 12px;
+          }
+  
+          .gz-product-admin-actions {
+            display: grid !important;
+            grid-template-columns: 1fr;
+            gap: 10px !important;
+          }
+  
+          .gz-product-admin-actions .ant-space-item {
+            width: 100%;
+          }
+  
+          .gz-product-refresh-btn,
+          .gz-product-add-btn {
+            width: 100%;
+            height: 40px;
+          }
+  
+          .gz-product-table-card {
+            border-radius: 14px;
+            overflow-x: auto;
+          }
+  
+          .gz-product-admin-table .ant-table {
+            font-size: 13px;
+          }
+  
+          .gz-product-admin-table .ant-table-thead > tr > th,
+          .gz-product-admin-table .ant-table-tbody > tr > td {
+            padding: 10px 8px !important;
+          }
+  
+          .gz-product-admin-table .ant-pagination-options {
+            display: none !important;
+          }
+        }
+  
+        @media (max-width: 420px) {
+          .gz-product-admin-title {
+            font-size: 20px;
+          }
+  
+          .gz-product-admin-table .ant-table {
+            font-size: 12px;
+          }
+        }
+      `}</style>
     </div>
   );
 };

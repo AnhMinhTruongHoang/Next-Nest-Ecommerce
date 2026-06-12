@@ -1,66 +1,4 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { getPaymentsOverviewData } from "./overview.data";
-import { PaymentsOverviewChart } from "./chart.payment";
-import { standardFormat } from "../overview/format";
-
-type DataPoint = { x: string | number; y: number };
-type PaymentsOverviewData = { received: DataPoint[]; due: DataPoint[] };
-
-type PropsType = {
-  timeFrame?: string; // "monthly" | "yearly"
-  className?: string;
-};
-
-export function PaymentsOverview({ timeFrame = "monthly" }: PropsType) {
-  const [data, setData] = useState<PaymentsOverviewData | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const ac = new AbortController();
-    setError(null);
-    setData(null);
-
-    getPaymentsOverviewData({ timeFrame, signal: ac.signal })
-      .then((res) => setData(res))
-      .catch((err) => {
-        if (err?.name !== "AbortError") setError(err?.message || String(err));
-      });
-
-    return () => ac.abort();
-  }, [timeFrame]);
-
-  if (error) {
-    return (
-      <div style={{ borderRadius: 16, background: "#fff", padding: 24 }}>
-        Lỗi tải dữ liệu: {error}
-      </div>
-    );
-  }
-
-  if (!data) {
-    return (
-      <div
-        style={{
-          borderRadius: 16,
-          backgroundColor: "white",
-          padding: 24,
-          boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-        }}
-      >
-        <p style={{ color: "#9ca3af", textTransform: "uppercase" }}>
-          ĐANG TẢI…
-        </p>
-      </div>
-    );
-  }
-
-  const receivedTotal = data.received.reduce((s, i) => s + (i.y || 0), 0);
-  const dueTotal = data.due.reduce((s, i) => s + (i.y || 0), 0);
-
-  ///
-  return (
+return (
     <div
       style={{
         borderRadius: 16,
@@ -143,4 +81,3 @@ export function PaymentsOverview({ timeFrame = "monthly" }: PropsType) {
       </dl>
     </div>
   );
-}

@@ -17,20 +17,22 @@ import type { TablePaginationConfig } from "antd/es/table/interface";
 import { ReloadOutlined, SearchOutlined, StarFilled } from "@ant-design/icons";
 
 interface IUserRef {
-  _id: string;
-  email: string;
+  _id?: string;
+  email?: string;
 }
+
 interface IProductRef {
-  _id: string;
-  name: string;
+  _id?: string;
+  name?: string;
 }
+
 interface IReview {
   _id: string;
-  userId: IUserRef | string;
-  productId: IProductRef | string;
-  rating: number;
-  comment?: string;
-  createdAt?: string;
+  userId?: IUserRef | string | null;
+  productId?: IProductRef | string | null;
+  rating?: number | null;
+  comment?: string | null;
+  createdAt?: string | null;
 }
 
 const DEFAULT_PAGE = 1;
@@ -43,6 +45,7 @@ const ReviewsTable: React.FC = () => {
   const [pagination, setPagination] = useState<TablePaginationConfig | false>(
     false
   );
+
   const { notification } = App.useApp();
 
   // Lấy token
@@ -54,13 +57,35 @@ const ReviewsTable: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (accessToken) getData(DEFAULT_PAGE, DEFAULT_LIMIT);
+    if (accessToken) {
+      getData(DEFAULT_PAGE, DEFAULT_LIMIT);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken]);
+
+  // ===== Helper chống lỗi null =====
+  const getUserEmail = (userId?: IUserRef | string | null) => {
+    if (!userId) return "Không xác định";
+    if (typeof userId === "string") return userId || "Không xác định";
+    return userId.email || "Không xác định";
+  };
+
+  const getProductName = (productId?: IProductRef | string | null) => {
+    if (!productId) return "Không xác định";
+    if (typeof productId === "string") return productId || "Không xác định";
+    return productId.name || "Không xác định";
+  };
+
+  const getRatingValue = (rating?: number | null) => {
+    const value = Number(rating);
+    return Number.isFinite(value) ? value : 0;
+  };
 
   // ===== API =====
   const getData = async (page = DEFAULT_PAGE, limit = DEFAULT_LIMIT) => {
     try {
       setLoading(true);
+
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/reviews?page=${page}&limit=${limit}`,
         {
@@ -70,9 +95,9 @@ const ReviewsTable: React.FC = () => {
           },
         }
       );
+
       const d = await res.json();
 
-      // Chuẩn hoá dữ liệu (luôn là mảng)
       const items: IReview[] =
         (Array.isArray(d?.items) && d.items) ||
         (Array.isArray(d?.data?.items) && d.data.items) ||
@@ -80,7 +105,6 @@ const ReviewsTable: React.FC = () => {
         (Array.isArray(d?.data) && d.data) ||
         [];
 
-      // Chuẩn hoá meta
       const meta = d?.pagination ||
         d?.data?.pagination ||
         d?.data?.meta || {
@@ -96,14 +120,18 @@ const ReviewsTable: React.FC = () => {
         pageSize: Number(meta.limit) || limit,
         total: Number(meta.total) || items.length,
         showSizeChanger: true,
+        position: ["bottomCenter"],
         showTotal: (total: number, range: [number, number]) =>
           `${range[0]}-${range[1]} / ${total} đánh giá`,
         onChange: handleOnChange,
         onShowSizeChange: handleOnChange,
       };
+
       setPagination(nextPagination);
-    } catch (e) {
-      notification.error({ message: "Lỗi tải dữ liệu đánh giá!" });
+    } catch {
+      notification.error({
+        message: "Lỗi tải dữ liệu đánh giá!",
+      });
     } finally {
       setLoading(false);
     }
@@ -119,7 +147,14 @@ const ReviewsTable: React.FC = () => {
     getData(page, nextSize);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id?: string) => {
+    if (!id) {
+      notification.error({
+        message: "Không tìm thấy ID đánh giá!",
+      });
+      return;
+    }
+
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/reviews/${id}`,
@@ -131,17 +166,34 @@ const ReviewsTable: React.FC = () => {
           },
         }
       );
+
       const d = await res.json();
+
       if (res.ok || d?.ok) {
-        notification.success({ message: "Xoá đánh giá thành công!" });
-        const cur = (pagination && pagination.current) || DEFAULT_PAGE;
-        const size = (pagination && pagination.pageSize) || DEFAULT_LIMIT;
+        notification.success({
+          message: "Xoá đánh giá thành công!",
+        });
+
+        const cur =
+          typeof pagination === "object" && pagination?.current
+            ? pagination.current
+            : DEFAULT_PAGE;
+
+        const size =
+          typeof pagination === "object" && pagination?.pageSize
+            ? pagination.pageSize
+            : DEFAULT_LIMIT;
+
         getData(Number(cur), Number(size));
       } else {
-        notification.error({ message: "Xoá thất bại!" });
+        notification.error({
+          message: d?.message || "Xoá thất bại!",
+        });
       }
     } catch {
-      notification.error({ message: "Không thể xoá đánh giá!" });
+      notification.error({
+        message: "Không thể xoá đánh giá!",
+      });
     }
   };
 
@@ -151,26 +203,20 @@ const ReviewsTable: React.FC = () => {
       title: "Người dùng",
       dataIndex: ["userId", "email"],
       align: "center",
-      render: (_v, record) =>
-        typeof record.userId === "object"
-          ? record.userId.email
-          : String(record.userId),
+      render: (_v, record) => getUserEmail(record.userId),
     },
     {
       title: "Sản phẩm",
       dataIndex: ["productId", "name"],
       align: "center",
-      render: (_v, record) =>
-        typeof record.productId === "object"
-          ? record.productId.name
-          : String(record.productId),
+      render: (_v, record) => getProductName(record.productId),
       filterDropdown: ({
         setSelectedKeys,
         selectedKeys,
         confirm,
         clearFilters,
       }) => (
-        <div style={{ padding: 8 }}>
+        <div className="gz-review-filter-dropdown">
           <Input
             placeholder="Tìm sản phẩm"
             value={selectedKeys[0]}
@@ -178,12 +224,18 @@ const ReviewsTable: React.FC = () => {
               setSelectedKeys(e.target.value ? [e.target.value] : [])
             }
             onPressEnter={() => confirm()}
-            style={{ width: 188, marginBottom: 8, display: "block" }}
+            style={{
+              width: 188,
+              marginBottom: 8,
+              display: "block",
+            }}
           />
+
           <Space>
             <Button type="primary" onClick={() => confirm()} size="small">
               Tìm kiếm
             </Button>
+
             <Button onClick={() => clearFilters?.()} size="small">
               Đặt lại
             </Button>
@@ -191,45 +243,40 @@ const ReviewsTable: React.FC = () => {
         </div>
       ),
       filterIcon: (filtered) => (
-        <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+        <SearchOutlined style={{ color: filtered ? "#00ffe0" : undefined }} />
       ),
       onFilter: (value, record) => {
-        const productName =
-          typeof record.productId === "object"
-            ? record.productId.name
-            : String(record.productId);
-        return productName?.toLowerCase().includes(String(value).toLowerCase());
+        const productName = getProductName(record.productId);
+        return productName.toLowerCase().includes(String(value).toLowerCase());
       },
     },
     {
       title: "Đánh giá",
       dataIndex: "rating",
       align: "center",
-      filters: [5, 4, 3, 2, 1].map((v) => ({ text: `${v}⭐`, value: v })),
-      onFilter: (value, record) => record.rating === value,
-      render: (rating: number) => (
+      filters: [5, 4, 3, 2, 1].map((v) => ({
+        text: `${v}⭐`,
+        value: v,
+      })),
+      onFilter: (value, record) =>
+        getRatingValue(record.rating) === Number(value),
+      render: (rating?: number | null) => (
         <Rate
           disabled
-          value={rating}
+          value={getRatingValue(rating)}
           character={<StarFilled style={{ color: "#faad14" }} />}
         />
       ),
-      sorter: (a, b) => a.rating - b.rating,
+      sorter: (a, b) => getRatingValue(a.rating) - getRatingValue(b.rating),
     },
     {
       title: "Bình luận",
       dataIndex: "comment",
       align: "center",
-      render: (comment?: string) =>
+      render: (comment?: string | null) =>
         comment ? (
           <span
-            style={{
-              whiteSpace: "nowrap",
-              textOverflow: "ellipsis",
-              overflow: "hidden",
-              display: "inline-block",
-              maxWidth: 260,
-            }}
+            className="gz-review-comment-text"
             title={comment}
           >
             {comment}
@@ -245,7 +292,7 @@ const ReviewsTable: React.FC = () => {
       sorter: (a, b) =>
         new Date(a.createdAt || 0).getTime() -
         new Date(b.createdAt || 0).getTime(),
-      render: (value?: string) =>
+      render: (value?: string | null) =>
         value ? new Date(value).toLocaleString("vi-VN") : "-",
     },
     {
@@ -259,7 +306,7 @@ const ReviewsTable: React.FC = () => {
           okText="Có"
           cancelText="Không"
         >
-          <Button danger size="small">
+          <Button danger size="small" className="gz-review-delete-btn">
             Xoá
           </Button>
         </Popconfirm>
@@ -271,14 +318,22 @@ const ReviewsTable: React.FC = () => {
     <div className="gz-review-admin-page">
       <div className="gz-review-admin-header">
         <h2>Bảng đánh giá</h2>
-  
+
         <Space>
           <Button
             type="text"
             icon={<ReloadOutlined style={{ color: "#00c781" }} />}
             onClick={() => {
-              const cur = (pagination && pagination.current) || DEFAULT_PAGE;
-              const size = (pagination && pagination.pageSize) || DEFAULT_LIMIT;
+              const cur =
+                typeof pagination === "object" && pagination?.current
+                  ? pagination.current
+                  : DEFAULT_PAGE;
+
+              const size =
+                typeof pagination === "object" && pagination?.pageSize
+                  ? pagination.pageSize
+                  : DEFAULT_LIMIT;
+
               getData(Number(cur), Number(size));
             }}
             className="gz-refresh-btn"
@@ -287,7 +342,7 @@ const ReviewsTable: React.FC = () => {
           </Button>
         </Space>
       </div>
-  
+
       <Spin spinning={loading} tip="Đang tải dữ liệu...">
         <div className="gz-review-table-wrap">
           <Table<IReview>
@@ -300,8 +355,7 @@ const ReviewsTable: React.FC = () => {
           />
         </div>
       </Spin>
-  
-      {/* Style */}
+
       <style jsx global>{`
         .gz-review-admin-page {
           background: #1e2021;
@@ -309,7 +363,7 @@ const ReviewsTable: React.FC = () => {
           padding: 20px;
           color: #ffffff;
         }
-  
+
         .gz-review-admin-header {
           display: flex;
           justify-content: space-between;
@@ -321,135 +375,223 @@ const ReviewsTable: React.FC = () => {
           border-radius: 14px;
           padding: 14px 16px;
         }
-  
+
         .gz-review-admin-header h2 {
           margin: 0;
           color: #ffffff;
           font-weight: 800;
         }
-  
+
         .gz-refresh-btn {
           color: #e5e7eb !important;
+          border-radius: 10px !important;
         }
-  
+
         .gz-refresh-btn:hover {
           color: #00ffe0 !important;
           background: rgba(0, 255, 224, 0.08) !important;
         }
-  
+
         .gz-review-table-wrap {
           background: #181a1b;
           border: 1px solid #2a2d2e;
           border-radius: 14px;
           overflow: hidden;
         }
-  
+
         .gz-review-table .ant-table {
           background: #181a1b !important;
           color: #e5e7eb !important;
         }
-  
+
         .gz-review-table .ant-table-container {
           background: #181a1b !important;
         }
-  
+
         .gz-review-table .ant-table-thead > tr > th {
           background: #111314 !important;
           color: #ffffff !important;
           border-bottom: 1px solid #303435 !important;
           font-weight: 800 !important;
+          white-space: nowrap;
         }
-  
+
         .gz-review-table .ant-table-tbody > tr > td {
           background: #181a1b !important;
           color: #d1d5db !important;
           border-bottom: 1px solid #2a2d2e !important;
+          vertical-align: middle;
         }
-  
+
         .gz-review-table .ant-table-tbody > tr:hover > td {
           background: #202324 !important;
         }
-  
+
         .gz-review-table .ant-table-cell-row-hover {
           background: #202324 !important;
         }
-  
+
+        .gz-review-comment-text {
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          display: inline-block;
+          max-width: 260px;
+          color: #d1d5db;
+        }
+
+        .gz-review-delete-btn {
+          border-radius: 999px !important;
+          font-weight: 700 !important;
+        }
+
         .gz-review-table .ant-empty-description {
           color: #8b949e !important;
         }
-  
+
         .gz-review-table .ant-table-column-sorter {
           color: #8b949e !important;
         }
-  
+
+        .gz-review-table .ant-table-filter-trigger {
+          color: #8b949e !important;
+        }
+
+        .gz-review-table .ant-table-filter-trigger:hover {
+          color: #00ffe0 !important;
+        }
+
+        .gz-review-table .ant-pagination {
+          padding: 12px 16px;
+          margin: 0 !important;
+          justify-content: center !important;
+        }
+
+        .gz-review-table .ant-pagination-total-text {
+          color: #b8b8b8 !important;
+        }
+
         .gz-review-table .ant-pagination-item {
           background: #181a1b !important;
           border-color: #303435 !important;
         }
-  
+
         .gz-review-table .ant-pagination-item a {
           color: #e5e7eb !important;
         }
-  
+
         .gz-review-table .ant-pagination-item-active {
           border-color: #00ffe0 !important;
         }
-  
+
         .gz-review-table .ant-pagination-item-active a {
           color: #00ffe0 !important;
         }
-  
+
         .gz-review-table .ant-pagination-prev button,
         .gz-review-table .ant-pagination-next button {
           background: #181a1b !important;
           border-color: #303435 !important;
           color: #e5e7eb !important;
         }
-  
+
         .gz-review-table .ant-select-selector {
           background: #111314 !important;
           border-color: #303435 !important;
           color: #ffffff !important;
         }
-  
-        .gz-review-table .ant-table-filter-trigger {
-          color: #8b949e !important;
-        }
-  
-        .gz-review-table .ant-table-filter-trigger:hover {
-          color: #00ffe0 !important;
-        }
-  
+
         .gz-review-admin-page .ant-spin-text {
           color: #00ffe0 !important;
         }
-  
+
+        .gz-review-admin-page .ant-spin-dot-item {
+          background-color: #00ffe0 !important;
+        }
+
+        .gz-review-filter-dropdown {
+          padding: 10px;
+          background: #181a1b;
+          border: 1px solid #2a2d2e;
+          border-radius: 10px;
+        }
+
+        .gz-review-filter-dropdown .ant-input {
+          background: #111314 !important;
+          border-color: #303435 !important;
+          color: #ffffff !important;
+        }
+
+        .gz-review-filter-dropdown .ant-input::placeholder {
+          color: #6b7280 !important;
+        }
+
+        .gz-review-filter-dropdown .ant-input:hover,
+        .gz-review-filter-dropdown .ant-input:focus {
+          border-color: #00ffe0 !important;
+          box-shadow: 0 0 0 2px rgba(0, 255, 224, 0.08) !important;
+        }
+
+        .gz-review-filter-dropdown .ant-btn-primary {
+          background: linear-gradient(135deg, #ff4d00, #ff7a00) !important;
+          border-color: #ff4d00 !important;
+        }
+
+        .ant-popconfirm .ant-popover-inner {
+          background: #181a1b !important;
+          border: 1px solid #2a2d2e !important;
+        }
+
+        .ant-popconfirm .ant-popover-title,
+        .ant-popconfirm .ant-popover-inner-content {
+          color: #ffffff !important;
+        }
+
         @media (max-width: 768px) {
           .gz-review-admin-page {
             padding: 12px;
           }
-  
+
           .gz-review-admin-header {
             align-items: flex-start;
             flex-direction: column;
             padding: 12px;
           }
-  
+
           .gz-review-admin-header h2 {
             font-size: 22px;
           }
-  
+
           .gz-review-table-wrap {
             border-radius: 12px;
             overflow-x: auto;
           }
-  
+
           .gz-review-table .ant-table {
             font-size: 13px;
           }
-  
+
+          .gz-review-table .ant-table-thead > tr > th,
+          .gz-review-table .ant-table-tbody > tr > td {
+            padding: 10px 8px !important;
+          }
+
           .gz-review-table .ant-pagination-options {
             display: none !important;
+          }
+        }
+
+        @media (max-width: 420px) {
+          .gz-review-admin-page {
+            padding: 10px;
+          }
+
+          .gz-review-admin-header h2 {
+            font-size: 20px;
+          }
+
+          .gz-review-table .ant-table {
+            font-size: 12px;
           }
         }
       `}</style>
