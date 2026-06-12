@@ -265,18 +265,11 @@ const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
                             </div>
                           )}
   
-                          <div className="rating-row">
-                            <Rate
-                              disabled
-                              allowHalf
-                              value={p.averageRating ?? 0}
-                              style={{ color: "#faad14", fontSize: 13 }}
-                            />
-  
-                            <Tag color="green" className="sold-tag">
-                              {p.sold ?? 0} đã bán
-                            </Tag>
-                          </div>
+  <div className="rating-row">
+  <Tag color="green" className="sold-tag">
+    {p.sold ?? 0} đã bán
+  </Tag>
+</div>
   
                           <div className="price-block">
                             {original && (
@@ -440,9 +433,9 @@ const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
           font-size: 11px;
           color: #c9d1d9;
         }
-  
-       .rating-row {
- 
+
+        .rating-row {
+  display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
@@ -451,8 +444,6 @@ const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
   width: 100%;
   text-align: center;
 }
-
-
 
 .sold-tag {
   margin: 0 !important;
