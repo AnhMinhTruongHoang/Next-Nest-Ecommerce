@@ -442,7 +442,7 @@ const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
         }
   
        .rating-row {
-  display: flex;
+ 
   align-items: center;
   justify-content: center;
   gap: 6px;
@@ -452,10 +452,7 @@ const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
   text-align: center;
 }
 
-.review-count {
-  font-size: 12px;
-  color: #b8b8b8;
-}
+
 
 .sold-tag {
   margin: 0 !important;
