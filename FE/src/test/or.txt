@@ -1,0 +1,55 @@
+ return (
+    <Spin spinning={loading}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 16,
+        }}
+      >
+        <h2>Danh sách đơn hàng</h2>
+        <Space>
+          <Input.Search
+            placeholder="Nhập ID / tên / số điện thoại để tìm..."
+            allowClear
+            enterButton={<SearchOutlined />}
+            onSearch={handleSearch}
+            style={{ width: 300 }}
+          />
+          <Button
+            type="text"
+            icon={<ReloadOutlined style={{ color: "green" }} />}
+            onClick={() => getData(1, pagination?.pageSize || 999999)}
+          >
+            Refresh
+          </Button>
+          <Button
+            icon={<PlusOutlined />}
+            type="primary"
+            onClick={() => setIsCreateModalOpen(true)}
+          >
+            Add new
+          </Button>
+        </Space>
+      </div>
+      <Table
+        columns={columns}
+        dataSource={filteredOrders}
+        rowKey={"_id"}
+        pagination={pagination}
+      />
+      <CreateOrderModal
+        isOpen={isCreateModalOpen}
+        setIsOpen={setIsCreateModalOpen}
+        accessToken={access_token}
+        reload={() => getData(1, pagination?.pageSize || 999999)}
+      />
+      <ViewOrderModal
+        orderData={orderData}
+        setOrderData={setOrderData}
+        isViewModalOpen={isViewModalOpen}
+        setIsViewModalOpen={setIsViewModalOpen}
+      />
+    </Spin>
+  );

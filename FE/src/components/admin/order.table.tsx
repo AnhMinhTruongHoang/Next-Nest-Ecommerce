@@ -290,61 +290,367 @@ const OrderTable = () => {
       ),
     },
   ];
-
   return (
-    <Spin spinning={loading}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 16,
-        }}
-      >
-        <h2>Danh sách đơn hàng</h2>
-        <Space>
-          <Input.Search
-            placeholder="Nhập ID / tên / số điện thoại để tìm..."
-            allowClear
-            enterButton={<SearchOutlined />}
-            onSearch={handleSearch}
-            style={{ width: 300 }}
+    <div className="gz-order-page">
+      <Spin spinning={loading} tip="Đang tải đơn hàng...">
+        <div className="gz-order-header">
+          <div>
+            <h2 className="gz-order-title">Danh sách đơn hàng</h2>
+            <p className="gz-order-subtitle">
+              Quản lý, tìm kiếm và xử lý đơn hàng
+            </p>
+          </div>
+  
+          <Space className="gz-order-actions" wrap>
+            <Input.Search
+              className="gz-order-search"
+              placeholder="Nhập ID / tên / số điện thoại để tìm..."
+              allowClear
+              enterButton={<SearchOutlined />}
+              onSearch={handleSearch}
+            />
+  
+            <Button
+              type="text"
+              icon={<ReloadOutlined style={{ color: "#00c781" }} />}
+              onClick={() => getData(1, pagination?.pageSize || 999999)}
+              className="gz-order-refresh-btn"
+            >
+              Refresh
+            </Button>
+  
+            <Button
+              icon={<PlusOutlined />}
+              type="primary"
+              onClick={() => setIsCreateModalOpen(true)}
+              className="gz-order-add-btn"
+            >
+              Add new
+            </Button>
+          </Space>
+        </div>
+  
+        <div className="gz-order-table-card">
+          <Table<IOrder>
+            className="gz-order-table"
+            columns={columns}
+            dataSource={filteredOrders}
+            rowKey="_id"
+            pagination={pagination}
+            scroll={{ x: 1100 }}
           />
-          <Button
-            type="text"
-            icon={<ReloadOutlined style={{ color: "green" }} />}
-            onClick={() => getData(1, pagination?.pageSize || 999999)}
-          >
-            Refresh
-          </Button>
-          <Button
-            icon={<PlusOutlined />}
-            type="primary"
-            onClick={() => setIsCreateModalOpen(true)}
-          >
-            Add new
-          </Button>
-        </Space>
-      </div>
-      <Table
-        columns={columns}
-        dataSource={filteredOrders}
-        rowKey={"_id"}
-        pagination={pagination}
-      />
-      <CreateOrderModal
-        isOpen={isCreateModalOpen}
-        setIsOpen={setIsCreateModalOpen}
-        accessToken={access_token}
-        reload={() => getData(1, pagination?.pageSize || 999999)}
-      />
-      <ViewOrderModal
-        orderData={orderData}
-        setOrderData={setOrderData}
-        isViewModalOpen={isViewModalOpen}
-        setIsViewModalOpen={setIsViewModalOpen}
-      />
-    </Spin>
+        </div>
+  
+        <CreateOrderModal
+          isOpen={isCreateModalOpen}
+          setIsOpen={setIsCreateModalOpen}
+          accessToken={access_token}
+          reload={() => getData(1, pagination?.pageSize || 999999)}
+        />
+  
+        <ViewOrderModal
+          orderData={orderData}
+          setOrderData={setOrderData}
+          isViewModalOpen={isViewModalOpen}
+          setIsViewModalOpen={setIsViewModalOpen}
+        />
+      </Spin>
+  
+      <style jsx global>{`
+        .gz-order-page {
+          min-height: 100vh;
+          background: #1e2021;
+          padding: 22px;
+          color: #ffffff;
+        }
+  
+        .gz-order-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          margin-bottom: 18px;
+          padding: 16px 18px;
+          border-radius: 16px;
+          background: #181a1b;
+          border: 1px solid #2a2d2e;
+          box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+        }
+  
+        .gz-order-title {
+          margin: 0;
+          color: #ffffff;
+          font-size: 26px;
+          font-weight: 800;
+        }
+  
+        .gz-order-subtitle {
+          margin: 5px 0 0;
+          color: #8b949e;
+          font-size: 13px;
+        }
+  
+        .gz-order-actions {
+          justify-content: flex-end;
+        }
+  
+        .gz-order-search {
+          width: 320px;
+        }
+  
+        .gz-order-search .ant-input {
+          background: #111314 !important;
+          border-color: #303435 !important;
+          color: #ffffff !important;
+        }
+  
+        .gz-order-search .ant-input::placeholder {
+          color: #6b7280 !important;
+        }
+  
+        .gz-order-search .ant-input:hover,
+        .gz-order-search .ant-input:focus {
+          border-color: #00ffe0 !important;
+          box-shadow: none !important;
+        }
+  
+        .gz-order-search .ant-input-group-addon button {
+          background: linear-gradient(135deg, #00d5c0, #00b894) !important;
+          border-color: #00d5c0 !important;
+          color: #ffffff !important;
+        }
+  
+        .gz-order-refresh-btn {
+          color: #e5e7eb !important;
+          border-radius: 10px !important;
+        }
+  
+        .gz-order-refresh-btn:hover {
+          color: #00ffe0 !important;
+          background: rgba(0, 255, 224, 0.08) !important;
+        }
+  
+        .gz-order-add-btn {
+          border: none !important;
+          border-radius: 10px !important;
+          font-weight: 700 !important;
+          background: linear-gradient(135deg, #ff5a00, #ff7e1a) !important;
+          box-shadow: 0 8px 18px rgba(255, 102, 0, 0.18) !important;
+        }
+  
+        .gz-order-table-card {
+          background: #181a1b;
+          border: 1px solid #2a2d2e;
+          border-radius: 16px;
+          overflow: hidden;
+          box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+        }
+  
+        .gz-order-table .ant-table {
+          background: #181a1b !important;
+          color: #e5e7eb !important;
+        }
+  
+        .gz-order-table .ant-table-container {
+          background: #181a1b !important;
+        }
+  
+        .gz-order-table .ant-table-thead > tr > th {
+          background: #111314 !important;
+          color: #ffffff !important;
+          border-bottom: 1px solid #303435 !important;
+          font-weight: 800 !important;
+          white-space: nowrap;
+        }
+  
+        .gz-order-table .ant-table-tbody > tr > td {
+          background: #181a1b !important;
+          color: #d1d5db !important;
+          border-bottom: 1px solid #2a2d2e !important;
+          vertical-align: middle;
+        }
+  
+        .gz-order-table .ant-table-tbody > tr:hover > td {
+          background: #202324 !important;
+        }
+  
+        .gz-order-table .ant-table-cell-row-hover {
+          background: #202324 !important;
+        }
+  
+        .gz-order-table .ant-typography {
+          color: #e5e7eb !important;
+        }
+  
+        .gz-order-table .ant-typography-copy {
+          color: #00ffe0 !important;
+        }
+  
+        .gz-order-table .ant-table-column-sorter {
+          color: #8b949e !important;
+        }
+  
+        .gz-order-table .ant-table-filter-trigger {
+          color: #8b949e !important;
+        }
+  
+        .gz-order-table .ant-table-filter-trigger:hover {
+          color: #00ffe0 !important;
+        }
+  
+        .gz-order-table .ant-empty-description {
+          color: #8b949e !important;
+        }
+  
+        .gz-order-approve-btn {
+          border: none !important;
+          border-radius: 999px !important;
+          background: rgba(0, 255, 224, 0.12) !important;
+          color: #00ffe0 !important;
+          font-weight: 700 !important;
+        }
+  
+        .gz-order-approve-btn:hover {
+          background: rgba(0, 255, 224, 0.22) !important;
+          color: #ffffff !important;
+        }
+  
+        .gz-order-delete-btn {
+          border-radius: 999px !important;
+          font-weight: 700 !important;
+        }
+  
+        .gz-order-table .ant-pagination {
+          padding: 12px 16px;
+          margin: 0 !important;
+        }
+  
+        .gz-order-table .ant-pagination-total-text {
+          color: #b8b8b8 !important;
+        }
+  
+        .gz-order-table .ant-pagination-item {
+          background: #111314 !important;
+          border-color: #303435 !important;
+        }
+  
+        .gz-order-table .ant-pagination-item a {
+          color: #e5e7eb !important;
+        }
+  
+        .gz-order-table .ant-pagination-item-active {
+          border-color: #00ffe0 !important;
+        }
+  
+        .gz-order-table .ant-pagination-item-active a {
+          color: #00ffe0 !important;
+        }
+  
+        .gz-order-table .ant-pagination-prev button,
+        .gz-order-table .ant-pagination-next button {
+          background: #111314 !important;
+          border-color: #303435 !important;
+          color: #e5e7eb !important;
+        }
+  
+        .gz-order-table .ant-select-selector {
+          background: #111314 !important;
+          border-color: #303435 !important;
+          color: #ffffff !important;
+        }
+  
+        .gz-order-page .ant-spin-text {
+          color: #00ffe0 !important;
+        }
+  
+        .gz-order-page .ant-spin-dot-item {
+          background-color: #00ffe0 !important;
+        }
+  
+        @media (max-width: 992px) {
+          .gz-order-header {
+            flex-direction: column;
+            align-items: stretch;
+          }
+  
+          .gz-order-actions {
+            width: 100%;
+            justify-content: flex-start;
+          }
+  
+          .gz-order-search {
+            width: 100%;
+          }
+        }
+  
+        @media (max-width: 768px) {
+          .gz-order-page {
+            padding: 12px;
+          }
+  
+          .gz-order-header {
+            padding: 14px;
+            border-radius: 14px;
+          }
+  
+          .gz-order-title {
+            font-size: 22px;
+          }
+  
+          .gz-order-subtitle {
+            font-size: 12px;
+          }
+  
+          .gz-order-actions {
+            display: grid !important;
+            grid-template-columns: 1fr;
+            gap: 10px !important;
+          }
+  
+          .gz-order-actions .ant-space-item {
+            width: 100%;
+          }
+  
+          .gz-order-refresh-btn,
+          .gz-order-add-btn {
+            width: 100%;
+            height: 40px;
+          }
+  
+          .gz-order-table-card {
+            border-radius: 14px;
+            overflow-x: auto;
+          }
+  
+          .gz-order-table .ant-table {
+            font-size: 13px;
+          }
+  
+          .gz-order-table .ant-table-thead > tr > th,
+          .gz-order-table .ant-table-tbody > tr > td {
+            padding: 10px 8px !important;
+          }
+  
+          .gz-order-table .ant-pagination-options {
+            display: none !important;
+          }
+        }
+  
+        @media (max-width: 420px) {
+          .gz-order-page {
+            padding: 10px;
+          }
+  
+          .gz-order-title {
+            font-size: 20px;
+          }
+  
+          .gz-order-table .ant-table {
+            font-size: 12px;
+          }
+        }
+      `}</style>
+    </div>
   );
 };
 
