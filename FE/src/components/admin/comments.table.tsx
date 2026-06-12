@@ -268,39 +268,191 @@ const ReviewsTable: React.FC = () => {
   ];
 
   return (
-    <div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 16,
-        }}
-      >
+    <div className="gz-review-admin-page">
+      <div className="gz-review-admin-header">
         <h2>Bảng đánh giá</h2>
+  
         <Space>
           <Button
             type="text"
-            icon={<ReloadOutlined style={{ color: "green" }} />}
+            icon={<ReloadOutlined style={{ color: "#00c781" }} />}
             onClick={() => {
               const cur = (pagination && pagination.current) || DEFAULT_PAGE;
               const size = (pagination && pagination.pageSize) || DEFAULT_LIMIT;
               getData(Number(cur), Number(size));
             }}
+            className="gz-refresh-btn"
           >
             Làm mới
           </Button>
         </Space>
       </div>
-
+  
       <Spin spinning={loading} tip="Đang tải dữ liệu...">
-        <Table<IReview>
-          columns={columns}
-          dataSource={Array.isArray(listReviews) ? listReviews : []}
-          rowKey="_id"
-          pagination={pagination}
-        />
+        <div className="gz-review-table-wrap">
+          <Table<IReview>
+            columns={columns}
+            dataSource={Array.isArray(listReviews) ? listReviews : []}
+            rowKey="_id"
+            pagination={pagination}
+            scroll={{ x: 950 }}
+            className="gz-review-table"
+          />
+        </div>
       </Spin>
+  
+      {/* Style */}
+      <style jsx global>{`
+        .gz-review-admin-page {
+          background: #1e2021;
+          min-height: 100vh;
+          padding: 20px;
+          color: #ffffff;
+        }
+  
+        .gz-review-admin-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 16px;
+          background: #181a1b;
+          border: 1px solid #2a2d2e;
+          border-radius: 14px;
+          padding: 14px 16px;
+        }
+  
+        .gz-review-admin-header h2 {
+          margin: 0;
+          color: #ffffff;
+          font-weight: 800;
+        }
+  
+        .gz-refresh-btn {
+          color: #e5e7eb !important;
+        }
+  
+        .gz-refresh-btn:hover {
+          color: #00ffe0 !important;
+          background: rgba(0, 255, 224, 0.08) !important;
+        }
+  
+        .gz-review-table-wrap {
+          background: #181a1b;
+          border: 1px solid #2a2d2e;
+          border-radius: 14px;
+          overflow: hidden;
+        }
+  
+        .gz-review-table .ant-table {
+          background: #181a1b !important;
+          color: #e5e7eb !important;
+        }
+  
+        .gz-review-table .ant-table-container {
+          background: #181a1b !important;
+        }
+  
+        .gz-review-table .ant-table-thead > tr > th {
+          background: #111314 !important;
+          color: #ffffff !important;
+          border-bottom: 1px solid #303435 !important;
+          font-weight: 800 !important;
+        }
+  
+        .gz-review-table .ant-table-tbody > tr > td {
+          background: #181a1b !important;
+          color: #d1d5db !important;
+          border-bottom: 1px solid #2a2d2e !important;
+        }
+  
+        .gz-review-table .ant-table-tbody > tr:hover > td {
+          background: #202324 !important;
+        }
+  
+        .gz-review-table .ant-table-cell-row-hover {
+          background: #202324 !important;
+        }
+  
+        .gz-review-table .ant-empty-description {
+          color: #8b949e !important;
+        }
+  
+        .gz-review-table .ant-table-column-sorter {
+          color: #8b949e !important;
+        }
+  
+        .gz-review-table .ant-pagination-item {
+          background: #181a1b !important;
+          border-color: #303435 !important;
+        }
+  
+        .gz-review-table .ant-pagination-item a {
+          color: #e5e7eb !important;
+        }
+  
+        .gz-review-table .ant-pagination-item-active {
+          border-color: #00ffe0 !important;
+        }
+  
+        .gz-review-table .ant-pagination-item-active a {
+          color: #00ffe0 !important;
+        }
+  
+        .gz-review-table .ant-pagination-prev button,
+        .gz-review-table .ant-pagination-next button {
+          background: #181a1b !important;
+          border-color: #303435 !important;
+          color: #e5e7eb !important;
+        }
+  
+        .gz-review-table .ant-select-selector {
+          background: #111314 !important;
+          border-color: #303435 !important;
+          color: #ffffff !important;
+        }
+  
+        .gz-review-table .ant-table-filter-trigger {
+          color: #8b949e !important;
+        }
+  
+        .gz-review-table .ant-table-filter-trigger:hover {
+          color: #00ffe0 !important;
+        }
+  
+        .gz-review-admin-page .ant-spin-text {
+          color: #00ffe0 !important;
+        }
+  
+        @media (max-width: 768px) {
+          .gz-review-admin-page {
+            padding: 12px;
+          }
+  
+          .gz-review-admin-header {
+            align-items: flex-start;
+            flex-direction: column;
+            padding: 12px;
+          }
+  
+          .gz-review-admin-header h2 {
+            font-size: 22px;
+          }
+  
+          .gz-review-table-wrap {
+            border-radius: 12px;
+            overflow-x: auto;
+          }
+  
+          .gz-review-table .ant-table {
+            font-size: 13px;
+          }
+  
+          .gz-review-table .ant-pagination-options {
+            display: none !important;
+          }
+        }
+      `}</style>
     </div>
   );
 };

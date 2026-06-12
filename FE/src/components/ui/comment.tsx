@@ -197,149 +197,400 @@ const UsersComment: React.FC<UsersCommentProps> = ({
   const currentUserInitial =
     currentUser.name?.trim()?.charAt(0)?.toUpperCase() || "B";
 
-  return (
-    <div style={{ marginTop: 24 }}>
-      {/* Danh sách bình luận */}
-      <List
-        loading={loading}
-        dataSource={comments}
-        locale={{ emptyText: "Chưa có bình luận nào." }}
-        header={comments.length ? `${comments.length} bình luận` : undefined}
-        itemLayout="horizontal"
-        renderItem={(item, idx) => {
-          const avatarSrc = normalizeAvatar(item.avatar);
-          const initial = item.author?.trim()?.charAt(0)?.toUpperCase() || "A";
-
-          return (
-            <div
-              key={item._id || `${item.author}-${idx}`}
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 12,
-                padding: "12px 0",
-                borderBottom: "1px solid #f0f0f0",
-              }}
-            >
-              <Avatar src={avatarSrc}>{!avatarSrc ? initial : null}</Avatar>
-
-              <div style={{ flex: 1 }}>
-                <Space direction="vertical" size={6} style={{ width: "100%" }}>
-                  {/* header */}
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "baseline",
-                    }}
-                  >
-                    <Text strong>{item.author}</Text>
-                    <Text type="secondary" style={{ fontSize: 12 }}>
-                      {dayjs(item.createdAt).fromNow()}
-                    </Text>
-                  </div>
-
-                  {/* rating + content */}
-                  <div>
-                    {item.rating ? (
-                      <Rate disabled defaultValue={item.rating} />
-                    ) : null}
-                    <p style={{ margin: "4px 0 0" }}>{item.content}</p>
-                  </div>
-
-                  {/* actions */}
-                  <Space size={16} style={{ color: "rgba(0,0,0,0.45)" }}>
-                    <Tooltip title="Like">
-                      <span
-                        onClick={() => handleLike(idx)}
-                        style={{ cursor: "pointer", userSelect: "none" }}
-                      >
-                        {item.action === "liked" ? (
-                          <LikeFilled />
-                        ) : (
-                          <LikeOutlined />
-                        )}{" "}
-                        {item.likes}
-                      </span>
-                    </Tooltip>
-
-                    <Tooltip title="Dislike">
-                      <span
-                        onClick={() => handleDislike(idx)}
-                        style={{ cursor: "pointer", userSelect: "none" }}
-                      >
-                        {item.action === "disliked" ? (
-                          <DislikeFilled />
-                        ) : (
-                          <DislikeOutlined />
-                        )}{" "}
-                        {item.dislikes}
-                      </span>
-                    </Tooltip>
+    return (
+      <div className="gz-comments-section">
+        {/* Danh sách bình luận */}
+        <List
+          className="gz-comments-list"
+          loading={loading}
+          dataSource={comments}
+          locale={{
+            emptyText: <span className="gz-empty-text">Chưa có bình luận nào.</span>,
+          }}
+          header={
+            comments.length ? (
+              <div className="gz-comments-header">{comments.length} bình luận</div>
+            ) : undefined
+          }
+          itemLayout="horizontal"
+          renderItem={(item, idx) => {
+            const avatarSrc = normalizeAvatar(item.avatar);
+            const initial = item.author?.trim()?.charAt(0)?.toUpperCase() || "A";
+    
+            return (
+              <div key={item._id || `${item.author}-${idx}`} className="gz-comment-item">
+                <Avatar src={avatarSrc} className="gz-comment-avatar">
+                  {!avatarSrc ? initial : null}
+                </Avatar>
+    
+                <div className="gz-comment-content">
+                  <Space direction="vertical" size={6} style={{ width: "100%" }}>
+                    {/* header */}
+                    <div className="gz-comment-top">
+                      <Text strong className="gz-comment-author">
+                        {item.author}
+                      </Text>
+    
+                      <Text className="gz-comment-time">
+                        {dayjs(item.createdAt).fromNow()}
+                      </Text>
+                    </div>
+    
+                    {/* rating + content */}
+                    <div>
+                      {item.rating ? (
+                        <Rate
+                          disabled
+                          defaultValue={item.rating}
+                          className="gz-comment-rate"
+                        />
+                      ) : null}
+    
+                      <p className="gz-comment-text">{item.content}</p>
+                    </div>
+    
+                    {/* actions */}
+                    <Space size={16} className="gz-comment-actions">
+                      <Tooltip title="Like">
+                        <span
+                          onClick={() => handleLike(idx)}
+                          className={`gz-action-btn ${
+                            item.action === "liked" ? "active-like" : ""
+                          }`}
+                        >
+                          {item.action === "liked" ? <LikeFilled /> : <LikeOutlined />}{" "}
+                          {item.likes}
+                        </span>
+                      </Tooltip>
+    
+                      <Tooltip title="Dislike">
+                        <span
+                          onClick={() => handleDislike(idx)}
+                          className={`gz-action-btn ${
+                            item.action === "disliked" ? "active-dislike" : ""
+                          }`}
+                        >
+                          {item.action === "disliked" ? (
+                            <DislikeFilled />
+                          ) : (
+                            <DislikeOutlined />
+                          )}{" "}
+                          {item.dislikes}
+                        </span>
+                      </Tooltip>
+                    </Space>
                   </Space>
-                </Space>
+                </div>
               </div>
-            </div>
-          );
-        }}
-      />
-
-      {/* Form nhập đánh giá */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          gap: 12,
-          marginTop: 24,
-        }}
-      >
-        <Avatar src={currentUserAvatar}>
-          {!currentUserAvatar ? currentUserInitial : null}
-        </Avatar>
-
-        <div style={{ flex: 1 }}>
-          {!accessToken ? (
-            <Alert
-              type="warning"
-              showIcon
-              message={
-                <Space>
-                  <LoginOutlined />
-                  <span>
-                    Vui lòng{" "}
-                    <a href="/auth/signin" style={{ fontWeight: 500 }}>
-                      đăng nhập
-                    </a>{" "}
-                    để gửi đánh giá.
-                  </span>
-                </Space>
-              }
-            />
-          ) : (
-            <Form onFinish={handleSubmit}>
-              <Form.Item style={{ marginBottom: 8 }}>
-                <Space direction="vertical" style={{ width: "100%" }}>
-                  <Text>Đánh giá của bạn:</Text>
-                  <Rate value={rating} onChange={setRating} />
-                  <TextArea
-                    rows={4}
-                    value={value}
-                    onChange={(e) => setValue(e.target.value)}
-                    placeholder={placeholder}
-                  />
-                </Space>
-              </Form.Item>
-              <Form.Item style={{ marginBottom: 0, textAlign: "center" }}>
-                <Button type="primary" htmlType="submit" loading={submitting}>
-                  {submitText}
-                </Button>
-              </Form.Item>
-            </Form>
-          )}
+            );
+          }}
+        />
+    
+        {/* Form nhập đánh giá */}
+        <div className="gz-comment-form-wrap">
+          <Avatar src={currentUserAvatar} className="gz-comment-avatar">
+            {!currentUserAvatar ? currentUserInitial : null}
+          </Avatar>
+    
+          <div className="gz-comment-form-content">
+            {!accessToken ? (
+              <Alert
+                type="warning"
+                showIcon
+                className="gz-login-alert"
+                message={
+                  <Space>
+                    <LoginOutlined />
+                    <span>
+                      Vui lòng{" "}
+                      <a href="/auth/signin" className="gz-login-link">
+                        đăng nhập
+                      </a>{" "}
+                      để gửi đánh giá.
+                    </span>
+                  </Space>
+                }
+              />
+            ) : (
+              <Form onFinish={handleSubmit} className="gz-comment-form">
+                <Form.Item style={{ marginBottom: 10 }}>
+                  <Space direction="vertical" style={{ width: "100%" }}>
+                    <Text className="gz-form-label">Đánh giá của bạn:</Text>
+    
+                    <Rate value={rating} onChange={setRating} className="gz-form-rate" />
+    
+                    <TextArea
+                      rows={4}
+                      value={value}
+                      onChange={(e) => setValue(e.target.value)}
+                      placeholder={placeholder}
+                      className="gz-comment-textarea"
+                    />
+                  </Space>
+                </Form.Item>
+    
+                <Form.Item style={{ marginBottom: 0, textAlign: "center" }}>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    loading={submitting}
+                    className="gz-submit-review-btn"
+                  >
+                    {submitText}
+                  </Button>
+                </Form.Item>
+              </Form>
+            )}
+          </div>
         </div>
+    
+        {/* Style */}
+        <style jsx global>{`
+          .gz-comments-section {
+            margin-top: 24px;
+            background: #111314;
+            border: 1px solid #2a2d2e;
+            border-radius: 16px;
+            padding: 18px;
+          }
+    
+          .gz-comments-list {
+            color: #e5e7eb;
+          }
+    
+          .gz-comments-list .ant-list-header {
+            border-bottom: 1px solid #303435 !important;
+          }
+    
+          .gz-comments-list .ant-list-empty-text {
+            color: #8b949e !important;
+          }
+    
+          .gz-comments-header {
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 18px;
+          }
+    
+          .gz-empty-text {
+            color: #8b949e;
+          }
+    
+          .gz-comment-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 0;
+            border-bottom: 1px solid #2a2d2e;
+          }
+    
+          .gz-comment-item:last-child {
+            border-bottom: none;
+          }
+    
+          .gz-comment-avatar {
+            flex-shrink: 0;
+            background: #00b894 !important;
+            color: #ffffff !important;
+            font-weight: 800;
+            border: 1px solid #303435;
+          }
+    
+          .gz-comment-content {
+            flex: 1;
+            min-width: 0;
+          }
+    
+          .gz-comment-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 12px;
+          }
+    
+          .gz-comment-author {
+            color: #ffffff !important;
+            font-weight: 800;
+            max-width: 70%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+    
+          .gz-comment-time {
+            color: #8b949e !important;
+            font-size: 12px;
+            white-space: nowrap;
+          }
+    
+          .gz-comment-rate {
+            color: #faad14 !important;
+            font-size: 15px !important;
+          }
+    
+          .gz-comment-text {
+            margin: 6px 0 0;
+            color: #d1d5db;
+            line-height: 1.65;
+            word-break: break-word;
+          }
+    
+          .gz-comment-actions {
+            color: #8b949e;
+          }
+    
+          .gz-action-btn {
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.2s ease;
+          }
+    
+          .gz-action-btn:hover {
+            color: #00ffe0;
+          }
+    
+          .gz-action-btn.active-like {
+            color: #00c781;
+          }
+    
+          .gz-action-btn.active-dislike {
+            color: #ff4d4f;
+          }
+    
+          .gz-comment-form-wrap {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-top: 22px;
+            padding-top: 20px;
+            border-top: 1px solid #303435;
+          }
+    
+          .gz-comment-form-content {
+            flex: 1;
+            min-width: 0;
+          }
+    
+          .gz-login-alert {
+            background: rgba(250, 173, 20, 0.1) !important;
+            border-color: rgba(250, 173, 20, 0.35) !important;
+          }
+    
+          .gz-login-alert .ant-alert-message {
+            color: #facc15 !important;
+          }
+    
+          .gz-login-link {
+            color: #00ffe0;
+            font-weight: 700;
+          }
+    
+          .gz-form-label {
+            color: #ffffff !important;
+            font-weight: 700;
+          }
+    
+          .gz-form-rate {
+            color: #faad14 !important;
+          }
+    
+          .gz-comment-textarea {
+            background: #181a1b !important;
+            border-color: #303435 !important;
+            color: #ffffff !important;
+            border-radius: 12px !important;
+            resize: none;
+          }
+    
+          .gz-comment-textarea::placeholder {
+            color: #6b7280 !important;
+          }
+    
+          .gz-comment-textarea:hover,
+          .gz-comment-textarea:focus {
+            border-color: #00ffe0 !important;
+            box-shadow: 0 0 0 2px rgba(0, 255, 224, 0.08) !important;
+          }
+    
+          .gz-submit-review-btn {
+            min-width: 140px;
+            height: 40px;
+            border-radius: 999px !important;
+            border: none !important;
+            background: linear-gradient(135deg, #ff4d00, #ff7a00) !important;
+            font-weight: 800 !important;
+            box-shadow: 0 10px 22px rgba(255, 77, 0, 0.18) !important;
+          }
+    
+          @media (max-width: 768px) {
+            .gz-comments-section {
+              padding: 14px;
+              border-radius: 14px;
+            }
+    
+            .gz-comment-item {
+              gap: 10px;
+              padding: 12px 0;
+            }
+    
+            .gz-comment-top {
+              flex-direction: column;
+              align-items: flex-start;
+              gap: 2px;
+            }
+    
+            .gz-comment-author {
+              max-width: 100%;
+              font-size: 14px;
+            }
+    
+            .gz-comment-time {
+              font-size: 11px;
+            }
+    
+            .gz-comment-rate {
+              font-size: 13px !important;
+            }
+    
+            .gz-comment-text {
+              font-size: 13px;
+            }
+    
+            .gz-comment-actions {
+              font-size: 13px;
+            }
+    
+            .gz-comment-form-wrap {
+              gap: 10px;
+            }
+    
+            .gz-submit-review-btn {
+              width: 100%;
+            }
+          }
+    
+          @media (max-width: 420px) {
+            .gz-comments-section {
+              padding: 12px;
+            }
+    
+            .gz-comment-avatar {
+              width: 34px !important;
+              height: 34px !important;
+              line-height: 34px !important;
+            }
+    
+            .gz-comment-form-wrap {
+              align-items: flex-start;
+            }
+    
+            .gz-comment-textarea {
+              font-size: 13px;
+            }
+          }
+        `}</style>
       </div>
-    </div>
-  );
+    );
 };
 
 export default UsersComment;

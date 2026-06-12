@@ -214,19 +214,21 @@ const Cards = () => {
             max-width: 340px;
           }
 
-          .card-item {
-            border-radius: 16px;
-            overflow: hidden;
-            height: 100%;
-            padding: 0;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-          }
+         .card-item {
+  border-radius: 16px;
+  overflow: hidden;
+  height: 100%;
+  padding: 0;
+  border: 1px solid #2a2d2e !important;
+  background: #181a1b !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
 
-          :global(.ant-card.card-item) {
-            padding: 0;
-            overflow: hidden;
-          }
-
+:global(.ant-card-hoverable.card-item:hover) {
+  transform: translateY(-5px);
+  border-color: #00ffe0 !important;
+  box-shadow: 0 12px 28px rgba(0, 255, 224, 0.12) !important;
+}
           :global(.ant-card.card-item .ant-card-body) {
             display: none;
             padding: 0;

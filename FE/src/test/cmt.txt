@@ -1,0 +1,302 @@
+return (
+    <div style={{ marginTop: 24 }}>
+      {/* Danh sách bình luận */}
+      <List
+        loading={loading}
+        dataSource={comments}
+        locale={{ emptyText: "Chưa có bình luận nào." }}
+        header={comments.length ? `${comments.length} bình luận` : undefined}
+        itemLayout="horizontal"
+        renderItem={(item, idx) => {
+          const avatarSrc = normalizeAvatar(item.avatar);
+          const initial = item.author?.trim()?.charAt(0)?.toUpperCase() || "A";
+
+          return (
+            <div
+              key={item._id || `${item.author}-${idx}`}
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 12,
+                padding: "12px 0",
+                borderBottom: "1px solid #f0f0f0",
+              }}
+            >
+              <Avatar src={avatarSrc}>{!avatarSrc ? initial : null}</Avatar>
+
+              <div style={{ flex: 1 }}>
+                <Space direction="vertical" size={6} style={{ width: "100%" }}>
+                  {/* header */}
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "baseline",
+                    }}
+                  >
+                    <Text strong>{item.author}</Text>
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      {dayjs(item.createdAt).fromNow()}
+                    </Text>
+                  </div>
+
+                  {/* rating + content */}
+                  <div>
+                    {item.rating ? (
+                      <Rate disabled defaultValue={item.rating} />
+                    ) : null}
+                    <p style={{ margin: "4px 0 0" }}>{item.content}</p>
+                  </div>
+
+                  {/* actions */}
+                  <Space size={16} style={{ color: "rgba(0,0,0,0.45)" }}>
+                    <Tooltip title="Like">
+                      <span
+                        onClick={() => handleLike(idx)}
+                        style={{ cursor: "pointer", userSelect: "none" }}
+                      >
+                        {item.action === "liked" ? (
+                          <LikeFilled />
+                        ) : (
+                          <LikeOutlined />
+                        )}{" "}
+                        {item.likes}
+                      </span>
+                    </Tooltip>
+
+                    <Tooltip title="Dislike">
+                      <span
+                        onClick={() => handleDislike(idx)}
+                        style={{ cursor: "pointer", userSelect: "none" }}
+                      >
+                        {item.action === "disliked" ? (
+                          <DislikeFilled />
+                        ) : (
+                          <DislikeOutlined />
+                        )}{" "}
+                        {item.dislikes}
+                      </span>
+                    </Tooltip>
+                  </Space>
+                </Space>
+              </div>
+            </div>
+          );
+        }}
+      />
+
+      {/* Form nhập đánh giá */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 12,
+          marginTop: 24,
+        }}
+      >
+        <Avatar src={currentUserAvatar}>
+          {!currentUserAvatar ? currentUserInitial : null}
+        </Avatar>
+
+        <div style={{ flex: 1 }}>
+          {!accessToken ? (
+            <Alert
+              type="warning"
+              showIcon
+              message={
+                <Space>
+                  <LoginOutlined />
+                  <span>
+                    Vui lòng{" "}
+                    <a href="/auth/signin" style={{ fontWeight: 500 }}>
+                      đăng nhập
+                    </a>{" "}
+                    để gửi đánh giá.
+                  </span>
+                </Space>
+              }
+            />
+          ) : (
+            <Form onFinish={handleSubmit}>
+              <Form.Item style={{ marginBottom: 8 }}>
+                <Space direction="vertical" style={{ width: "100%" }}>
+                  <Text>Đánh giá của bạn:</Text>
+                  <Rate value={rating} onChange={setRating} />
+                  <TextArea
+                    rows={4}
+                    value={value}
+                    onChange={(e) => setValue(e.target.value)}
+                    placeholder={placeholder}
+                  />
+                </Space>
+              </Form.Item>
+              <Form.Item style={{ marginBottom: 0, textAlign: "center" }}>
+                <Button type="primary" htmlType="submit" loading={submitting}>
+                  {submitText}
+                </Button>
+              </Form.Item>
+            </Form>
+          )}
+        </div>
+      </div>
+    </div>
+  ); 
+/// table
+ // ===== Cột bảng =====
+  const columns: ColumnsType<IReview> = [
+    {
+      title: "Người dùng",
+      dataIndex: ["userId", "email"],
+      align: "center",
+      render: (_v, record) =>
+        typeof record.userId === "object"
+          ? record.userId.email
+          : String(record.userId),
+    },
+    {
+      title: "Sản phẩm",
+      dataIndex: ["productId", "name"],
+      align: "center",
+      render: (_v, record) =>
+        typeof record.productId === "object"
+          ? record.productId.name
+          : String(record.productId),
+      filterDropdown: ({
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+      }) => (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Tìm sản phẩm"
+            value={selectedKeys[0]}
+            onChange={(e) =>
+              setSelectedKeys(e.target.value ? [e.target.value] : [])
+            }
+            onPressEnter={() => confirm()}
+            style={{ width: 188, marginBottom: 8, display: "block" }}
+          />
+          <Space>
+            <Button type="primary" onClick={() => confirm()} size="small">
+              Tìm kiếm
+            </Button>
+            <Button onClick={() => clearFilters?.()} size="small">
+              Đặt lại
+            </Button>
+          </Space>
+        </div>
+      ),
+      filterIcon: (filtered) => (
+        <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+      ),
+      onFilter: (value, record) => {
+        const productName =
+          typeof record.productId === "object"
+            ? record.productId.name
+            : String(record.productId);
+        return productName?.toLowerCase().includes(String(value).toLowerCase());
+      },
+    },
+    {
+      title: "Đánh giá",
+      dataIndex: "rating",
+      align: "center",
+      filters: [5, 4, 3, 2, 1].map((v) => ({ text: `${v}⭐`, value: v })),
+      onFilter: (value, record) => record.rating === value,
+      render: (rating: number) => (
+        <Rate
+          disabled
+          value={rating}
+          character={<StarFilled style={{ color: "#faad14" }} />}
+        />
+      ),
+      sorter: (a, b) => a.rating - b.rating,
+    },
+    {
+      title: "Bình luận",
+      dataIndex: "comment",
+      align: "center",
+      render: (comment?: string) =>
+        comment ? (
+          <span
+            style={{
+              whiteSpace: "nowrap",
+              textOverflow: "ellipsis",
+              overflow: "hidden",
+              display: "inline-block",
+              maxWidth: 260,
+            }}
+            title={comment}
+          >
+            {comment}
+          </span>
+        ) : (
+          <Tag color="default">Không có bình luận</Tag>
+        ),
+    },
+    {
+      title: "Ngày tạo",
+      dataIndex: "createdAt",
+      align: "center",
+      sorter: (a, b) =>
+        new Date(a.createdAt || 0).getTime() -
+        new Date(b.createdAt || 0).getTime(),
+      render: (value?: string) =>
+        value ? new Date(value).toLocaleString("vi-VN") : "-",
+    },
+    {
+      title: "Hành động",
+      align: "center",
+      render: (_, record) => (
+        <Popconfirm
+          title="Xoá đánh giá"
+          description="Bạn có chắc muốn xoá đánh giá này?"
+          onConfirm={() => handleDelete(record._id)}
+          okText="Có"
+          cancelText="Không"
+        >
+          <Button danger size="small">
+            Xoá
+          </Button>
+        </Popconfirm>
+      ),
+    },
+  ];
+
+  return (
+    <div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 16,
+        }}
+      >
+        <h2>Bảng đánh giá</h2>
+        <Space>
+          <Button
+            type="text"
+            icon={<ReloadOutlined style={{ color: "green" }} />}
+            onClick={() => {
+              const cur = (pagination && pagination.current) || DEFAULT_PAGE;
+              const size = (pagination && pagination.pageSize) || DEFAULT_LIMIT;
+              getData(Number(cur), Number(size));
+            }}
+          >
+            Làm mới
+          </Button>
+        </Space>
+      </div>
+
+      <Spin spinning={loading} tip="Đang tải dữ liệu...">
+        <Table<IReview>
+          columns={columns}
+          dataSource={Array.isArray(listReviews) ? listReviews : []}
+          rowKey="_id"
+          pagination={pagination}
+        />
+      </Spin>
+    </div>
+  ); css phan binh luan lai cho dep di dark mode + res nho tinh toan ky de ko lam vo css nua

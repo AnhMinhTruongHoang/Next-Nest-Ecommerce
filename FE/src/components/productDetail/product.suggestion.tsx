@@ -138,18 +138,14 @@ const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
   }, [currentProduct]);
 
   const slides = useMemo(() => chunk(listProduct, cols), [listProduct, cols]);
+  ///
   return (
     <div className="similar-section">
       <h2 className="similar-title">Sản phẩm tương tự</h2>
   
       {/* Loading */}
       {isLoading && (
-        <div
-          className="similar-grid"
-          style={{
-            gridTemplateColumns: `repeat(${cols}, 1fr)`,
-          }}
-        >
+        <div className="similar-grid">
           {Array.from({ length: cols }).map((_, i) => (
             <Card key={i} className="similar-card loading-card">
               <Skeleton.Image className="similar-skeleton-img" active />
@@ -164,11 +160,12 @@ const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
         </div>
       )}
   
-      {/* Error / Empty */}
+      {/* Error */}
       {!isLoading && errorMsg && (
         <div className="similar-error">{errorMsg}</div>
       )}
   
+      {/* Empty */}
       {!isLoading && !errorMsg && listProduct.length === 0 && (
         <div className="similar-empty">
           <Empty
@@ -183,179 +180,197 @@ const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
   
       {/* List */}
       {!isLoading && !errorMsg && listProduct.length > 0 && (
-        <Carousel
-          arrows
-          prevArrow={<Arrow left />}
-          nextArrow={<Arrow />}
-          dots={false}
-          draggable
-          className="similar-carousel"
-        >
-          {slides.map((group, idx) => (
-            <div key={idx}>
-              <div
-                className="similar-grid"
-                style={{
-                  gridTemplateColumns: `repeat(${cols}, 1fr)`,
-                }}
-              >
-                {group.map((p) => {
-                  const imgSrc = getImageUrl(p.thumbnail);
+        <div className="similar-carousel-wrap">
+          <Carousel
+            arrows
+            prevArrow={<Arrow left />}
+            nextArrow={<Arrow />}
+            dots={false}
+            draggable
+            className="similar-carousel"
+          >
+            {slides.map((group, idx) => (
+              <div key={idx}>
+                <div className="similar-grid">
+                  {group.map((p) => {
+                    const imgSrc = getImageUrl(p.thumbnail);
   
-                  const original =
-                    p.originalPrice && p.originalPrice > p.price
-                      ? p.originalPrice
-                      : undefined;
+                    const original =
+                      p.originalPrice && p.originalPrice > p.price
+                        ? p.originalPrice
+                        : undefined;
   
-                  const discountAmount = original
-                    ? Math.max(original - p.price, 0)
-                    : 0;
+                    const discountAmount = original
+                      ? Math.max(original - p.price, 0)
+                      : 0;
   
-                  const discountPercent = original
-                    ? Math.round((discountAmount / original) * 100)
-                    : 0;
+                    const discountPercent = original
+                      ? Math.round((discountAmount / original) * 100)
+                      : 0;
   
-                  const hotDeal = discountPercent >= 15;
+                    const hotDeal = discountPercent >= 15;
   
-                  const chips: string[] = [];
-                  if (p.hz) chips.push(`${p.hz} Hz`);
-                  if (p.sizeInch) chips.push(`${p.sizeInch} inch`);
-                  if (p.panel) chips.push(p.panel.toUpperCase());
-                  if (p.resolution) {
-                    chips.push(p.resolution.replace("x", " × "));
-                  }
+                    const chips: string[] = [];
+                    if (p.hz) chips.push(`${p.hz} Hz`);
+                    if (p.sizeInch) chips.push(`${p.sizeInch} inch`);
+                    if (p.panel) chips.push(p.panel.toUpperCase());
+                    if (p.resolution) {
+                      chips.push(p.resolution.replace("x", " × "));
+                    }
   
-                  return (
-                    <Link
-                      key={p._id}
-                      href={`/product-detail/${p._id}`}
-                      style={{ textDecoration: "none" }}
-                    >
-                      <Card
-                        hoverable
-                        className="similar-card"
-                        styles={{
-                          body: {
-                            padding: 12,
-                            backgroundColor: "#181A1B",
-                          },
-                        }}
-                        cover={
-                          <div className="similar-img-box">
-                            <Image
-                              alt={p.name}
-                              src={imgSrc}
-                              fill
-                              sizes="280px"
-                              style={{ objectFit: "contain" }}
+                    return (
+                      <Link
+                        key={p._id}
+                        href={`/product-detail/${p._id}`}
+                        className="similar-link"
+                      >
+                        <Card
+                          hoverable
+                          className="similar-card"
+                          styles={{
+                            body: {
+                              padding: 12,
+                              backgroundColor: "#111314",
+                            },
+                          }}
+                          cover={
+                            <div className="similar-img-box">
+                              <Image
+                                alt={p.name}
+                                src={imgSrc}
+                                fill
+                                sizes="280px"
+                                style={{ objectFit: "contain" }}
+                              />
+  
+                              {hotDeal && (
+                                <div className="hot-deal">
+                                  <FireOutlined /> HOT DEAL
+                                </div>
+                              )}
+                            </div>
+                          }
+                        >
+                          <div className="similar-product-name" title={p.name}>
+                            {p.name}
+                          </div>
+  
+                          {chips.length > 0 && (
+                            <div className="spec-chip-box">
+                              {chips.slice(0, 4).map((c, i) => (
+                                <span key={i} className="spec-chip">
+                                  {c}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+  
+                          <div className="rating-row">
+                            <Rate
+                              disabled
+                              allowHalf
+                              value={p.averageRating ?? 0}
+                              style={{ color: "#faad14", fontSize: 13 }}
                             />
   
-                            {hotDeal && (
-                              <div className="hot-deal">
-                                <FireOutlined /> HOT DEAL
+                            <span className="review-count">
+                              ({p.totalReviews ?? 0})
+                            </span>
+  
+                            <Tag color="green" className="sold-tag">
+                              {p.sold ?? 0} đã bán
+                            </Tag>
+                          </div>
+  
+                          <div className="price-block">
+                            {original && (
+                              <div className="original-price">
+                                {currencyVN(original)}{" "}
+                                {discountPercent ? (
+                                  <span className="discount-percent">
+                                    -{discountPercent}%
+                                  </span>
+                                ) : null}
+                              </div>
+                            )}
+  
+                            <div className="similar-price">
+                              {currencyVN(p.price)}
+                            </div>
+  
+                            {discountAmount > 0 && (
+                              <div className="discount-amount">
+                                Giảm {currencyVN(discountAmount)}
                               </div>
                             )}
                           </div>
-                        }
-                      >
-                        <div className="similar-product-name" title={p.name}>
-                          {p.name}
-                        </div>
-  
-                        {/* Chip specs */}
-                        {chips.length > 0 && (
-                          <div className="spec-chip-box">
-                            {chips.slice(0, 4).map((c, i) => (
-                              <span key={i} className="spec-chip">
-                                {c}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-  
-                        {/* Rating + sold */}
-                        <div className="rating-row">
-                          <Rate
-                            disabled
-                            allowHalf
-                            value={p.averageRating ?? 0}
-                            style={{ color: "#faad14", fontSize: 14 }}
-                          />
-  
-                          <span className="review-count">
-                            ({p.totalReviews ?? 0})
-                          </span>
-  
-                          <Tag color="green" className="sold-tag">
-                            {p.sold ?? 0} đã bán
-                          </Tag>
-                        </div>
-  
-                        {/* Price block */}
-                        <div>
-                          {original && (
-                            <div className="original-price">
-                              {currencyVN(original)}{" "}
-                              {discountPercent ? (
-                                <span className="discount-percent">
-                                  -{discountPercent}%
-                                </span>
-                              ) : null}
-                            </div>
-                          )}
-  
-                          <div className="similar-price">
-                            {currencyVN(p.price)}
-                          </div>
-  
-                          {discountAmount > 0 && (
-                            <div className="discount-amount">
-                              Giảm {currencyVN(discountAmount)}
-                            </div>
-                          )}
-                        </div>
-                      </Card>
-                    </Link>
-                  );
-                })}
+                        </Card>
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
-        </Carousel>
+            ))}
+          </Carousel>
+        </div>
       )}
   
       <style jsx global>{`
         .similar-section {
           margin-top: 24px;
-          padding: 20px 0 45px;
-          background-color: #1e2021;
+          padding: 28px 18px 45px;
+          background: #1e2021;
+          border-radius: 14px;
         }
   
         .similar-title {
           color: #ffffff;
           font-weight: 800;
-          margin-bottom: 18px;
+          margin: 0 0 24px;
           letter-spacing: 0.3px;
           text-align: center;
         }
   
+        .similar-carousel-wrap {
+          max-width: 980px;
+          margin: 0 auto;
+          position: relative;
+        }
+  
+        .similar-carousel .slick-list {
+          padding: 4px 0 12px;
+        }
+  
         .similar-grid {
           display: grid;
-          gap: 16px;
+          grid-template-columns: repeat(auto-fit, minmax(240px, 280px));
+          gap: 18px;
+          justify-content: center;
+          align-items: stretch;
+          width: 100%;
+          margin: 0 auto;
+        }
+  
+        .similar-link {
+          text-decoration: none !important;
+          display: block;
+          width: 100%;
         }
   
         .similar-card {
+          width: 100%;
+          height: 100%;
           border-radius: 14px !important;
           overflow: hidden;
-          height: 100%;
-          background-color: #181a1b !important;
+          background: #111314 !important;
           border: 1px solid #2a2d2e !important;
           transition: transform 0.3s ease, box-shadow 0.3s ease,
             border-color 0.3s ease;
         }
   
         .similar-card .ant-card-body {
-          background-color: #181a1b !important;
+          background: #111314 !important;
+          min-height: 112px;
         }
   
         .similar-card:hover {
@@ -367,16 +382,20 @@ const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
         .similar-img-box {
           position: relative;
           height: 180px;
-          background: #111314;
+          background: #ffffff;
           overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
   
         .similar-img-box img {
+          padding: 10px !important;
           transition: transform 0.45s ease;
         }
   
         .similar-card:hover .similar-img-box img {
-          transform: scale(1.07);
+          transform: scale(1.06);
         }
   
         .hot-deal {
@@ -397,32 +416,32 @@ const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
   
         .similar-product-name {
           color: #ffffff;
-          font-weight: 700;
+          font-weight: 800;
+          font-size: 14px;
+          text-align: center;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-          margin-bottom: 6px;
-          min-height: 22px;
-          text-align: center;
+          margin-bottom: 8px;
         }
   
         .spec-chip-box {
           display: flex;
-          gap: 8px;
+          gap: 6px;
           flex-wrap: wrap;
           justify-content: center;
-          background: #202324;
-          padding: 8px;
+          background: #181a1b;
+          padding: 7px;
           border-radius: 8px;
           margin: 8px 0 10px;
         }
   
         .spec-chip {
-          background: #111314;
+          background: #0d0f10;
           border: 1px solid #303435;
-          padding: 2px 8px;
+          padding: 2px 7px;
           border-radius: 6px;
-          font-size: 12px;
+          font-size: 11px;
           color: #c9d1d9;
         }
   
@@ -437,11 +456,15 @@ const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
   
         .review-count {
           font-size: 12px;
-          color: #9ca3af;
+          color: #b8b8b8;
         }
   
         .sold-tag {
           margin-left: 0 !important;
+        }
+  
+        .price-block {
+          text-align: center;
         }
   
         .original-price {
@@ -449,7 +472,6 @@ const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
           text-decoration: line-through;
           font-size: 13px;
           margin-bottom: 2px;
-          text-align: center;
         }
   
         .discount-percent {
@@ -460,9 +482,9 @@ const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
   
         .similar-price {
           color: #ff4d4f;
-          font-weight: 800;
+          font-weight: 900;
           font-size: 18px;
-          text-align: center;
+          line-height: 1.4;
         }
   
         .discount-amount {
@@ -470,7 +492,6 @@ const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
           font-weight: 600;
           margin-top: 4px;
           font-size: 13px;
-          text-align: center;
         }
   
         .similar-error,
@@ -487,35 +508,88 @@ const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
         .similar-skeleton-img {
           width: 100% !important;
           height: 180px !important;
-          border-radius: 10px !important;
         }
   
-        .similar-card .ant-skeleton-title,
-        .similar-card .ant-skeleton-paragraph > li {
-          background: linear-gradient(
-            90deg,
-            #252829 25%,
-            #333738 37%,
-            #252829 63%
-          ) !important;
+        .similar-carousel .slick-prev,
+        .similar-carousel .slick-next {
+          width: 38px !important;
+          height: 38px !important;
+          z-index: 5 !important;
+          background: rgba(255, 255, 255, 0.28) !important;
+          border-radius: 50% !important;
         }
   
-        .similar-carousel .slick-list {
-          padding: 4px 0 10px;
+        .similar-carousel .slick-prev {
+          left: -48px !important;
         }
   
-        .similar-carousel .slick-prev::before,
-        .similar-carousel .slick-next::before {
-          color: #ffffff !important;
+        .similar-carousel .slick-next {
+          right: -48px !important;
+        }
+  
+        .similar-carousel .slick-prev:hover,
+        .similar-carousel .slick-next:hover {
+          background: rgba(0, 255, 224, 0.45) !important;
+        }
+  
+        @media (max-width: 1100px) {
+          .similar-carousel-wrap {
+            max-width: 900px;
+            padding: 0 42px;
+          }
+  
+          .similar-carousel .slick-prev {
+            left: 0 !important;
+          }
+  
+          .similar-carousel .slick-next {
+            right: 0 !important;
+          }
         }
   
         @media (max-width: 768px) {
+          .similar-section {
+            padding: 24px 10px 36px;
+          }
+  
           .similar-title {
             font-size: 24px;
+            margin-bottom: 18px;
+          }
+  
+          .similar-carousel-wrap {
+            padding: 0 34px;
           }
   
           .similar-grid {
-            grid-template-columns: repeat(1, 1fr) !important;
+            grid-template-columns: repeat(1, minmax(0, 280px));
+            gap: 14px;
+          }
+  
+          .similar-img-box {
+            height: 170px;
+          }
+  
+          .similar-card .ant-card-body {
+            min-height: auto;
+          }
+        }
+  
+        @media (max-width: 420px) {
+          .similar-carousel-wrap {
+            padding: 0 28px;
+          }
+  
+          .similar-grid {
+            grid-template-columns: 1fr;
+          }
+  
+          .similar-img-box {
+            height: 155px;
+          }
+  
+          .similar-price {
+            font-size: 16px;
           }
         }
       `}</style>
