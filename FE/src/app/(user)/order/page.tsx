@@ -16,7 +16,7 @@ export default function CheckoutPage() {
   const router = useRouter();
 
   return (
-    <div style={{ padding: 40  ,  background: "#1e2021";}}>
+    <div style={{ padding: 40 }}>
       <Steps
         current={currentStep}
         items={[
