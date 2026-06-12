@@ -181,14 +181,14 @@ const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
       {/* List */}
       {!isLoading && !errorMsg && listProduct.length > 0 && (
         <div className="similar-carousel-wrap">
-          <Carousel
-            arrows
-            prevArrow={<Arrow left />}
-            nextArrow={<Arrow />}
-            dots={false}
-            draggable
-            className="similar-carousel"
-          >
+        <Carousel
+  arrows={slides.length > 1}
+  prevArrow={slides.length > 1 ? <Arrow left /> : undefined}
+  nextArrow={slides.length > 1 ? <Arrow /> : undefined}
+  dots={false}
+  draggable={slides.length > 1}
+  className="similar-carousel"
+>
             {slides.map((group, idx) => (
               <div key={idx}>
                 <div className="similar-grid">
@@ -273,14 +273,16 @@ const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
                               style={{ color: "#faad14", fontSize: 13 }}
                             />
   
-                            <span className="review-count">
-                              ({p.totalReviews ?? 0})
-                            </span>
-  
                             <Tag color="green" className="sold-tag">
                               {p.sold ?? 0} đã bán
                             </Tag>
                           </div>
+
+                          
+                          <span className="review-count">
+                              ({p.totalReviews ?? 0})
+                            </span>
+  
   
                           <div className="price-block">
                             {original && (

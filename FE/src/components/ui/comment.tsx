@@ -30,6 +30,7 @@ dayjs.locale("vi");
 
 const { TextArea } = Input;
 const { Text } = Typography;
+const DEFAULT_AVATAR = "/images/logos/GZ.png";
 
 type CommentItem = {
   _id?: string;
@@ -197,89 +198,112 @@ const UsersComment: React.FC<UsersCommentProps> = ({
   const currentUserInitial =
     currentUser.name?.trim()?.charAt(0)?.toUpperCase() || "B";
 
+
+    ///
+
     return (
-      <div className="gz-comments-section">
+      <div className="gzx-review-wrap">
+        {/* Header */}
+        <div className="gzx-review-head">
+          <div>
+            <h3 className="gzx-review-title">Đánh giá & bình luận</h3>
+            <p className="gzx-review-subtitle">
+              Chia sẻ cảm nhận của bạn về sản phẩm này
+            </p>
+          </div>
+    
+          <div className="gzx-review-count">
+            {comments.length} bình luận
+          </div>
+        </div>
+    
         {/* Danh sách bình luận */}
         <List
-          className="gz-comments-list"
+          className="gzx-review-list"
           loading={loading}
           dataSource={comments}
           locale={{
-            emptyText: <span className="gz-empty-text">Chưa có bình luận nào.</span>,
+            emptyText: (
+              <div className="gzx-empty-box">
+                <div className="gzx-empty-icon">💬</div>
+                <div className="gzx-empty-title">Chưa có bình luận nào</div>
+                <div className="gzx-empty-text">
+                  Hãy là người đầu tiên chia sẻ cảm nhận về sản phẩm này.
+                </div>
+              </div>
+            ),
           }}
-          header={
-            comments.length ? (
-              <div className="gz-comments-header">{comments.length} bình luận</div>
-            ) : undefined
-          }
           itemLayout="horizontal"
           renderItem={(item, idx) => {
             const avatarSrc = normalizeAvatar(item.avatar);
             const initial = item.author?.trim()?.charAt(0)?.toUpperCase() || "A";
     
             return (
-              <div key={item._id || `${item.author}-${idx}`} className="gz-comment-item">
-                <Avatar src={avatarSrc} className="gz-comment-avatar">
+              <div
+                key={item._id || `${item.author}-${idx}`}
+                className="gzx-comment-card"
+              >
+                <Avatar
+                  src={avatarSrc || "/images/logos/GZ.png"}
+                  className="gzx-comment-avatar"
+                >
                   {!avatarSrc ? initial : null}
                 </Avatar>
     
-                <div className="gz-comment-content">
-                  <Space direction="vertical" size={6} style={{ width: "100%" }}>
-                    {/* header */}
-                    <div className="gz-comment-top">
-                      <Text strong className="gz-comment-author">
+                <div className="gzx-comment-main">
+                  <div className="gzx-comment-top">
+                    <div className="gzx-comment-user">
+                      <Text strong className="gzx-comment-author">
                         {item.author}
                       </Text>
     
-                      <Text className="gz-comment-time">
-                        {dayjs(item.createdAt).fromNow()}
-                      </Text>
-                    </div>
-    
-                    {/* rating + content */}
-                    <div>
                       {item.rating ? (
                         <Rate
                           disabled
                           defaultValue={item.rating}
-                          className="gz-comment-rate"
+                          className="gzx-comment-rate"
                         />
                       ) : null}
-    
-                      <p className="gz-comment-text">{item.content}</p>
                     </div>
     
-                    {/* actions */}
-                    <Space size={16} className="gz-comment-actions">
-                      <Tooltip title="Like">
-                        <span
-                          onClick={() => handleLike(idx)}
-                          className={`gz-action-btn ${
-                            item.action === "liked" ? "active-like" : ""
-                          }`}
-                        >
-                          {item.action === "liked" ? <LikeFilled /> : <LikeOutlined />}{" "}
-                          {item.likes}
-                        </span>
-                      </Tooltip>
+                    <Text className="gzx-comment-time">
+                      {dayjs(item.createdAt).fromNow()}
+                    </Text>
+                  </div>
     
-                      <Tooltip title="Dislike">
-                        <span
-                          onClick={() => handleDislike(idx)}
-                          className={`gz-action-btn ${
-                            item.action === "disliked" ? "active-dislike" : ""
-                          }`}
-                        >
-                          {item.action === "disliked" ? (
-                            <DislikeFilled />
-                          ) : (
-                            <DislikeOutlined />
-                          )}{" "}
-                          {item.dislikes}
-                        </span>
-                      </Tooltip>
-                    </Space>
-                  </Space>
+                  <p className="gzx-comment-text">{item.content}</p>
+    
+                  <div className="gzx-comment-actions">
+                    <Tooltip title="Like">
+                      <button
+                        type="button"
+                        onClick={() => handleLike(idx)}
+                        className={`gzx-action-pill ${
+                          item.action === "liked" ? "liked" : ""
+                        }`}
+                      >
+                        {item.action === "liked" ? <LikeFilled /> : <LikeOutlined />}
+                        <span>{item.likes}</span>
+                      </button>
+                    </Tooltip>
+    
+                    <Tooltip title="Dislike">
+                      <button
+                        type="button"
+                        onClick={() => handleDislike(idx)}
+                        className={`gzx-action-pill ${
+                          item.action === "disliked" ? "disliked" : ""
+                        }`}
+                      >
+                        {item.action === "disliked" ? (
+                          <DislikeFilled />
+                        ) : (
+                          <DislikeOutlined />
+                        )}
+                        <span>{item.dislikes}</span>
+                      </button>
+                    </Tooltip>
+                  </div>
                 </div>
               </div>
             );
@@ -287,23 +311,28 @@ const UsersComment: React.FC<UsersCommentProps> = ({
         />
     
         {/* Form nhập đánh giá */}
-        <div className="gz-comment-form-wrap">
-          <Avatar src={currentUserAvatar} className="gz-comment-avatar">
-            {!currentUserAvatar ? currentUserInitial : null}
-          </Avatar>
+        <div className="gzx-form-box">
+          <div className="gzx-form-left">
+            <Avatar
+              src={currentUserAvatar || "/images/logos/GZ.png"}
+              className="gzx-comment-avatar"
+            >
+              {!currentUserAvatar ? currentUserInitial : null}
+            </Avatar>
+          </div>
     
-          <div className="gz-comment-form-content">
+          <div className="gzx-form-right">
             {!accessToken ? (
               <Alert
                 type="warning"
                 showIcon
-                className="gz-login-alert"
+                className="gzx-login-alert"
                 message={
                   <Space>
                     <LoginOutlined />
                     <span>
                       Vui lòng{" "}
-                      <a href="/auth/signin" className="gz-login-link">
+                      <a href="/auth/signin" className="gzx-login-link">
                         đăng nhập
                       </a>{" "}
                       để gửi đánh giá.
@@ -312,280 +341,411 @@ const UsersComment: React.FC<UsersCommentProps> = ({
                 }
               />
             ) : (
-              <Form onFinish={handleSubmit} className="gz-comment-form">
-                <Form.Item style={{ marginBottom: 10 }}>
-                  <Space direction="vertical" style={{ width: "100%" }}>
-                    <Text className="gz-form-label">Đánh giá của bạn:</Text>
+              <Form onFinish={handleSubmit} className="gzx-review-form">
+                <div className="gzx-form-header">
+                  <Text className="gzx-form-title">Đánh giá của bạn</Text>
+                  <Rate
+                    value={rating}
+                    onChange={setRating}
+                    className="gzx-form-rate"
+                  />
+                </div>
     
-                    <Rate value={rating} onChange={setRating} className="gz-form-rate" />
-    
-                    <TextArea
-                      rows={4}
-                      value={value}
-                      onChange={(e) => setValue(e.target.value)}
-                      placeholder={placeholder}
-                      className="gz-comment-textarea"
-                    />
-                  </Space>
+                <Form.Item style={{ marginBottom: 12 }}>
+                  <TextArea
+                    rows={4}
+                    value={value}
+                    onChange={(e) => setValue(e.target.value)}
+                    placeholder={placeholder}
+                    className="gzx-comment-input"
+                  />
                 </Form.Item>
     
-                <Form.Item style={{ marginBottom: 0, textAlign: "center" }}>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    loading={submitting}
-                    className="gz-submit-review-btn"
-                  >
-                    {submitText}
-                  </Button>
+                <Form.Item style={{ marginBottom: 0 }}>
+                  <div className="gzx-submit-wrap">
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      loading={submitting}
+                      className="gzx-submit-btn"
+                    >
+                      {submitText}
+                    </Button>
+                  </div>
                 </Form.Item>
               </Form>
             )}
           </div>
         </div>
     
-        {/* Style */}
         <style jsx global>{`
-          .gz-comments-section {
-            margin-top: 24px;
-            background: #111314;
-            border: 1px solid #2a2d2e;
-            border-radius: 16px;
-            padding: 18px;
+          .gzx-review-wrap {
+            margin-top: 28px;
+            padding: 22px;
+            border-radius: 18px;
+            background: linear-gradient(180deg, #111314 0%, #0d0f10 100%);
+            border: 1px solid #24282a;
+            box-shadow: 0 14px 36px rgba(0, 0, 0, 0.28);
           }
     
-          .gz-comments-list {
-            color: #e5e7eb;
-          }
-    
-          .gz-comments-list .ant-list-header {
-            border-bottom: 1px solid #303435 !important;
-          }
-    
-          .gz-comments-list .ant-list-empty-text {
-            color: #8b949e !important;
-          }
-    
-          .gz-comments-header {
-            color: #ffffff;
-            font-weight: 800;
-            font-size: 18px;
-          }
-    
-          .gz-empty-text {
-            color: #8b949e;
-          }
-    
-          .gz-comment-item {
+          .gzx-review-head {
             display: flex;
+            justify-content: space-between;
             align-items: flex-start;
-            gap: 12px;
-            padding: 14px 0;
+            gap: 16px;
+            margin-bottom: 18px;
+            padding-bottom: 16px;
             border-bottom: 1px solid #2a2d2e;
           }
     
-          .gz-comment-item:last-child {
-            border-bottom: none;
+          .gzx-review-title {
+            margin: 0;
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 800;
+            line-height: 1.2;
           }
     
-          .gz-comment-avatar {
+          .gzx-review-subtitle {
+            margin: 6px 0 0;
+            color: #8b949e;
+            font-size: 13px;
+          }
+    
+          .gzx-review-count {
             flex-shrink: 0;
-            background: #00b894 !important;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(0, 255, 224, 0.08);
+            border: 1px solid rgba(0, 255, 224, 0.22);
+            color: #00ffe0;
+            font-weight: 700;
+            font-size: 13px;
+          }
+    
+          .gzx-review-list {
+            margin-bottom: 10px;
+          }
+    
+          .gzx-comment-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 16px;
+            margin-bottom: 14px;
+            border-radius: 16px;
+            background: #141719;
+            border: 1px solid #222629;
+            transition: transform 0.25s ease, border-color 0.25s ease,
+              box-shadow 0.25s ease;
+          }
+    
+          .gzx-comment-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(0, 255, 224, 0.3);
+            box-shadow: 0 10px 24px rgba(0, 255, 224, 0.08);
+          }
+    
+          .gzx-comment-avatar {
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #00d5c0, #00b894) !important;
             color: #ffffff !important;
             font-weight: 800;
-            border: 1px solid #303435;
+            border: 1px solid #2d3336;
           }
     
-          .gz-comment-content {
+          .gzx-comment-avatar img {
+            object-fit: cover !important;
+          }
+    
+          .gzx-comment-main {
             flex: 1;
             min-width: 0;
           }
     
-          .gz-comment-top {
+          .gzx-comment-top {
             display: flex;
             justify-content: space-between;
-            align-items: baseline;
+            align-items: flex-start;
             gap: 12px;
+            margin-bottom: 8px;
           }
     
-          .gz-comment-author {
+          .gzx-comment-user {
+            min-width: 0;
+          }
+    
+          .gzx-comment-author {
+            display: block;
             color: #ffffff !important;
             font-weight: 800;
-            max-width: 70%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-          }
-    
-          .gz-comment-time {
-            color: #8b949e !important;
-            font-size: 12px;
-            white-space: nowrap;
-          }
-    
-          .gz-comment-rate {
-            color: #faad14 !important;
-            font-size: 15px !important;
-          }
-    
-          .gz-comment-text {
-            margin: 6px 0 0;
-            color: #d1d5db;
-            line-height: 1.65;
+            margin-bottom: 4px;
             word-break: break-word;
           }
     
-          .gz-comment-actions {
-            color: #8b949e;
+          .gzx-comment-rate {
+            color: #faad14 !important;
+            font-size: 14px !important;
           }
     
-          .gz-action-btn {
+          .gzx-comment-time {
+            color: #8b949e !important;
+            font-size: 12px;
+            white-space: nowrap;
+            flex-shrink: 0;
+          }
+    
+          .gzx-comment-text {
+            margin: 0 0 12px;
+            color: #d1d5db;
+            line-height: 1.7;
+            word-break: break-word;
+            font-size: 14px;
+          }
+    
+          .gzx-comment-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+          }
+    
+          .gzx-action-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            border: 1px solid #303435;
+            background: #111314;
+            color: #b8b8b8;
             cursor: pointer;
-            user-select: none;
-            transition: color 0.2s ease;
+            transition: all 0.2s ease;
+            font-size: 13px;
           }
     
-          .gz-action-btn:hover {
+          .gzx-action-pill:hover {
             color: #00ffe0;
+            border-color: #00ffe0;
+            background: rgba(0, 255, 224, 0.06);
           }
     
-          .gz-action-btn.active-like {
+          .gzx-action-pill.liked {
             color: #00c781;
+            border-color: rgba(0, 199, 129, 0.35);
+            background: rgba(0, 199, 129, 0.08);
           }
     
-          .gz-action-btn.active-dislike {
-            color: #ff4d4f;
+          .gzx-action-pill.disliked {
+            color: #ff6b6b;
+            border-color: rgba(255, 107, 107, 0.35);
+            background: rgba(255, 107, 107, 0.08);
           }
     
-          .gz-comment-form-wrap {
+          .gzx-empty-box {
+            padding: 24px 12px;
+            text-align: center;
+          }
+    
+          .gzx-empty-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+          }
+    
+          .gzx-empty-title {
+            color: #ffffff;
+            font-weight: 700;
+            margin-bottom: 4px;
+          }
+    
+          .gzx-empty-text {
+            color: #8b949e;
+            font-size: 13px;
+          }
+    
+          .gzx-form-box {
             display: flex;
             align-items: flex-start;
-            gap: 12px;
-            margin-top: 22px;
-            padding-top: 20px;
-            border-top: 1px solid #303435;
+            gap: 14px;
+            margin-top: 18px;
+            padding-top: 18px;
+            border-top: 1px solid #2a2d2e;
           }
     
-          .gz-comment-form-content {
+          .gzx-form-left {
+            flex-shrink: 0;
+          }
+    
+          .gzx-form-right {
             flex: 1;
             min-width: 0;
           }
     
-          .gz-login-alert {
-            background: rgba(250, 173, 20, 0.1) !important;
-            border-color: rgba(250, 173, 20, 0.35) !important;
+          .gzx-review-form {
+            padding: 16px;
+            border-radius: 16px;
+            background: #141719;
+            border: 1px solid #222629;
           }
     
-          .gz-login-alert .ant-alert-message {
+          .gzx-form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+          }
+    
+          .gzx-form-title {
+            color: #ffffff !important;
+            font-weight: 800;
+            font-size: 15px;
+          }
+    
+          .gzx-form-rate {
+            color: #faad14 !important;
+          }
+    
+          .gzx-comment-input {
+            background: #101214 !important;
+            border: 1px solid #303435 !important;
+            border-radius: 14px !important;
+            color: #ffffff !important;
+            resize: none;
+            padding: 12px 14px !important;
+          }
+    
+          .gzx-comment-input::placeholder {
+            color: #6b7280 !important;
+          }
+    
+          .gzx-comment-input:hover,
+          .gzx-comment-input:focus {
+            border-color: #00ffe0 !important;
+            box-shadow: 0 0 0 3px rgba(0, 255, 224, 0.08) !important;
+          }
+    
+          .gzx-submit-wrap {
+            display: flex;
+            justify-content: center;
+          }
+    
+          .gzx-submit-btn {
+            min-width: 170px;
+            height: 44px !important;
+            padding: 0 24px !important;
+            border: none !important;
+            border-radius: 999px !important;
+            background: linear-gradient(135deg, #ff5a00, #ff7e1a) !important;
+            font-weight: 800 !important;
+            box-shadow: 0 12px 26px rgba(255, 102, 0, 0.22) !important;
+          }
+    
+          .gzx-submit-btn:hover {
+            background: linear-gradient(135deg, #ff6a1a, #ff8d2c) !important;
+          }
+    
+          .gzx-login-alert {
+            background: rgba(250, 173, 20, 0.08) !important;
+            border-color: rgba(250, 173, 20, 0.28) !important;
+            border-radius: 14px !important;
+          }
+    
+          .gzx-login-alert .ant-alert-message {
             color: #facc15 !important;
           }
     
-          .gz-login-link {
+          .gzx-login-link {
             color: #00ffe0;
             font-weight: 700;
           }
     
-          .gz-form-label {
-            color: #ffffff !important;
-            font-weight: 700;
-          }
-    
-          .gz-form-rate {
-            color: #faad14 !important;
-          }
-    
-          .gz-comment-textarea {
-            background: #181a1b !important;
-            border-color: #303435 !important;
-            color: #ffffff !important;
-            border-radius: 12px !important;
-            resize: none;
-          }
-    
-          .gz-comment-textarea::placeholder {
-            color: #6b7280 !important;
-          }
-    
-          .gz-comment-textarea:hover,
-          .gz-comment-textarea:focus {
-            border-color: #00ffe0 !important;
-            box-shadow: 0 0 0 2px rgba(0, 255, 224, 0.08) !important;
-          }
-    
-          .gz-submit-review-btn {
-            min-width: 140px;
-            height: 40px;
-            border-radius: 999px !important;
-            border: none !important;
-            background: linear-gradient(135deg, #ff4d00, #ff7a00) !important;
-            font-weight: 800 !important;
-            box-shadow: 0 10px 22px rgba(255, 77, 0, 0.18) !important;
-          }
-    
           @media (max-width: 768px) {
-            .gz-comments-section {
-              padding: 14px;
-              border-radius: 14px;
+            .gzx-review-wrap {
+              padding: 16px;
+              border-radius: 16px;
             }
     
-            .gz-comment-item {
-              gap: 10px;
-              padding: 12px 0;
-            }
-    
-            .gz-comment-top {
+            .gzx-review-head {
               flex-direction: column;
               align-items: flex-start;
-              gap: 2px;
             }
     
-            .gz-comment-author {
-              max-width: 100%;
-              font-size: 14px;
+            .gzx-review-title {
+              font-size: 21px;
             }
     
-            .gz-comment-time {
-              font-size: 11px;
+            .gzx-comment-card {
+              padding: 14px;
+              gap: 12px;
             }
     
-            .gz-comment-rate {
-              font-size: 13px !important;
+            .gzx-comment-top {
+              flex-direction: column;
+              gap: 6px;
             }
     
-            .gz-comment-text {
-              font-size: 13px;
+            .gzx-comment-time {
+              white-space: normal;
             }
     
-            .gz-comment-actions {
-              font-size: 13px;
+            .gzx-form-box {
+              gap: 12px;
             }
     
-            .gz-comment-form-wrap {
-              gap: 10px;
+            .gzx-review-form {
+              padding: 14px;
             }
     
-            .gz-submit-review-btn {
+            .gzx-submit-btn {
               width: 100%;
             }
           }
     
-          @media (max-width: 420px) {
-            .gz-comments-section {
+          @media (max-width: 480px) {
+            .gzx-review-wrap {
               padding: 12px;
             }
     
-            .gz-comment-avatar {
-              width: 34px !important;
-              height: 34px !important;
-              line-height: 34px !important;
+            .gzx-review-title {
+              font-size: 19px;
             }
     
-            .gz-comment-form-wrap {
-              align-items: flex-start;
+            .gzx-review-subtitle {
+              font-size: 12px;
             }
     
-            .gz-comment-textarea {
+            .gzx-comment-card {
+              padding: 12px;
+              border-radius: 14px;
+            }
+    
+            .gzx-comment-avatar {
+              width: 36px !important;
+              height: 36px !important;
+              line-height: 36px !important;
+            }
+    
+            .gzx-comment-text {
               font-size: 13px;
+            }
+    
+            .gzx-action-pill {
+              padding: 5px 10px;
+              font-size: 12px;
+            }
+    
+            .gzx-form-box {
+              flex-direction: column;
+            }
+    
+            .gzx-form-left {
+              display: none;
+            }
+    
+            .gzx-form-header {
+              align-items: flex-start;
             }
           }
         `}</style>
