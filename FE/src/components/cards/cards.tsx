@@ -9,8 +9,6 @@ import { useRouter } from "next/navigation";
 import "antd/dist/reset.css";
 import "../../styles/globals.css";
 
-const { Meta } = Card;
-
 type CardList = {
   id: number;
   key: "headset" | "keyboard" | "mouse" | "accessories";
@@ -59,15 +57,19 @@ const cardList: CardList[] = [
 
 const Cards = () => {
   const router = useRouter();
+
   const [showHover, setShowHover] = useState(false);
   const [catMapByName, setCatMapByName] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const cached = localStorage.getItem("catMapByName");
+
     if (cached) {
       try {
         const { map } = JSON.parse(cached);
-        if (map && typeof map === "object") setCatMapByName(map);
+        if (map && typeof map === "object") {
+          setCatMapByName(map);
+        }
       } catch {}
     }
   }, []);
@@ -76,6 +78,7 @@ const Cards = () => {
     const interval = setInterval(() => {
       setShowHover((prev) => !prev);
     }, 4000);
+
     return () => clearInterval(interval);
   }, []);
 
@@ -84,9 +87,15 @@ const Cards = () => {
     const sp = new URLSearchParams();
 
     const id = catMapByName[catName.toLowerCase()];
-    if (id) sp.set("category", id);
-    else sp.set("categoryName", catName);
+
+    if (id) {
+      sp.set("category", id);
+    } else {
+      sp.set("categoryName", catName);
+    }
+
     sp.set("sort", "-sold");
+
     router.push(`/productsList?${sp.toString()}`);
   };
 
@@ -98,6 +107,7 @@ const Cards = () => {
           padding: "8px",
           fontWeight: "bold",
           marginTop: 50,
+          color: "white",
         }}
       >
         <h1>Sản phẩm nổi bật</h1>
@@ -111,8 +121,9 @@ const Cards = () => {
           marginTop: 30,
         }}
       >
-        <Link href={`/productsList`}>
+        <Link href="/productsList">
           <button
+            type="button"
             title="All Products"
             style={{
               textAlign: "center",
@@ -125,14 +136,15 @@ const Cards = () => {
               backgroundColor: "gainsboro",
               transition: "all 0.25s ease",
             }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.backgroundColor = "#d9d9d9")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.backgroundColor = "gainsboro")
-            }
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#d9d9d9";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "gainsboro";
+            }}
           >
-            <ProductOutlined /> <span style={{ marginLeft: 6 }}>Tất cả</span>
+            <ProductOutlined />
+            <span style={{ marginLeft: 6 }}>Tất cả</span>
           </button>
         </Link>
       </div>
@@ -144,7 +156,16 @@ const Cards = () => {
               hoverable
               className="card-item"
               onClick={() => goCategory(card.key)}
-              style={{ cursor: "pointer", padding: 0 }}
+              styles={{
+                body: {
+                  display: "none",
+                  padding: 0,
+                },
+              }}
+              style={{
+                cursor: "pointer",
+                padding: 0,
+              }}
               cover={
                 <div className="image-wrapper">
                   <Image
@@ -166,17 +187,10 @@ const Cards = () => {
                       priority={false}
                     />
                   )}
+
                   <div className="overlay">
                     <span className="title">{card.title}</span>
                   </div>
-                  <Meta
-                    style={{
-                      textAlign: "center",
-                      justifyContent: "center",
-                      color: "#00FFE0",
-                    }}
-                    title=" GamerZone"
-                  />
                 </div>
               }
             />
@@ -204,8 +218,29 @@ const Cards = () => {
             border-radius: 16px;
             overflow: hidden;
             height: 100%;
+            padding: 0;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
           }
+
+          :global(.ant-card.card-item) {
+            padding: 0;
+            overflow: hidden;
+          }
+
+          :global(.ant-card.card-item .ant-card-body) {
+            display: none;
+            padding: 0;
+          }
+
+          :global(.ant-card.card-item .ant-card-cover) {
+            margin: 0;
+            height: 100%;
+          }
+
+          :global(.ant-card.card-item .ant-card-cover > div) {
+            border-radius: 16px;
+          }
+
           :global(.ant-card-hoverable.card-item:hover) {
             transform: translateY(-5px);
             box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
@@ -214,8 +249,9 @@ const Cards = () => {
           .image-wrapper {
             position: relative;
             width: 100%;
-            padding-top: 133%;
+            aspect-ratio: 3 / 4;
             overflow: hidden;
+            border-radius: 16px;
           }
 
           .main-img,
@@ -233,21 +269,21 @@ const Cards = () => {
             z-index: 1;
           }
 
-          /* Hover bằng chuột */
           .image-wrapper:hover .main-img {
             transform: scale(1.08);
             opacity: 0;
           }
+
           .image-wrapper:hover .hover-img {
             opacity: 1;
             transform: scale(1.05);
           }
 
-          /* Auto play toàn bộ card */
           .main-img.active {
             opacity: 0;
             transform: scale(1.08);
           }
+
           .hover-img.active {
             opacity: 1;
             transform: scale(1.05);
@@ -258,19 +294,21 @@ const Cards = () => {
             bottom: 0;
             left: 0;
             right: 0;
-            padding: 12px;
+            z-index: 2;
+            padding: 14px 12px;
             background: linear-gradient(
               to top,
-              rgba(0, 0, 0, 0.55),
-              rgba(0, 0, 0, 0.1)
+              rgba(0, 0, 0, 0.65),
+              rgba(0, 0, 0, 0.08)
             );
             display: flex;
             justify-content: center;
+            align-items: center;
           }
 
           .title {
             color: white;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 16px;
             text-align: center;
             text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);

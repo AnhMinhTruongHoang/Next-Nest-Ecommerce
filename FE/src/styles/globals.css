@@ -6,6 +6,20 @@
 /* Global HTML */
 html {
   scroll-behavior: smooth;
+  background-color: #1e2021;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #1e2021;
+  color: white;
+  min-height: 100vh;
+}
+
+/* Fix màu nền cho app */
+main {
+  background-color: #1e2021;
 }
 
 /* NProgress */

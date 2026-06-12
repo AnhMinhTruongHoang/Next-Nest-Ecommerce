@@ -13,37 +13,36 @@ export default function UserPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // giả lập loading 2s
     const timer = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(timer);
   }, []);
 
   return (
-    <div>
-      {/* Carousel */}
+    <main
+      style={{
+        backgroundColor: "#1E2021",
+        minHeight: "100vh",
+      }}
+    >
       <Skeleton active loading={loading} paragraph={false}>
         <MainCarousel />
       </Skeleton>
-
-      {/* Cards */}
+  
       <Skeleton active loading={loading}>
         <Cards />
       </Skeleton>
-
-      {/* Highlight */}
+  
       <Skeleton active loading={loading}>
         <HightLight />
       </Skeleton>
-
-      {/* Banner */}
+  
       <Skeleton active loading={loading} paragraph={false}>
         <ExclusiveBanner1 />
       </Skeleton>
-
-      {/* Product Grid */}
+  
       <Skeleton active loading={loading}>
         <ProductsGrid />
       </Skeleton>
-    </div>
+    </main>
   );
 }

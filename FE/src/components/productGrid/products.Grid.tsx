@@ -103,6 +103,7 @@ const ProductsGrid = () => {
           padding: "8px",
           fontWeight: "bold",
           marginTop: 30,
+
         }}
       >
         <h1>Best Sellers</h1>
@@ -173,6 +174,7 @@ const ProductsGrid = () => {
                         width: 300,
                         borderRadius: 12,
                         overflow: "hidden",
+                        backgroundColor:"#181A1B"
                       }}
                       cover={
                         <div
