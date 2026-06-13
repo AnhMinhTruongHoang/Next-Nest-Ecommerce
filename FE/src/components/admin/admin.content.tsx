@@ -11,15 +11,29 @@ const AdminContent = ({ children }: { children: React.ReactNode }) => {
       {children}
 
       <style jsx global>{`
+        html,
+        body {
+          background: #1e2021 !important;
+        }
+
+        .ant-layout,
+        .ant-layout-content {
+          background: #1e2021 !important;
+        }
+
+        .ant-layout-footer {
+          background: #181a1b !important;
+        }
+
         .admin-content {
           flex: 1;
-          min-height: calc(100dvh - 160px);
+          min-height: calc(100dvh - 128px);
           background: #1e2021 !important;
           padding: 12px;
           padding-left: max(12px, env(safe-area-inset-left));
           padding-right: max(12px, env(safe-area-inset-right));
           overflow: auto;
-          border-radius: 8px;
+          border-radius: 0;
           color: #ffffff;
         }
 

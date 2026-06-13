@@ -13,20 +13,15 @@ const AdminFooter = () => {
       <style jsx global>{`
         .gz-admin-footer {
           text-align: center;
+          background: #181a1b !important;
+          color: #8b949e !important;
           padding: 16px 12px !important;
-          font-size: 14px;
+          border-top: 1px solid #2a2d2e !important;
         }
 
         .gz-admin-footer-author {
           color: #00ffe0;
           font-weight: 800;
-        }
-
-        @media (max-width: 768px) {
-          .gz-admin-footer {
-            padding: 14px 8px !important;
-            font-size: 13px;
-          }
         }
       `}</style>
     </Footer>
