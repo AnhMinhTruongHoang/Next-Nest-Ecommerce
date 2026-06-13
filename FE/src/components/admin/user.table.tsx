@@ -241,60 +241,287 @@ const UsersTable = () => {
   ];
 
   return (
-    <Spin spinning={loading}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 16,
-        }}
-      >
-        <h2>Danh sách người dùng</h2>
-        <Button
-          icon={<PlusOutlined />}
-          type="primary"
-          onClick={() => setIsCreateModalOpen(true)}
-          disabled={!accessToken}
-        >
-          Thêm mới
-        </Button>
-      </div>
-      <Table
-        columns={columns}
-        dataSource={listUsers}
-        rowKey={"_id"}
-        pagination={{
-          current: meta.current,
-          pageSize: meta.pageSize,
-          total: meta.total,
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} trên tổng ${total} người dùng`,
-          onChange: handleOnChange,
-          showSizeChanger: true,
-        }}
-      />
-      <ViewUserModal
-        isOpen={isViewModalOpen}
-        setViewUser={setViewUser}
-        setIsViewModalOpen={setIsViewModalOpen}
-        userData={viewUser}
-      />
-      <CreateUserModal
-        access_token={accessToken} // raw token
-        getData={getData}
-        isCreateModalOpen={isCreateModalOpen}
-        setIsCreateModalOpen={setIsCreateModalOpen}
-      />
-      <UpdateUserModal
-        access_token={accessToken} 
-        getData={getData}
-        isUpdateModalOpen={isUpdateModalOpen}
-        setIsUpdateModalOpen={setIsUpdateModalOpen}
-        dataUpdate={dataUpdate}
-        setDataUpdate={setDataUpdate}
-      />
-    </Spin>
+    <div className="gz-user-admin-page">
+      <Spin spinning={loading} tip="Đang tải dữ liệu...">
+        <div className="gz-user-admin-header">
+          <div>
+            <h2 className="gz-user-admin-title">Danh sách người dùng</h2>
+            <p className="gz-user-admin-subtitle">
+              Quản lý tài khoản và thông tin người dùng
+            </p>
+          </div>
+  
+          <Button
+            icon={<PlusOutlined />}
+            type="primary"
+            onClick={() => setIsCreateModalOpen(true)}
+            disabled={!accessToken}
+            className="gz-user-add-btn"
+          >
+            Thêm mới
+          </Button>
+        </div>
+  
+        <div className="gz-user-table-card">
+          <Table
+            className="gz-user-admin-table"
+            columns={columns}
+            dataSource={listUsers}
+            rowKey="_id"
+            scroll={{ x: 1000 }}
+            pagination={{
+              position: ["bottomCenter"],
+              current: meta.current,
+              pageSize: meta.pageSize,
+              total: meta.total,
+              showTotal: (total, range) =>
+                `${range[0]}-${range[1]} trên tổng ${total} người dùng`,
+              onChange: handleOnChange,
+              showSizeChanger: true,
+            }}
+          />
+        </div>
+  
+        <ViewUserModal
+          isOpen={isViewModalOpen}
+          setViewUser={setViewUser}
+          setIsViewModalOpen={setIsViewModalOpen}
+          userData={viewUser}
+        />
+  
+        <CreateUserModal
+          access_token={accessToken}
+          getData={getData}
+          isCreateModalOpen={isCreateModalOpen}
+          setIsCreateModalOpen={setIsCreateModalOpen}
+        />
+  
+        <UpdateUserModal
+          access_token={accessToken}
+          getData={getData}
+          isUpdateModalOpen={isUpdateModalOpen}
+          setIsUpdateModalOpen={setIsUpdateModalOpen}
+          dataUpdate={dataUpdate}
+          setDataUpdate={setDataUpdate}
+        />
+      </Spin>
+  
+      <style jsx global>{`
+        .gz-user-admin-page {
+          width: 100%;
+          color: #ffffff;
+        }
+  
+        .gz-user-admin-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 16px;
+          margin-bottom: 18px;
+          padding: 16px 18px;
+          background: #181a1b;
+          border: 1px solid #2a2d2e;
+          border-radius: 16px;
+          box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+        }
+  
+        .gz-user-admin-title {
+          margin: 0;
+          color: #ffffff;
+          font-size: 26px;
+          font-weight: 800;
+        }
+  
+        .gz-user-admin-subtitle {
+          margin: 5px 0 0;
+          color: #8b949e;
+          font-size: 13px;
+        }
+  
+        .gz-user-add-btn {
+          border: none !important;
+          border-radius: 10px !important;
+          font-weight: 800 !important;
+          background: linear-gradient(135deg, #ff4d00, #ff7a00) !important;
+          box-shadow: 0 8px 18px rgba(255, 77, 0, 0.18) !important;
+        }
+  
+        .gz-user-add-btn:disabled {
+          background: #303435 !important;
+          color: #8b949e !important;
+          box-shadow: none !important;
+        }
+  
+        .gz-user-table-card {
+          background: #181a1b;
+          border: 1px solid #2a2d2e;
+          border-radius: 16px;
+          overflow: hidden;
+          box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+        }
+  
+        .gz-user-admin-table .ant-table {
+          background: #181a1b !important;
+          color: #e5e7eb !important;
+        }
+  
+        .gz-user-admin-table .ant-table-container {
+          background: #181a1b !important;
+        }
+  
+        .gz-user-admin-table .ant-table-thead > tr > th {
+          background: #111314 !important;
+          color: #ffffff !important;
+          border-bottom: 1px solid #303435 !important;
+          font-weight: 800 !important;
+          white-space: nowrap;
+        }
+  
+        .gz-user-admin-table .ant-table-tbody > tr > td {
+          background: #181a1b !important;
+          color: #d1d5db !important;
+          border-bottom: 1px solid #2a2d2e !important;
+          vertical-align: middle;
+        }
+  
+        .gz-user-admin-table .ant-table-tbody > tr:hover > td {
+          background: #202324 !important;
+        }
+  
+        .gz-user-admin-table .ant-table-cell-row-hover {
+          background: #202324 !important;
+        }
+  
+        .gz-user-admin-table .ant-btn-link {
+          color: #00ffe0 !important;
+          font-weight: 700 !important;
+        }
+  
+        .gz-user-admin-table .ant-btn-link:hover {
+          color: #ff7a00 !important;
+        }
+  
+        .gz-user-admin-table .ant-table-column-sorter,
+        .gz-user-admin-table .ant-table-filter-trigger {
+          color: #8b949e !important;
+        }
+  
+        .gz-user-admin-table .ant-table-filter-trigger:hover {
+          color: #00ffe0 !important;
+        }
+  
+        .gz-user-admin-table .ant-empty-description {
+          color: #8b949e !important;
+        }
+  
+        .gz-user-admin-table .ant-pagination {
+          padding: 12px 16px;
+          margin: 0 !important;
+          justify-content: center !important;
+        }
+  
+        .gz-user-admin-table .ant-pagination-total-text {
+          color: #b8b8b8 !important;
+        }
+  
+        .gz-user-admin-table .ant-pagination-item {
+          background: #111314 !important;
+          border-color: #303435 !important;
+        }
+  
+        .gz-user-admin-table .ant-pagination-item a {
+          color: #e5e7eb !important;
+        }
+  
+        .gz-user-admin-table .ant-pagination-item-active {
+          border-color: #00ffe0 !important;
+        }
+  
+        .gz-user-admin-table .ant-pagination-item-active a {
+          color: #00ffe0 !important;
+        }
+  
+        .gz-user-admin-table .ant-pagination-prev button,
+        .gz-user-admin-table .ant-pagination-next button {
+          background: #111314 !important;
+          border-color: #303435 !important;
+          color: #e5e7eb !important;
+        }
+  
+        .gz-user-admin-table .ant-select-selector {
+          background: #111314 !important;
+          border-color: #303435 !important;
+          color: #ffffff !important;
+        }
+  
+        .gz-user-admin-page .ant-spin-text {
+          color: #00ffe0 !important;
+        }
+  
+        .gz-user-admin-page .ant-spin-dot-item {
+          background-color: #00ffe0 !important;
+        }
+  
+        @media (max-width: 992px) {
+          .gz-user-admin-header {
+            flex-direction: column;
+            align-items: stretch;
+          }
+  
+          .gz-user-add-btn {
+            width: fit-content;
+          }
+        }
+  
+        @media (max-width: 768px) {
+          .gz-user-admin-header {
+            padding: 14px;
+            border-radius: 14px;
+          }
+  
+          .gz-user-admin-title {
+            font-size: 22px;
+          }
+  
+          .gz-user-admin-subtitle {
+            font-size: 12px;
+          }
+  
+          .gz-user-add-btn {
+            width: 100%;
+            height: 40px;
+          }
+  
+          .gz-user-table-card {
+            border-radius: 14px;
+            overflow-x: auto;
+          }
+  
+          .gz-user-admin-table .ant-table {
+            font-size: 13px;
+          }
+  
+          .gz-user-admin-table .ant-table-thead > tr > th,
+          .gz-user-admin-table .ant-table-tbody > tr > td {
+            padding: 10px 8px !important;
+          }
+  
+          .gz-user-admin-table .ant-pagination-options {
+            display: none !important;
+          }
+        }
+  
+        @media (max-width: 420px) {
+          .gz-user-admin-title {
+            font-size: 20px;
+          }
+  
+          .gz-user-admin-table .ant-table {
+            font-size: 12px;
+          }
+        }
+      `}</style>
+    </div>
   );
 };
 

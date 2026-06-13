@@ -1,21 +1,37 @@
 "use client";
+
 import { Layout } from "antd";
 
-const AdminFooter = () => {
-  const { Footer } = Layout;
+const { Footer } = Layout;
 
+const AdminFooter = () => {
   return (
-    <Footer
-      style={{
-        textAlign: "center",
-        background: "transparent",
-        color: "#ccc",
-        padding: "16px 0",
-        borderTop: "1px solid rgba(255,255,255,0.1)",
-      }}
-    >
+    <Footer className="gz-admin-footer">
       {new Date().getFullYear()} — Created by{" "}
-      <span style={{ color: "#00ffe0", fontWeight: 500 }}>@M1nh</span>
+      <span className="gz-admin-footer-author">@M1nh</span>
+
+      <style jsx global>{`
+        .gz-admin-footer {
+          text-align: center;
+          background: #181a1b !important;
+          color: #8b949e !important;
+          padding: 16px 12px !important;
+          border-top: 1px solid #2a2d2e !important;
+          font-size: 14px;
+        }
+
+        .gz-admin-footer-author {
+          color: #00ffe0;
+          font-weight: 800;
+        }
+
+        @media (max-width: 768px) {
+          .gz-admin-footer {
+            padding: 14px 8px !important;
+            font-size: 13px;
+          }
+        }
+      `}</style>
     </Footer>
   );
 };
