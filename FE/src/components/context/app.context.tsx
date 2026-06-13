@@ -166,17 +166,19 @@ export const AppProvider = ({ children }: TProps) => {
   return (
     <>
       {isAppLoading ? (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            display: "grid",
-            placeItems: "center",
-            background: "transparent",
-          }}
-        >
-          <PacmanLoader size={30} color="#36d6b4" />
-        </div>
+      <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        display: "grid",
+        placeItems: "center",
+        background: "rgba(30, 32, 33, 0.92)",
+        backdropFilter: "blur(4px)",
+      }}
+    >
+      <PacmanLoader size={30} color="#00FFE0" />
+    </div>
       ) : (
         <CurrentAppContext.Provider
           value={{
