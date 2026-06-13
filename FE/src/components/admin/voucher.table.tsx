@@ -329,14 +329,13 @@ const VouchersTable: React.FC = () => {
           >
             Sửa
           </Button>
-  
           <Popconfirm
   title="Xóa voucher này?"
   description="Bạn có chắc muốn xoá voucher này không?"
   onConfirm={() => xuLyXoa(record)}
   okText="Có"
   cancelText="Không"
-  overlayClassName="gz-voucher-popconfirm"
+  classNames={{ root: "gz-voucher-popconfirm" }}
 >
   <Button
     danger

@@ -257,13 +257,14 @@ const OrderTable = () => {
             Duyệt đơn
           </Button>
   
+
           <Popconfirm
   title="Xóa đơn hàng này?"
   description="Bạn có chắc muốn xoá đơn hàng này không?"
   onConfirm={() => handleDeleteOrder(record)}
   okText="Yes"
   cancelText="No"
-  overlayClassName="gz-order-popconfirm"
+  classNames={{ root: "gz-order-popconfirm" }}
 >
   <Button danger className="gz-order-delete-btn">
     Xóa
