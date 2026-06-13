@@ -331,15 +331,21 @@ const VouchersTable: React.FC = () => {
           </Button>
   
           <Popconfirm
-            title="Xóa voucher này?"
-            onConfirm={() => xuLyXoa(record)}
-            okText="Có"
-            cancelText="Không"
-          >
-            <Button danger icon={<DeleteOutlined />} className="gz-voucher-delete-btn">
-              Xóa
-            </Button>
-          </Popconfirm>
+  title="Xóa voucher này?"
+  description="Bạn có chắc muốn xoá voucher này không?"
+  onConfirm={() => xuLyXoa(record)}
+  okText="Có"
+  cancelText="Không"
+  overlayClassName="gz-voucher-popconfirm"
+>
+  <Button
+    danger
+    icon={<DeleteOutlined />}
+    className="gz-voucher-delete-btn"
+  >
+    Xóa
+  </Button>
+</Popconfirm>
         </Space>
       ),
     },
@@ -642,6 +648,69 @@ const VouchersTable: React.FC = () => {
           background: linear-gradient(135deg, #ff4d00, #ff7a00) !important;
           border-color: #ff4d00 !important;
         }
+
+        .gz-voucher-delete-btn {
+  border-radius: 999px !important;
+  font-weight: 700 !important;
+  background: rgba(255, 77, 79, 0.1) !important;
+  border-color: rgba(255, 77, 79, 0.55) !important;
+  color: #ff4d4f !important;
+}
+
+.gz-voucher-delete-btn:hover {
+  background: rgba(255, 77, 79, 0.22) !important;
+  border-color: #ff4d4f !important;
+  color: #ffffff !important;
+}
+
+.gz-voucher-popconfirm .ant-popover-inner {
+  background: #181a1b !important;
+  border: 1px solid #2a2d2e !important;
+  border-radius: 14px !important;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35) !important;
+}
+
+.gz-voucher-popconfirm .ant-popover-arrow::before {
+  background: #181a1b !important;
+}
+
+.gz-voucher-popconfirm .ant-popconfirm-title {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+}
+
+.gz-voucher-popconfirm .ant-popconfirm-description {
+  color: #b8b8b8 !important;
+}
+
+.gz-voucher-popconfirm .ant-popconfirm-message-icon {
+  color: #ff4d4f !important;
+}
+
+.gz-voucher-popconfirm .ant-popconfirm-buttons .ant-btn-default {
+  background: #111314 !important;
+  border-color: #303435 !important;
+  color: #e5e7eb !important;
+  border-radius: 8px !important;
+}
+
+.gz-voucher-popconfirm .ant-popconfirm-buttons .ant-btn-default:hover {
+  border-color: #00ffe0 !important;
+  color: #00ffe0 !important;
+}
+
+.gz-voucher-popconfirm .ant-popconfirm-buttons .ant-btn-primary {
+  background: #ff4d4f !important;
+  border-color: #ff4d4f !important;
+  color: #ffffff !important;
+  border-radius: 8px !important;
+  font-weight: 700 !important;
+}
+
+.gz-voucher-popconfirm .ant-popconfirm-buttons .ant-btn-primary:hover {
+  background: #ff7875 !important;
+  border-color: #ff7875 !important;
+}
   
         .gz-voucher-admin-page .ant-spin-text {
           color: #00ffe0 !important;
