@@ -9,14 +9,14 @@ const AdminFooter = () => {
     <Footer className="gz-admin-footer">
       {new Date().getFullYear()} — Created by{" "}
       <span className="gz-admin-footer-author">@M1nh</span>
-
       <style jsx global>{`
         .gz-admin-footer {
           text-align: center;
-          background: #181a1b !important;
+          background: transparent !important;
           color: #8b949e !important;
-          padding: 16px 12px !important;
-          border-top: 1px solid #2a2d2e !important;
+          padding: 14px 12px !important;
+          border: none !important;
+          box-shadow: none !important;
         }
 
         .gz-admin-footer-author {
