@@ -705,20 +705,39 @@ export class DatabasesService implements OnModuleInit {
           }
         }
 
-        const insertedOrders = await this.orderModel.insertMany(orderDocs, {
-          ordered: false,
-        });
-        for (let i = 0; i < paymentDocs.length; i++) {
-          paymentDocs[i].orderId = insertedOrders[i]._id;
+        try {
+          const insertedOrders = await this.orderModel.insertMany(orderDocs, {
+            ordered: true,
+          });
+
+          const paymentsToInsert = insertedOrders.map(
+            (order: any, index: number) => ({
+              ...paymentDocs[index],
+              orderId: order._id,
+              amount: order.totalPrice ?? paymentDocs[index]?.amount ?? 0,
+              ref: order.paymentRef ?? paymentDocs[index]?.ref ?? null,
+            }),
+          );
+
+          if (paymentsToInsert.length > 0) {
+            await this.paymentModel.insertMany(paymentsToInsert, {
+              ordered: false,
+            });
+          }
+
+          if (productBulkOps.length > 0) {
+            await this.productModel.bulkWrite(productBulkOps, {
+              ordered: false,
+            });
+          }
+
+          this.logger.log('>>> INIT ORDERS & PAYMENTS DONE...');
+        } catch (e: any) {
+          this.logger.error(
+            '>>> INIT ORDERS & PAYMENTS FAILED',
+            e?.stack || e?.message || e,
+          );
         }
-
-        await this.paymentModel.insertMany(paymentDocs, { ordered: false });
-
-        if (productBulkOps.length > 0) {
-          await this.productModel.bulkWrite(productBulkOps, { ordered: false });
-        }
-
-        this.logger.log('>>> INIT ORDERS & PAYMENTS DONE...');
       }
     }
   }
