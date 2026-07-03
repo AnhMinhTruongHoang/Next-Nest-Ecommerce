@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { getPaymentsOverviewData } from "./overview.data";
 import { PaymentsOverviewChart } from "./chart.payment";
-import { standardFormat } from "../overview/format";
+import { currencyVND, standardFormat } from "../overview/format";
 
 type DataPoint = { x: string | number; y: number };
 type PaymentsOverviewData = { received: DataPoint[]; due: DataPoint[] };
@@ -95,12 +95,12 @@ export function PaymentsOverview({ timeFrame = "monthly" }: PropsType) {
           TỔNG QUAN THANH TOÁN
         </h2>
       </div>
-  
+
       {/* CHART */}
       <div style={{ marginTop: 20, minHeight: 240, overflow: "hidden" }}>
         <PaymentsOverviewChart data={data} />
       </div>
-  
+
       {/* TOTALS */}
       <dl
         style={{
@@ -121,11 +121,11 @@ export function PaymentsOverview({ timeFrame = "monthly" }: PropsType) {
           }}
         >
           <dt style={{ fontSize: 22, fontWeight: 600, color: "#00C781" }}>
-            {standardFormat(receivedTotal)} ₫
+            {currencyVND(receivedTotal)}
           </dt>
           <dd style={{ fontSize: 14, color: "#B8B8B8" }}>ĐÃ NHẬN</dd>
         </div>
-  
+
         <div
           style={{
             display: "flex",
@@ -136,7 +136,7 @@ export function PaymentsOverview({ timeFrame = "monthly" }: PropsType) {
           }}
         >
           <dt style={{ fontSize: 22, fontWeight: 600, color: "#FF4D4F" }}>
-            {standardFormat(dueTotal)} ₫
+            {currencyVND(dueTotal)}
           </dt>
           <dd style={{ fontSize: 14, color: "#B8B8B8" }}>CÒN NỢ</dd>
         </div>

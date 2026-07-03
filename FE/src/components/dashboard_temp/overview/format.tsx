@@ -1,15 +1,33 @@
 export function compactFormat(value: number) {
-  const formatter = new Intl.NumberFormat("en", {
-    notation: "compact",
-    compactDisplay: "short",
-  });
+  const num = Math.round(Number(value) || 0);
 
-  return formatter.format(value);
+  if (num >= 1_000_000_000) {
+    return `${new Intl.NumberFormat("vi-VN", {
+      maximumFractionDigits: 1,
+    }).format(num / 1_000_000_000)} tỷ`;
+  }
+
+  if (num >= 1_000_000) {
+    return `${new Intl.NumberFormat("vi-VN", {
+      maximumFractionDigits: 1,
+    }).format(num / 1_000_000)} triệu`;
+  }
+
+  if (num >= 1_000) {
+    return `${new Intl.NumberFormat("vi-VN", {
+      maximumFractionDigits: 1,
+    }).format(num / 1_000)} nghìn`;
+  }
+
+  return new Intl.NumberFormat("vi-VN").format(num);
 }
 
 export function standardFormat(value: number) {
-  return value.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+  return new Intl.NumberFormat("vi-VN", {
+    maximumFractionDigits: 0,
+  }).format(Math.round(Number(value) || 0));
+}
+
+export function currencyVND(value: number) {
+  return `${standardFormat(value)} ₫`;
 }

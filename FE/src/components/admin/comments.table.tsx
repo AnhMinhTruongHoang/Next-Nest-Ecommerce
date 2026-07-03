@@ -51,8 +51,9 @@ const ReviewsTable: React.FC = () => {
   // Lấy token
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("access_token");
-      if (token) setAccessToken(token);
+      const token = localStorage.getItem("access_token") || "";
+      const pureToken = token.startsWith("Bearer ") ? token.slice(7) : token;
+      setAccessToken(pureToken);
     }
   }, []);
 
@@ -275,10 +276,7 @@ const ReviewsTable: React.FC = () => {
       align: "center",
       render: (comment?: string | null) =>
         comment ? (
-          <span
-            className="gz-review-comment-text"
-            title={comment}
-          >
+          <span className="gz-review-comment-text" title={comment}>
             {comment}
           </span>
         ) : (
@@ -350,7 +348,7 @@ const ReviewsTable: React.FC = () => {
             dataSource={Array.isArray(listReviews) ? listReviews : []}
             rowKey="_id"
             pagination={pagination}
-            scroll={{ x: 950 }}
+            scroll={{ x: "max-content" }}
             className="gz-review-table"
           />
         </div>
@@ -358,12 +356,9 @@ const ReviewsTable: React.FC = () => {
 
       <style jsx global>{`
         .gz-review-admin-page {
-          background: #1e2021;
-          min-height: 100vh;
-          padding: 20px;
+          width: 100%;
           color: #ffffff;
         }
-
         .gz-review-admin-header {
           display: flex;
           justify-content: space-between;
@@ -556,10 +551,12 @@ const ReviewsTable: React.FC = () => {
             align-items: flex-start;
             flex-direction: column;
             padding: 12px;
+            text-align: center;
           }
 
           .gz-review-admin-header h2 {
             font-size: 22px;
+            text-align: center;
           }
 
           .gz-review-table-wrap {
@@ -592,6 +589,84 @@ const ReviewsTable: React.FC = () => {
 
           .gz-review-table .ant-table {
             font-size: 12px;
+          }
+          @media (max-width: 768px) {
+            .gz-review-admin-header {
+              position: relative;
+              display: flex !important;
+              flex-direction: column !important;
+              align-items: stretch !important;
+              gap: 14px !important;
+              padding: 16px !important;
+              margin-bottom: 16px !important;
+              border-radius: 18px !important;
+              background: linear-gradient(
+                  180deg,
+                  rgba(255, 255, 255, 0.045),
+                  rgba(255, 255, 255, 0.012)
+                ),
+                #181a1b !important;
+              border: 1px solid rgba(0, 255, 224, 0.12) !important;
+              box-shadow: 0 14px 34px rgba(0, 0, 0, 0.32),
+                inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+              overflow: hidden;
+            }
+
+            .gz-review-admin-header::before {
+              content: "";
+              position: absolute;
+              inset: 0;
+              pointer-events: none;
+              background: radial-gradient(
+                  circle at top right,
+                  rgba(0, 255, 224, 0.13),
+                  transparent 34%
+                ),
+                radial-gradient(
+                  circle at bottom left,
+                  rgba(255, 77, 0, 0.11),
+                  transparent 36%
+                );
+            }
+
+            .gz-review-admin-header > * {
+              position: relative;
+              z-index: 1;
+            }
+
+            .gz-review-admin-header h2 {
+              margin: 0 !important;
+              color: #ffffff !important;
+              font-size: 20px !important;
+              line-height: 1.2 !important;
+              font-weight: 900 !important;
+              letter-spacing: -0.3px;
+            }
+
+            .gz-review-admin-header .ant-space {
+              width: 100% !important;
+            }
+
+            .gz-review-admin-header .ant-space-item {
+              width: 100% !important;
+            }
+
+            .gz-refresh-btn {
+              width: 100% !important;
+              height: 36px !important;
+              border-radius: 12px !important;
+              background: rgba(0, 255, 224, 0.065) !important;
+              border: 1px solid rgba(0, 255, 224, 0.14) !important;
+              color: #00ffe0 !important;
+              font-size: 12px !important;
+              font-weight: 800 !important;
+            }
+
+            .gz-refresh-btn:hover {
+              background: rgba(0, 255, 224, 0.13) !important;
+              border-color: rgba(0, 255, 224, 0.32) !important;
+              color: #ffffff !important;
+            }
           }
         }
       `}</style>

@@ -1,6 +1,5 @@
 "use client";
 
-import { RegionLabels } from "../dashboard_temp/map/label";
 import OVCard from "../dashboard_temp/overview/ov.card";
 import { PaymentsOverview } from "../dashboard_temp/payments-overview/payment.OverView";
 
@@ -9,64 +8,78 @@ interface AdminCardProps {
 }
 
 export default function AdminCard({ searchParams }: AdminCardProps) {
-  console.log("searchParams:", searchParams);
-
   return (
-    <div className="wrapper">
-      <div className="block">
+    <div className="gz-dashboard-wrapper">
+      <div className="gz-dashboard-heading">
+        <div>
+          <h1 style={{ textAlign: "center" }}>Dashboard Overview</h1>
+          <p style={{ textAlign: "center" }}>
+            Theo dõi nhanh người dùng, đơn hàng, sản phẩm và doanh thu.
+          </p>
+        </div>
+      </div>
+
+      <section className="gz-dashboard-section">
         <OVCard />
-      </div>
+      </section>
 
-      <div className="block">
+      <section className="gz-dashboard-section">
         <PaymentsOverview timeFrame="monthly" />
-      </div>
-
-      <div className="block center">
-        <RegionLabels />
-      </div>
+      </section>
 
       <style jsx>{`
-        .wrapper {
-          margin-top: 16px;
+        .gz-dashboard-wrapper {
+          width: 100%;
           display: grid;
-          grid-template-columns: 1fr; /* mobile-first: 1 cột */
-          gap: 12px; /* gap nhỏ trên mobile */
+          grid-template-columns: 1fr;
+          gap: 16px;
         }
 
-        .block {
-          grid-column: 1 / -1; /* full width */
+        .gz-dashboard-heading {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 16px;
+          padding: 18px 20px;
+          border-radius: 16px;
+          background: #181a1b;
+          border: 1px solid #2a2d2e;
+          box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
         }
 
-        .center {
-          text-align: center;
-          margin-top: 12px;
+        .gz-dashboard-heading h1 {
+          margin: 0;
+          color: #ffffff;
+          font-size: 28px;
+          font-weight: 900;
         }
 
-        /* ≥768px (md): 6 cột */
-        @media (min-width: 768px) {
-          .wrapper {
-            grid-template-columns: repeat(6, minmax(0, 1fr));
-            gap: 16px;
-          }
-          .block {
-            grid-column: 1 / -1; /* vẫn full width, dễ đổi sau này */
-          }
-          .center {
-            margin-top: 14px;
-          }
+        .gz-dashboard-heading p {
+          margin: 6px 0 0;
+          color: #8b949e;
+          font-size: 14px;
         }
 
-        /* ≥1024px (lg): 12 cột */
-        @media (min-width: 1024px) {
-          .wrapper {
-            grid-template-columns: repeat(12, minmax(0, 1fr));
-            gap: 16px;
+        .gz-dashboard-section {
+          min-width: 0;
+        }
+
+        @media (max-width: 768px) {
+          .gz-dashboard-wrapper {
+            gap: 12px;
           }
-          .block {
-            grid-column: span 12;
+
+          .gz-dashboard-heading {
+            padding: 14px;
+            border-radius: 14px;
           }
-          .center {
-            margin-top: 15px;
+
+          .gz-dashboard-heading h1 {
+            font-size: 22px;
+          }
+
+          .gz-dashboard-heading p {
+            font-size: 12px;
           }
         }
       `}</style>
