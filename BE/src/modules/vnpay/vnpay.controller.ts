@@ -1,4 +1,3 @@
-// vnpay.controller.ts
 import {
   Controller,
   Get,
@@ -15,6 +14,7 @@ import { UpdateVnpayDto } from './dto/update-vnpay.dto';
 import { Request } from 'express';
 import { OrdersService } from '../orders/orders.service';
 import { PaymentStatus } from '../payments/schema/payment.schema';
+
 @Controller('vnpay')
 export class VnpayController {
   constructor(
@@ -35,6 +35,54 @@ export class VnpayController {
     return this.vnpayService.findAll();
   }
 
+  // IMPORTANT: đặt return-url trước :id
+  @Get('return-url')
+  async vnpayReturn(@Req() req: Request) {
+    const result = this.vnpayService.verifyReturn({ ...req.query });
+
+    console.log('VNPay Return:', result);
+
+    const paymentRef = result.data?.vnp_TxnRef;
+    console.log('paymentRef (vnp_TxnRef):', paymentRef);
+
+    if (!paymentRef) {
+      return {
+        statusCode: 400,
+        message: 'Thiếu vnp_TxnRef trong phản hồi VNPay',
+      };
+    }
+
+    if (result.isValid && result.data.vnp_ResponseCode === '00') {
+      const updated = await this.orderService.updateStatus(
+        paymentRef,
+        PaymentStatus.PAID,
+      );
+
+      console.log('Update success:', updated);
+
+      return {
+        statusCode: 200,
+        message: 'Thanh toán thành công',
+        paymentRef,
+        data: result.data,
+      };
+    }
+
+    const updated = await this.orderService.updateStatus(
+      paymentRef,
+      PaymentStatus.FAILED,
+    );
+
+    console.log('Update failed:', updated);
+
+    return {
+      statusCode: 400,
+      message: 'Thanh toán thất bại hoặc sai chữ ký',
+      paymentRef,
+      data: result.data,
+    };
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.vnpayService.findOne(+id);
@@ -48,36 +96,5 @@ export class VnpayController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.vnpayService.remove(+id);
-  }
-
-  @Get('return-url')
-  async vnpayReturn(@Req() req: Request) {
-    const result = this.vnpayService.verifyReturn(req.query);
-    console.log('VNPay Return:', result);
-
-    // Đây thực chất là paymentRef bạn đã gán khi tạo order
-    const paymentRef = result.data?.vnp_TxnRef;
-    console.log('paymentRef (vnp_TxnRef):', paymentRef);
-
-    if (!paymentRef) {
-      return { message: 'Thiếu vnp_TxnRef trong phản hồi VNPay' };
-    }
-
-    if (result.isValid && result.data.vnp_ResponseCode === '00') {
-      // ✅ DÙNG ENUM THAY VÌ CHUỖI
-      const updated = await this.orderService.updateStatus(
-        paymentRef,
-        PaymentStatus.PAID,
-      );
-      console.log('Update success:', updated);
-      return { message: 'Thanh toán thành công', paymentRef };
-    } else {
-      const updated = await this.orderService.updateStatus(
-        paymentRef,
-        PaymentStatus.FAILED,
-      );
-      console.log('Update failed:', updated);
-      return { message: 'Thanh toán thất bại hoặc sai chữ ký', paymentRef };
-    }
   }
 }

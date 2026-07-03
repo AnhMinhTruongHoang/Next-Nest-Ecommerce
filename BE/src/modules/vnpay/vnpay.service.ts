@@ -1,77 +1,125 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateVnpayDto } from './dto/create-vnpay.dto';
 import { UpdateVnpayDto } from './dto/update-vnpay.dto';
 import { Request } from 'express';
 import dayjs from 'dayjs';
 import { ConfigService } from '@nestjs/config';
 import crypto from 'crypto';
-import querystring from 'qs';
+import qs from 'qs';
 
 @Injectable()
 export class VnpayService {
   constructor(private configService: ConfigService) {}
 
-  sortObject(obj: any) {
-    let sorted = {};
-    let str = [];
-    let key;
-    for (key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        str.push(encodeURIComponent(key));
-      }
+  private getRequiredEnv(key: string) {
+    const value = this.configService.get<string>(key);
+
+    if (!value) {
+      throw new BadRequestException(`Missing env: ${key}`);
     }
-    str.sort();
-    for (key = 0; key < str.length; key++) {
-      sorted[str[key]] = encodeURIComponent(obj[str[key]]).replace(/%20/g, '+');
+
+    return value;
+  }
+
+  private getClientIp(req: Request) {
+    const forwardedFor = req.headers['x-forwarded-for'];
+
+    if (typeof forwardedFor === 'string') {
+      return forwardedFor.split(',')[0].trim();
     }
+
+    if (Array.isArray(forwardedFor) && forwardedFor.length > 0) {
+      return forwardedFor[0];
+    }
+
+    return (req.ip || req.socket.remoteAddress || '127.0.0.1').replace(
+      '::ffff:',
+      '',
+    );
+  }
+
+  sortObject(obj: Record<string, any>) {
+    const sorted: Record<string, string> = {};
+    const keys = Object.keys(obj).sort();
+
+    for (const key of keys) {
+      sorted[key] = encodeURIComponent(obj[key]).replace(/%20/g, '+');
+    }
+
     return sorted;
   }
 
   createUrl(createVnpayDto: CreateVnpayDto, req: Request) {
-    const ipAddr = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    const { amount, bankCode = '', locale = 'vn', paymentRef } = createVnpayDto;
-
     process.env.TZ = 'Asia/Ho_Chi_Minh';
 
-    let date = new Date();
-    let createDate = dayjs(date).format('YYYYMMDDHHmmss');
-    let orderId = paymentRef;
+    const { amount, bankCode = '', locale = 'vn', paymentRef } = createVnpayDto;
 
-    let tmnCode = this.configService.get<string>('vnp_TmnCode');
-    let secretKey = this.configService.get<string>('vnp_HashSecret');
-    let vnpUrl = this.configService.get<string>('vnp_Url');
-    let returnUrl = this.configService.get<string>('vnp_ReturnUrl');
-
-    let currCode = 'VND';
-    let vnp_Params = {};
-    vnp_Params['vnp_Version'] = '2.1.0';
-    vnp_Params['vnp_Command'] = 'pay';
-    vnp_Params['vnp_TmnCode'] = tmnCode;
-    vnp_Params['vnp_Locale'] = locale;
-    vnp_Params['vnp_CurrCode'] = currCode;
-    vnp_Params['vnp_TxnRef'] = orderId;
-    vnp_Params['vnp_OrderInfo'] = 'Thanh toan cho ma GD:' + orderId;
-    vnp_Params['vnp_OrderType'] = 'other';
-    vnp_Params['vnp_Amount'] = Math.round(Number(amount)) * 100;
-    vnp_Params['vnp_ReturnUrl'] = returnUrl;
-    vnp_Params['vnp_IpAddr'] = ipAddr;
-    vnp_Params['vnp_CreateDate'] = createDate;
-    if (bankCode) {
-      vnp_Params['vnp_BankCode'] = bankCode;
+    if (!paymentRef) {
+      throw new BadRequestException('Missing paymentRef');
     }
 
-    vnp_Params = this.sortObject(vnp_Params);
+    const cleanAmount = Math.round(Number(amount));
 
-    let signData = querystring.stringify(vnp_Params, { encode: false });
-    let hmac = crypto.createHmac('sha512', secretKey);
-    let signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
-    vnp_Params['vnp_SecureHash'] = signed;
-    vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
+    if (!Number.isFinite(cleanAmount) || cleanAmount <= 0) {
+      throw new BadRequestException('Invalid amount');
+    }
+
+    const ipAddr = this.getClientIp(req);
+
+    const createDate = dayjs(new Date()).format('YYYYMMDDHHmmss');
+    const tmnCode = this.getRequiredEnv('vnp_TmnCode');
+    const secretKey = this.getRequiredEnv('vnp_HashSecret');
+    let vnpUrl = this.getRequiredEnv('vnp_Url');
+    const returnUrl = this.getRequiredEnv('vnp_ReturnUrl');
+
+    let vnpParams: Record<string, any> = {
+      vnp_Version: '2.1.0',
+      vnp_Command: 'pay',
+      vnp_TmnCode: tmnCode,
+      vnp_Locale: locale || 'vn',
+      vnp_CurrCode: 'VND',
+      vnp_TxnRef: paymentRef,
+      vnp_OrderInfo: `Thanh toan cho ma GD:${paymentRef}`,
+      vnp_OrderType: 'other',
+      vnp_Amount: cleanAmount * 100,
+      vnp_ReturnUrl: returnUrl,
+      vnp_IpAddr: ipAddr,
+      vnp_CreateDate: createDate,
+    };
+
+    if (bankCode) {
+      vnpParams.vnp_BankCode = bankCode;
+    }
+
+    vnpParams = this.sortObject(vnpParams);
+
+    const signData = qs.stringify(vnpParams, { encode: false });
+    const secureHash = crypto
+      .createHmac('sha512', secretKey)
+      .update(Buffer.from(signData, 'utf-8'))
+      .digest('hex');
+
+    vnpParams.vnp_SecureHash = secureHash;
+
+    const paymentUrl = `${vnpUrl}?${qs.stringify(vnpParams, {
+      encode: false,
+    })}`;
+
+    console.log('VNPAY CONFIG:', {
+      tmnCode,
+      returnUrl,
+      vnpUrl,
+      amount: cleanAmount,
+      paymentRef,
+      ipAddr,
+    });
+
+    console.log('VNPAY PAYMENT URL:', paymentUrl);
 
     return {
       statusCode: 200,
       message: 'Create Vnpay URL',
-      data: { url: vnpUrl },
+      data: { url: paymentUrl },
     };
   }
 
@@ -92,20 +140,24 @@ export class VnpayService {
   }
 
   verifyReturn(query: any) {
-    const secureHash = query['vnp_SecureHash'];
-    delete query['vnp_SecureHash'];
-    delete query['vnp_SecureHashType'];
+    const data = { ...query };
 
-    const secretKey = this.configService.get<string>('vnp_HashSecret');
-    const sortedParams = this.sortObject(query);
+    const secureHash = data.vnp_SecureHash;
+    delete data.vnp_SecureHash;
+    delete data.vnp_SecureHashType;
 
-    const signData = require('qs').stringify(sortedParams, { encode: false });
-    const hmac = crypto.createHmac('sha512', secretKey);
-    const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
+    const secretKey = this.getRequiredEnv('vnp_HashSecret');
+    const sortedParams = this.sortObject(data);
+
+    const signData = qs.stringify(sortedParams, { encode: false });
+    const signed = crypto
+      .createHmac('sha512', secretKey)
+      .update(Buffer.from(signData, 'utf-8'))
+      .digest('hex');
 
     return {
       isValid: secureHash === signed,
-      data: query,
+      data,
     };
   }
 }
