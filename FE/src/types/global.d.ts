@@ -68,21 +68,31 @@ declare global {
     email: string;
     name: string;
   }
-
+  
   interface IProduct {
     _id: string;
-    thumbnail: string;
-    images: string[];
-    description: string;
+
     name: string;
-    brand: string;
+    brand?: string;
+    description?: string;
+
     price: number;
     stock: number;
     sold: number;
-    quantity: number;
-    category: any;
-    createdAt: Date;
-    updatedAt: Date;
+    quantity?: number;
+
+    thumbnail?: string;
+    images?: string[];
+
+    category?:
+      | string
+      | {
+          _id?: string;
+          name?: string;
+        };
+
+    createdAt?: string | Date;
+    updatedAt?: string | Date;
   }
 
   interface IOrder {

@@ -1,42 +1,79 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Card, Carousel, Skeleton, Empty, Rate, Tag } from "antd";
+import { Card, Carousel, Skeleton, Empty, Tag } from "antd";
 import { LeftOutlined, RightOutlined, FireOutlined } from "@ant-design/icons";
 import Image from "next/image";
 import Link from "next/link";
 import { getImageUrl } from "@/utils/getImageUrl";
 
+type TCategory =
+  | string
+  | {
+      _id?: string;
+      name?: string;
+    };
+
 type TProduct = {
   _id: string;
-  thumbnail: string;
+
   name: string;
+  brand?: string;
+  description?: string;
+
   price: number;
-  sold: number;
   originalPrice?: number;
-  averageRating?: number;
-  totalReviews?: number;
-  category?: string[] | string;
-  hz?: number;
-  sizeInch?: number;
+
+  stock?: number;
+  sold?: number;
+  quantity?: number;
+
+  thumbnail?: string;
+  images?: string[];
+
+  category?: TCategory | TCategory[];
+
+  hz?: number | string;
+  sizeInch?: number | string;
   panel?: string;
   resolution?: string;
+
+  averageRating?: number;
+  totalReviews?: number;
+
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
 };
 
-const currencyVN = (n?: number) =>
-  new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(
-    n ?? 0
-  );
-
 interface SuggestionListProps {
-  currentProduct: TProduct;
+  currentProduct: TProduct | null;
 }
+
+const currencyVN = (value?: number) =>
+  new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+    maximumFractionDigits: 0,
+  }).format(Number(value) || 0);
 
 const chunk = <T,>(arr: T[], size: number) =>
   arr.reduce<T[][]>(
-    (acc, _, i) => (i % size ? acc : [...acc, arr.slice(i, i + size)]),
+    (acc, _, index) =>
+      index % size ? acc : [...acc, arr.slice(index, index + size)],
     []
   );
+
+const getCategoryValue = (category?: TProduct["category"]) => {
+  if (!category) return "";
+
+  const firstCategory = Array.isArray(category) ? category[0] : category;
+
+  if (!firstCategory) return "";
+
+  if (typeof firstCategory === "string") return firstCategory;
+
+  return firstCategory._id || firstCategory.name || "";
+};
 
 const Arrow = ({
   className,
@@ -47,107 +84,149 @@ const Arrow = ({
   onClick?: () => void;
   left?: boolean;
 }) => (
-  <div
-    className={className}
+  <button
+    type="button"
+    className={`${className || ""} similar-arrow ${
+      left ? "similar-arrow-left" : "similar-arrow-right"
+    }`}
     onClick={onClick}
-    style={{
-      width: 36,
-      height: 36,
-      borderRadius: "50%",
-      background: "#fff",
-      boxShadow: "0 4px 12px rgba(0,0,0,.12)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      border: "1px solid #eee",
-      zIndex: 2,
-    }}
+    aria-label={left ? "Previous products" : "Next products"}
   >
     {left ? <LeftOutlined /> : <RightOutlined />}
-  </div>
+  </button>
 );
 
 const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
   const [listProduct, setListProduct] = useState<TProduct[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [errorMsg, setErrorMsg] = useState<string>("");
-
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
   const [cols, setCols] = useState(4);
+
+  const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/+$/, "");
+
+  const categoryValue = useMemo(
+    () => getCategoryValue(currentProduct?.category),
+    [currentProduct?.category]
+  );
+
   useEffect(() => {
-    const sync = () => {
-      const w = window.innerWidth;
-      if (w < 640) setCols(1);
-      else if (w < 1024) setCols(2);
-      else setCols(4);
+    const syncCols = () => {
+      const width = window.innerWidth;
+
+      if (width < 640) {
+        setCols(1);
+        return;
+      }
+
+      if (width < 1024) {
+        setCols(2);
+        return;
+      }
+
+      setCols(4);
     };
-    sync();
-    window.addEventListener("resize", sync);
-    return () => window.removeEventListener("resize", sync);
+
+    syncCols();
+
+    window.addEventListener("resize", syncCols);
+    return () => window.removeEventListener("resize", syncCols);
   }, []);
 
   useEffect(() => {
+    if (!currentProduct?._id || !categoryValue || !backendURL) {
+      setListProduct([]);
+      return;
+    }
+
+    const controller = new AbortController();
+
     const fetchProducts = async () => {
-      const cat = Array.isArray(currentProduct?.category)
-        ? currentProduct.category?.[0]
-        : (currentProduct?.category as string);
-
-      if (!cat) return;
-
       setIsLoading(true);
       setErrorMsg("");
+
       try {
-        const query = `current=1&pageSize=10&category=${cat}&sort=-sold`;
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/products?${query}`
-        );
+        const query = new URLSearchParams({
+          current: "1",
+          pageSize: "12",
+          category: categoryValue,
+          sort: "-sold",
+        });
+
+        const res = await fetch(`${backendURL}/products?${query.toString()}`, {
+          signal: controller.signal,
+        });
+
         const data = await res.json();
-        let result: TProduct[] = data?.data?.result ?? [];
 
-        result = result.filter((p) => p._id !== currentProduct._id);
+        if (!res.ok) {
+          throw new Error(data?.message || "Cannot fetch related products");
+        }
 
-        // enrich rating
+        let result: TProduct[] = Array.isArray(data?.data?.result)
+          ? data.data.result
+          : Array.isArray(data?.data)
+          ? data.data
+          : [];
+
+        result = result.filter((item) => item._id !== currentProduct._id);
+
         const enriched = await Promise.all(
-          result.map(async (p) => {
+          result.slice(0, 8).map(async (product) => {
             try {
-              const r = await fetch(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/reviews/summary/${p._id}`
+              const reviewRes = await fetch(
+                `${backendURL}/reviews/summary/${product._id}`,
+                { signal: controller.signal }
               );
-              const summary = await r.json();
+
+              const summary = await reviewRes.json();
+              const payload = summary?.data ?? summary;
+
               return {
-                ...p,
-                averageRating: summary?.average ?? 0,
-                totalReviews: summary?.total ?? 0,
+                ...product,
+                averageRating: Number(payload?.average ?? 0),
+                totalReviews: Number(payload?.total ?? 0),
               };
             } catch {
-              return { ...p, averageRating: 0, totalReviews: 0 };
+              return {
+                ...product,
+                averageRating: 0,
+                totalReviews: 0,
+              };
             }
           })
         );
 
-        // Chỉ lấy tối đa 4 cho UI gọn như yêu cầu
-        setListProduct(enriched.slice(0, 4));
-      } catch (e) {
-        console.error("Fetch related products error:", e);
+        setListProduct(enriched);
+      } catch (error: any) {
+        if (error?.name === "AbortError") return;
+
+        console.error("Fetch related products error:", error);
         setErrorMsg("Không tải được sản phẩm gợi ý.");
+        setListProduct([]);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchProducts();
-  }, [currentProduct]);
+
+    return () => controller.abort();
+  }, [backendURL, categoryValue, currentProduct?._id]);
 
   const slides = useMemo(() => chunk(listProduct, cols), [listProduct, cols]);
-  ///
+
   return (
-    <div className="similar-section">
-      <h2 className="similar-title">Sản phẩm tương tự</h2>
-  
-      {/* Loading */}
+    <section className="similar-section">
+      <div className="similar-section-head">
+        <span>Recommended Products</span>
+        <h2>Sản phẩm tương tự</h2>
+        <p>Những sản phẩm cùng danh mục có thể phù hợp với bạn.</p>
+      </div>
+
       {isLoading && (
         <div className="similar-grid">
-          {Array.from({ length: cols }).map((_, i) => (
-            <Card key={i} className="similar-card loading-card">
+          {Array.from({ length: cols }).map((_, index) => (
+            <Card key={index} className="similar-card loading-card">
               <Skeleton.Image className="similar-skeleton-img" active />
               <Skeleton
                 active
@@ -159,90 +238,85 @@ const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
           ))}
         </div>
       )}
-  
-      {/* Error */}
+
       {!isLoading && errorMsg && (
         <div className="similar-error">{errorMsg}</div>
       )}
-  
-      {/* Empty */}
+
       {!isLoading && !errorMsg && listProduct.length === 0 && (
         <div className="similar-empty">
           <Empty
             description={
-              <span style={{ color: "#b8b8b8" }}>
+              <span style={{ color: "#b8c0cc", fontWeight: 700 }}>
                 Không có sản phẩm liên quan
               </span>
             }
           />
         </div>
       )}
-  
-      {/* List */}
+
       {!isLoading && !errorMsg && listProduct.length > 0 && (
         <div className="similar-carousel-wrap">
-        <Carousel
-  arrows={slides.length > 1}
-  prevArrow={slides.length > 1 ? <Arrow left /> : undefined}
-  nextArrow={slides.length > 1 ? <Arrow /> : undefined}
-  dots={false}
-  draggable={slides.length > 1}
-  className="similar-carousel"
->
-            {slides.map((group, idx) => (
-              <div key={idx}>
+          <Carousel
+            arrows={slides.length > 1}
+            prevArrow={slides.length > 1 ? <Arrow left /> : undefined}
+            nextArrow={slides.length > 1 ? <Arrow /> : undefined}
+            dots={slides.length > 1}
+            draggable={slides.length > 1}
+            className="similar-carousel"
+          >
+            {slides.map((group, index) => (
+              <div key={index}>
                 <div className="similar-grid">
-                  {group.map((p) => {
-                    const imgSrc = getImageUrl(p.thumbnail);
-  
+                  {group.map((product) => {
+                    const imgSrc =
+                      getImageUrl(product.thumbnail) || "/images/noimage.png";
+
                     const original =
-                      p.originalPrice && p.originalPrice > p.price
-                        ? p.originalPrice
+                      product.originalPrice &&
+                      product.originalPrice > product.price
+                        ? product.originalPrice
                         : undefined;
-  
+
                     const discountAmount = original
-                      ? Math.max(original - p.price, 0)
+                      ? Math.max(original - product.price, 0)
                       : 0;
-  
+
                     const discountPercent = original
                       ? Math.round((discountAmount / original) * 100)
                       : 0;
-  
+
                     const hotDeal = discountPercent >= 15;
-  
+
                     const chips: string[] = [];
-                    if (p.hz) chips.push(`${p.hz} Hz`);
-                    if (p.sizeInch) chips.push(`${p.sizeInch} inch`);
-                    if (p.panel) chips.push(p.panel.toUpperCase());
-                    if (p.resolution) {
-                      chips.push(p.resolution.replace("x", " × "));
+
+                    if (product.hz) chips.push(`${product.hz} Hz`);
+                    if (product.sizeInch)
+                      chips.push(`${product.sizeInch} inch`);
+                    if (product.panel) chips.push(product.panel.toUpperCase());
+                    if (product.resolution) {
+                      chips.push(product.resolution.replace("x", " × "));
                     }
-  
+
                     return (
                       <Link
-                        key={p._id}
-                        href={`/product-detail/${p._id}`}
+                        key={product._id}
+                        href={`/product-detail/${product._id}`}
                         className="similar-link"
                       >
                         <Card
                           hoverable
                           className="similar-card"
-                          styles={{
-                            body: {
-                              padding: 12,
-                              backgroundColor: "#111314",
-                            },
-                          }}
                           cover={
                             <div className="similar-img-box">
                               <Image
-                                alt={p.name}
+                                alt={product.name}
                                 src={imgSrc}
                                 fill
-                                sizes="280px"
-                                style={{ objectFit: "contain" }}
+                                sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 280px"
+                                className="similar-img"
                               />
-  
+
                               {hotDeal && (
                                 <div className="hot-deal">
                                   <FireOutlined /> HOT DEAL
@@ -251,42 +325,46 @@ const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
                             </div>
                           }
                         >
-                          <div className="similar-product-name" title={p.name}>
-                            {p.name}
+                          <div
+                            className="similar-product-name"
+                            title={product.name}
+                          >
+                            {product.name}
                           </div>
-  
+
                           {chips.length > 0 && (
                             <div className="spec-chip-box">
-                              {chips.slice(0, 4).map((c, i) => (
-                                <span key={i} className="spec-chip">
-                                  {c}
+                              {chips.slice(0, 4).map((chip) => (
+                                <span key={chip} className="spec-chip">
+                                  {chip}
                                 </span>
                               ))}
                             </div>
                           )}
-  
-  <div className="rating-row">
-  <Tag color="green" className="sold-tag">
-    {p.sold ?? 0} đã bán
-  </Tag>
-</div>
-  
+
+                          <div className="rating-row">
+                            <Tag className="sold-tag">
+                              {product.sold ?? 0} đã bán
+                            </Tag>
+                          </div>
+
                           <div className="price-block">
                             {original && (
                               <div className="original-price">
-                                {currencyVN(original)}{" "}
-                                {discountPercent ? (
+                                {currencyVN(original)}
+
+                                {discountPercent > 0 && (
                                   <span className="discount-percent">
                                     -{discountPercent}%
                                   </span>
-                                ) : null}
+                                )}
                               </div>
                             )}
-  
+
                             <div className="similar-price">
-                              {currencyVN(p.price)}
+                              {currencyVN(product.price)}
                             </div>
-  
+
                             {discountAmount > 0 && (
                               <div className="discount-amount">
                                 Giảm {currencyVN(discountAmount)}
@@ -303,285 +381,443 @@ const SuggestionList = ({ currentProduct }: SuggestionListProps) => {
           </Carousel>
         </div>
       )}
-  
+
       <style jsx global>{`
         .similar-section {
           margin-top: 24px;
-          padding: 28px 18px 45px;
-          background: #1e2021;
-          border-radius: 14px;
+          padding: 26px 18px 40px;
+          border-radius: 20px;
+          background: radial-gradient(
+              circle at top left,
+              rgba(0, 255, 224, 0.06),
+              transparent 36%
+            ),
+            linear-gradient(
+              180deg,
+              rgba(255, 255, 255, 0.035),
+              rgba(255, 255, 255, 0.012)
+            ),
+            #111314;
+          border: 1px solid #2a2d2e;
         }
-  
-        .similar-title {
-          color: #ffffff;
-          font-weight: 800;
-          margin: 0 0 24px;
-          letter-spacing: 0.3px;
+
+        .similar-section-head {
+          margin: 0 auto 22px;
+          max-width: 620px;
           text-align: center;
         }
-  
+
+        .similar-section-head span {
+          display: block;
+          margin-bottom: 7px;
+          color: #00ffe0;
+          font-size: 11px;
+          font-weight: 900;
+          line-height: 1.2;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+        }
+
+        .similar-section-head h2 {
+          margin: 0;
+          color: #ffffff;
+          font-size: 28px;
+          font-weight: 950;
+          line-height: 1.22;
+        }
+
+        .similar-section-head p {
+          margin: 9px auto 0;
+          color: #b8c0cc;
+          font-size: 14px;
+          font-weight: 600;
+          line-height: 1.55;
+        }
+
         .similar-carousel-wrap {
-          max-width: 980px;
+          width: 100%;
+          max-width: 1080px;
           margin: 0 auto;
           position: relative;
         }
-  
+
         .similar-carousel .slick-list {
-          padding: 4px 0 12px;
+          padding: 4px 0 18px;
         }
-  
+
         .similar-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(240px, 280px));
-          gap: 18px;
-          justify-content: center;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 16px;
           align-items: stretch;
           width: 100%;
           margin: 0 auto;
         }
-  
+
         .similar-link {
-          text-decoration: none !important;
           display: block;
-          width: 100%;
-        }
-  
-        .similar-card {
-          width: 100%;
           height: 100%;
-          border-radius: 14px !important;
+          text-decoration: none !important;
+        }
+
+        .similar-card {
+          height: 100%;
           overflow: hidden;
-          background: #111314 !important;
+          border-radius: 18px !important;
+          background: linear-gradient(
+              180deg,
+              rgba(255, 255, 255, 0.035),
+              rgba(255, 255, 255, 0.01)
+            ),
+            #181a1b !important;
           border: 1px solid #2a2d2e !important;
-          transition: transform 0.3s ease, box-shadow 0.3s ease,
-            border-color 0.3s ease;
+          box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22) !important;
+          transition: transform 0.25s ease, border-color 0.25s ease,
+            box-shadow 0.25s ease;
         }
-  
+
         .similar-card .ant-card-body {
-          background: #111314 !important;
-          min-height: 112px;
+          min-height: 160px;
+          padding: 14px !important;
+          background: transparent !important;
         }
-  
+
         .similar-card:hover {
           transform: translateY(-5px);
           border-color: #00ffe0 !important;
-          box-shadow: 0 12px 28px rgba(0, 255, 224, 0.12) !important;
+          box-shadow: 0 16px 34px rgba(0, 255, 224, 0.12) !important;
         }
-  
+
         .similar-img-box {
           position: relative;
-          height: 180px;
-          background: #ffffff;
+          height: 190px;
           overflow: hidden;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          background: #0f1112;
+          border-bottom: 1px solid #2a2d2e;
         }
-  
-        .similar-img-box img {
-          padding: 10px !important;
-          transition: transform 0.45s ease;
+
+        .similar-img {
+          padding: 14px !important;
+          object-fit: contain !important;
+          transition: transform 0.35s ease;
         }
-  
-        .similar-card:hover .similar-img-box img {
-          transform: scale(1.06);
+
+        .similar-card:hover .similar-img {
+          transform: scale(1.055);
         }
-  
+
         .hot-deal {
           position: absolute;
           top: 10px;
           left: 10px;
-          background: #ff4d4f;
-          color: #fff;
-          font-size: 12px;
-          font-weight: 700;
-          padding: 4px 8px;
-          border-radius: 999px;
-          display: flex;
+          z-index: 2;
+          padding: 5px 9px;
+          display: inline-flex;
           align-items: center;
           gap: 6px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-        }
-  
-        .similar-product-name {
           color: #ffffff;
-          font-weight: 800;
+          font-size: 11px;
+          font-weight: 900;
+          border-radius: 999px;
+          background: linear-gradient(135deg, #ff4d00, #ff7a00);
+          box-shadow: 0 8px 18px rgba(255, 77, 0, 0.2);
+        }
+
+        .similar-product-name {
+          min-height: 39px;
+          color: #ffffff;
           font-size: 14px;
+          font-weight: 900;
+          line-height: 1.4;
           text-align: center;
-          white-space: nowrap;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
           overflow: hidden;
-          text-overflow: ellipsis;
-          margin-bottom: 8px;
         }
-  
+
         .spec-chip-box {
+          margin: 10px 0;
+          padding: 8px;
           display: flex;
-          gap: 6px;
-          flex-wrap: wrap;
           justify-content: center;
-          background: #181a1b;
-          padding: 7px;
-          border-radius: 8px;
-          margin: 8px 0 10px;
+          flex-wrap: wrap;
+          gap: 6px;
+          border-radius: 12px;
+          background: #111314;
+          border: 1px solid #303435;
         }
-  
+
         .spec-chip {
+          padding: 3px 8px;
+          color: #cbd5e1;
+          font-size: 11px;
+          font-weight: 800;
+          line-height: 1.2;
+          border-radius: 999px;
           background: #0d0f10;
           border: 1px solid #303435;
-          padding: 2px 7px;
-          border-radius: 6px;
-          font-size: 11px;
-          color: #c9d1d9;
         }
 
         .rating-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin-bottom: 8px;
-  flex-wrap: wrap;
-  width: 100%;
-  text-align: center;
-}
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          margin: 8px 0;
+          flex-wrap: wrap;
+        }
 
-.sold-tag {
-  margin: 0 !important;
-  display: inline-flex !important;
-  align-items: center;
-  justify-content: center;
-}
+        .sold-tag {
+          margin: 0 !important;
+          color: #22c55e !important;
+          background: rgba(34, 197, 94, 0.1) !important;
+          border: 1px solid rgba(34, 197, 94, 0.28) !important;
+          border-radius: 999px !important;
+          font-size: 12px !important;
+          font-weight: 900 !important;
+        }
+
         .price-block {
+          margin-top: 8px;
           text-align: center;
         }
-  
+
         .original-price {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 7px;
           color: #8b949e;
+          font-size: 12px;
+          font-weight: 700;
           text-decoration: line-through;
-          font-size: 13px;
-          margin-bottom: 2px;
+          margin-bottom: 3px;
         }
-  
+
         .discount-percent {
           color: #ff4d4f;
-          font-weight: 700;
+          font-weight: 900;
           text-decoration: none;
         }
-  
+
         .similar-price {
           color: #ff4d4f;
-          font-weight: 900;
-          font-size: 18px;
-          line-height: 1.4;
+          font-size: 19px;
+          font-weight: 950;
+          line-height: 1.35;
         }
-  
+
         .discount-amount {
-          color: #00c781;
-          font-weight: 600;
           margin-top: 4px;
-          font-size: 13px;
+          color: #00c781;
+          font-size: 12px;
+          font-weight: 800;
         }
-  
+
         .similar-error,
         .similar-empty {
+          margin: 18px 0 20px;
+          padding: 24px 12px;
           text-align: center;
-          color: #b8b8b8;
-          margin: 16px 0 40px;
+          color: #b8c0cc;
+          border-radius: 16px;
+          background: #181a1b;
+          border: 1px dashed #303435;
         }
-  
+
         .similar-error {
-          color: #ff4d4f;
+          color: #ff7875;
+          font-weight: 800;
         }
-  
+
+        .loading-card {
+          padding: 0 !important;
+        }
+
         .similar-skeleton-img {
           width: 100% !important;
-          height: 180px !important;
+          height: 190px !important;
         }
-  
-        .similar-carousel .slick-prev,
-        .similar-carousel .slick-next {
-          width: 38px !important;
-          height: 38px !important;
-          z-index: 5 !important;
-          background: rgba(255, 255, 255, 0.28) !important;
-          border-radius: 50% !important;
+
+        .similar-carousel .similar-arrow {
+          z-index: 8 !important;
+          width: 40px !important;
+          height: 40px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          border: none !important;
+          border-radius: 999px !important;
+          color: #ffffff !important;
+          background: rgba(0, 128, 112, 0.82) !important;
+          box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28) !important;
+          cursor: pointer !important;
+          transform: translateY(-50%) !important;
+          transition: background 0.2s ease, box-shadow 0.2s ease !important;
         }
-  
+
+        .similar-carousel .similar-arrow:hover {
+          color: #061313 !important;
+          background: #00ffe0 !important;
+          box-shadow: 0 12px 28px rgba(0, 255, 224, 0.18) !important;
+          transform: translateY(-50%) !important;
+        }
+
         .similar-carousel .slick-prev {
-          left: -48px !important;
+          left: -50px !important;
         }
-  
+
         .similar-carousel .slick-next {
-          right: -48px !important;
+          right: -50px !important;
         }
-  
-        .similar-carousel .slick-prev:hover,
-        .similar-carousel .slick-next:hover {
-          background: rgba(0, 255, 224, 0.45) !important;
+
+        .similar-carousel .slick-prev::before,
+        .similar-carousel .slick-next::before,
+        .similar-carousel .slick-prev::after,
+        .similar-carousel .slick-next::after {
+          display: none !important;
         }
-  
-        @media (max-width: 1100px) {
+
+        .similar-carousel .slick-dots {
+          bottom: -8px !important;
+        }
+
+        .similar-carousel .slick-dots li {
+          width: 18px !important;
+          height: 4px !important;
+        }
+
+        .similar-carousel .slick-dots li button {
+          width: 18px !important;
+          height: 4px !important;
+          border-radius: 999px !important;
+          background: rgba(255, 255, 255, 0.35) !important;
+          opacity: 1 !important;
+        }
+
+        .similar-carousel .slick-dots li.slick-active,
+        .similar-carousel .slick-dots li.slick-active button {
+          width: 30px !important;
+        }
+
+        .similar-carousel .slick-dots li.slick-active button {
+          background: #00ffe0 !important;
+        }
+
+        @media (max-width: 1180px) {
           .similar-carousel-wrap {
-            max-width: 900px;
-            padding: 0 42px;
+            padding: 0 46px;
           }
-  
+
           .similar-carousel .slick-prev {
             left: 0 !important;
           }
-  
+
           .similar-carousel .slick-next {
             right: 0 !important;
           }
         }
-  
+
         @media (max-width: 768px) {
           .similar-section {
-            padding: 24px 10px 36px;
+            margin-top: 18px;
+            padding: 22px 12px 34px;
+            border-radius: 18px;
           }
-  
-          .similar-title {
-            font-size: 24px;
+
+          .similar-section-head {
             margin-bottom: 18px;
           }
-  
-          .similar-carousel-wrap {
-            padding: 0 34px;
+
+          .similar-section-head h2 {
+            font-size: 24px;
           }
-  
+
+          .similar-section-head p {
+            font-size: 13px;
+          }
+
+          .similar-carousel-wrap {
+            padding: 0 38px;
+          }
+
           .similar-grid {
-            grid-template-columns: repeat(1, minmax(0, 280px));
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 14px;
           }
-  
+
           .similar-img-box {
             height: 170px;
           }
-  
+
           .similar-card .ant-card-body {
-            min-height: auto;
+            min-height: 150px;
+            padding: 12px !important;
+          }
+
+          .similar-price {
+            font-size: 17px;
+          }
+
+          .similar-carousel .similar-arrow {
+            width: 34px !important;
+            height: 34px !important;
           }
         }
-  
+
+        @media (max-width: 640px) {
+          .similar-grid {
+            grid-template-columns: 1fr;
+            max-width: 300px;
+          }
+
+          .similar-carousel-wrap {
+            padding: 0 32px;
+          }
+        }
+
         @media (max-width: 420px) {
+          .similar-section {
+            padding: 20px 10px 30px;
+            border-radius: 16px;
+          }
+
+          .similar-section-head h2 {
+            font-size: 22px;
+          }
+
+          .similar-section-head p {
+            max-width: 280px;
+          }
+
           .similar-carousel-wrap {
             padding: 0 28px;
           }
-  
+
           .similar-grid {
-            grid-template-columns: 1fr;
+            max-width: 100%;
           }
-  
+
           .similar-img-box {
             height: 155px;
           }
-  
-          .similar-price {
-            font-size: 16px;
+
+          .similar-product-name {
+            font-size: 13px;
+          }
+
+          .similar-card .ant-card-body {
+            min-height: auto;
+          }
+
+          .similar-carousel .similar-arrow {
+            width: 31px !important;
+            height: 31px !important;
           }
         }
       `}</style>
-    </div>
+    </section>
   );
 };
 

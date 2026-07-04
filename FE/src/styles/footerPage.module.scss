@@ -1,64 +1,320 @@
 .container {
+  width: 100%;
   max-width: 980px;
-  margin: 15px auto;
-  padding: 24px 16px 60px;
-  border: 1px solid #e5e7eb;
-  background: #fff;
+  margin: 0 auto;
+  padding: 36px 20px 56px;
+  color: #ffffff;
 }
 
-.section {
-  scroll-margin-top: 90px;
+.hero {
+  text-align: center;
+  padding: 26px 18px;
+  border-radius: 20px;
+  background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.045),
+      rgba(255, 255, 255, 0.012)
+    ),
+    #181a1b;
+  border: 1px solid #2a2d2e;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.24);
+}
+
+.pageTitle {
+  margin: 0 !important;
+  color: #ffffff !important;
+  font-size: 32px !important;
+  font-weight: 900 !important;
+  line-height: 1.2 !important;
+}
+
+.pageDesc {
+  max-width: 680px;
+  margin: 10px auto 0 !important;
+  color: #b8c0cc !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  line-height: 1.6 !important;
 }
 
 .toc {
-  position: static;
-  top: 84px;
-  background: #fff;
-  border: 1px solid #eee;
-  border-radius: 10px;
-  padding: 12px;
-  margin-top: 16px;
+  margin-top: 20px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: #111314;
+  border: 1px solid #2a2d2e;
+
+  details {
+    width: 100%;
+  }
+
+  summary {
+    cursor: pointer;
+    color: #00ffe0;
+    font-size: 14px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  ul {
+    display: grid;
+    gap: 6px;
+    list-style: none;
+    padding-left: 0;
+    margin: 14px 0 0;
+  }
+
+  li {
+    margin: 0;
+    padding: 0;
+  }
 
   a {
-    color: #1677ff;
+    display: block;
+    padding: 9px 12px;
+    color: #cbd5e1;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.4;
     text-decoration: none;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid transparent;
+    transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease,
+      transform 0.2s ease;
+  }
 
-    &:hover {
-      text-decoration: underline;
-    }
+  a:hover {
+    color: #00ffe0;
+    background: rgba(0, 255, 224, 0.07);
+    border-color: rgba(0, 255, 224, 0.22);
+    transform: translateX(3px);
   }
 }
 
-@media (max-width: 768px) {
-  .toc {
-    position: static;
-    padding: 0;
-    border: none;
+.divider {
+  margin: 24px 0 !important;
+  border-color: #303435 !important;
+}
 
-    details {
-      border: 1px solid #eee;
-      border-radius: 10px;
-      padding: 10px 12px;
-      background: #fff;
-    }
+.section {
+  margin-top: 24px;
+  padding: 22px;
+  border-radius: 18px;
+  background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.035),
+      rgba(255, 255, 255, 0.01)
+    ),
+    #181a1b;
+  border: 1px solid #2a2d2e;
 
-    summary {
-      cursor: pointer;
-      font-weight: 600;
-      list-style: none;
-    }
+  :global(.ant-typography) {
+    color: #dbe4ef;
+  }
 
-    ul {
-      margin-top: 10px;
-    }
+  :global(h3.ant-typography) {
+    margin-top: 0 !important;
+    margin-bottom: 12px !important;
+    color: #ffffff !important;
+    font-size: 22px !important;
+    font-weight: 900 !important;
+    line-height: 1.3 !important;
+  }
+
+  :global(p.ant-typography) {
+    margin-bottom: 0 !important;
+    color: #cbd5e1 !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    line-height: 1.7 !important;
+  }
+
+  ul,
+  ol {
+    margin: 0;
+    padding-left: 20px;
+    color: #cbd5e1;
+  }
+
+  li {
+    margin: 8px 0;
+    color: #cbd5e1;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.55;
+  }
+
+  a {
+    color: #00ffe0;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
   }
 }
 
 .codeBlock {
-  display: inline-block;
-  background: #f6f8fa;
-  padding: 6px 8px;
-  border-radius: 6px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    "Liberation Mono", "Courier New", monospace;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 8px;
+  background: #0d0f10;
+  border: 1px solid #303435;
+  color: #00ffe0;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.policyAlert {
+  border-radius: 14px !important;
+  background: rgba(0, 255, 224, 0.07) !important;
+  border: 1px solid rgba(0, 255, 224, 0.22) !important;
+
+  :global(.ant-alert-message) {
+    color: #ffffff !important;
+    font-weight: 900 !important;
+  }
+
+  :global(.ant-alert-description) {
+    color: #cbd5e1 !important;
+    font-weight: 600 !important;
+    line-height: 1.55 !important;
+  }
+
+  :global(.ant-alert-icon) {
+    color: #00ffe0 !important;
+  }
+}
+
+.mt32 {
+  margin-top: 32px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 24px 14px 42px;
+  }
+
+  .hero {
+    padding: 22px 14px;
+    border-radius: 18px;
+  }
+
+  .pageTitle {
+    font-size: 26px !important;
+  }
+
+  .pageDesc {
+    max-width: 520px;
+    font-size: 14px !important;
+  }
+
+  .toc {
+    margin-top: 16px;
+    padding: 14px;
+    border-radius: 16px;
+
+    a {
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+  }
+
+  .section {
+    margin-top: 18px;
+    padding: 18px;
+    border-radius: 16px;
+
+    :global(h3.ant-typography) {
+      font-size: 19px !important;
+    }
+
+    :global(p.ant-typography),
+    li {
+      font-size: 14px !important;
+    }
+  }
+}
+
+@media (max-width: 420px) {
+  .container {
+    padding: 18px 10px 34px;
+  }
+
+  .hero {
+    padding: 20px 12px;
+    border-radius: 16px;
+  }
+
+  .pageTitle {
+    font-size: 23px !important;
+  }
+
+  .pageDesc {
+    font-size: 13px !important;
+    line-height: 1.55 !important;
+  }
+
+  .toc {
+    padding: 12px;
+    border-radius: 15px;
+
+    summary {
+      text-align: center;
+      font-size: 13px;
+    }
+
+    ul {
+      gap: 7px;
+    }
+
+    a {
+      width: 100%;
+      padding: 10px;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    a:hover {
+      transform: none;
+    }
+  }
+
+  .divider {
+    margin: 18px 0 !important;
+  }
+
+  .section {
+    margin-top: 14px;
+    padding: 15px 14px;
+    border-radius: 15px;
+
+    :global(h3.ant-typography) {
+      font-size: 18px !important;
+      text-align: center;
+    }
+
+    :global(p.ant-typography) {
+      text-align: center;
+      font-size: 13px !important;
+    }
+
+    ul,
+    ol {
+      padding-left: 18px;
+    }
+
+    li {
+      font-size: 13px !important;
+      line-height: 1.5;
+    }
+  }
+
+  .codeBlock {
+    margin-top: 4px;
+  }
 }

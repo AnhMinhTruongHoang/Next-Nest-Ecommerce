@@ -678,6 +678,36 @@ const ReviewsTable: React.FC = () => {
               color: #ffffff !important;
             }
           }
+
+          /* Nền đen, chữ trắng cho popup */
+          .ant-popover-inner {
+            background-color: #000 !important;
+            color: #fff !important;
+          }
+
+          /* Tiêu đề và mô tả caption */
+          .ant-popover-message-title,
+          .ant-popover-description {
+            color: #fff !important;
+            text-align: center; /* canh giữa caption */
+          }
+
+          /* Nút OK và Cancel */
+          .ant-popover-buttons .ant-btn {
+            background-color: #333 !important;
+            color: #fff !important;
+            border: none !important;
+          }
+
+          .ant-popover-buttons .ant-btn-primary {
+            background-color: #28a745 !important; /* xanh lá cho nút OK */
+            color: #fff !important;
+          }
+
+          .ant-popover-buttons .ant-btn-default {
+            background-color: #dc3545 !important; /* đỏ cho nút Cancel */
+            color: #fff !important;
+          }
         }
       `}</style>
     </div>

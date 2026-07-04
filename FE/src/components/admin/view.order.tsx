@@ -18,12 +18,6 @@ import {
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
-import {
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  DollarOutlined,
-  ShoppingCartOutlined,
-} from "@ant-design/icons";
 
 interface ViewOrderModalProps {
   orderData: IOrder | null;
@@ -78,16 +72,6 @@ const ViewOrderModal: React.FC<ViewOrderModalProps> = ({
     }
 
     return headers;
-  };
-
-  const buildAuthHeader = () => {
-    const token = getToken();
-
-    if (!token) return {};
-
-    return {
-      Authorization: token.startsWith("Bearer ") ? token : `Bearer ${token}`,
-    };
   };
 
   const formatVND = (value?: number) =>

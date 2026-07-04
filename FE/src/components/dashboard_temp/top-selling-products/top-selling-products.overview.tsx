@@ -3,6 +3,7 @@
 import { getTopSellingProductsData } from "@/utils/api";
 import { getImageUrl } from "@/utils/getImageUrl";
 import { Card, Empty, Segmented, Spin, Tooltip } from "antd";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 const monthLabelMap: Record<string, string> = {
@@ -36,7 +37,11 @@ export function TopSellingProductsOverview() {
   const [chartData, setChartData] = useState<TopSellingChartItem[]>([]);
   const [rankingData, setRankingData] = useState<TopSellingProductItem[]>([]);
   const [error, setError] = useState("");
+  const router = useRouter();
 
+  const handleGoProductDetail = (productId: string) => {
+    router.push(`/product-detail/${productId}`);
+  };
   useEffect(() => {
     const controller = new AbortController();
 
@@ -174,7 +179,20 @@ export function TopSellingProductsOverview() {
               {rankingData.length > 0 ? (
                 <div className="gz-top-selling-ranking-list">
                   {rankingData.map((item, index) => (
-                    <div className="gz-top-selling-ranking-item" key={item._id}>
+                    <div
+                      className="gz-top-selling-ranking-item"
+                      key={item._id}
+                      role="button"
+                      tabIndex={0}
+                      title={`Xem chi tiết ${item.name}`}
+                      onClick={() => handleGoProductDetail(item._id)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleGoProductDetail(item._id);
+                        }
+                      }}
+                    >
                       <div className="gz-top-selling-ranking-left">
                         <div
                           className={`gz-top-selling-rank ${
@@ -185,17 +203,28 @@ export function TopSellingProductsOverview() {
                         </div>
 
                         {item.thumbnail ? (
-                          <img
-                            className="gz-top-selling-thumb"
-                            src={getImageUrl(item.thumbnail)}
-                            alt={item.name}
-                            onError={(e) => {
-                              e.currentTarget.style.display = "none";
-                              const fallback = e.currentTarget
-                                .nextElementSibling as HTMLElement | null;
-                              if (fallback) fallback.style.display = "grid";
-                            }}
-                          />
+                          <>
+                            <img
+                              className="gz-top-selling-thumb"
+                              src={getImageUrl(item.thumbnail)}
+                              alt={item.name}
+                              onError={(e) => {
+                                e.currentTarget.style.display = "none";
+
+                                const fallback = e.currentTarget
+                                  .nextElementSibling as HTMLElement | null;
+
+                                if (fallback) fallback.style.display = "grid";
+                              }}
+                            />
+
+                            <div
+                              className="gz-top-selling-thumb-placeholder"
+                              style={{ display: "none" }}
+                            >
+                              {item.name?.charAt(0)?.toUpperCase() || "P"}
+                            </div>
+                          </>
                         ) : (
                           <div className="gz-top-selling-thumb-placeholder">
                             {item.name?.charAt(0)?.toUpperCase() || "P"}
@@ -869,6 +898,18 @@ export function TopSellingProductsOverview() {
 
           .gz-top-selling-ranking-value b {
             font-size: 13px;
+          }
+          .gz-top-selling-ranking-item {
+            cursor: pointer;
+          }
+
+          .gz-top-selling-ranking-item:focus-visible {
+            outline: 2px solid rgba(0, 255, 224, 0.75);
+            outline-offset: 3px;
+          }
+
+          .gz-top-selling-ranking-item:active {
+            transform: scale(0.985);
           }
         }
       `}</style>

@@ -13,11 +13,14 @@ const toc = [
 export default function PoliciesPage() {
   return (
     <main className={styles.container}>
-      <Typography.Title level={2} style={{ marginTop: 8, textAlign: "center" }}>
+      <Typography.Title
+        level={2}
+        style={{ marginTop: 8, textAlign: "center", color: "white" }}
+      >
         Chính sách
       </Typography.Title>
       <Typography.Paragraph
-        style={{ marginTop: 8, textAlign: "center" }}
+        style={{ marginTop: 8, textAlign: "center", color: "white" }}
         type="secondary"
       >
         Điều khoản & chính sách áp dụng cho khách hàng và đối tác.
