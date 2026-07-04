@@ -30,7 +30,7 @@ export default function UnifiedLayout({
     <ConfigProvider>
       <AntdApp>
         <AppProvider>
-          <Layout style={{ minHeight: "100vh" }}>
+          <Layout style={{ minHeight: "100vh", background: "#202223" }}>
             <Header style={{ padding: 0, margin: 0 }}>
               <AppHeader />
             </Header>

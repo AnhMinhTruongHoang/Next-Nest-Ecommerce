@@ -93,7 +93,11 @@ const ModalChangePassword = ({ isModalOpen, setIsModalOpen }: any) => {
     <Modal
       title={
         <div
-          style={{ textAlign: "center", width: "100%", marginBottom: "15px" }}
+          style={{
+            textAlign: "center",
+            width: "100%",
+            marginBottom: "15px",
+          }}
         >
           <b>Đặt lại mật khẩu</b>
         </div>

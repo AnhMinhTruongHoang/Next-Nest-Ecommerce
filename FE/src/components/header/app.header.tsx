@@ -659,6 +659,29 @@ export default function AppHeader() {
             padding: 0 8px;
             max-width: none;
           }
+          @media (max-width: 767px) {
+            .ant-drawer {
+              z-index: 3000 !important;
+            }
+
+            .ant-drawer-content-wrapper {
+              max-height: 80vh !important;
+            }
+
+            .ant-drawer-bottom .ant-drawer-content {
+              border-radius: 18px 18px 0 0 !important;
+              overflow: hidden !important;
+            }
+
+            .ant-drawer-bottom .ant-drawer-header {
+              padding: 14px 16px !important;
+            }
+
+            .ant-drawer-bottom .ant-drawer-body {
+              max-height: calc(80vh - 56px) !important;
+              overflow-y: auto !important;
+            }
+          }
         }
       `}</style>
 
@@ -877,7 +900,7 @@ export default function AppHeader() {
                 open={isMobileUI && openUserMenu}
                 onClose={() => setOpenUserMenu(false)}
                 placement="bottom"
-                height="auto"
+                height={330}
                 styles={{
                   header: { borderTopLeftRadius: 12, borderTopRightRadius: 12 },
                   content: {
@@ -887,7 +910,113 @@ export default function AppHeader() {
                   body: { paddingTop: 0, paddingBottom: 12 },
                 }}
               >
-                {/* giữ nguyên nội dung Drawer cũ */}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    padding: "8px 4px 12px",
+                  }}
+                >
+                  <Avatar
+                    size={40}
+                    style={{
+                      background: "#9b59b6",
+                      border: "2px solid #00ffe0",
+                    }}
+                  >
+                    {session?.user?.name?.charAt(0)?.toUpperCase() || "U"}
+                  </Avatar>
+
+                  <div style={{ lineHeight: 1.2 }}>
+                    <div style={{ fontWeight: 600 }}>
+                      {session?.user?.name || "Người dùng"}
+                    </div>
+
+                    <div style={{ color: "#888", fontSize: 12 }}>
+                      {session?.user?.email}
+                    </div>
+                  </div>
+                </div>
+
+                <List
+                  itemLayout="horizontal"
+                  dataSource={[
+                    {
+                      key: "profile",
+                      text: "Hồ sơ",
+                      onClick: () => setOpenManageAccount(true),
+                      icon: <UserIcon size={18} />,
+                    },
+                    ...(session?.user?.role === "ADMIN"
+                      ? [
+                          {
+                            key: "dashboard",
+                            text: "Quản lý",
+                            onClick: () => router.push("/dashboard"),
+                            icon: <DashboardFilled />,
+                          },
+                        ]
+                      : [
+                          {
+                            key: "orders",
+                            text: "Lịch sử mua hàng",
+                            onClick: () => setOpenOrderHistory(true),
+                            icon: <ShoppingCartOutlined />,
+                          },
+                        ]),
+                    {
+                      key: "logout",
+                      text: "Đăng xuất",
+                      onClick: handleLogout,
+                      icon: <LogoutOutlined />,
+                    },
+                  ]}
+                  renderItem={(item: any) => (
+                    <List.Item
+                      style={{
+                        padding: "12px 6px",
+                        cursor: "pointer",
+                        borderRadius: 10,
+                      }}
+                      onClick={() => {
+                        setOpenUserMenu(false);
+
+                        setTimeout(() => {
+                          item.onClick();
+                        }, 120);
+                      }}
+                    >
+                      <List.Item.Meta
+                        avatar={
+                          <span
+                            style={{
+                              width: 30,
+                              height: 30,
+                              display: "inline-flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              color: "#00ffe0",
+                            }}
+                          >
+                            {item.icon}
+                          </span>
+                        }
+                        title={
+                          <span
+                            style={{
+                              fontSize: 15,
+                              fontWeight: 700,
+                              color: "#111",
+                            }}
+                          >
+                            {item.text}
+                          </span>
+                        }
+                      />
+                    </List.Item>
+                  )}
+                />
               </Drawer>
             </>
           ) : (
