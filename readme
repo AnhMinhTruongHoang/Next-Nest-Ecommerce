@@ -1,0 +1,380 @@
+# GamerZone - Website Thương mại điện tử Gaming Gear
+
+GamerZone là một website thương mại điện tử chuyên bán các sản phẩm gaming như chuột, bàn phím, tai nghe, lót chuột và các phụ kiện dành cho game thủ. Dự án được xây dựng theo mô hình Fullstack với Frontend sử dụng Next.js và Backend sử dụng NestJS.
+
+Dự án đã được deploy để người dùng có thể truy cập và trải nghiệm trực tiếp.
+
+---
+
+## Demo
+
+- Frontend Demo: `https://next-nest-ecommerce.vercel.app/`
+- Backend API: `DÁN_LINK_BACKEND_DEPLOY_Ở_ĐÂY`
+
+Ví dụ:
+
+```txt
+Frontend: https://your-frontend.vercel.app
+Backend: https://your-backend.onrender.com
+```
+
+---
+
+## Công nghệ sử dụng
+
+### Frontend
+
+- Next.js
+- React
+- TypeScript
+- Ant Design
+- Next Image
+- CSS Module / Styled JSX
+- Responsive UI
+- Dark theme gaming style
+
+### Backend
+
+- NestJS
+- TypeScript
+- MongoDB
+- Mongoose
+- JWT Authentication
+- RESTful API
+- Cloud deployment
+
+---
+
+## Tính năng chính
+
+### Người dùng
+
+- Đăng ký tài khoản
+- Đăng nhập / đăng xuất
+- Xác thực người dùng bằng JWT
+- Xem danh sách sản phẩm
+- Tìm kiếm sản phẩm
+- Lọc sản phẩm theo danh mục, thương hiệu, giá
+- Xem chi tiết sản phẩm
+- Xem hình ảnh, giá, mô tả và thông tin sản phẩm
+- Thêm sản phẩm vào giỏ hàng
+- Cập nhật số lượng trong giỏ hàng
+- Xóa sản phẩm khỏi giỏ hàng
+- Thanh toán đơn hàng
+- Hỗ trợ thanh toán khi nhận hàng
+- Hỗ trợ thanh toán qua VNPAY
+- Áp dụng mã giảm giá / voucher
+- Theo dõi đơn hàng
+- Đánh giá và bình luận sản phẩm
+
+### Trang sản phẩm
+
+- Hiển thị danh sách sản phẩm responsive
+- Giao diện dark theme phù hợp website gaming
+- Bộ lọc sản phẩm
+- Sắp xếp theo giá, sản phẩm mới, sản phẩm bán chạy
+- Card sản phẩm có hình ảnh, giá, số lượng đã bán
+- Tối ưu giao diện trên desktop, tablet và mobile
+
+### Giỏ hàng và thanh toán
+
+- Hiển thị danh sách sản phẩm trong giỏ hàng
+- Tính tổng tiền đơn hàng
+- Cập nhật số lượng sản phẩm
+- Xóa sản phẩm khỏi giỏ hàng
+- Nhập thông tin nhận hàng
+- Chọn phương thức thanh toán
+- Áp dụng voucher
+- Hiển thị tổng tiền sau giảm giá
+- Giao diện thanh toán responsive
+
+### Đánh giá sản phẩm
+
+- Người dùng có thể đánh giá sản phẩm bằng số sao
+- Hiển thị bình luận của người dùng
+- Hiển thị rating sản phẩm
+- Giao diện đánh giá được tối ưu lại bằng custom star UI
+
+### eMagazine / Trang quảng bá
+
+- Trang giới thiệu thương hiệu gaming
+- Trang G2 Esports
+- Trang Falcon / Razer
+- Layout hình ảnh lớn
+- Video quảng bá
+- Hashtag, tiêu đề lớn, nội dung dạng bài viết
+- Responsive trên nhiều kích thước màn hình
+
+### Admin
+
+- Quản lý sản phẩm
+- Quản lý danh mục
+- Quản lý thương hiệu
+- Quản lý đơn hàng
+- Quản lý người dùng
+- Quản lý voucher / mã giảm giá
+- Theo dõi dữ liệu hệ thống
+
+---
+
+## Cấu trúc thư mục
+
+```txt
+NextNestEcommerce/
+│
+├── FE/
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── auth/
+│   │   │   ├── products/
+│   │   │   ├── productsList/
+│   │   │   ├── order/
+│   │   │   ├── checkout/
+│   │   │   ├── emagazine/
+│   │   │   └── admin/
+│   │   │
+│   │   ├── components/
+│   │   │   ├── layout/
+│   │   │   ├── products/
+│   │   │   ├── ui/
+│   │   │   └── home/
+│   │   │
+│   │   ├── lib/
+│   │   ├── types/
+│   │   └── utils/
+│   │
+│   ├── public/
+│   │   ├── images/
+│   │   └── audio/
+│   │
+│   ├── package.json
+│   └── next.config.ts
+│
+├── BE/
+│   ├── src/
+│   │   ├── auth/
+│   │   ├── users/
+│   │   ├── products/
+│   │   ├── categories/
+│   │   ├── brands/
+│   │   ├── orders/
+│   │   ├── vouchers/
+│   │   └── common/
+│   │
+│   ├── package.json
+│   └── .env
+│
+└── README.md
+```
+
+---
+
+## Cài đặt dự án
+
+### 1. Clone source code
+
+```bash
+git clone https://github.com/your-username/your-repository.git
+cd NextNestEcommerce
+```
+
+---
+
+## Chạy Frontend
+
+```bash
+cd FE
+npm install
+npm run dev
+```
+
+Frontend chạy tại:
+
+```txt
+http://localhost:3000
+```
+
+Tạo file `.env.local` trong thư mục `FE`:
+
+```env
+NEXT_PUBLIC_BACKEND_URL=http://localhost:8000/api/v1
+NEXT_PUBLIC_IMAGE_URL=http://localhost:8000
+```
+
+---
+
+## Chạy Backend
+
+```bash
+cd BE
+npm install
+npm run start:dev
+```
+
+Backend chạy tại:
+
+```txt
+http://localhost:8000
+```
+
+Tạo file `.env` trong thư mục `BE`:
+
+```env
+PORT=8000
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+JWT_EXPIRES_IN=1d
+```
+
+---
+
+## Build production
+
+### Frontend
+
+```bash
+cd FE
+npm run build
+npm start
+```
+
+### Backend
+
+```bash
+cd BE
+npm run build
+npm run start:prod
+```
+
+---
+
+## API chính
+
+### Auth
+
+```txt
+POST /api/v1/auth/register
+POST /api/v1/auth/login
+GET  /api/v1/auth/profile
+```
+
+### Products
+
+```txt
+GET    /api/v1/products
+GET    /api/v1/products/:id
+POST   /api/v1/products
+PATCH  /api/v1/products/:id
+DELETE /api/v1/products/:id
+```
+
+### Orders
+
+```txt
+GET  /api/v1/orders
+POST /api/v1/orders
+GET  /api/v1/orders/:id
+```
+
+### Vouchers
+
+```txt
+GET  /api/v1/vouchers
+POST /api/v1/vouchers/apply
+```
+
+---
+
+## Giao diện
+
+Dự án sử dụng phong cách giao diện gaming:
+
+- Nền tối
+- Màu nhấn xanh cyan, xanh Razer, cam gaming
+- Card bo góc
+- Hiệu ứng hover
+- Layout responsive
+- Tối ưu trải nghiệm trên mobile
+
+---
+
+## Một số màn hình chính
+
+```txt
+Trang chủ
+Trang danh sách sản phẩm
+Trang chi tiết sản phẩm
+Trang giỏ hàng
+Trang thanh toán
+Trang đơn hàng
+Trang đăng nhập
+Trang đăng ký
+Trang admin
+Trang eMagazine
+```
+
+---
+
+## Deploy
+
+Dự án có thể deploy theo mô hình:
+
+### Frontend
+
+- Vercel
+- Netlify
+
+### Backend
+
+- Render
+- Railway
+- VPS
+- Docker server
+
+### Database
+
+- MongoDB Atlas
+
+---
+
+## Ghi chú khi deploy
+
+Frontend cần cấu hình biến môi trường:
+
+```env
+NEXT_PUBLIC_BACKEND_URL=https://your-backend-domain.com/api/v1
+NEXT_PUBLIC_IMAGE_URL=https://your-backend-domain.com
+```
+
+Backend cần cấu hình:
+
+```env
+PORT=8000
+MONGODB_URI=your_mongodb_atlas_uri
+JWT_SECRET=your_secret_key
+JWT_EXPIRES_IN=1d
+```
+
+---
+
+## Tác giả
+
+Thực hiện bởi Minh.
+
+```txt
+Frontend Developer
+Fullstack Web Developer
+```
+
+---
+
+## Trạng thái dự án
+
+Dự án đang trong quá trình phát triển và hoàn thiện thêm các chức năng như:
+
+- Tối ưu giao diện admin
+- Hoàn thiện quản lý đơn hàng
+- Cải thiện trải nghiệm thanh toán
+- Tối ưu responsive
+- Cải thiện SEO
+- Tối ưu tốc độ tải ảnh
