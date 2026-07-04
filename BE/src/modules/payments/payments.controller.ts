@@ -10,7 +10,6 @@ import {
 import { PaymentsService } from './payments.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
-import { GetOverviewDto } from './dto/get-overview.dto';
 
 @Controller('payments')
 export class PaymentsController {

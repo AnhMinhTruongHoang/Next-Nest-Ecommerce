@@ -52,6 +52,22 @@ export class OrdersController {
     return this.ordersService.confirmVNPayPayment(query);
   }
 
+  @Get('top-selling-products')
+  @ResponseMessage('Fetch top selling products')
+  getTopSellingProducts(
+    @Query('timeFrame') timeFrame: 'monthly' | 'yearly' = 'monthly',
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.ordersService.getTopSellingProducts({
+      timeFrame,
+      from,
+      to,
+      limit: Number(limit) || 7,
+    });
+  }
+
   @Get(':id')
   @ResponseMessage('Fetch order detail')
   findOne(@Param('id') id: string) {

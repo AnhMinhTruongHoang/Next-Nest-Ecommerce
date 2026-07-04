@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import { Connection, Model, Types } from 'mongoose';
+import { Connection, Model, PipelineStage, Types } from 'mongoose';
 import { Order, OrderDocument } from './schema/order.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -297,6 +297,169 @@ export class OrdersService {
     } finally {
       session.endSession();
     }
+  }
+  ///
+
+  async getTopSellingProducts(params: {
+    timeFrame?: 'monthly' | 'yearly';
+    from?: string;
+    to?: string;
+    limit?: number;
+  }) {
+    const timeFrame = params.timeFrame === 'yearly' ? 'yearly' : 'monthly';
+    const limit = Math.max(1, Math.min(Number(params.limit) || 7, 20));
+
+    const match: Record<string, any> = {
+      isDeleted: { $ne: true },
+      $or: [
+        { status: { $in: ['PAID', 'SHIPPED', 'COMPLETED'] } },
+        { paymentStatus: 'PAID' },
+        { inventoryAdjusted: true },
+      ],
+    };
+
+    if (params.from || params.to) {
+      match.createdAt = {};
+
+      if (params.from) {
+        const fromDate = new Date(params.from);
+        if (!Number.isNaN(fromDate.getTime())) {
+          match.createdAt.$gte = fromDate;
+        }
+      }
+
+      if (params.to) {
+        const toDate = new Date(params.to);
+        if (!Number.isNaN(toDate.getTime())) {
+          match.createdAt.$lte = toDate;
+        }
+      }
+
+      if (Object.keys(match.createdAt).length === 0) {
+        delete match.createdAt;
+      }
+    }
+
+    const chartFormat = timeFrame === 'yearly' ? '%Y' : '%m';
+
+    const chartPipeline: PipelineStage[] = [
+      { $match: match },
+      { $unwind: '$items' },
+      {
+        $group: {
+          _id: {
+            period: {
+              $dateToString: {
+                format: chartFormat,
+                date: '$createdAt',
+              },
+            },
+          },
+          sold: { $sum: '$items.quantity' },
+        },
+      },
+      { $sort: { '_id.period': 1 } },
+    ];
+
+    const rankingPipeline: PipelineStage[] = [
+      { $match: match },
+      { $unwind: '$items' },
+      {
+        $group: {
+          _id: '$items.productId',
+          sold: { $sum: '$items.quantity' },
+          revenue: {
+            $sum: {
+              $multiply: ['$items.quantity', '$items.price'],
+            },
+          },
+          orderIds: { $addToSet: '$_id' },
+        },
+      },
+      {
+        $lookup: {
+          from: 'products',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'product',
+        },
+      },
+      { $unwind: '$product' },
+      {
+        $match: {
+          'product.isDeleted': { $ne: true },
+        },
+      },
+      {
+        $project: {
+          _id: { $toString: '$_id' },
+          name: '$product.name',
+          thumbnail: '$product.thumbnail',
+          brand: '$product.brand',
+          price: '$product.price',
+          sold: 1,
+          revenue: 1,
+          totalOrders: { $size: '$orderIds' },
+        },
+      },
+      { $sort: { sold: -1, revenue: -1 } },
+      { $limit: limit },
+    ];
+
+    const [chartRows, rankingRows] = await Promise.all([
+      this.orderModel.aggregate(chartPipeline),
+      this.orderModel.aggregate(rankingPipeline),
+    ]);
+
+    let chart: { label: string; sold: number }[] = [];
+
+    if (timeFrame === 'yearly') {
+      const soldByYear = new Map<string, number>();
+
+      for (const row of chartRows) {
+        soldByYear.set(String(row._id.period), Number(row.sold) || 0);
+      }
+
+      const yearsFromData = Array.from(soldByYear.keys()).sort();
+
+      const years =
+        yearsFromData.length > 0
+          ? yearsFromData
+          : Array.from({ length: 5 }, (_, index) =>
+              String(new Date().getFullYear() - 4 + index),
+            );
+
+      chart = years.map((year) => ({
+        label: year,
+        sold: soldByYear.get(year) ?? 0,
+      }));
+    } else {
+      const soldByMonth = new Map<number, number>();
+
+      for (const row of chartRows) {
+        const month = Number(row._id.period);
+        if (!Number.isFinite(month) || month < 1 || month > 12) continue;
+
+        soldByMonth.set(
+          month,
+          (soldByMonth.get(month) ?? 0) + Number(row.sold),
+        );
+      }
+
+      chart = Array.from({ length: 12 }, (_, index) => {
+        const month = index + 1;
+
+        return {
+          label: `Th${month}`,
+          sold: soldByMonth.get(month) ?? 0,
+        };
+      });
+    }
+
+    return {
+      chart,
+      ranking: rankingRows,
+    };
   }
 
   // SOFT DELETE
