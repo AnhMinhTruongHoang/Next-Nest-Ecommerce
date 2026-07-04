@@ -2,6 +2,7 @@
 
 import OVCard from "../dashboard_temp/overview/ov.card";
 import { PaymentsOverview } from "../dashboard_temp/payments-overview/payment.OverView";
+import { TopSellingProductsOverview } from "../dashboard_temp/top-selling-products/top-selling-products.overview";
 
 interface AdminCardProps {
   searchParams?: any;
@@ -11,11 +12,9 @@ export default function AdminCard({ searchParams }: AdminCardProps) {
   return (
     <div className="gz-dashboard-wrapper">
       <div className="gz-dashboard-heading">
-        <div>
-          <h1 style={{ textAlign: "center" }}>Dashboard Overview</h1>
-          <p style={{ textAlign: "center" }}>
-            Theo dõi nhanh người dùng, đơn hàng, sản phẩm và doanh thu.
-          </p>
+        <div className="gz-dashboard-heading-inner">
+          <h1>Dashboard Overview</h1>
+          <p>Theo dõi nhanh người dùng, đơn hàng, sản phẩm và doanh thu.</p>
         </div>
       </div>
 
@@ -27,30 +26,37 @@ export default function AdminCard({ searchParams }: AdminCardProps) {
         <PaymentsOverview timeFrame="monthly" />
       </section>
 
+      <section className="gz-dashboard-section">
+        <TopSellingProductsOverview />
+      </section>
+
       <style jsx>{`
         .gz-dashboard-wrapper {
           width: 100%;
           display: grid;
           grid-template-columns: 1fr;
           gap: 16px;
+          text-align: center;
         }
 
-        .gz-dashboard-heading {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 16px;
-          padding: 18px 20px;
-          border-radius: 16px;
-          background: #181a1b;
-          border: 1px solid #2a2d2e;
-          box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+        .gz-dashboard-heading-inner h1 {
+          margin: 0;
+          color: #ffffff;
+          font-size: 28px;
+          font-weight: 900;
         }
 
+        .gz-dashboard-heading-inner p {
+          margin: 8px 0 0;
+          color: #8b949e;
+          font-size: 14px;
+        }
         .gz-dashboard-heading h1 {
           margin: 0;
           color: #ffffff;
           font-size: 28px;
+          text-align: center;
+
           font-weight: 900;
         }
 

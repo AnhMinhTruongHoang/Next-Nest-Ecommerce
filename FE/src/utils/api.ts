@@ -190,3 +190,95 @@ export async function updatePaymentOrderAPI(
 
   return res.json();
 }
+/// overview orders
+
+const getAuthHeaders = () => {
+  if (typeof window === "undefined") {
+    return { "Content-Type": "application/json" };
+  }
+
+  const token = localStorage.getItem("access_token") || "";
+  const pureToken = token.startsWith("Bearer ") ? token.slice(7) : token;
+
+  return {
+    "Content-Type": "application/json",
+    ...(pureToken ? { Authorization: `Bearer ${pureToken}` } : {}),
+  };
+};
+
+const toEndOfDayISOString = (date: Date) => {
+  const d = new Date(date);
+  d.setHours(23, 59, 59, 999);
+  return d.toISOString();
+};
+
+const buildRangeParams = (range: TopSellingRange) => {
+  const now = new Date();
+
+  if (range === "month") {
+    const from = new Date(now.getFullYear(), now.getMonth(), 1);
+    const to = now;
+
+    return {
+      timeFrame: "monthly",
+      from: from.toISOString(),
+      to: toEndOfDayISOString(to),
+    };
+  }
+
+  if (range === "year") {
+    const from = new Date(now.getFullYear(), 0, 1);
+    const to = new Date(now.getFullYear(), 11, 31);
+
+    return {
+      timeFrame: "monthly",
+      from: from.toISOString(),
+      to: toEndOfDayISOString(to),
+    };
+  }
+
+  return {
+    timeFrame: "monthly",
+  };
+};
+
+export async function getTopSellingProductsData(params?: {
+  range?: TopSellingRange;
+  limit?: number;
+  signal?: AbortSignal;
+}): Promise<TopSellingProductsResp> {
+  const base = process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/+$/, "");
+
+  if (!base) {
+    throw new Error("Missing NEXT_PUBLIC_BACKEND_URL");
+  }
+
+  const range = params?.range || "year";
+  const limit = params?.limit || 7;
+  const rangeParams = buildRangeParams(range);
+
+  const query = new URLSearchParams();
+  query.set("timeFrame", rangeParams.timeFrame);
+  query.set("limit", String(limit));
+
+  if (rangeParams.from) query.set("from", rangeParams.from);
+  if (rangeParams.to) query.set("to", rangeParams.to);
+
+  const res = await fetch(`${base}/orders/top-selling-products?${query}`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+    signal: params?.signal,
+  });
+
+  const json = await res.json();
+  const payload = json?.data ?? json;
+
+  if (!res.ok) {
+    throw new Error(payload?.message || "Cannot fetch top selling products");
+  }
+
+  return {
+    chart: Array.isArray(payload?.chart) ? payload.chart : [],
+    ranking: Array.isArray(payload?.ranking) ? payload.ranking : [],
+  };
+}

@@ -153,4 +153,27 @@ declare global {
     message?: string;
     error?: string;
   }
+
+  type TopSellingRange = "month" | "year" | "all";
+
+  type TopSellingChartItem = {
+    label: string;
+    sold: number;
+  };
+
+  type TopSellingProductItem = {
+    _id: string;
+    name: string;
+    thumbnail?: string;
+    brand?: string;
+    price?: number;
+    sold: number;
+    revenue?: number;
+    totalOrders?: number;
+  };
+
+  type TopSellingProductsResp = {
+    chart: TopSellingChartItem[];
+    ranking: TopSellingProductItem[];
+  };
 }

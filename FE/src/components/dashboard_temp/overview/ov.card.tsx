@@ -46,6 +46,26 @@ const getTotal = (res: any, listLength: number) => {
   return Number(res?.data?.meta?.total ?? res?.meta?.total ?? listLength ?? 0);
 };
 
+// helper: convert hex to rgba
+const hexToRgba = (hex: string, alpha = 1) => {
+  try {
+    let h = hex.replace("#", "");
+    if (h.length === 3) {
+      h = h
+        .split("")
+        .map((c) => c + c)
+        .join("");
+    }
+    const bigint = parseInt(h, 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  } catch {
+    return `rgba(0,0,0,${alpha})`;
+  }
+};
+
 const OVCard = () => {
   const [dataDashboard, setDataDashboard] = useState<DashboardStats>({
     countOrder: 0,
@@ -220,15 +240,24 @@ const OVCard = () => {
                 size={isMobile ? "small" : "default"}
                 className="gz-stat-card"
               >
-                <div className="gz-stat-card-inner">
+                <div
+                  className="gz-stat-card-inner"
+                  style={{
+                    // set css variable for accent color so CSS can use it in hover/shadow
+                    // also compute a subtle shadow inline for better cross-browser look
+                    boxShadow: `0 10px 28px ${hexToRgba(item.color, 0.06)}`,
+                  }}
+                >
                   <div
-                    className="gz-stat-icon"
+                    className="gz-stat-badge"
                     style={{
-                      color: item.color,
-                      backgroundColor: `${item.color}18`,
+                      background: item.color,
+                      boxShadow: `0 6px 18px ${hexToRgba(item.color, 0.12)}`,
                     }}
-                  >
-                    {item.icon}
+                    aria-hidden
+                  />
+                  <div className="gz-stat-icon-wrapper" aria-hidden>
+                    <span className="gz-stat-icon-inner">{item.icon}</span>
                   </div>
 
                   <Statistic
@@ -259,50 +288,108 @@ const OVCard = () => {
         .gz-stat-card {
           height: 100%;
           border-radius: 16px !important;
-          background: #181a1b !important;
+          background: linear-gradient(
+              180deg,
+              rgba(255, 255, 255, 0.04),
+              rgba(255, 255, 255, 0.012)
+            ),
+            #181a1b !important;
           border: 1px solid #2a2d2e !important;
           box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22) !important;
           transition: transform 0.25s ease, border-color 0.25s ease,
             box-shadow 0.25s ease;
+          overflow: visible;
         }
 
         .gz-stat-card:hover {
           transform: translateY(-4px);
-          border-color: #00ffe0 !important;
-          box-shadow: 0 12px 28px rgba(0, 255, 224, 0.12) !important;
+          border-color: var(--accent, #00ffe0) !important;
         }
 
         .gz-stat-card .ant-card-body {
+          height: 100%;
           padding: 18px !important;
         }
 
         .gz-stat-card-inner {
+          min-height: 92px;
           display: flex;
+          flex-direction: column;
           align-items: center;
-          gap: 14px;
-          min-height: 82px;
+          justify-content: center;
+          gap: 8px;
+          text-align: center;
+          position: relative;
+          padding: 18px;
+          box-sizing: border-box;
+          background: transparent;
+        }
+
+        /* small colored badge (top-left) */
+        .gz-stat-badge {
+          position: absolute;
+          top: 12px;
+          left: 12px;
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          transform: translateZ(0);
+        }
+
+        /* icon wrapper (optional) */
+        .gz-stat-icon-wrapper {
+          position: absolute;
+          top: 8px;
+          right: 12px;
+          width: 36px;
+          height: 36px;
+          display: grid;
+          place-items: center;
+          border-radius: 10px;
+        }
+
+        .gz-stat-icon-inner :global(svg) {
+          color: rgba(255, 255, 255, 0.9);
+          font-size: 18px;
         }
 
         .gz-stat-icon {
-          width: 46px;
-          height: 46px;
-          min-width: 46px;
-          border-radius: 14px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 22px;
+          display: none !important;
+        }
+
+        .gz-stat-card .ant-statistic {
+          width: 100%;
+          text-align: center !important;
         }
 
         .gz-stat-card .ant-statistic-title {
-          color: #b8b8b8 !important;
-          font-weight: 700 !important;
+          margin-bottom: 8px !important;
+          color: #b8c0cc !important;
           font-size: 13px !important;
-          margin-bottom: 7px !important;
+          font-weight: 800 !important;
+          line-height: 1.35 !important;
+          text-align: center !important;
         }
 
         .gz-stat-card .ant-statistic-content {
+          width: 100%;
+          color: #ffffff !important;
           line-height: 1.2 !important;
+          text-align: center !important;
+        }
+
+        .gz-stat-card .ant-statistic-content-value {
+          color: #ffffff !important;
+          font-size: 26px !important;
+          font-weight: 900 !important;
+          line-height: 1.2 !important;
+          text-align: center !important;
+        }
+
+        .gz-stat-card .ant-statistic-content-prefix,
+        .gz-stat-card .ant-statistic-content-suffix {
+          color: var(--accent, #00ffe0) !important;
+          font-weight: 900 !important;
         }
 
         .gz-dashboard-stats .ant-spin-text {
@@ -311,6 +398,11 @@ const OVCard = () => {
 
         .gz-dashboard-stats .ant-spin-dot-item {
           background-color: #00ffe0 !important;
+        }
+
+        /* Hover accent: apply subtle glow using inline badge color */
+        .gz-stat-card:hover .gz-stat-card-inner {
+          box-shadow: 0 18px 44px rgba(0, 0, 0, 0.32);
         }
 
         @media (max-width: 768px) {
@@ -323,16 +415,60 @@ const OVCard = () => {
           }
 
           .gz-stat-card-inner {
-            min-height: 72px;
-            gap: 12px;
+            min-height: 82px;
+            gap: 7px;
+            padding: 14px;
           }
 
-          .gz-stat-icon {
-            width: 40px;
-            height: 40px;
-            min-width: 40px;
-            font-size: 19px;
-            border-radius: 12px;
+          .gz-stat-card .ant-statistic-title {
+            font-size: 12px !important;
+          }
+
+          .gz-stat-card .ant-statistic-content-value {
+            font-size: 22px !important;
+          }
+
+          .gz-stat-icon-wrapper {
+            top: 10px;
+            right: 10px;
+            width: 32px;
+            height: 32px;
+          }
+
+          .gz-stat-badge {
+            top: 10px;
+            left: 10px;
+            width: 11px;
+            height: 11px;
+          }
+        }
+
+        @media (max-width: 420px) {
+          .gz-stat-card-inner {
+            min-height: 78px;
+            padding: 12px;
+          }
+
+          .gz-stat-card .ant-statistic-content-value {
+            font-size: 21px !important;
+          }
+
+          .gz-stat-icon-wrapper {
+            display: none;
+          }
+
+          .gz-stat-card-inner {
+            min-height: 92px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-align: center;
+            position: relative;
+            padding: 18px;
+            box-sizing: border-box;
+            background: transparent;
           }
         }
       `}</style>

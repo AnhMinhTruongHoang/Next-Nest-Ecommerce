@@ -1,21 +1,24 @@
-const BACKEND_URL = "https://next-nest-ecommerce.onrender.com";
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_IMAGE_URL ||
+  process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/api\/v\d+\/?$/, "") ||
+  "https://next-nest-ecommerce.onrender.com";
 
 export const getImageUrl = (url?: string) => {
   if (!url) return "";
 
-  // Nếu đã là full URL
-  if (url.startsWith("http")) return url;
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
 
-  // Nếu BE đã trả dạng /images/...
+  const cleanBackendUrl = BACKEND_URL.replace(/\/+$/, "");
+
   if (url.startsWith("/images/")) {
-    return `${BACKEND_URL}${url}`;
+    return `${cleanBackendUrl}${url}`;
   }
 
-  // Nếu BE trả dạng /thumbnails/... hoặc /slider/...
   if (url.startsWith("/")) {
-    return `${BACKEND_URL}/images${url}`;
+    return `${cleanBackendUrl}/images${url}`;
   }
 
-  // Nếu BE trả dạng thumbnails/xxx.png hoặc slider/xxx.png
-  return `${BACKEND_URL}/images/${url}`;
+  return `${cleanBackendUrl}/images/${url}`;
 };

@@ -319,7 +319,16 @@ const UsersTable = () => {
           gap: 16px;
           margin-bottom: 18px;
           padding: 16px 18px;
-          background: #181a1b;
+          background: radial-gradient(
+              circle at top right,
+              rgba(0, 255, 224, 0.13),
+              transparent 34%
+            ),
+            radial-gradient(
+              circle at bottom left,
+              rgba(255, 77, 0, 0.11),
+              transparent 36%
+            );
           border: 1px solid #2a2d2e;
           border-radius: 16px;
           box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);

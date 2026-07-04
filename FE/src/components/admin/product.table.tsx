@@ -74,15 +74,17 @@ const ProductsTable = () => {
         return;
       }
       setListProducts(d.data.result);
-
       setPagination({
         current: d.data.meta.current,
         pageSize: d.data.meta.pageSize,
         total: pageSize === 999999 ? d.data.result.length : d.data.meta.total,
         showSizeChanger: true,
         pageSizeOptions: ["10", "20", "50", "100"],
-        showTotal: (total: number, range: [number, number]) =>
-          `${range[0]}-${range[1]} / ${total} sản phẩm`,
+        showTotal: (total: number, range: [number, number]) => (
+          <span style={{ color: "grey", fontWeight: 700 }}>
+            {`${range[0]}-${range[1]} / ${total}`}
+          </span>
+        ),
         onChange: handleOnChange,
         onShowSizeChange: handleOnChange,
       });
@@ -383,7 +385,16 @@ const ProductsTable = () => {
           gap: 16px;
           margin-bottom: 18px;
           padding: 16px 18px;
-          background: #181a1b;
+          background: radial-gradient(
+              circle at top right,
+              rgba(0, 255, 224, 0.13),
+              transparent 34%
+            ),
+            radial-gradient(
+              circle at bottom left,
+              rgba(255, 77, 0, 0.11),
+              transparent 36%
+            );
           border: 1px solid #2a2d2e;
           border-radius: 16px;
           box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);

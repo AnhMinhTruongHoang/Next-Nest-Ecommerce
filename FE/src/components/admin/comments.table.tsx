@@ -369,6 +369,16 @@ const ReviewsTable: React.FC = () => {
           border: 1px solid #2a2d2e;
           border-radius: 14px;
           padding: 14px 16px;
+          background: radial-gradient(
+              circle at top right,
+              rgba(0, 255, 224, 0.13),
+              transparent 34%
+            ),
+            radial-gradient(
+              circle at bottom left,
+              rgba(255, 77, 0, 0.11),
+              transparent 36%
+            );
         }
 
         .gz-review-admin-header h2 {
