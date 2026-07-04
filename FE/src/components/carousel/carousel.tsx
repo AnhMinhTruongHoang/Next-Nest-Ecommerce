@@ -14,21 +14,21 @@ type Slide = {
 const slides: Slide[] = [
   {
     id: 1,
-    title: "",
-    image: "/images/banners/banner6.png",
-    link: "/product-detail/692190c152b600997c5407a9",
+    title: "Khuyến mãi Razer",
+    image: "/images/banners/razerBanner.jpg",
+    link: "/exclusivePromo",
   },
   {
     id: 2,
-    title: "",
-    image: "/images/banners/EdraBanner.jpg",
-    link: "/product-detail/692190c152b600997c5407ae",
+    title: "G2 Esports",
+    image: "/images/banners/monesyE.jpg",
+    link: "/emagazine/g2",
   },
   {
     id: 3,
-    title: "",
-    image: "/images/banners/banner5.jpg",
-    link: "/product-detail/692190c152b600997c5407a3",
+    title: "Falcons Esports",
+    image: "/images/banners/niko.png",
+    link: "/emagazine/falcon",
   },
 ];
 
@@ -53,18 +53,16 @@ const MainCarousel: React.FC = () => {
               <div className="gz-main-carousel-slide">
                 <Image
                   src={slide.image}
-                  alt={slide.title || "GamerZone banner"}
+                  alt={slide.title || "Banner GamerZone"}
                   fill
                   priority={slide.id === 1}
+                  loading={slide.id === 1 ? "eager" : "lazy"}
                   sizes="100vw"
+                  quality={82}
                   className="gz-main-carousel-image"
                 />
 
                 <div className="gz-main-carousel-overlay" />
-
-                {slide.title && (
-                  <div className="gz-main-carousel-title">{slide.title}</div>
-                )}
               </div>
             </Link>
           </div>
@@ -77,7 +75,6 @@ const MainCarousel: React.FC = () => {
           position: relative;
           overflow: hidden;
           background: #0d0d0d;
-          border-radius: 0;
         }
 
         .gz-main-carousel-promo {
@@ -91,7 +88,7 @@ const MainCarousel: React.FC = () => {
           background: linear-gradient(135deg, #ff0000, #ff3b00);
           color: #ffffff;
           font-size: 15px;
-          font-weight: 800;
+          font-weight: 850;
           line-height: 1.25;
           text-align: center;
           text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
@@ -99,12 +96,13 @@ const MainCarousel: React.FC = () => {
 
         .gz-main-carousel-promo strong {
           color: #ffffff;
-          font-weight: 900;
+          font-weight: 950;
         }
 
         .gz-main-carousel {
           width: 100%;
           background: #000000;
+          overflow: hidden;
         }
 
         .gz-main-carousel-link {
@@ -114,9 +112,11 @@ const MainCarousel: React.FC = () => {
         }
 
         .gz-main-carousel-slide {
-          width: 100%;
-          height: clamp(360px, 46vw, 640px);
           position: relative;
+          width: 100%;
+          aspect-ratio: 16 / 9;
+          max-height: 720px;
+          min-height: 180px;
           overflow: hidden;
           background: #000000;
         }
@@ -124,7 +124,12 @@ const MainCarousel: React.FC = () => {
         .gz-main-carousel-image {
           object-fit: cover !important;
           object-position: center center !important;
-          transform: scale(1.002);
+          transform: scale(1.001);
+          transition: transform 4s ease;
+        }
+
+        .gz-main-carousel .slick-active .gz-main-carousel-image {
+          transform: scale(1.025);
         }
 
         .gz-main-carousel-overlay {
@@ -133,27 +138,17 @@ const MainCarousel: React.FC = () => {
           z-index: 1;
           pointer-events: none;
           background: linear-gradient(
-            180deg,
-            rgba(0, 0, 0, 0.14),
-            rgba(0, 0, 0, 0.02) 45%,
-            rgba(0, 0, 0, 0.26)
-          );
-        }
-
-        .gz-main-carousel-title {
-          position: absolute;
-          inset: 0;
-          z-index: 2;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 24px;
-          color: #ffffff;
-          font-size: clamp(24px, 4vw, 48px);
-          font-weight: 900;
-          line-height: 1.15;
-          text-align: center;
-          text-shadow: 0 4px 16px rgba(0, 0, 0, 0.75);
+              90deg,
+              rgba(0, 0, 0, 0.22),
+              rgba(0, 0, 0, 0.03) 42%,
+              rgba(0, 0, 0, 0.18)
+            ),
+            linear-gradient(
+              180deg,
+              rgba(0, 0, 0, 0.08),
+              rgba(0, 0, 0, 0.02) 48%,
+              rgba(0, 0, 0, 0.22)
+            );
         }
 
         .gz-main-carousel .slick-slider,
@@ -161,39 +156,49 @@ const MainCarousel: React.FC = () => {
         .gz-main-carousel .slick-track,
         .gz-main-carousel .slick-slide,
         .gz-main-carousel .slick-slide > div {
-          height: 100%;
+          height: auto !important;
         }
 
-        /* ===== Carousel arrows fixed ===== */
+        .gz-main-carousel .slick-slide {
+          line-height: 0;
+        }
+
+        .gz-main-carousel .slick-slide > div {
+          display: block;
+        }
+
+        /* ===== Mũi tên carousel ===== */
         .gz-main-carousel .slick-prev,
         .gz-main-carousel .slick-next {
           z-index: 8 !important;
-          width: 42px !important;
-          height: 42px !important;
+          width: 44px !important;
+          height: 44px !important;
           display: flex !important;
           align-items: center !important;
           justify-content: center !important;
           border-radius: 999px !important;
-          background: rgba(0, 128, 112, 0.82) !important;
-          backdrop-filter: blur(8px);
-          box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28) !important;
+          background: rgba(0, 0, 0, 0.42) !important;
+          border: 1px solid rgba(0, 255, 224, 0.3) !important;
+          backdrop-filter: blur(10px);
+          box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35) !important;
           transform: translateY(-50%) !important;
-          transition: background 0.2s ease, box-shadow 0.2s ease,
-            opacity 0.2s ease !important;
+          transition: background 0.2s ease, border-color 0.2s ease,
+            box-shadow 0.2s ease, opacity 0.2s ease !important;
         }
 
         .gz-main-carousel .slick-prev {
-          left: 16px !important;
+          left: 18px !important;
         }
 
         .gz-main-carousel .slick-next {
-          right: 16px !important;
+          right: 18px !important;
         }
 
         .gz-main-carousel .slick-prev:hover,
         .gz-main-carousel .slick-next:hover {
-          background: rgba(0, 255, 224, 0.75) !important;
-          box-shadow: 0 10px 26px rgba(0, 255, 224, 0.18) !important;
+          background: rgba(0, 255, 224, 0.24) !important;
+          border-color: rgba(0, 255, 224, 0.72) !important;
+          box-shadow: 0 12px 30px rgba(0, 255, 224, 0.16) !important;
           transform: translateY(-50%) !important;
         }
 
@@ -204,24 +209,23 @@ const MainCarousel: React.FC = () => {
 
         .gz-main-carousel .slick-prev::after,
         .gz-main-carousel .slick-next::after {
+          content: "";
           position: static !important;
-          width: 10px !important;
-          height: 10px !important;
+          width: 11px !important;
+          height: 11px !important;
           margin: 0 !important;
-          border-color: #ffffff !important;
+          border: solid #ffffff !important;
+          border-width: 2px 2px 0 0 !important;
           opacity: 1 !important;
-          transform: rotate(45deg) !important;
         }
 
         .gz-main-carousel .slick-prev::after {
-          border-top: 0 !important;
-          border-right: 0 !important;
+          transform: rotate(-135deg) !important;
           margin-left: 4px !important;
         }
 
         .gz-main-carousel .slick-next::after {
-          border-bottom: 0 !important;
-          border-left: 0 !important;
+          transform: rotate(45deg) !important;
           margin-right: 4px !important;
         }
 
@@ -229,6 +233,7 @@ const MainCarousel: React.FC = () => {
         .gz-main-carousel .slick-dots {
           bottom: 18px !important;
           z-index: 6;
+          margin: 0 !important;
         }
 
         .gz-main-carousel .slick-dots li {
@@ -240,35 +245,40 @@ const MainCarousel: React.FC = () => {
         .gz-main-carousel .slick-dots li button {
           width: 18px !important;
           height: 4px !important;
+          padding: 0 !important;
           border-radius: 999px !important;
           background: rgba(255, 255, 255, 0.55) !important;
           opacity: 1 !important;
         }
 
+        .gz-main-carousel .slick-dots li button::after {
+          display: none !important;
+        }
+
         .gz-main-carousel .slick-dots li.slick-active {
-          width: 32px !important;
+          width: 34px !important;
         }
 
         .gz-main-carousel .slick-dots li.slick-active button {
-          width: 32px !important;
+          width: 34px !important;
           background: #00ffe0 !important;
         }
 
         @media (max-width: 991px) {
-          .gz-main-carousel-slide {
-            height: clamp(320px, 58vw, 520px);
-          }
-
           .gz-main-carousel-promo {
             min-height: 38px;
             padding: 9px 12px;
             font-size: 13px;
           }
 
+          .gz-main-carousel-slide {
+            min-height: 160px;
+          }
+
           .gz-main-carousel .slick-prev,
           .gz-main-carousel .slick-next {
-            width: 36px !important;
-            height: 36px !important;
+            width: 38px !important;
+            height: 38px !important;
           }
 
           .gz-main-carousel .slick-prev {
@@ -294,7 +304,7 @@ const MainCarousel: React.FC = () => {
           }
 
           .gz-main-carousel-slide {
-            height: 430px;
+            min-height: 150px;
           }
 
           .gz-main-carousel-image {
@@ -304,9 +314,9 @@ const MainCarousel: React.FC = () => {
 
           .gz-main-carousel .slick-prev,
           .gz-main-carousel .slick-next {
-            width: 34px !important;
-            height: 34px !important;
-            background: rgba(0, 128, 112, 0.78) !important;
+            width: 32px !important;
+            height: 32px !important;
+            background: rgba(0, 0, 0, 0.38) !important;
           }
 
           .gz-main-carousel .slick-prev {
@@ -324,7 +334,7 @@ const MainCarousel: React.FC = () => {
           }
 
           .gz-main-carousel .slick-dots {
-            bottom: 12px !important;
+            bottom: 10px !important;
           }
 
           .gz-main-carousel .slick-dots li {
@@ -345,38 +355,38 @@ const MainCarousel: React.FC = () => {
         }
 
         @media (max-width: 420px) {
-          .gz-main-carousel-slide {
-            height: 400px;
-          }
-
           .gz-main-carousel-promo {
             font-size: 11px;
           }
 
-          .gz-main-carousel .slick-prev,
-          .gz-main-carousel .slick-next {
-            width: 32px !important;
-            height: 32px !important;
-          }
-
-          .gz-main-carousel .slick-prev {
-            left: 7px !important;
-          }
-
-          .gz-main-carousel .slick-next {
-            right: 7px !important;
-          }
-        }
-
-        @media (max-width: 360px) {
           .gz-main-carousel-slide {
-            height: 370px;
+            min-height: 135px;
           }
 
           .gz-main-carousel .slick-prev,
           .gz-main-carousel .slick-next {
             width: 30px !important;
             height: 30px !important;
+          }
+
+          .gz-main-carousel .slick-prev {
+            left: 6px !important;
+          }
+
+          .gz-main-carousel .slick-next {
+            right: 6px !important;
+          }
+        }
+
+        @media (max-width: 360px) {
+          .gz-main-carousel-slide {
+            min-height: 125px;
+          }
+
+          .gz-main-carousel .slick-prev,
+          .gz-main-carousel .slick-next {
+            width: 28px !important;
+            height: 28px !important;
           }
         }
       `}</style>

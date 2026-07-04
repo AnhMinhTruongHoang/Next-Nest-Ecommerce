@@ -5,8 +5,6 @@ import { Skeleton } from "antd";
 
 import Cards from "@/components/cards/cards";
 import MainCarousel from "@/components/carousel/carousel";
-import ExclusiveBanner1 from "@/components/exclusive1/exclusive1.banner";
-import HightLight from "@/components/hightLight/hightLight";
 import ProductsGrid from "@/components/productGrid/products.Grid";
 
 export default function UserPage() {
@@ -27,19 +25,11 @@ export default function UserPage() {
       <Skeleton active loading={loading} paragraph={false}>
         <MainCarousel />
       </Skeleton>
-  
+
       <Skeleton active loading={loading}>
         <Cards />
       </Skeleton>
-  
-      <Skeleton active loading={loading}>
-        <HightLight />
-      </Skeleton>
-  
-      <Skeleton active loading={loading} paragraph={false}>
-        <ExclusiveBanner1 />
-      </Skeleton>
-  
+
       <Skeleton active loading={loading}>
         <ProductsGrid />
       </Skeleton>
