@@ -181,16 +181,179 @@ export class ProductsService {
     return { ok: true };
   }
 
+  private removeVietnameseAccent(text: string) {
+    return String(text || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'D')
+      .toLowerCase()
+      .trim();
+  }
+
+  private escapeRegex(text: string) {
+    return String(text || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
   async suggest(keyword: string) {
-    const q = this.stripVN(keyword);
-    if (!q) return [];
+    const rawKeyword = String(keyword || '').trim();
 
-    const docs = await this.productModel
-      .find({ isDeleted: false })
-      .select('_id name thumbnail price')
-      .limit(50)
-      .lean();
+    if (!rawKeyword) return [];
 
-    return docs.filter((p) => this.stripVN(p.name).includes(q)).slice(0, 8);
+    const normalizedKeyword = this.removeVietnameseAccent(rawKeyword);
+
+    const aliasMap: Record<string, string[]> = {
+      chuot: ['chuột', 'chuot', 'mouse'],
+      mouse: ['chuột', 'chuot', 'mouse'],
+
+      'ban phim': ['bàn phím', 'ban phim', 'keyboard'],
+      banphim: ['bàn phím', 'ban phim', 'keyboard'],
+      keyboard: ['bàn phím', 'ban phim', 'keyboard'],
+
+      'tai nghe': ['tai nghe', 'headset', 'headphones'],
+      tainghe: ['tai nghe', 'headset', 'headphones'],
+      headset: ['tai nghe', 'headset', 'headphones'],
+
+      'man hinh': ['màn hình', 'man hinh', 'monitor'],
+      manhinh: ['màn hình', 'man hinh', 'monitor'],
+      monitor: ['màn hình', 'man hinh', 'monitor'],
+
+      ghe: ['ghế', 'ghe', 'chairs', 'chair'],
+      chair: ['ghế', 'ghe', 'chairs', 'chair'],
+      chairs: ['ghế', 'ghe', 'chairs', 'chair'],
+
+      'phu kien': ['phụ kiện', 'phu kien', 'accessories', 'accessory'],
+      phukien: ['phụ kiện', 'phu kien', 'accessories', 'accessory'],
+      accessories: ['phụ kiện', 'phu kien', 'accessories', 'accessory'],
+    };
+
+    const keywordParts = normalizedKeyword.split(/\s+/).filter(Boolean);
+
+    const searchTerms = new Set<string>([
+      rawKeyword,
+      normalizedKeyword,
+      ...keywordParts,
+    ]);
+
+    for (const [key, values] of Object.entries(aliasMap)) {
+      const normalizedKey = this.removeVietnameseAccent(key);
+
+      if (
+        normalizedKeyword === normalizedKey ||
+        normalizedKeyword.includes(normalizedKey) ||
+        keywordParts.includes(normalizedKey)
+      ) {
+        values.forEach((value) => searchTerms.add(value));
+      }
+    }
+
+    const regexList = Array.from(searchTerms)
+      .filter(Boolean)
+      .map((term) => new RegExp(this.escapeRegex(term), 'i'));
+
+    return this.productModel
+      .aggregate([
+        {
+          $match: {
+            isDeleted: { $ne: true },
+          },
+        },
+        {
+          $lookup: {
+            from: 'categories',
+            localField: 'category',
+            foreignField: '_id',
+            as: 'categoryData',
+          },
+        },
+        {
+          $unwind: {
+            path: '$categoryData',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $match: {
+            $or: regexList.flatMap((regex) => [
+              { name: regex },
+              { brand: regex },
+              { description: regex },
+              { 'categoryData.name': regex },
+            ]),
+          },
+        },
+        {
+          $addFields: {
+            searchScore: {
+              $switch: {
+                branches: [
+                  {
+                    case: {
+                      $regexMatch: {
+                        input: '$name',
+                        regex: new RegExp(
+                          `^${this.escapeRegex(rawKeyword)}`,
+                          'i',
+                        ),
+                      },
+                    },
+                    then: 100,
+                  },
+                  {
+                    case: {
+                      $regexMatch: {
+                        input: '$name',
+                        regex: new RegExp(this.escapeRegex(rawKeyword), 'i'),
+                      },
+                    },
+                    then: 80,
+                  },
+                  {
+                    case: {
+                      $regexMatch: {
+                        input: '$brand',
+                        regex: new RegExp(this.escapeRegex(rawKeyword), 'i'),
+                      },
+                    },
+                    then: 60,
+                  },
+                  {
+                    case: {
+                      $regexMatch: {
+                        input: '$categoryData.name',
+                        regex: new RegExp(this.escapeRegex(rawKeyword), 'i'),
+                      },
+                    },
+                    then: 50,
+                  },
+                ],
+                default: 10,
+              },
+            },
+          },
+        },
+        {
+          $sort: {
+            searchScore: -1,
+            sold: -1,
+            createdAt: -1,
+          },
+        },
+        {
+          $limit: 8,
+        },
+        {
+          $project: {
+            _id: 1,
+            name: 1,
+            brand: 1,
+            price: 1,
+            thumbnail: 1,
+            sold: 1,
+            category: '$categoryData.name',
+          },
+        },
+      ])
+      .exec();
   }
 }
