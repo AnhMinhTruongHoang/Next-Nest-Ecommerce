@@ -6,6 +6,8 @@ import { Skeleton } from "antd";
 import Cards from "@/components/cards/cards";
 import MainCarousel from "@/components/carousel/carousel";
 import ProductsGrid from "@/components/productGrid/products.Grid";
+import HomeBenefits from "@/components/homePromoSection/homeBenefits";
+import HomePromoSection from "@/components/homePromoSection/HomePromoSection";
 
 export default function UserPage() {
   const [loading, setLoading] = useState(true);
@@ -27,11 +29,19 @@ export default function UserPage() {
       </Skeleton>
 
       <Skeleton active loading={loading}>
+        <HomeBenefits />
+      </Skeleton>
+
+      <Skeleton active loading={loading}>
         <Cards />
       </Skeleton>
 
       <Skeleton active loading={loading}>
         <ProductsGrid />
+      </Skeleton>
+
+      <Skeleton active loading={loading}>
+        <HomePromoSection />
       </Skeleton>
     </main>
   );

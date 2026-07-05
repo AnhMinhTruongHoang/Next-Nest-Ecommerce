@@ -122,14 +122,10 @@ const MainCarousel: React.FC = () => {
         }
 
         .gz-main-carousel-image {
-          object-fit: cover !important;
+          object-fit: fill !important;
           object-position: center center !important;
           transform: scale(1.001);
           transition: transform 4s ease;
-        }
-
-        .gz-main-carousel .slick-active .gz-main-carousel-image {
-          transform: scale(1.025);
         }
 
         .gz-main-carousel-overlay {

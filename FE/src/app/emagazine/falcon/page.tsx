@@ -18,7 +18,7 @@ export default function FalconMagazinePage() {
       {/* HERO */}
       <section className="falcon-hero">
         <Image
-          src="/images/banners/niko.png"
+          src="/images/inforgrafic/niko04.png"
           alt="Falcons Esports"
           fill
           priority
