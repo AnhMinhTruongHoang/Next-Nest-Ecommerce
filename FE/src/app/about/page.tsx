@@ -42,7 +42,9 @@ export default function PoliciesPage() {
       <Divider />
 
       <section id="privacy" className={`${styles.section} ${styles.mt32}`}>
-        <Typography.Title level={3}>Chính sách bảo mật</Typography.Title>
+        <Typography.Title level={3} style={{ textAlign: "center" }}>
+          Chính sách bảo mật
+        </Typography.Title>
         <Typography.Paragraph>
           Chúng tôi chỉ thu thập dữ liệu tối thiểu phục vụ xử lý đơn hàng, bảo
           hành và chăm sóc khách hàng, tuân thủ pháp luật hiện hành. Bạn có
@@ -51,7 +53,9 @@ export default function PoliciesPage() {
       </section>
 
       <section id="terms" className={`${styles.section} ${styles.mt32}`}>
-        <Typography.Title level={3}>Điều khoản dịch vụ</Typography.Title>
+        <Typography.Title level={3} style={{ textAlign: "center" }}>
+          Điều khoản dịch vụ
+        </Typography.Title>
         <ul>
           <li>Không lạm dụng hệ thống để trục lợi khuyến mãi.</li>
           <li>Không đăng tải nội dung vi phạm pháp luật.</li>
@@ -60,7 +64,9 @@ export default function PoliciesPage() {
       </section>
 
       <section id="consumer" className={`${styles.section} ${styles.mt32}`}>
-        <Typography.Title level={3}>Bảo vệ người tiêu dùng</Typography.Title>
+        <Typography.Title level={3} style={{ textAlign: "center" }}>
+          Bảo vệ người tiêu dùng
+        </Typography.Title>
         <Alert
           type="info"
           showIcon
@@ -71,7 +77,9 @@ export default function PoliciesPage() {
 
       <section id="warranty" className={`${styles.section} ${styles.mt32}`}>
         <br />
-        <Typography.Title level={3}>Chính sách bảo hành</Typography.Title>
+        <Typography.Title level={3} style={{ textAlign: "center" }}>
+          Chính sách bảo hành
+        </Typography.Title>
         <ul>
           <li>Bảo hành theo tiêu chuẩn của hãng (tem/phiếu/serial hợp lệ).</li>
           <li>Thời gian xử lý: 7–15 ngày làm việc (tùy dòng sản phẩm).</li>

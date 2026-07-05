@@ -40,7 +40,9 @@ export default function PoliciesPage() {
       <Divider className={styles.divider} />
 
       <section id="privacy" className={styles.section}>
-        <Typography.Title level={3}>Chính sách bảo mật</Typography.Title>
+        <Typography.Title level={3} style={{ textAlign: "center" }}>
+          Chính sách bảo mật
+        </Typography.Title>
 
         <Typography.Paragraph>
           Chúng tôi chỉ thu thập dữ liệu tối thiểu phục vụ xử lý đơn hàng, bảo
@@ -50,7 +52,9 @@ export default function PoliciesPage() {
       </section>
 
       <section id="terms" className={styles.section}>
-        <Typography.Title level={3}>Điều khoản dịch vụ</Typography.Title>
+        <Typography.Title level={3} style={{ textAlign: "center" }}>
+          Điều khoản dịch vụ
+        </Typography.Title>
 
         <ul>
           <li>Không lạm dụng hệ thống để trục lợi khuyến mãi.</li>
@@ -60,7 +64,9 @@ export default function PoliciesPage() {
       </section>
 
       <section id="consumer" className={styles.section}>
-        <Typography.Title level={3}>Bảo vệ người tiêu dùng</Typography.Title>
+        <Typography.Title level={3} style={{ textAlign: "center" }}>
+          Bảo vệ người tiêu dùng
+        </Typography.Title>
 
         <Alert
           type="info"
@@ -72,7 +78,9 @@ export default function PoliciesPage() {
       </section>
 
       <section id="warranty" className={styles.section}>
-        <Typography.Title level={3}>Chính sách bảo hành</Typography.Title>
+        <Typography.Title level={3} style={{ textAlign: "center" }}>
+          Chính sách bảo hành
+        </Typography.Title>
 
         <ul>
           <li>Bảo hành theo tiêu chuẩn của hãng, tem/phiếu/serial hợp lệ.</li>

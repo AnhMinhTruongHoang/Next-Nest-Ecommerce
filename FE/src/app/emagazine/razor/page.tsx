@@ -167,9 +167,6 @@ export default function RazerDayMagazinePage() {
         <div className="razer-section-head">
           <span>Razer Day Picks</span>
           <h2>5 điểm nhấn trong chiến dịch siêu sale</h2>
-          <p>
-            Các ảnh bên dưới bạn có thể thay sau theo đúng 5 ảnh ở Home Promo.
-          </p>
         </div>
 
         <div className="razer-product-grid">

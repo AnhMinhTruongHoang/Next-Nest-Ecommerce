@@ -42,14 +42,18 @@ export default function SupportPage() {
       <Divider className={styles.divider} />
 
       <section id="help-center" className={styles.section}>
-        <Typography.Title level={3}>Trung tâm trợ giúp</Typography.Title>
+        <Typography.Title level={3} style={{ textAlign: "center" }}>
+          Trung tâm trợ giúp
+        </Typography.Title>
         <Typography.Paragraph>
           Tra cứu đơn hàng, bảo hành, sản phẩm và các câu hỏi thường gặp.
         </Typography.Paragraph>
       </section>
 
       <section id="how-to-buy" className={styles.section}>
-        <Typography.Title level={3}>Hướng dẫn mua hàng</Typography.Title>
+        <Typography.Title level={3} style={{ textAlign: "center" }}>
+          Hướng dẫn mua hàng
+        </Typography.Title>
 
         <ol>
           <li>Chọn sản phẩm → Thêm vào giỏ</li>
@@ -58,14 +62,17 @@ export default function SupportPage() {
           <li>Xác nhận đơn</li>
         </ol>
 
-        <Typography.Paragraph>
+        <hr />
+        <Typography.Paragraph style={{ textAlign: "center", marginTop: 10 }}>
           Mẹo: dùng ô tìm kiếm ở header, hoặc lọc theo{" "}
           <code className={styles.codeBlock}>Danh mục / Khoảng giá</code>.
         </Typography.Paragraph>
       </section>
 
       <section id="shipping" className={styles.section}>
-        <Typography.Title level={3}>Vận chuyển</Typography.Title>
+        <Typography.Title level={3} style={{ textAlign: "center" }}>
+          Vận chuyển
+        </Typography.Title>
 
         <ul>
           <li>HCM nội thành: 1–2 ngày</li>
@@ -75,7 +82,9 @@ export default function SupportPage() {
       </section>
 
       <section id="returns" className={styles.section}>
-        <Typography.Title level={3}>Đổi trả & Hoàn tiền</Typography.Title>
+        <Typography.Title level={3} style={{ textAlign: "center" }}>
+          Đổi trả & Hoàn tiền
+        </Typography.Title>
 
         <ul>
           <li>Đổi trả trong 7 ngày nếu lỗi do nhà sản xuất</li>
@@ -85,7 +94,9 @@ export default function SupportPage() {
       </section>
 
       <section id="contact" className={styles.section}>
-        <Typography.Title level={3}>Liên hệ hỗ trợ</Typography.Title>
+        <Typography.Title level={3} style={{ textAlign: "center" }}>
+          Liên hệ hỗ trợ
+        </Typography.Title>
 
         <Typography.Paragraph style={{ textAlign: "center" }}>
           Hotline: <a href="tel:0721123213">0721123213</a> — Email:{" "}

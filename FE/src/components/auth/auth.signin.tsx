@@ -191,13 +191,6 @@ export default function AuthSignIn() {
             <Form.Item name="remember" valuePropName="checked" noStyle>
               <Checkbox>Ghi nhớ đăng nhập</Checkbox>
             </Form.Item>
-
-            <Typography.Link
-              onClick={() => setChangePassword(true)}
-              className="forgot-link"
-            >
-              Quên mật khẩu?
-            </Typography.Link>
           </div>
 
           <Form.Item style={{ marginBottom: 8 }}>
@@ -218,6 +211,13 @@ export default function AuthSignIn() {
             <Link href="/auth/signup" className="signup-link">
               Đăng ký ngay
             </Link>
+            <br />
+            <Typography.Link
+              onClick={() => setChangePassword(true)}
+              className="forgot-link"
+            >
+              Quên mật khẩu?
+            </Typography.Link>
           </div>
         </Form>
 

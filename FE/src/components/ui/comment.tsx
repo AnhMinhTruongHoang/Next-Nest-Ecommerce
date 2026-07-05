@@ -425,9 +425,10 @@ const UsersComment: React.FC<UsersCommentProps> = ({
           )}
         </div>
       </div>
-
       <style jsx global>{`
         .gzx-review-wrap {
+          width: 100%;
+          max-width: 100%;
           margin-top: 28px;
           padding: 22px;
           border-radius: 18px;
@@ -439,6 +440,7 @@ const UsersComment: React.FC<UsersCommentProps> = ({
             linear-gradient(180deg, #111314 0%, #0d0f10 100%);
           border: 1px solid #24282a;
           box-shadow: 0 14px 36px rgba(0, 0, 0, 0.28);
+          overflow-x: hidden;
         }
 
         .gzx-review-head {
@@ -542,7 +544,6 @@ const UsersComment: React.FC<UsersCommentProps> = ({
           word-break: break-word;
         }
 
-        /* ===== CUSTOM STAR - NO BORDER ===== */
         .gzx-custom-stars {
           display: inline-flex;
           align-items: center;
@@ -560,20 +561,16 @@ const UsersComment: React.FC<UsersCommentProps> = ({
           height: 28px;
           padding: 0 !important;
           margin: 0 !important;
-
           border: none !important;
           outline: none !important;
           box-shadow: none !important;
           background: transparent !important;
-
           appearance: none !important;
           -webkit-appearance: none !important;
-
           cursor: pointer;
           display: inline-flex;
           align-items: center;
           justify-content: center;
-
           transition: transform 0.16s ease;
         }
 
@@ -686,25 +683,30 @@ const UsersComment: React.FC<UsersCommentProps> = ({
           font-weight: 600;
         }
 
+        /* FORM CENTER FIX */
         .gzx-form-box {
           display: flex;
           align-items: flex-start;
-          gap: 14px;
+          justify-content: center;
+          width: 100%;
           margin-top: 18px;
           padding-top: 18px;
           border-top: 1px solid #2a2d2e;
         }
 
         .gzx-form-left {
-          flex-shrink: 0;
+          display: none;
         }
 
         .gzx-form-right {
-          flex: 1;
+          width: 100%;
+          max-width: 420px;
+          flex: none;
           min-width: 0;
         }
 
         .gzx-review-form {
+          width: 100%;
           padding: 16px;
           border-radius: 16px;
           background: linear-gradient(
@@ -714,15 +716,17 @@ const UsersComment: React.FC<UsersCommentProps> = ({
             ),
             #141719;
           border: 1px solid #222629;
+          box-shadow: 0 14px 28px rgba(0, 0, 0, 0.22);
         }
 
         .gzx-form-header {
           display: flex;
-          justify-content: space-between;
+          justify-content: center;
           align-items: center;
           gap: 12px;
           margin-bottom: 14px;
           flex-wrap: wrap;
+          text-align: center;
         }
 
         .gzx-form-title {
@@ -732,6 +736,7 @@ const UsersComment: React.FC<UsersCommentProps> = ({
         }
 
         .gzx-comment-input {
+          width: 100%;
           background: #101214 !important;
           border: 1px solid #303435 !important;
           border-radius: 14px !important;
@@ -754,10 +759,12 @@ const UsersComment: React.FC<UsersCommentProps> = ({
         .gzx-submit-wrap {
           display: flex;
           justify-content: center;
+          width: 100%;
         }
 
         .gzx-submit-btn {
-          min-width: 170px;
+          width: 100%;
+          min-width: 0;
           height: 44px !important;
           padding: 0 24px !important;
           border: none !important;
@@ -818,16 +825,12 @@ const UsersComment: React.FC<UsersCommentProps> = ({
             white-space: normal;
           }
 
-          .gzx-form-box {
-            gap: 12px;
+          .gzx-form-right {
+            max-width: 390px;
           }
 
           .gzx-review-form {
             padding: 14px;
-          }
-
-          .gzx-submit-btn {
-            width: 100%;
           }
         }
 
@@ -842,6 +845,11 @@ const UsersComment: React.FC<UsersCommentProps> = ({
 
           .gzx-review-subtitle {
             font-size: 12px;
+          }
+
+          .gzx-review-count {
+            font-size: 12px;
+            padding: 7px 12px;
           }
 
           .gzx-comment-card {
@@ -865,21 +873,32 @@ const UsersComment: React.FC<UsersCommentProps> = ({
           }
 
           .gzx-form-box {
-            flex-direction: column;
+            padding-top: 16px;
           }
 
-          .gzx-form-left {
-            display: none;
+          .gzx-form-right {
+            max-width: 100%;
+          }
+
+          .gzx-review-form {
+            padding: 14px;
+            border-radius: 14px;
           }
 
           .gzx-form-header {
-            align-items: flex-start;
+            flex-direction: column;
+            gap: 8px;
           }
 
           .gzx-star-btn,
           .gzx-custom-stars-picker button {
             width: 26px;
             height: 26px;
+          }
+
+          .gzx-comment-input {
+            min-height: 112px !important;
+            font-size: 13px;
           }
         }
       `}</style>
